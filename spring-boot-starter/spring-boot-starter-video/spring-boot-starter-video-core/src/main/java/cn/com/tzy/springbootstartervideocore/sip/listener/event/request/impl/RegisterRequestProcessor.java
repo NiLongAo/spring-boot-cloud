@@ -84,7 +84,6 @@ public class RegisterRequestProcessor extends AbstractSipRequestEvent implements
                     String transport = reqViaHeader.getTransport();
                     deviceVo.setTransport("TCP".equalsIgnoreCase(transport) ? TransportType.TCP.getValue() :TransportType.UDP.getValue());
                     sipMessageHandle.handleMessage(request.getLocalAddress().getHostAddress(),response);
-                    deviceVo.setRegisterTime(new Date());
                     deviceVoService.online(deviceVo,sipServer,sipCommander,videoProperties,new SipTransactionInfo((SIPResponse)response));
                     return;
                 }
@@ -92,7 +91,6 @@ public class RegisterRequestProcessor extends AbstractSipRequestEvent implements
             //设备密码
             String password = (deviceVo != null && !ObjectUtils.isEmpty(deviceVo.getPassword()))? deviceVo.getPassword() : sipConfigProperties.getPassword();
             AuthorizationHeader authHead = (AuthorizationHeader) request.getHeader(AuthorizationHeader.NAME);
-
             if (authHead == null && !ObjectUtils.isEmpty(password)) {
                 log.info("[{}] 回复401: {}",title, requestAddress);
                 response = sipServer.getSipFactory().createMessageFactory().createResponse(Response.UNAUTHORIZED, request);
