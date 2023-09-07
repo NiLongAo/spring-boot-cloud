@@ -95,10 +95,9 @@ public class KeepaliveNotifyMessageHandler extends SipResponseEvent implements M
             }
         }
         deviceVo.setKeepaliveTime(date);
-        if (deviceVo.getOnline() == 1) {
+        if (deviceVo.getOnline() == ConstEnum.Flag.YES.getValue()) {
             deviceVoService.save(deviceVo);
         }else{
-            deviceVo.setOnline(ConstEnum.Flag.YES.getValue());
             deviceVoService.online(deviceVo,sipServer,sipCommander,videoProperties,null);
         }
         // 刷新过期任务
