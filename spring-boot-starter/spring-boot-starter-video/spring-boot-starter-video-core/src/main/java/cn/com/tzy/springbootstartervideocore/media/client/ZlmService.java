@@ -21,6 +21,8 @@ import cn.com.tzy.springbootstartervideocore.service.video.*;
 import cn.com.tzy.springbootstartervideocore.sip.SipServer;
 import cn.com.tzy.springbootstartervideocore.sip.cmd.SIPCommander;
 import cn.com.tzy.springbootstartervideocore.sip.cmd.SIPCommanderForPlatform;
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.json.JSONUtil;
 import lombok.extern.log4j.Log4j2;
@@ -293,7 +295,7 @@ public class ZlmService {
                         continue;
                     }
                     MediaRestResult result = MediaClient.getMediaList(mediaServer, null, vo.getSchema(), vo.getApp(), vo.getStream());
-                    if(result == null || result.getCode() != RespCode.CODE_0.getValue() || ObjectUtils.isEmpty(result.getData())){
+                    if(result == null || result.getCode() != RespCode.CODE_0.getValue() || ObjectUtils.isEmpty(result.getData()) || MapUtil.getInt(BeanUtil.beanToMap(result.getData()),"totalReaderCount",0) <= 0){
                         delete.add(vo);
                     }
                 }
@@ -304,6 +306,7 @@ public class ZlmService {
                             .schema(vo.getSchema())
                             .mediaServerId(vo.getMediaServerId())
                             .build();
+                    log.info("定时任务检测到无人观看流，自动关闭：{}",build);
                     mediaHookServer.onStreamNoneReader(build);
                     streamChangedManager.remove(vo);
                 }

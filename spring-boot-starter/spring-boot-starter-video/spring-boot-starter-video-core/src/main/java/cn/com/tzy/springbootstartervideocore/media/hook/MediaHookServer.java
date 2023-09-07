@@ -41,6 +41,7 @@ import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.context.request.async.DeferredResult;
 
@@ -320,6 +321,7 @@ public class MediaHookServer {
             //获取国标流 ， 点播/录像回放/录像下载
             //点播
             InviteInfo inviteInfo = inviteStreamManager.getInviteInfoByStream(null, hookVo.getStream());
+            log.info("无人观看流时 {}，{}",hookVo.getStream(), ObjectUtils.isEmpty(inviteInfo)?"未发现 inviteInfo":"发现 inviteInfo");
             if(inviteInfo != null){
                 // 录像下载
                 if (inviteInfo.getType() == VideoStreamType.download) {
