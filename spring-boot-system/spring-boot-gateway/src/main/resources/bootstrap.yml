@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: gateway-server
+  profiles:
+    active: dev
+
+

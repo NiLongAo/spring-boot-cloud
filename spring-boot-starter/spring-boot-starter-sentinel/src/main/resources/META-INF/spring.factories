@@ -1,0 +1,3 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+ cn.com.tzy.springbootstartersentinel.config.SentinelConfig,\
+cn.com.tzy.springbootstartersentinel.config.SentinelGatewayConfig

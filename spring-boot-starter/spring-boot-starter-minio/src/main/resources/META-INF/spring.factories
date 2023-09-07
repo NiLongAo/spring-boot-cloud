@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+ cn.com.tzy.springbootstarterminio.config.MinioConfig

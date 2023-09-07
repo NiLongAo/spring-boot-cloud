@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.tzy.springbootbean.mapper.sql.RoleConnectPrivilegeMapper">
+  <resultMap id="BaseResultMap" type="cn.com.tzy.springbootentity.dome.bean.RoleConnectPrivilege">
+    <!--@mbg.generated-->
+    <!--@Table bean_role_connect_privilege-->
+    <result column="role_id" property="roleId" />
+    <result column="privilege_id" property="privilegeId" />
+    <result column="update_user_id" property="updateUserId" />
+    <result column="update_time" property="updateTime" />
+    <result column="create_user_id" property="createUserId" />
+    <result column="create_time" property="createTime" />
+    <result column="tenant_id" property="tenantId" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    role_id, privilege_id, update_user_id, update_time, create_user_id, create_time, 
+    tenant_id
+  </sql>
+
+  <select id="findRolePrivilegeList" resultType="string">
+       select
+       brcp.privilege_id
+       from bean_role_connect_privilege brcp,bean_privilege bp
+       where brcp.role_id =#{roleId}
+       and brcp.privilege_id = bp.id
+  </select>
+
+  <insert id="saveRoleConnectPrivilege">
+    insert into bean_role_connect_privilege(role_id,privilege_id) VALUES
+    <foreach collection="privilegeList" item="privilegeId" separator=",">
+     (#{roleId},#{privilegeId})
+    </foreach>
+  </insert>
+
+  <delete id="deleteRoleConnectPrivilege">
+    delete from bean_role_connect_privilege
+    where role_id =#{roleId}
+    <foreach close=")" collection="privilegeList" item="privilegeId" open="and privilege_id IN(" separator=",">
+        #{privilegeId}
+    </foreach>
+  </delete>
+
+</mapper>

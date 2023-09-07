@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.tzy.springbootbean.mapper.sql.DepartmentConnectPrivilegeMapper">
+  <resultMap id="BaseResultMap" type="cn.com.tzy.springbootentity.dome.bean.DepartmentConnectPrivilege">
+    <!--@mbg.generated-->
+    <!--@Table bean_department_connect_privilege-->
+    <result column="department_id" property="departmentId" />
+    <result column="privilege_id" property="privilegeId" />
+    <result column="update_user_id" property="updateUserId" />
+    <result column="update_time" property="updateTime" />
+    <result column="create_user_id" property="createUserId" />
+    <result column="create_time" property="createTime" />
+    <result column="tenant_id" property="tenantId" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    department_id, privilege_id, update_user_id, update_time, create_user_id, create_time, 
+    tenant_id
+  </sql>
+
+  <select id="findDepartmentPrivilegeList" resultType="string">
+       select
+       bdcp.privilege_id
+       from bean_department_connect_privilege bdcp,bean_privilege bp
+       where  bdcp.department_id =#{departmentId}
+       and bdcp.privilege_id = bp.id
+  </select>
+
+  <insert id="saveDepartmentConnectPrivilege">
+    insert into bean_department_connect_privilege(department_id,privilege_id) VALUES
+    <foreach collection="privilegeList" item="privilegeId" separator=",">
+     (#{departmentId},#{privilegeId})
+    </foreach>
+  </insert>
+
+  <delete id="deleteIdList">
+    delete from bean_department_connect_privilege
+    where department_id =#{departmentId}
+    <foreach close=")" collection="privilegeList" item="privilegeId" open="and privilege_id IN(" separator=",">
+        #{privilegeId}
+    </foreach>
+  </delete>
+</mapper>

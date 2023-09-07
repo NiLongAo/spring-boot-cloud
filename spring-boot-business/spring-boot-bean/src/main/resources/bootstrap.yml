@@ -1,0 +1,11 @@
+spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 100MB
+  application:
+    name: bean-server
+  profiles:
+    active: dev
+elasticsearch:
+  clusterNodes: 1.15.9.228:10010

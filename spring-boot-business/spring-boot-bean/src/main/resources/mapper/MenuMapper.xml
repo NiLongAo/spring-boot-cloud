@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.tzy.springbootbean.mapper.sql.MenuMapper">
+  <resultMap id="BaseResultMap" type="cn.com.tzy.springbootentity.dome.bean.Menu">
+    <!--@mbg.generated-->
+    <!--@Table bean_menu-->
+    <id column="id" property="id" />
+    <result column="parent_id" property="parentId" />
+    <result column="level" property="level" />
+    <result column="menu_name" property="menuName" />
+    <result column="path" property="path" />
+    <result column="view_path" property="viewPath" />
+    <result column="icon" property="icon" />
+    <result column="is_open" property="isOpen" />
+    <result column="hide_menu" property="hideMenu" />
+    <result column="num" property="num" />
+    <result column="memo" property="memo" />
+    <result column="update_user_id" property="updateUserId" />
+    <result column="update_time" property="updateTime" />
+    <result column="create_user_id" property="createUserId" />
+    <result column="create_time" property="createTime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, parent_id, `level`, menu_name, `path`, view_path, icon, is_open, hide_menu, num, 
+    memo, update_user_id, update_time, create_user_id, create_time
+  </sql>
+  <select id="findAvailableTree" resultType="map">
+    select
+        bm.parent_id as parentId,
+        bm.id as id,
+        bm.menu_name as menuName
+    from bean_menu bm
+    <trim prefix="where" prefixOverrides="and">
+        <if test="menuName != null and menuName != ''">
+            and bm.menu_name like concat('%',#{menuName},'%')
+        </if>
+        <if test="isShowPrivilege != null and isShowPrivilege == 0">
+            and not exists(select 1 from bean_privilege bp where bm.id = bp.menu_id)
+        </if>
+        and bm.is_open = 1
+    </trim>
+    order by num asc
+ </select>
+
+  <select id="findUserTenantMenu" parameterType="long" resultType="cn.com.tzy.springbootentity.dome.bean.Menu">
+    select
+        bm.*
+    from bean_menu bm,bean_privilege bp,sys_tenant_connect_privilege stcp,bean_user bu
+    where  bm.id = bp.menu_id
+    and bp.id = stcp.privilege_id
+    and stcp.tenant_id = bu.tenant_id
+    and bu.id = #{userId}
+    and bm.is_open = 1
+    and bp.is_open = 1
+    and bp.id like concat('%',':list')
+ </select>
+
+ <select id="findUserRoleMenu" parameterType="long" resultType="cn.com.tzy.springbootentity.dome.bean.Menu">
+    select
+        bm.*
+    from bean_menu bm,bean_user_connect_role bucr,bean_role_connect_privilege brcp ,bean_privilege bp
+    where bm.id = bp.menu_id
+    and bp.id = brcp.privilege_id
+    and brcp.role_id = bucr.role_id
+    and bm.is_open = 1
+    and bucr.user_id = #{userId}
+    and bp.is_open = 1
+    and bp.id like concat('%',':list')
+ </select>
+
+ <select id="findUserDepartmentMenu" parameterType="long" resultType="cn.com.tzy.springbootentity.dome.bean.Menu">
+    select
+        bm.*
+    from bean_menu bm,bean_user_connect_department bucr,bean_department_connect_privilege brcp ,bean_privilege bp
+    where bm.id = bp.menu_id
+    and bp.id = brcp.privilege_id
+    and brcp.department_id = bucr.department_id
+    and bm.is_open = 1
+    and bucr.user_id = #{userId}
+    and bp.is_open = 1
+    and bp.id like concat('%',':list')
+ </select>
+
+ <select id="findUserPositionMenu" parameterType="long" resultType="cn.com.tzy.springbootentity.dome.bean.Menu">
+    select
+        bm.*
+    from bean_menu bm,bean_user_connect_position bucr,bean_position_connect_privilege brcp ,bean_privilege bp
+    where bm.id = bp.menu_id
+    and bp.id = brcp.privilege_id
+    and brcp.position_id = bucr.position_id
+    and bm.is_open = 1
+    and bucr.user_id = #{userId}
+    and bp.is_open = 1
+    and bp.id like concat('%',':list')
+ </select>
+
+ <select id="findSelect" parameterType="long" resultType="map">
+    select
+        bm.id as id,
+        1  as type,
+        bm.parent_id  as parentId,
+        bm.level  as level,
+        bm.menu_name  as menuName,
+        bm.path  as path,
+        bm.view_path  as viewPath,
+        bm.icon as icon,
+        bm.is_open  as isOpen,
+        bm.hide_menu  as hideMenu,
+        bm.num  as num,
+        bm.memo  as memo
+     from bean_menu bm
+     <trim prefix="where" prefixOverrides="and">
+        <if test="menuName != null and menuName != ''">
+            and bm.menu_name like concat('%',#{menuName},'%')
+        </if>
+     </trim>
+     order by bm.num asc
+ </select>
+
+
+ <select id="find" parameterType="long" resultType="map">
+    select
+        bm.id as id,
+        1  as type,
+        bm.parent_id  as parentId,
+        bm.level  as level,
+        bm.menu_name  as menuName,
+        bm.path  as path,
+        bm.view_path  as viewPath,
+        bm.icon as icon,
+        bm.is_open  as isOpen,
+        bm.hide_menu  as hideMenu,
+        bm.num  as num,
+        bm.memo  as memo
+     from bean_menu bm
+     <trim prefix="where" prefixOverrides="and">
+        <if test="id != null">
+            and bm.id =#{id}
+        </if>
+     </trim>
+ </select>
+
+
+ <select id="findMenuPrivilegeTree" resultType="map">
+    select
+        bm.parent_id as parentId,
+        1  as type,
+        bm.id as v,
+        bm.menu_name as k
+    from bean_menu bm
+    <trim prefix="where" prefixOverrides="and">
+        and bm.is_open = 1
+    </trim>
+    order by num asc
+ </select>
+
+</mapper>

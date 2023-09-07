@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.tzy.springbootbean.mapper.sql.TenantConnectPrivilegeMapper">
+  <resultMap id="BaseResultMap" type="cn.com.tzy.springbootentity.dome.sys.TenantConnectPrivilege">
+    <!--@mbg.generated-->
+    <!--@Table sys_tenant_connect_privilege-->
+    <result column="tenant_id" property="tenantId" />
+    <result column="privilege_id" property="privilegeId" />
+    <result column="update_user_id" property="updateUserId" />
+    <result column="update_time" property="updateTime" />
+    <result column="create_user_id" property="createUserId" />
+    <result column="create_time" property="createTime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    tenant_id, privilege_id, update_user_id, update_time, create_user_id, create_time
+  </sql>
+
+  <select id="findTenantPrivilegeList" resultType="string">
+       select
+       stcp.privilege_id
+       from sys_tenant_connect_privilege stcp ,bean_privilege bp
+       where stcp.tenant_id =#{tenantId}
+       and stcp.privilege_id = bp.id
+  </select>
+
+  <insert id="saveTenantConnectPrivilege">
+    insert into sys_tenant_connect_privilege(tenant_id,privilege_id) VALUES
+    <foreach collection="privilegeList" item="privilegeId" separator=",">
+     (#{tenantId},#{privilegeId})
+    </foreach>
+  </insert>
+
+  <delete id="deleteTenantConnectPrivilege">
+    delete from sys_tenant_connect_privilege
+    where tenant_id =#{tenantId}
+    <foreach close=")" collection="privilegeList" item="privilegeId" open="and privilege_id IN(" separator=",">
+        #{privilegeId}
+    </foreach>
+  </delete>
+</mapper>

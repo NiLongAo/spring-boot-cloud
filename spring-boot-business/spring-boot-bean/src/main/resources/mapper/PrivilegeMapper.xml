@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.tzy.springbootbean.mapper.sql.PrivilegeMapper">
+  <resultMap id="BaseResultMap" type="cn.com.tzy.springbootentity.dome.bean.Privilege">
+    <!--@mbg.generated-->
+    <!--@Table bean_privilege-->
+    <id column="id" property="id" />
+    <result column="privilege_name" property="privilegeName" />
+    <result column="is_open" property="isOpen" />
+    <result column="request_url" property="requestUrl" />
+    <result column="menu_id" property="menuId" />
+    <result column="memo" property="memo" />
+    <result column="update_user_id" property="updateUserId" />
+    <result column="update_time" property="updateTime" />
+    <result column="create_user_id" property="createUserId" />
+    <result column="create_time" property="createTime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, privilege_name, is_open, request_url, menu_id, memo, update_user_id, update_time, 
+    create_user_id, create_time
+  </sql>
+
+   <select id="findUserAdmin" resultType="string">
+   select
+   bp.id
+   from bean_privilege bp
+  </select>
+
+    <select id="findTenantPrivilegeList" parameterType="long" resultType="string">
+        select
+        brcp.privilege_id
+        from sys_tenant_connect_privilege brcp,bean_privilege bp
+        where  brcp.privilege_id = bp.id
+        and brcp.tenant_id =#{tenantId}
+        and bp.is_open = 1
+    </select>
+
+  <select id="findUserRolePrivilegeList" parameterType="long" resultType="string">
+   select
+   brcp.privilege_id
+   from bean_user_connect_role bucr,bean_role_connect_privilege brcp,bean_privilege bp
+   where bucr.role_id =brcp.role_id
+   and brcp.privilege_id = bp.id
+   and bucr.user_id =#{userId}
+   and bp.is_open = 1
+  </select>
+
+  <select id="findUserDepartmentPrivilegeList" parameterType="long" resultType="string">
+   select
+   bdcp.privilege_id
+   from bean_user_connect_department bucd ,bean_department_connect_privilege bdcp,bean_privilege bp
+   where bucd.department_id = bdcp.department_id
+   and bdcp.privilege_id = bp.id
+   and bucd.user_id = #{userId}
+   and bp.is_open = 1
+  </select>
+
+  <select id="findUserPositionPrivilegeList" parameterType="long" resultType="string">
+   select
+   bpcp.privilege_id
+   from bean_user_connect_position bucp,bean_position_connect_privilege bpcp,bean_privilege bp
+   where bucp.position_id = bpcp.position_id
+   and bpcp.privilege_id = bp.id
+   and bucp.user_id = #{userId}
+   and bp.is_open = 1
+  </select>
+
+
+ <select id="findEnabledAll" resultType="cn.com.tzy.springbootentity.dome.bean.Privilege">
+    select
+    bp.request_url as requestUrl,
+    bp.id as id
+    from bean_privilege bp,bean_menu bm
+    where bp.menu_id = bm.id
+    and bm.is_open = #{isOpen}
+ </select>
+
+    <select id="findMenuList" resultType="map">
+        select
+        id as id,
+        3 as type,
+        privilege_name as menuName,
+        request_url as path,
+        menu_id as parentId,
+        memo as memo,
+        is_open as isOpen
+        from bean_privilege bp
+         <trim prefix="where" prefixOverrides="and">
+            <if test="idList != null and idList.size() &gt; 0">
+                <foreach close=")" collection="idList" item="id" open="and bp.menu_id in (" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+        </trim>
+    </select>
+
+
+    <select id="findMenuPrivilegeTree" resultType="map">
+        select
+        id as v,
+        3 as type,
+        privilege_name as k,
+        menu_id as parentId
+        from bean_privilege bp
+         <trim prefix="where" prefixOverrides="and">
+            <if test="idList != null and idList.size() &gt; 0">
+                <foreach close=")" collection="idList" item="id" open="and bp.menu_id in (" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+             and bp.is_open = 1
+        </trim>
+    </select>
+
+    <select id="findTenantMenuPrivilegeTree" resultType="map">
+        select
+        id as v,
+        3 as type,
+        privilege_name as k,
+        menu_id as parentId
+        from bean_privilege bp,sys_tenant_connect_privilege stcp
+         <trim prefix="where" prefixOverrides="and">
+            and bp.id = stcp.privilege_id
+            and stcp.tenant_id = #{tenantId}
+            <if test="idList != null and idList.size() &gt; 0">
+                <foreach close=")" collection="idList" item="id" open="and bp.menu_id in (" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+             and bp.is_open = 1
+        </trim>
+    </select>
+</mapper>
