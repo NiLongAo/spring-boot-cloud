@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-@Api(tags = "地理信息相关接口",position = 1)
+@Api(tags = "地理信息相关接口", position = 1)
 @RestController("WebApiConfigAreaController")
 @RequestMapping(value = "/webapi/config/area")
 public class AreaController extends ApiController {
@@ -22,7 +22,7 @@ public class AreaController extends ApiController {
     @ApiOperation(value = "查询所有经纬度及名称", notes = "查询所有经纬度及名称")
     @GetMapping("all")
     @ResponseBody
-    public RestResult<?> all(){
+    public RestResult<?> all() {
         return areaService.all();
     }
 }
