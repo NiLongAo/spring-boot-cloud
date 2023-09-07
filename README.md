@@ -36,7 +36,7 @@
 ├─.build
 │  ├─docker    docker打包脚本
 │  └─jenkins   jenkins自动化部署脚本
-├─.lib-service                                                         [ 1.此包文件过大，无法上传，已被移除，需要者可联系群主 ]
+├─.lib-service                                                         [ 1.此包文件过大，无法上传，已被移除，需要可自行下载，文件在最下方 ]
 │  ├─allatori  代码混淆打包工具
 │  ├─rabbitmq-plugins  mq创建docker脚本 及 延迟队列插件 3.9.0
 │  └─skywalking-agent  微服务链路追踪 agent 相关jar
@@ -47,7 +47,7 @@
 │  ├─spring-boot-bean 项目基础业务模块
 │  │  └─start liunx项目运行相关脚本
 │  ├─spring-boot-face 人脸识别模块
-│  │  ├─conf  人脸识别模块所需第三方包：核心                                 [ 2.此包文件过大，无法上传，已被移除，需要者可联系群主 ]
+│  │  ├─conf  人脸识别模块所需第三方包：核心                                 [ 2.此包文件过大，无法上传，已被移除，需要可自行下载，文件在最下方 ]
 │  │  └─start liunx项目运行相关脚本
 │  ├─spring-boot-oa 工作流业务模块
 │  │  └─start liunx项目运行相关脚本
