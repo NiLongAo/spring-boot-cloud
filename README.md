@@ -36,7 +36,7 @@
 ├─.build
 │  ├─docker    docker打包脚本
 │  └─jenkins   jenkins自动化部署脚本
-├─.lib-service
+├─.lib-service                                                         [ 1.此包文件过大，无法上传，已被移除，需要者可联系群主 ]
 │  ├─allatori  代码混淆打包工具
 │  ├─rabbitmq-plugins  mq创建docker脚本 及 延迟队列插件 3.9.0
 │  └─skywalking-agent  微服务链路追踪 agent 相关jar
@@ -47,6 +47,7 @@
 │  ├─spring-boot-bean 项目基础业务模块
 │  │  └─start liunx项目运行相关脚本
 │  ├─spring-boot-face 人脸识别模块
+│  │  ├─conf  人脸识别模块所需第三方包：核心                                 [ 2.此包文件过大，无法上传，已被移除，需要者可联系群主 ]
 │  │  └─start liunx项目运行相关脚本
 │  ├─spring-boot-oa 工作流业务模块
 │  │  └─start liunx项目运行相关脚本
@@ -125,6 +126,10 @@
 
 ## 前端整合示例
 - [vue3-admin-cloud](https://gitee.com/tong_zi_yong/vue-admin-cloud) - 基于 SpringCloud Alibaba 的微服务中后台快速开发平台
+
+## 备注
+- 由于项目文件过大，将部分大文件剔除，有需要者，可联系群主获取 
+- 剔除文件：模块中已说明
 
 ## 交流
 `逆龙傲` 是完全开源免费的项目，在帮助开发者更方便地进行中大型管理系统开发，同时也提供 QQ 交流群使用问题欢迎在群内提问。
