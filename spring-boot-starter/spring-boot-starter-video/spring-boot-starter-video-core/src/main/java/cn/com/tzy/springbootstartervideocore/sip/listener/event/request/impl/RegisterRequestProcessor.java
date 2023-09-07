@@ -58,7 +58,7 @@ public class RegisterRequestProcessor extends AbstractSipRequestEvent implements
             String requestAddress = String.format("%s:%s",evtExt.getRemoteIpAddress(),evtExt.getRemotePort());
             SIPRequest request = (SIPRequest)event.getRequest();
             // 注册标志
-            boolean registerFlag = request.getExpires().getExpires() >= 0;
+            boolean registerFlag = request.getExpires().getExpires() > 0;
             String title = registerFlag ? "[注册请求]": "[注销请求]";
             FromHeader fromHeader = (FromHeader) request.getHeader(FromHeader.NAME);
             AddressImpl address = (AddressImpl) fromHeader.getAddress();
