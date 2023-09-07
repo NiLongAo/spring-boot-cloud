@@ -128,9 +128,9 @@
 - [vue3-admin-cloud](https://gitee.com/tong_zi_yong/vue-admin-cloud) - 基于 SpringCloud Alibaba 的微服务中后台快速开发平台
 
 ## 备注
-- 由于项目文件过大，将部分大文件剔除，有需要者，可联系群主获取 
+- 由于项目文件过大，将部分大文件剔除，有需要者，自行下载
 - 剔除文件：模块中已说明
-
+- [大文件下载地址 ](https://pan.xunlei.com/s/VNdi9s7-6nE1U-Ht5U_xgKyWA1)  提取码：rapu，解压码：spring-boot-cloud
 ## 交流
 `逆龙傲` 是完全开源免费的项目，在帮助开发者更方便地进行中大型管理系统开发，同时也提供 QQ 交流群使用问题欢迎在群内提问。
 - QQ 群 `715528092`
