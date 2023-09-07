@@ -33,7 +33,7 @@ public class VideoProperties {
     // 推流鉴权， 默认开启
     private Boolean pushAuthority = Boolean.TRUE;
     // 设备上线时是否自动同步通道
-    private Boolean syncChannelOnDeviceOnline = Boolean.FALSE;
+    private Boolean syncChannelOnDeviceOnline = Boolean.TRUE;
     // 是否开启sip日志
     private Boolean sipLog = Boolean.FALSE;
     // 消息通道功能-缺少国标ID是否给所有上级发送消息
