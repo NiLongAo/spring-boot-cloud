@@ -63,7 +63,9 @@ public class KeepaliveNotifyMessageHandler extends SipResponseEvent implements M
                 log.error("[命令发送失败] 心跳回复: {}", e.getMessage());
             }
             log.info("设备注册过期，重新注册");
-            deviceVoService.offline(deviceVo.getDeviceId());
+            if(deviceVo.getOnline() == ConstEnum.Flag.YES.getValue()){
+                deviceVoService.offline(deviceVo.getDeviceId());
+            }
             return;
         }
         // 回复200 OK
