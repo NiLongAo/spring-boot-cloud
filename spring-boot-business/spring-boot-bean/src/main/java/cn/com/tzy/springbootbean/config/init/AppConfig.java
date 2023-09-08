@@ -58,7 +58,7 @@ public class AppConfig{
         if(StringUtils.isEmpty(path)){
             return "";
         }
-        return String.format("%s%s", allConfig.get(ConstEnum.ConfigEnum.STATSE_PATH.getValue()),path);
+        return String.format("%s%s", allConfig.get(ConstEnum.ConfigEnum.STATIC_PATH.getValue()),path);
     }
 
     public String findAddress(Integer provinceId,Integer cityId,Integer areaId){

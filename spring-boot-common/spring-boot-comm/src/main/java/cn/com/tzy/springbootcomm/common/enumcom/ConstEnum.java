@@ -1,16 +1,18 @@
 package cn.com.tzy.springbootcomm.common.enumcom;
 
-import lombok.Getter;
-
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * 枚举类
+ * @author TZY
  */
 public class ConstEnum {
 
     public enum Flag {
+        /**
+         * 判断枚举
+         */
         NO(0, "否"),
         YES(1, "是"),
         ;
@@ -31,18 +33,21 @@ public class ConstEnum {
             return name;
         }
         public static String getName(Integer value) {
-            return map.get(value);
+            return MAP.get(value);
         }
-        private static Map<Integer, String> map = new HashMap<Integer, String>();
+        private static final Map<Integer, String> MAP = new HashMap<>();
 
         static {
             for (Flag s : Flag.values()) {
-                map.put(s.getValue(), s.getName());
+                MAP.put(s.getValue(), s.getName());
             }
         }
     }
 
     public enum Sex {
+        /**
+         * 姓名
+         */
         UNKNOWN(0, "未知"),
         MALE(1, "男"),
         FEMALE(2, "女"),
@@ -63,10 +68,14 @@ public class ConstEnum {
         public String getName() {
             return name;
         }
-        private static Map<Integer, String> map = new HashMap<Integer, String>();
+
+        public static String getName(int value){
+           return MAP.get(value);
+        }
+        private static final Map<Integer, String> MAP = new HashMap<>();
         static {
             for (Sex s : Sex.values()) {
-                map.put(s.getValue(), s.getName());
+                MAP.put(s.getValue(), s.getName());
             }
         }
     }
@@ -74,6 +83,9 @@ public class ConstEnum {
 
 
     public enum ContentType {
+        /**
+         * 内容类型
+         */
         JSON("application/json;charset=UTF-8");
 
         private final String value;
@@ -89,6 +101,9 @@ public class ConstEnum {
 
 
     public enum StaticPath {
+        /**
+         * 静态文件路径
+         */
         USER_IMAGE_PATH(1, "用户图像路径","/image/user/%s/%s.%s"),
         EXPERIMENT_TEMPLATE_VIDEO_PATH(2, "模板任务视频路径","/video/experiment_template/%s/%s.%s"),
         TEACHING_TASK_VIDEO_PATH(3, "课程任务视频路径","/video/teaching_task/%s/%s.%s"),
@@ -119,37 +134,61 @@ public class ConstEnum {
         }
 
         public static String getUrl(Integer type) {
-            return urlMap.get(type);
+            return URL_MAP.get(type);
         }
         public static String getName(Integer type) {
-            return nameMap.get(type);
+            return NAME_MAP.get(type);
         }
 
-        private static Map<Integer, String> urlMap = new HashMap<Integer, String>();
-        private static Map<Integer, String> nameMap = new HashMap<Integer, String>();
+        private final static Map<Integer, String> URL_MAP = new HashMap<>();
+        private final static Map<Integer, String> NAME_MAP = new HashMap<>();
         static {
             for (StaticPath s : StaticPath.values()) {
-                urlMap.put(s.getType(), s.getUrl());
-                nameMap.put(s.getType(), s.getName());
+                URL_MAP.put(s.getType(), s.getUrl());
+                NAME_MAP.put(s.getType(), s.getName());
             }
         }
     }
 
-
-    //加密方式
     public enum PasswordEncoderTypeEnum {
+        /**
+         * 加密方式
+         */
         BCRYPT("{bcrypt}","BCRYPT加密"),
         NOOP("{noop}","无加密明文");
-        @Getter
-        private String prefix;
-        PasswordEncoderTypeEnum(String prefix,String desc){
-            this.prefix=prefix;
+
+        private final String prefix;
+        private final String desc;
+
+        public String getPrefix() {
+            return prefix;
         }
 
+        public String getDesc() {
+            return desc;
+        }
+
+        PasswordEncoderTypeEnum(String prefix, String desc){
+            this.prefix=prefix;
+            this.desc=desc;
+        }
+
+        public static String getName(String value){
+            return MAP.get(value);
+        }
+        private static final Map<String, String> MAP = new HashMap<>();
+        static {
+            for (PasswordEncoderTypeEnum s : PasswordEncoderTypeEnum.values()) {
+                MAP.put(s.getPrefix(), s.getDesc());
+            }
+        }
     }
 
     public enum ConfigEnum {
-        STATSE_PATH("minio.path", "静态服务地址"),
+        /**
+         * 字典枚举
+         */
+        STATIC_PATH("minio.path", "静态服务地址"),
         ;
 
         private final String value;
@@ -167,44 +206,21 @@ public class ConstEnum {
         public String getName() {
             return name;
         }
-        private static Map<String, String> map = new HashMap<String, String>();
+        public static String getName(String value){
+            return MAP.get(value);
+        }
+        private final static Map<String, String> MAP = new HashMap<>();
         static {
             for (ConfigEnum s : ConfigEnum.values()) {
-                map.put(s.getValue(), s.getName());
-            }
-        }
-    }
-
-    /**
-     * 字典枚举
-     */
-    public enum DictionaryTypeEnum {
-        OA_ACTIVITI("OA_ACTIVITI", "工作流字典"),
-        ;
-        private final String value;
-        private final String name;
-
-        DictionaryTypeEnum(String value, String name) {
-            this.value = value;
-            this.name = name;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        public String getName() {
-            return name;
-        }
-        private static Map<String, String> map = new HashMap<String, String>();
-        static {
-            for (DictionaryTypeEnum s : DictionaryTypeEnum.values()) {
-                map.put(s.getValue(), s.getName());
+                MAP.put(s.getValue(), s.getName());
             }
         }
     }
 
     public enum ReviewStateEnum {
+        /**
+         * 流媒体状态
+         */
         IS_REVIEW(1, "审核中"),
         REVIEW_ADOPT(2, "审核通过"),
         REVIEW_NOT_ADOPT(3, "审核驳回"),
@@ -214,19 +230,19 @@ public class ConstEnum {
         private final int value;
         private final String name;
 
-        private ReviewStateEnum(int value, String name) {
+        ReviewStateEnum(int value, String name) {
             this.value = value;
             this.name = name;
         }
-        private static Map<Integer, String> map = new HashMap<Integer, String>();
+        private final static Map<Integer, String> MAP = new HashMap<>();
         static {
             for (ReviewStateEnum e : ReviewStateEnum.values()) {
-                map.put(e.getValue(), e.getName());
+                MAP.put(e.getValue(), e.getName());
             }
         }
 
         public static String getName(int value) {
-            return map.get(value);
+            return MAP.get(value);
         }
 
         public int getValue() {
@@ -240,6 +256,9 @@ public class ConstEnum {
 
 
     public enum UserTypeEnum {
+        /**
+         * 用户岗位信息
+         */
         ROLE(1, "角色"),
         POSITION(2, "职位"),
         DEPARTMENT(3, "部门"),
@@ -248,19 +267,19 @@ public class ConstEnum {
         private final int value;
         private final String name;
 
-        private UserTypeEnum(int value, String name) {
+        UserTypeEnum(int value, String name) {
             this.value = value;
             this.name = name;
         }
-        private static Map<Integer, String> map = new HashMap<Integer, String>();
+        private final static Map<Integer, String> MAP = new HashMap<>();
         static {
             for (UserTypeEnum e : UserTypeEnum.values()) {
-                map.put(e.getValue(), e.getName());
+                MAP.put(e.getValue(), e.getName());
             }
         }
 
         public static String getName(int value) {
-            return map.get(value);
+            return MAP.get(value);
         }
 
         public int getValue() {
@@ -272,14 +291,11 @@ public class ConstEnum {
         }
     }
 
-    /**
-     * @author Xiaohan.Yuan
-     * @version 1.0.0
-     * @ClassName TimingTriggerType.java
-     * @Description 定时类型触发器类型
-     * @createTime 2021年12月16日
-     */
+
     public enum TriggerType {
+        /**
+         * 定时类型触发器类型
+         */
         CRON(1,"标准CRON支持"),
         INTERVAL_MILLISECOND(2,"固定间隔毫秒"),
         INTERVAL_SECOND(3,"固定间隔秒"),
@@ -297,21 +313,21 @@ public class ConstEnum {
             this.name = name;
         }
 
-        private static Map<Integer, String> map = new HashMap<Integer, String>();
-        private static Map<Integer, TriggerType> mapType = new HashMap<Integer, TriggerType>();
+        private static final Map<Integer, String> MAP = new HashMap<>();
+        private static final Map<Integer, TriggerType> MAP_TYPE = new HashMap<>();
         static {
             for (TriggerType e : TriggerType.values()) {
-                map.put(e.getValue(), e.getName());
-                mapType.put(e.getValue(),e);
+                MAP.put(e.getValue(), e.getName());
+                MAP_TYPE.put(e.getValue(),e);
             }
         }
 
         public static String getName(int value) {
-            return map.get(value);
+            return MAP.get(value);
         }
 
         public static TriggerType getTriggerType(int value) {
-            return mapType.get(value);
+            return MAP_TYPE.get(value);
         }
 
         public int getValue() {
@@ -323,10 +339,11 @@ public class ConstEnum {
         }
     }
 
-    /**
-     * 登陆用户类型
-     */
+
     public enum LoginTypeEnum {
+        /**
+         * 登陆用户类型
+         */
         WX_MINI_USER("wx_mini_user", "微信小程序用户"),
         WEB_USER("web_user", "web登陆用户"),
         ;
@@ -334,19 +351,19 @@ public class ConstEnum {
         private final String value;
         private final String name;
 
-        private LoginTypeEnum(String value, String name) {
+        LoginTypeEnum(String value, String name) {
             this.value = value;
             this.name = name;
         }
-        private static Map<String, String> map = new HashMap<String, String>();
+        private static final Map<String, String> MAP = new HashMap<>();
         static {
             for (LoginTypeEnum e : LoginTypeEnum.values()) {
-                map.put(e.getValue(), e.getName());
+                MAP.put(e.getValue(), e.getName());
             }
         }
 
         public static String getName(String value) {
-            return map.get(value);
+            return MAP.get(value);
         }
 
         public String getValue() {

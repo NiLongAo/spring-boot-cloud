@@ -3,13 +3,13 @@ package cn.com.tzy.springbootcomm.common.bean;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-import java.io.Serializable;
-
+/**
+ * @author TZY
+ */
 @Data
 @SuperBuilder(toBuilder = true)
 @AllArgsConstructor

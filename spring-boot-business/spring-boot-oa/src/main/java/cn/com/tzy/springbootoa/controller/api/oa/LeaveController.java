@@ -70,7 +70,7 @@ public class LeaveController extends ApiController {
             leave.setDepartmentId(Long.valueOf(String.valueOf(map.get("departmentId"))));
             leave.setDepartmentName(String.valueOf(map.get("departmentName")));
         }else {
-            leave.setDepartmentId(1l);
+            leave.setDepartmentId(1L);
             leave.setDepartmentName("无");
         }
         leave.setStartTime(DateUtils.parseDate(param.getStartTime(), new String[]{Constant.DATE_TIME_FORMAT,Constant.DATE_FORMAT}));
