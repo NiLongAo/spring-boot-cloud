@@ -4,6 +4,9 @@ import io.swagger.annotations.ApiModel;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+/**
+ * @author TZY
+ */
 @ApiModel("权限分配")
 @SuperBuilder(toBuilder = true)
 @NoArgsConstructor
@@ -59,11 +62,5 @@ public class BaseModel {
      * 参数校验分组：修改状态
      */
     public @interface updateStatus {
-    }
-
-    /**
-     * 参数校验分组：批量删除
-     */
-    public @interface batchDelete {
     }
 }

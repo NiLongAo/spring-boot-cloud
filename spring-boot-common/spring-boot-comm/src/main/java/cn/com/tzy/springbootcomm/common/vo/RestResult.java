@@ -7,6 +7,9 @@ import org.apache.skywalking.apm.toolkit.trace.TraceContext;
 import java.io.Serializable;
 
 
+/**
+ * @author TZY
+ */
 @Data
 @Builder
 @NoArgsConstructor
@@ -39,13 +42,13 @@ public class RestResult<T>  implements Serializable {
     }
 
     public static <T> RestResult<T> result(RespCode respCode) {
-        return new RestResult<T>(respCode.getValue(), respCode.getName());
+        return new RestResult<>(respCode.getValue(), respCode.getName());
     }
 
     public static <T> RestResult<T> result(int code, String message) {
-        return new RestResult<T>(code, message);
+        return new RestResult<>(code, message);
     }
     public static <T> RestResult<T> result(int code, String message, T data) {
-        return new RestResult<T>(code, message,data);
+        return new RestResult<>(code, message,data);
     }
 }
