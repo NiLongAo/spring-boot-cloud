@@ -35,4 +35,5 @@ build/
 logs
 ### 大文件取消上传 ###
 .lib-service/
+.fastRequest/
 */spring-boot-face/conf/
