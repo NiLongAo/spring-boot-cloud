@@ -304,6 +304,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 }
             }
         }
+        String name = ConstEnum.Sex.getName(user.getGender());
+        if(StringUtils.isEmpty(name)){
+            return RestResult.result(RespCode.CODE_2.getValue(),"性别类型错误");
+        }
         UserInfoVo build = UserInfoVo.builder()
                 .id(userId)
                 .userName(user.getLoginAccount())//改为登录账户

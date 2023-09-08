@@ -6,34 +6,46 @@ import java.util.regex.Pattern;
 
 /**
  * 常量池
+ * @author TZY
  */
 public class Constant {
 
-    /*签名加密*/
+    /**
+     * 签名加密
+     */
     public static final String SECRET_KEY = "Lp0jtuCAwVfz@N8m";
     public static final String SECRET_IV = "z3UBSAGj#$6hJ9LV";
 
-    /*格式化*/
-    public final static String ENCODING_UTF_8 = "utf-8";
     public final static Charset CHARSET_UTF_8 = StandardCharsets.UTF_8;
-    //下划线匹配
+    /**
+     * 下划线匹配
+     */
     public static Pattern LINE_PATTERN = Pattern.compile("_(\\w)");
-    //大写匹配
+    /**
+     * 大写匹配
+     */
     public static Pattern HUMP_PATTERN = Pattern.compile("[A-Z]");
 
-    /*转换时间格式*/
+    /**
+     * 转换时间格式
+     */
     public final static String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
     public final static String DATETIME_FORMAT = "yyyyMMddHHmmss";
     public final static String DATE_FORMAT = "yyyy-MM-dd";
     public final static String HOUR_MINUTE = "HH:mm";
     public final static String MONTH_FORMAT = "yyyy-MM";
     public final static String YEAR_FORMAT = "yyyy";
-    /*图片格式*/
+    /**
+     * 图片格式
+     */
     public final static String[] IMAGE_SUFFIX = {"png", "jpeg", "bmp", "jpg", "gif", "ico"};
-    //文件暂存地址
+    /**
+     * 文件暂存地址
+     */
     public final static String PATH_TEMP = "/static/temp/";
-
-    /*默认公共租户编号 */
+    /**
+     * 默认公共租户编号
+     */
     public final static Long TENANT_ID = 1L;
 
     /**

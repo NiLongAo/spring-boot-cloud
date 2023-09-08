@@ -1,6 +1,13 @@
 package cn.com.tzy.springbootcomm.common.vo;
 
+/**
+ * @author TZY
+ */
+
 public enum RespCode {
+    /**
+     * 相应状态码
+     */
     CODE_0(0, "成功"),
     CODE_1(1, "服务器内部错误"),
     CODE_2(2, "参数错误"),
@@ -14,7 +21,7 @@ public enum RespCode {
     CODE_310(310, "密码未设置"),
     CODE_311(311, "用户名或密码错误"),
     CODE_312(312, "用户输入密码次数超限"),
-    CODE_313(313, "客户端认证失败"), // *
+    CODE_313(313, "客户端认证失败"),
     CODE_314(314, "token无效或已过期"),
     CODE_315(315, "token已被禁止访问"),
     CODE_316(316, "访问权限异常"),

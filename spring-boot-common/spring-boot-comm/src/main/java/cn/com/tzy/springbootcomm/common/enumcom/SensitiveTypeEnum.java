@@ -1,5 +1,8 @@
 package cn.com.tzy.springbootcomm.common.enumcom;
 
+/**
+ * @author TZY
+ */
 public enum SensitiveTypeEnum {
     /**
      * 中文名
@@ -36,5 +39,5 @@ public enum SensitiveTypeEnum {
     /**
      * 车牌号
      */
-    CARNUMBER;
+    CARNUMBER
 }

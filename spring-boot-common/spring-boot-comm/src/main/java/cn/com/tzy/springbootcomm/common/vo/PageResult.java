@@ -7,6 +7,9 @@ import org.apache.skywalking.apm.toolkit.trace.TraceContext;
 import java.io.Serializable;
 
 
+/**
+ * @author TZY
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,7 +18,7 @@ public class PageResult implements Serializable {
 
     int code;
     String message;
-    String tid = TraceContext.traceId();;
+    String tid = TraceContext.traceId();
     PageModel data;
 
     public PageResult(int code, String message,PageModel data) {
@@ -25,17 +28,14 @@ public class PageResult implements Serializable {
     }
 
     public static PageResult result(RespCode respCode) {
-        PageResult result = new PageResult(respCode.getValue(), respCode.getName(),null);
-        return result;
+        return new PageResult(respCode.getValue(), respCode.getName(),null);
     }
 
     public static PageResult result(int code, String message) {
-        PageResult result = new PageResult(code, message,null);
-        return result;
+        return new PageResult(code, message,null);
     }
     public static PageResult result(int code,int total, String message, Object data) {
-        PageResult result = new PageResult(code, message,new PageModel(total,data));
-        return result;
+        return new PageResult(code, message,new PageModel(total,data));
     }
 
     public static class PageModel{

@@ -1,13 +1,10 @@
 package cn.com.tzy.springbootentity.dome.face;
 
 import cn.com.tzy.springbootcomm.common.bean.LongIdEntity;
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,6 +13,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * 人员信息
+ * @author TZY
  */
 @ApiModel(value = "人员信息")
 @Data

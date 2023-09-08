@@ -5,14 +5,21 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.StringUtils;
 
+/**
+ * @author TZY
+ */
 @ApiModel("排序对象")
 public class PageSortModel {
     public static final String ASC = "asc";
     public static final String DESC = "desc";
+
+    public static final String ASCEND = "ascend";
+
+    public static final String DESCEND = "descend";
     @ApiModelProperty("排序字段 例子:endTime,id")
-    private  String field;
+    private final String field;
     @ApiModelProperty("正序倒序 例子:desc,ace")
-    private  String order;
+    private final String order;
 
     public PageSortModel(String field, String order) {
         this.field = field;
@@ -25,9 +32,9 @@ public class PageSortModel {
 
     public String getOrder() {
         if(StringUtils.isNotEmpty(this.order)){
-            if(this.order.equals("ascend")){
+            if(this.order.equals(DESCEND)){
                 return ASC;
-            }else if(order.equals("descend")){
+            }else if(order.equals(ASCEND)){
                 return DESC;
             }else {
                 return order;
