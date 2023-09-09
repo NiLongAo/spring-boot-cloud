@@ -8,6 +8,7 @@ import cn.com.tzy.springbootstartervideobasic.exception.SsrcTransactionNotFoundE
 import cn.com.tzy.springbootstartervideobasic.vo.media.*;
 import cn.com.tzy.springbootstartervideobasic.vo.sip.SendRtp;
 import cn.com.tzy.springbootstartervideobasic.vo.video.*;
+import cn.com.tzy.springbootstartervideocore.demo.InviteInfo;
 import cn.com.tzy.springbootstartervideocore.demo.SsrcTransaction;
 import cn.com.tzy.springbootstartervideocore.media.hook.MediaHookServer;
 import cn.com.tzy.springbootstartervideocore.pool.task.DynamicTask;
@@ -90,13 +91,16 @@ public class ZlmService {
         ssrcConfigManager.initMediaServerSSRC(mediaServerVo.getId(),null);
         //是否自动zlm配置文件
         if(mediaServerVo.getAutoConfig() == ConstEnum.Flag.YES.getValue()){
-            MediaClient.zlmConfigAuto(mediaServerVo,zlmServerConfig.getRestart()==ConstEnum.Flag.YES.getValue());
+            //重启时直接关闭全部留
+            boolean b = zlmServerConfig.getRestart() == ConstEnum.Flag.YES.getValue();
+            cleanStream(mediaServerVo,b);
+            MediaClient.zlmConfigAuto(mediaServerVo,b);
             //MediaClient.zlmConfigAuto(mediaServerVo,true);
         }
         //初始化流媒体信息
         mediaServerManager.resetOnlineServerItem(mediaServerVo);
         //定时检测是否在线
-        zlmKeepaliveTask(mediaServerVo);
+        zlmKeepaliveTask(mediaServerVo,false);
         //定时检测流上下线操作并相关处理
         zlmStreamChanged(mediaServerVo);
         //上线操作
@@ -106,22 +110,33 @@ public class ZlmService {
      * 心跳任务
      * @param mediaServerVo
      */
-    public void zlmKeepaliveTask(MediaServerVo mediaServerVo){
+    public void zlmKeepaliveTask(MediaServerVo mediaServerVo,boolean isDel){
         MediaHookSubscribe mediaHookSubscribe = MediaService.getMediaHookSubscribe();
         //心跳事件
         HookKey hookKey = HookKeyFactory.onServerKeepalive(mediaServerVo.getId());
-        HookKey key = mediaHookSubscribe.getHookKey(hookKey);
-        if(key == null){
-            mediaHookSubscribe.addSubscribe(hookKey,(server, response)->{
-                zlmKeepalive(server);//更新订阅过期时间
-            });
+        if(isDel){
+            mediaHookSubscribe.removeSubscribe(hookKey);
+            zlmKeepalive(mediaServerVo, true);
+        }else {
+            HookKey key = mediaHookSubscribe.getHookKey(hookKey);
+            if(key == null){
+                mediaHookSubscribe.addSubscribe(hookKey,(server, response)->{
+                    zlmKeepalive(server, false);//更新订阅过期时间
+                });
+            }
         }
     }
-    private void zlmKeepalive(MediaServerVo mediaServerVo){
+    private void zlmKeepalive(MediaServerVo mediaServerVo,boolean isDel){
         MediaServerVoService mediaServerVoService = VideoService.getMediaServerService();
         SsrcConfigManager ssrcConfigManager = RedisService.getSsrcConfigManager();
         MediaServerManager mediaServerManager = RedisService.getMediaServerManager();
         MediaHookSubscribe mediaHookSubscribe = MediaService.getMediaHookSubscribe();
+        //设置zlm服务上线
+        String key = zlmKeepaliveKeyPrefix + mediaServerVo.getId();
+        if(isDel){
+            dynamicTask.stop(key);
+            return;
+        }
         //更新流媒体状态
         mediaServerVoService.updateStatus(mediaServerVo.getId(),ConstEnum.Flag.YES.getValue());
         //订阅更新过期时间
@@ -129,8 +144,7 @@ public class ZlmService {
         if(hookKey != null){
             hookKey.updateExpires(null);//更新订阅过期时间
         }
-        //设置zlm服务上线
-        String key = zlmKeepaliveKeyPrefix + mediaServerVo.getId();
+
         //保证有一定延迟
         dynamicTask.startCron(key, mediaServerVo.getHookAliveInterval()+ VideoConstant.DELAY_TIME,mediaServerVo.getHookAliveInterval()+ VideoConstant.DELAY_TIME ,()->{
             //订阅更新过期时间
@@ -229,7 +243,7 @@ public class ZlmService {
         SendRtpManager sendRtpManager = RedisService.getSendRtpManager();
         SsrcTransactionManager ssrcTransactionManager = RedisService.getSsrcTransactionManager();
         //取消zlm在线认证
-        dynamicTask.stop(zlmKeepaliveKeyPrefix + mediaServerVo.getId());
+        zlmKeepaliveTask(mediaServerVo,false);
         //删除无人观看自动移除的流
         List<StreamProxyVo> streamProxyVoList = streamProxyVoService.findAutoRemoveMediaServerIdList(mediaServerVo.getId());
         if(! streamProxyVoList.isEmpty()){
@@ -281,40 +295,54 @@ public class ZlmService {
     }
     //定时检测流上下线操作并相关处理
     public void zlmStreamChanged(MediaServerVo mediaServerVo){
+        dynamicTask.startCron(StreamChangedManager.VIDEO_MEDIA_STREAM_CHANGED_PREFIX,60,()->{
+            cleanStream(mediaServerVo,false);
+        });
+    }
+
+    private  void cleanStream(MediaServerVo mediaServerVo,boolean delAll){
         StreamChangedManager streamChangedManager = RedisService.getStreamChangedManager();
         MediaServerVoService mediaServerService = VideoService.getMediaServerService();
         MediaHookServer mediaHookServer = SpringUtil.getBean(MediaHookServer.class);
-        dynamicTask.startCron(StreamChangedManager.VIDEO_MEDIA_STREAM_CHANGED_PREFIX,60,()->{
-            List<OnStreamChangedHookVo> mediaServerAll = streamChangedManager.getMediaServerAll(mediaServerVo.getId());
-            if(mediaServerAll != null && !mediaServerAll.isEmpty()){
-                List<OnStreamChangedHookVo> delete = new ArrayList<>();
-                for (OnStreamChangedHookVo vo : mediaServerAll) {
-                    MediaServerVo mediaServer = mediaServerService.findMediaServerId(vo.getMediaServerId());
-                    if(mediaServer == null){
-                        delete.add(vo);
-                        continue;
-                    }
-                    MediaRestResult result = MediaClient.getMediaInfo(mediaServerVo, null, vo.getSchema(), vo.getApp(), vo.getStream());
-                    if(result == null || result.getCode() !=RespCode.CODE_0.getValue() || ObjectUtils.isEmpty(result.getData())){
-                        delete.add(vo);
-                    }
-                    OnStreamChangedHookVo hookVo = BeanUtil.toBean(result.getData(), OnStreamChangedHookVo.class);
-                    if(hookVo == null || hookVo.getTotalReaderCount() <= 0){
-                        delete.add(vo);
-                    }
+        InviteStreamManager inviteStreamManager = RedisService.getInviteStreamManager();
+        DeviceChannelVoService deviceChannelVoService = VideoService.getDeviceChannelService();
+
+        List<OnStreamChangedHookVo> mediaServerAll = streamChangedManager.getMediaServerAll(mediaServerVo.getId());
+        if(mediaServerAll != null && !mediaServerAll.isEmpty()){
+            List<OnStreamChangedHookVo> delete = new ArrayList<>();
+            for (OnStreamChangedHookVo vo : mediaServerAll) {
+                MediaServerVo mediaServer = mediaServerService.findMediaServerId(vo.getMediaServerId());
+                if(mediaServer == null){
+                    delete.add(vo);
+                    continue;
                 }
-                for (OnStreamChangedHookVo vo : delete) {
-                    OnStreamNoneReaderHookVo build = OnStreamNoneReaderHookVo.builder()
-                            .app(vo.getApp())
-                            .stream(vo.getStream())
-                            .schema(vo.getSchema())
-                            .mediaServerId(vo.getMediaServerId())
-                            .build();
-                    log.info("定时任务检测到无人观看流，自动关闭：{}",build);
-                    mediaHookServer.onStreamNoneReader(build);
-                    streamChangedManager.remove(vo);
+                OnStreamChangedResult result = MediaClient.getMediaInfo(mediaServerVo, null, vo.getSchema(), vo.getApp(), vo.getStream());
+                if(delAll || result == null || result.getCode() != RespCode.CODE_0.getValue() || result.getTotalReaderCount() <= 0){
+                    delete.add(vo);
+                    continue;
                 }
             }
-        });
+            for (OnStreamChangedHookVo vo : delete) {
+                OnStreamNoneReaderHookVo build = OnStreamNoneReaderHookVo.builder()
+                        .app(vo.getApp())
+                        .stream(vo.getStream())
+                        .schema(vo.getSchema())
+                        .mediaServerId(vo.getMediaServerId())
+                        .build();
+                log.info("定时任务检测到无人观看流，自动关闭：{}",build);
+                mediaHookServer.onStreamNoneReader(build);
+                streamChangedManager.remove(vo);
+                //只有重启 zlm 时 delAll = true
+                // onStreamNoneReader 调用后 streamByeCmd 发送注销 ，这时zlm重启， 不触发hook onStreamChanged，手动删除及修改状态
+                if(delAll){
+                    InviteInfo inviteInfo = inviteStreamManager.getInviteInfoByStream(null, vo.getStream());
+                    if(inviteInfo != null){
+                        deviceChannelVoService.stopPlay(inviteInfo.getDeviceId(), inviteInfo.getChannelId());
+                        inviteStreamManager.removeInviteInfo(inviteInfo);
+                    }
+                }
+            }
+
+        }
     }
 }

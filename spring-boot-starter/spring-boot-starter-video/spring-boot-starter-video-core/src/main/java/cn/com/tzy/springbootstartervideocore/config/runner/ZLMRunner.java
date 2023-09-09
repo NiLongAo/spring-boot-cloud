@@ -93,7 +93,7 @@ public class ZLMRunner implements CommandLineRunner {
         if (allZML.size() == 0) {
             mediaHookSubscribe.removeSubscribe(HookKeyFactory.onServerStarted());
         }
-        config.setRestart(config.getHookEnable().equals("1")? ConstEnum.Flag.YES.getValue() :ConstEnum.Flag.NO.getValue());
+        config.setRestart("0".equals(config.getHookEnable())? ConstEnum.Flag.YES.getValue() :ConstEnum.Flag.NO.getValue());
         zlmService.zlmOnline(config);
     }
 

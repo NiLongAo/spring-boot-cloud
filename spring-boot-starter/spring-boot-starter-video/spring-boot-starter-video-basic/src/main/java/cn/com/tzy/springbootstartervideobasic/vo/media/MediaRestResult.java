@@ -33,13 +33,11 @@ public class MediaRestResult implements Serializable {
     }
 
     public static MediaRestResult result(RespCode respCode) {
-        MediaRestResult result = new MediaRestResult(respCode.getValue(), respCode.getName());
-        return result;
+        return new MediaRestResult(respCode.getValue(), respCode.getName());
     }
 
     public static MediaRestResult result(int code, String msg) {
-        MediaRestResult result = new MediaRestResult(code, msg);
-        return result;
+        return new MediaRestResult(code, msg);
     }
     public static MediaRestResult result(int code, String msg, Object data) {
         MediaRestResult result = new MediaRestResult(code, msg);

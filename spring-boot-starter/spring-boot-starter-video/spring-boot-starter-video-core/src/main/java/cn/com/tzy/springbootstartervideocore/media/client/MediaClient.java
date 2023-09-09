@@ -158,15 +158,11 @@ public class MediaClient {
         if (mediaServerVo == null) {
             return null;
         }
-        MediaRestResult result = getMediaInfo(mediaServerVo, "__defaultVhost__", "rtsp", app, stream);
-        if(result == null || result.getCode() !=RespCode.CODE_0.getValue() || ObjectUtils.isEmpty(result.getData())){
+        OnStreamChangedResult result = getMediaInfo(mediaServerVo, "__defaultVhost__", "rtsp", app, stream);
+        if(result == null || result.getCode() !=RespCode.CODE_0.getValue()){
             return null;
         }
-        OnStreamChangedHookVo hookVo = BeanUtil.toBean(result.getData(), OnStreamChangedHookVo.class);
-        if(hookVo == null){
-            return null;
-        }
-        return new StreamInfo(mediaServerVo,app,stream,hookVo.getTracks(),addr,callId,null,null);
+        return new StreamInfo(mediaServerVo,app,stream,result.getTracks(),addr,callId,null,null);
     }
 
 
@@ -329,14 +325,14 @@ public class MediaClient {
      * @param app 应用名，例如 live
      * @param stream 流id，例如 test
      */
-    public static MediaRestResult getMediaInfo(MediaServerVo mediaServerVo, String vhost, String schema, String app, String stream){
+    public static OnStreamChangedResult getMediaInfo(MediaServerVo mediaServerVo, String vhost, String schema, String app, String stream){
         NotNullMap map = new NotNullMap() {{
             putString("app", app);
             putString("stream", stream);
             putString("vhost",StringUtils.isNotEmpty(vhost)?vhost:"__defaultVhost__");
             putString("schema", StringUtils.isNotEmpty(vhost)?schema:"rtsp");
         }};
-        return MediaUtils.request(mediaServerVo,ZLMediaKitConstant.GET_MEDIA_INFO, map);
+        return MediaUtils.requestStreamChanged(mediaServerVo,ZLMediaKitConstant.GET_MEDIA_INFO, map);
     }
 
     /**

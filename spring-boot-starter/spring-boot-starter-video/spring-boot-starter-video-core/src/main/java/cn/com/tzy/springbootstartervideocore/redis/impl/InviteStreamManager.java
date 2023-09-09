@@ -1,20 +1,39 @@
 package cn.com.tzy.springbootstartervideocore.redis.impl;
 
+import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootcomm.constant.NotNullMap;
 import cn.com.tzy.springbootstarterredis.utils.RedisUtils;
 import cn.com.tzy.springbootstartervideobasic.common.VideoConstant;
 import cn.com.tzy.springbootstartervideobasic.enums.InviteSessionStatus;
 import cn.com.tzy.springbootstartervideobasic.enums.VideoStreamType;
+import cn.com.tzy.springbootstartervideobasic.exception.SsrcTransactionNotFoundException;
+import cn.com.tzy.springbootstartervideobasic.vo.media.OnStreamChangedResult;
+import cn.com.tzy.springbootstartervideobasic.vo.sip.SendRtp;
+import cn.com.tzy.springbootstartervideobasic.vo.video.DeviceVo;
 import cn.com.tzy.springbootstartervideobasic.vo.video.MediaServerVo;
+import cn.com.tzy.springbootstartervideobasic.vo.video.ParentPlatformVo;
 import cn.com.tzy.springbootstartervideocore.demo.StreamInfo;
 import cn.com.tzy.springbootstartervideocore.media.client.MediaClient;
+import cn.com.tzy.springbootstartervideocore.redis.RedisService;
+import cn.com.tzy.springbootstartervideocore.redis.subscribe.result.DeferredResultHolder;
 import cn.com.tzy.springbootstartervideocore.service.VideoService;
 import cn.com.tzy.springbootstartervideocore.demo.InviteInfo;
+import cn.com.tzy.springbootstartervideocore.service.video.DeviceVoService;
+import cn.com.tzy.springbootstartervideocore.service.video.MediaServerVoService;
+import cn.com.tzy.springbootstartervideocore.service.video.ParentPlatformVoService;
+import cn.com.tzy.springbootstartervideocore.service.video.StreamProxyVoService;
+import cn.com.tzy.springbootstartervideocore.sip.SipServer;
 import cn.com.tzy.springbootstartervideocore.sip.callback.InviteErrorCallback;
+import cn.com.tzy.springbootstartervideocore.sip.cmd.SIPCommander;
+import cn.com.tzy.springbootstartervideocore.sip.cmd.SIPCommanderForPlatform;
+import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.json.JSONUtil;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ObjectUtils;
 
+import javax.sip.InvalidArgumentException;
+import javax.sip.SipException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -198,15 +217,28 @@ public class InviteStreamManager {
                 ":*";
         List<String> scan = RedisUtils.keys(keys);
         if (scan.size() > 0) {
+            MediaServerVoService mediaServerService = VideoService.getMediaServerService();
             for (String key : scan) {
                 InviteInfo inviteInfo = (InviteInfo) RedisUtils.get(key);;
-                if (inviteInfo == null) {
-                    continue;
+                boolean del = false;
+                if (inviteInfo != null) {
+                    del = true;
+                    if(inviteInfo.getStreamInfo() != null){
+                        MediaServerVo mediaServerVo = mediaServerService.findMediaServerId(inviteInfo.getStreamInfo().getMediaServerId());
+                        if(mediaServerVo != null){
+                            OnStreamChangedResult result = MediaClient.getMediaInfo(mediaServerVo, null, "rtsp", inviteInfo.getStreamInfo().getApp(), inviteInfo.getStreamInfo().getStream());
+                            if(result != null && result.getCode() == RespCode.CODE_0.getValue()){
+                                del = false;
+                            }
+                        }
+                    }
                 }
-                RedisUtils.del(key);
-                String userKey = String.format("%s:%s",INVITE_DOWNLOAD_USER_PREFIX,inviteInfo.getUserId());
-                RedisUtils.setRemove(userKey,key);
-                inviteErrorCallbackMap.remove(buildKey(type, deviceId, channelId, inviteInfo.getStream()));
+                if(del){
+                    RedisUtils.del(key);
+                    String userKey = String.format("%s:%s",INVITE_DOWNLOAD_USER_PREFIX,inviteInfo.getUserId());
+                    RedisUtils.setRemove(userKey,key);
+                    inviteErrorCallbackMap.remove(buildKey(type, deviceId, channelId, inviteInfo.getStream()));
+                }
             }
         }
     }

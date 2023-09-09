@@ -6,6 +6,7 @@ import cn.com.tzy.springbootstartervideobasic.enums.VideoStreamType;
 import cn.com.tzy.springbootstartervideobasic.exception.SsrcTransactionNotFoundException;
 import cn.com.tzy.springbootstartervideobasic.vo.media.MediaRestResult;
 import cn.com.tzy.springbootstartervideobasic.vo.media.OnStreamChangedHookVo;
+import cn.com.tzy.springbootstartervideobasic.vo.media.OnStreamChangedResult;
 import cn.com.tzy.springbootstartervideobasic.vo.sip.SendRtp;
 import cn.com.tzy.springbootstartervideobasic.vo.video.DeviceChannelVo;
 import cn.com.tzy.springbootstartervideobasic.vo.video.DeviceVo;
@@ -79,13 +80,10 @@ public class ByeRequestProcessor  extends AbstractSipRequestEvent implements Sip
             //关闭推流
             ssrcConfigManager.releaseSsrc(mediaServerVo.getId(),sendRtpItem.getSsrc());
             MediaClient.stopSendRtp(mediaServerVo,"__defaultVhost__",sendRtpItem.getApp(),sendRtpItem.getStreamId(),sendRtpItem.getSsrc());
-            MediaRestResult result = MediaClient.getMediaInfo(mediaServerVo,"__defaultVhost__", "rtsp", sendRtpItem.getApp(), sendRtpItem.getStreamId());
+            OnStreamChangedResult result = MediaClient.getMediaInfo(mediaServerVo,"__defaultVhost__", "rtsp", sendRtpItem.getApp(), sendRtpItem.getStreamId());
             int totalReaderCount = 0;
-            if(result != null && result.getCode() == RespCode.CODE_0.getValue() && ObjectUtils.isNotEmpty(result.getData())){
-                OnStreamChangedHookVo hookVo = BeanUtil.toBean(result.getData(), OnStreamChangedHookVo.class);
-                if(hookVo != null){
-                    totalReaderCount =hookVo.getTotalReaderCount();
-                }
+            if(result != null && result.getCode() == RespCode.CODE_0.getValue()){
+                totalReaderCount =result.getTotalReaderCount();
             }
             if (totalReaderCount <= 0) {
                 log.info("[收到bye] {} 无其它观看者，通知设备停止推流", sendRtpItem.getStreamId());
