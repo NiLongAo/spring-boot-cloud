@@ -79,7 +79,7 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
             findParent(map,onj);
         });
         pageResult = new ArrayList<>(map.values());
-        List<Tree<Department>> tree = TreeUtil.getTree(pageResult, Department::getId, Department::getId, null);
+        List<Tree<Department>> tree = TreeUtil.getTree(pageResult, Department::getParentId, Department::getId, null);
         //转换树结构
         List<Map> maps = AppUtils.transformationTree("children",tree);
         return PageResult.result(RespCode.CODE_0.getValue(), pageResult.size(), null, maps);
