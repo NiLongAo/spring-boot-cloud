@@ -35,7 +35,7 @@ public class OnStreamChangedHookVo extends HookVo{
     /**
      * 观看总人数，包括hls/rtsp/rtmp/http-flv/ws-flv
      */
-    private String totalReaderCount;
+    private Integer totalReaderCount;
 
     /**
      * 协议 包括hls/rtsp/rtmp/http-flv/ws-flv

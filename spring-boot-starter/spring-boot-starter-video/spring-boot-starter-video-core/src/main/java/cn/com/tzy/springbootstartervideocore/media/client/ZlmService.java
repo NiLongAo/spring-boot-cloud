@@ -294,8 +294,12 @@ public class ZlmService {
                         delete.add(vo);
                         continue;
                     }
-                    MediaRestResult result = MediaClient.getMediaList(mediaServer, null, vo.getSchema(), vo.getApp(), vo.getStream());
-                    if(result == null || result.getCode() != RespCode.CODE_0.getValue() || ObjectUtils.isEmpty(result.getData()) || MapUtil.getInt(BeanUtil.beanToMap(result.getData()),"totalReaderCount",0) <= 0){
+                    MediaRestResult result = MediaClient.getMediaInfo(mediaServerVo, null, vo.getSchema(), vo.getApp(), vo.getStream());
+                    if(result == null || result.getCode() !=RespCode.CODE_0.getValue() || ObjectUtils.isEmpty(result.getData())){
+                        delete.add(vo);
+                    }
+                    OnStreamChangedHookVo hookVo = BeanUtil.toBean(result.getData(), OnStreamChangedHookVo.class);
+                    if(hookVo == null || hookVo.getTotalReaderCount() <= 0){
                         delete.add(vo);
                     }
                 }

@@ -31,7 +31,7 @@ public class StreamPushVo extends LongIdEntity {
     /**
      * 观看总人数，包括hls/rtsp/rtmp/http-flv/ws-flv
      */
-    private String totalReaderCount;
+    private Integer totalReaderCount;
 
     /**
      * 产生源类型 unknown = 0,rtmp_push=1,rtsp_push=2,rtp_push=3,pull=4,ffmpeg_pull=5,mp4_vod=6,device_chn=7

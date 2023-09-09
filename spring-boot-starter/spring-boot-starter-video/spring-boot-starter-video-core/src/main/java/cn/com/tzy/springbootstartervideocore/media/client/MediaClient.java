@@ -17,6 +17,7 @@ import cn.com.tzy.springbootstartervideocore.redis.impl.SsrcConfigManager;
 import cn.com.tzy.springbootstartervideocore.redis.subscribe.media.HookKeyFactory;
 import cn.com.tzy.springbootstartervideocore.redis.subscribe.media.MediaHookSubscribe;
 import cn.com.tzy.springbootstartervideocore.service.MediaService;
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.json.JSONUtil;
@@ -157,15 +158,15 @@ public class MediaClient {
         if (mediaServerVo == null) {
             return null;
         }
-        MediaRestResult result = getMediaList(mediaServerVo, "__defaultVhost__", null, app, stream);
+        MediaRestResult result = getMediaInfo(mediaServerVo, "__defaultVhost__", "rtsp", app, stream);
         if(result == null || result.getCode() !=RespCode.CODE_0.getValue() || ObjectUtils.isEmpty(result.getData())){
             return null;
         }
-        List<OnStreamChangedHookVo> onStreamChangedHookVos = JSONUtil.toList(JSONUtil.toJsonStr(result.getData()), OnStreamChangedHookVo.class);
-        if(onStreamChangedHookVos.isEmpty()){
+        OnStreamChangedHookVo hookVo = BeanUtil.toBean(result.getData(), OnStreamChangedHookVo.class);
+        if(hookVo == null){
             return null;
         }
-        return new StreamInfo(mediaServerVo,app,stream,onStreamChangedHookVos.get(0).getTracks(),addr,callId,null,null);
+        return new StreamInfo(mediaServerVo,app,stream,hookVo.getTracks(),addr,callId,null,null);
     }
 
 
@@ -315,10 +316,27 @@ public class MediaClient {
         if(StringUtils.isNotEmpty(vhost)){
             map.putString("vhost",vhost);
         }
-        if(StringUtils.isNotEmpty(vhost)){
+        if(StringUtils.isNotEmpty(schema)){
             map.putString("schema", schema);
         }
         return MediaUtils.request(mediaServerVo,ZLMediaKitConstant.GET_MEDIA_LIST, map);
+    }
+
+    /**
+     * 获取流信息
+     * @param schema 协议，例如 rtsp或rtmp
+     * @param vhost 虚拟主机，例如__defaultVhost__
+     * @param app 应用名，例如 live
+     * @param stream 流id，例如 test
+     */
+    public static MediaRestResult getMediaInfo(MediaServerVo mediaServerVo, String vhost, String schema, String app, String stream){
+        NotNullMap map = new NotNullMap() {{
+            putString("app", app);
+            putString("stream", stream);
+            putString("vhost",StringUtils.isNotEmpty(vhost)?vhost:"__defaultVhost__");
+            putString("schema", StringUtils.isNotEmpty(vhost)?schema:"rtsp");
+        }};
+        return MediaUtils.request(mediaServerVo,ZLMediaKitConstant.GET_MEDIA_INFO, map);
     }
 
     /**
