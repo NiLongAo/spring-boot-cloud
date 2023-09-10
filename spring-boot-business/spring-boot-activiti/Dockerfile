@@ -10,6 +10,7 @@ RUN mkdir -p /spring-boot-activiti/logs
 WORKDIR /spring-boot-activiti
 EXPOSE 8620
 EXPOSE 13006
+EXPOSE 14006
 ADD ./target/spring-boot-activiti.jar ./
 ADD ./target/lib/* ./lib/
 ADD ./start/logback.xml ./
@@ -20,6 +21,7 @@ ENTRYPOINT [ \
 #    "-javaagent:/spring-boot-activiti/skywalking-agent-lib/skywalking-agent.jar", \
 #    "-Dskywalking.agent.service_name=spring-boot-activiti", \
 #    "-Dskywalking.collector.backend_service=1.15.9.228:12011", \
+    "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=14006", \
     "-Xmx256m","-Xms256m", \
     "-Dloader.path=/spring-boot-activiti/lib", \
     "-Dfile.encoding=utf-8", \
