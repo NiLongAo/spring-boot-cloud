@@ -28,6 +28,11 @@
               <option name="hostIp" value="0.0.0.0" />
               <option name="hostPort" value="13006" />
             </DockerPortBindingImpl>
+            <DockerPortBindingImpl>
+              <option name="containerPort" value="14006" />
+              <option name="hostIp" value="0.0.0.0" />
+              <option name="hostPort" value="14006" />
+            </DockerPortBindingImpl>
           </list>
         </option>
         <option name="sourceFilePath" value="spring-boot-business/spring-boot-activiti/Dockerfile" />
