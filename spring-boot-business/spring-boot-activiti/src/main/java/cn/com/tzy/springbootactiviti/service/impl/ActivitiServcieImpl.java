@@ -330,9 +330,9 @@ public class ActivitiServcieImpl extends BaseWorkflowService implements Activiti
             List<HistoricActivityInstance> historicActivityInstanceList = getProcessEngine().getHistoryService().createHistoricActivityInstanceQuery()
                     .processInstanceId(instanceId)
                     .activityTenantId(TenantContextHolder.getTenantId().toString())
-                    .orderByHistoricActivityInstanceStartTime().asc()
+                    .orderByActivityId().asc()
                     .list();
-            List<NotNullMap> maps = historicActivityInstanceList.stream().sorted(Comparator.comparing(HistoricActivityInstance::getStartTime)).map(activityInstance -> {
+            List<NotNullMap> maps = historicActivityInstanceList.stream().map(activityInstance -> {
                 return new NotNullMap() {{
                     putString("activityName", activityInstance.getActivityName());
                     putString("processInstanceId", activityInstance.getProcessInstanceId());
