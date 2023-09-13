@@ -1,6 +1,7 @@
 FROM anapsix/alpine-java:8_server-jre_unlimited
 # 同步时区
 ENV TZ=Asia/Shanghai
+ENV LANG=C.UTF-8
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 RUN mkdir -p /spring-boot-activiti/lib
@@ -14,6 +15,8 @@ EXPOSE 14006
 ADD ./target/spring-boot-activiti.jar ./
 ADD ./target/lib/* ./lib/
 ADD ./start/logback.xml ./
+# 解决 图片 中文乱码 路径在 C:\Windows\Fonts\simsun.ttc
+ADD ./start/simsun.ttc /opt/jdk1.8.0_202/jre/lib/fonts/simsun.ttc
 # ADD ./target/tmp ./skywalking-agent-lib/
 # Djava.security.egd=file:/dev/./urandom 解决阿里云的tomcat启动慢的问题
 ENTRYPOINT [ \

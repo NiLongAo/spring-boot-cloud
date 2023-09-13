@@ -586,12 +586,10 @@ public abstract class BaseWorkflowService implements WorkflowService {
 
             InputStream imageStream = new DefaultProcessDiagramGenerator().generateDiagram(bpmnModel,
                     "png",
-                    highLightedActivitiIds,//所有活动过的节点，包括当前在激活状态下的节点
-                    currIds,//当前为激活状态下的节点
-                    highLightedFlowIds,//活动过的线
-                    "宋体",
-                    "宋体",
-                    "宋体",
+                    highLightedActivitiIds,
+                    currIds,
+                    highLightedFlowIds,
+                    "宋体", "宋体", "宋体",
                     processEngineConfiguration.getClassLoader(),
                     1.0);
 

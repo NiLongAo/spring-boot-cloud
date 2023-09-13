@@ -44,6 +44,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.el.ExpressionFactory;
 import javax.el.ValueExpression;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -327,27 +328,25 @@ public class ActivitiServcieImpl extends BaseWorkflowService implements Activiti
         try {
             //--------------------------------------------另一种写法-------------------------
             List<HistoricActivityInstance> historicActivityInstanceList = getProcessEngine().getHistoryService().createHistoricActivityInstanceQuery()
-                    .orderByHistoricActivityInstanceStartTime().asc()
                     .processInstanceId(instanceId)
                     .activityTenantId(TenantContextHolder.getTenantId().toString())
+                    .orderByHistoricActivityInstanceEndTime().asc()
                     .list();
-            List<NotNullMap> maps = new ArrayList<>();
-            for (HistoricActivityInstance activityInstance: historicActivityInstanceList) {
-                NotNullMap map = new NotNullMap();
-                map.put("activityName", activityInstance.getActivityName());
-                map.put("processInstanceId", activityInstance.getProcessInstanceId());
-                map.put("processDefinitionId", activityInstance.getProcessDefinitionId());
-                map.put("tackComment",findCommentTaskEntity(activityInstance.getTaskId()));
-                map.putDateTime("startTime", activityInstance.getStartTime());
-                map.putDateTime("endTime", activityInstance.getEndTime());
-                maps.add(map);
-            }
+            List<NotNullMap> maps = historicActivityInstanceList.stream().map(activityInstance -> {
+                return new NotNullMap() {{
+                    putString("activityName", activityInstance.getActivityName());
+                    putString("processInstanceId", activityInstance.getProcessInstanceId());
+                    putString("processDefinitionId", activityInstance.getProcessDefinitionId());
+                    put("tackComment", findCommentTaskEntity(activityInstance.getTaskId()));
+                    putDateTime("startTime", activityInstance.getStartTime());
+                    putDateTime("endTime", activityInstance.getEndTime());
+                }};
+            }).collect(Collectors.toList());
             result = RestResult.result(RespCode.CODE_0.getValue(),null,maps);
         } catch (Exception e) {
             log.error("获取历史任务失败:",e);
             result = RestResult.result(RespCode.CODE_2.getValue(),"获取历史任务失败");
         }
-
         return result;
     }
 
