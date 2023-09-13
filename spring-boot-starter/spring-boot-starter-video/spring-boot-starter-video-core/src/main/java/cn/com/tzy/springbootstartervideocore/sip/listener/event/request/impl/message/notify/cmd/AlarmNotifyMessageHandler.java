@@ -95,6 +95,7 @@ public class AlarmNotifyMessageHandler extends SipResponseEvent implements Messa
                         DeviceMobilePositionVo mobilePosition = new DeviceMobilePositionVo();
                         mobilePosition.setCreateTime(new Date());
                         mobilePosition.setDeviceId(deviceAlarmVo.getDeviceId());
+                        mobilePosition.setChannelId(channelId);
                         mobilePosition.setTime(deviceAlarmVo.getAlarmTime());
                         mobilePosition.setLongitude(deviceAlarmVo.getLongitude());
                         mobilePosition.setLatitude(deviceAlarmVo.getLatitude());

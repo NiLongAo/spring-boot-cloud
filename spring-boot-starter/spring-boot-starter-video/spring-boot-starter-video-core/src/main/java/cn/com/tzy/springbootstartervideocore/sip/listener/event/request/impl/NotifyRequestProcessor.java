@@ -226,6 +226,7 @@ public class NotifyRequestProcessor extends AbstractSipRequestEvent implements S
             //设备移动信息
             DeviceMobilePositionVo deviceMobilePositionVo = DeviceMobilePositionVo.builder()
                     .deviceId(deviceId)
+                    .channelId(channel)
                     .deviceName(deviceVo.getName())
                     .time(deviceAlarmVo.getAlarmTime())
                     .latitude(deviceAlarmVo.getLatitude())
