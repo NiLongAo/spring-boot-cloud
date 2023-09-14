@@ -180,8 +180,7 @@ public abstract class BaseWorkflowService implements WorkflowService {
     public RestResult<?> starProcess(StartProcessModel model) {
         String processDefineId = model.getProcessDefineKey();
         //找到流程定义
-        ProcessDefinition definition = Optional.ofNullable(
-                getProcessEngine().getRepositoryService()
+        ProcessDefinition definition = Optional.ofNullable(getProcessEngine().getRepositoryService()
                         .createProcessDefinitionQuery()
                         .processDefinitionTenantId(TenantContextHolder.getTenantId().toString())
                         .processDefinitionKey(processDefineId)
@@ -203,7 +202,7 @@ public abstract class BaseWorkflowService implements WorkflowService {
         //1.找到当前流程的任务节点。
         getProcessEngine().getRuntimeService().setProcessInstanceName(processInstance.getProcessInstanceId(),model.getName());
         //2.若任务处理人与申请人一致，则自动完成任务，直接进入下一步
-        //如请假申请为流程的第一步，则此任务自动完成
+        //3.如请假申请为流程的第一步，则此任务自动完成
         if (StringUtils.isNotBlank(model.getUserId())) {
             addCommand(processInstance.getId(),null,model.getUserId(),model.getComment());
             List<Task> list = getProcessEngine().getTaskService().createTaskQuery().processInstanceId(processInstance.getId()).active().list();
@@ -461,23 +460,17 @@ public abstract class BaseWorkflowService implements WorkflowService {
 
         // list里的第二条代表上一个任务
         HistoricTaskInstance lastTask = htiList.get(1);
-
         // list里第一条代表当前任务
         HistoricTaskInstance curTask = htiList.get(0);
-
         // 当前节点的executionId
         String curExecutionId = curTask.getExecutionId();
-
-
         // 上个节点的taskId
         String lastTaskId = lastTask.getId();
         // 上个节点的executionId
         String lastExecutionId = lastTask.getExecutionId();
-
         if (null == lastTaskId) {
             throw new WorkflowException("LAST TASK IS NULL");
         }
-
         String processDefinitionId = lastTask.getProcessDefinitionId();
         BpmnModel bpmnModel = getProcessEngine().getRepositoryService().getBpmnModel(processDefinitionId);
 
