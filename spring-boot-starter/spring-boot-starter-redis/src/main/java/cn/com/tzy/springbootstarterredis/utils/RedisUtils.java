@@ -64,10 +64,9 @@ public class RedisUtils {
      */
     public static boolean hasKey(String key) {
         try {
-            return redisTemplate.hasKey(key);
+            return Boolean.TRUE.equals(redisTemplate.hasKey(key));
         } catch (Exception e) {
             log.error(e);
-            e.printStackTrace();
             return false;
         }
     }

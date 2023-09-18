@@ -78,6 +78,7 @@ public class MediaServerServiceImpl extends ServiceImpl<MediaServerMapper, Media
         }
         MediaServerVo vo = MediaServerConvert.INSTANCE.convert(mediaServer);
         zlmService.zlmOffline(vo);
+        RedisService.getSsrcConfigManager().del(vo.getId());
         RedisService.getMediaServerManager().removeCount(vo.getId());
         baseMapper.deleteById(mediaServer.getId());
         return RestResult.result(RespCode.CODE_0.getValue(),"移除成功");

@@ -31,15 +31,15 @@ public class SsrcConfigManager {
         SipConfigProperties deviceSipConfig = sipServer.getSipConfigProperties();
         String ssrcPrefix = deviceSipConfig.getDomain().substring(3, 8);
         String redisKey = String.format("%s%s:%s",SSRC_CONFIG_INFO_PREFIX,videoProperties.getServerId(),mediaServerId);
+        if (hasMediaServerSSRC(mediaServerId)) {
+            RedisUtils.del(redisKey);
+        }
         List<String> ssrcList = new ArrayList<>();
         for (int i = 1; i < MAX_STREAM_COUNT; i++) {
             String ssrc = String.format("%s%04d", ssrcPrefix, i);
             if (null == usedSet || !usedSet.contains(ssrc)) {
                 ssrcList.add(ssrc);
             }
-        }
-        if (RedisUtils.sGetSetSize(redisKey) != null) {
-            RedisUtils.del(redisKey);
         }
         RedisUtils.sSet(redisKey, ssrcList.toArray());
     }
@@ -107,7 +107,19 @@ public class SsrcConfigManager {
      */
     public boolean hasMediaServerSSRC(String mediaServerId) {
         String redisKey = String.format("%s%s:%s",SSRC_CONFIG_INFO_PREFIX,videoProperties.getServerId(),mediaServerId);
-        return RedisUtils.sGet(redisKey) != null;
+        return RedisUtils.hasKey(redisKey);
+    }
+
+    /**
+     * 删除缓存
+     *
+     * @param mediaServerId 流媒体服务ID
+     */
+    public void del(String mediaServerId) {
+        String redisKey = String.format("%s%s:%s",SSRC_CONFIG_INFO_PREFIX,videoProperties.getServerId(),mediaServerId);
+        if (hasMediaServerSSRC(mediaServerId)) {
+            RedisUtils.del(redisKey);
+        }
     }
 
     /**

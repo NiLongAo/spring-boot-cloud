@@ -88,7 +88,9 @@ public class ZlmService {
         //修改信息
         mediaServerVoService.updateById(mediaServerVo);
         //存储ZLM的ssrc信息
-        ssrcConfigManager.initMediaServerSSRC(mediaServerVo.getId(),null);
+        if(ssrcConfigManager.hasMediaServerSSRC(mediaServerVo.getId())){
+            ssrcConfigManager.initMediaServerSSRC(mediaServerVo.getId(),null);
+        }
         //是否自动zlm配置文件
         if(mediaServerVo.getAutoConfig() == ConstEnum.Flag.YES.getValue()){
             //重启时直接关闭全部留
@@ -156,7 +158,9 @@ public class ZlmService {
             if(zlmConfig != null && zlmConfig.getCode() == 0){
                 log.info("[zlm心跳到期]：{}验证后zlm仍在线，请检查zlm是否可以正常向服务发送心跳", mediaServerVo.getId());
                 //在线
-                ssrcConfigManager.initMediaServerSSRC(mediaServerVo.getId(),null);
+                if(ssrcConfigManager.hasMediaServerSSRC(mediaServerVo.getId())){
+                    ssrcConfigManager.initMediaServerSSRC(mediaServerVo.getId(),null);
+                }
                 mediaServerManager.clearRTPServer(mediaServerVo);
             }else {
                 //离线
