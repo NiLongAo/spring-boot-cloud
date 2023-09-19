@@ -10,15 +10,17 @@
 
     <groupId>cn.com.tzy</groupId>
     <artifactId>spring-boot-cloud</artifactId>
-    <version>1.0.0</version>
+    <version>${cloud.version}</version>
     <name>spring-boot-cloud</name>
     <description>spring-boot-cloud</description>
     <packaging>pom</packaging>
 
     <properties>
+        <cloud.version>1.0.0</cloud.version>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring-cloud.version>Hoxton.SR9</spring-cloud.version>
+        <spring-cloud-dependencies.version>2.2.6.RELEASE</spring-cloud-dependencies.version>
         <spring-cloud-bootstrap.version>3.0.3</spring-cloud-bootstrap.version>
         <ip2region.version>1.7.2</ip2region.version>
         <mysql.version>8.0.16</mysql.version>
@@ -127,7 +129,7 @@
             <dependency>
                 <groupId>com.alibaba.cloud</groupId>
                 <artifactId>spring-cloud-alibaba-dependencies</artifactId>
-                <version>2.2.6.RELEASE</version>
+                <version>${spring-cloud-dependencies.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
