@@ -88,7 +88,13 @@ public interface MediaHookServiceFeign {
     NotNullMap onRtpServerTimeout(@RequestBody OnRtpServerTimeoutHookVo param);
 
 
-
+    /**
+     * 录制mp4完成后通知事件
+     * @param param
+     * @return
+     */
+    @RequestMapping(value =ZLMediaKitConstant.MEDIA_HOOK_ON_RECORD_MP4,method = RequestMethod.POST)
+    NotNullMap onRecordMp4(@RequestBody OnRecordMp4HookVo param);
 
 
 }

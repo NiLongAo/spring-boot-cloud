@@ -95,7 +95,15 @@ public class MediaHookService {
     public NotNullMap onRtpServerTimeout(OnRtpServerTimeoutHookVo param){
         return mediaHookServiceFeign.onRtpServerTimeout(param);
     }
-    
-    
-    
+
+    /**
+     * 录制mp4完成后通知事件
+     * @param param
+     * @return
+     */
+    public NotNullMap onRecordMp4(OnRecordMp4HookVo param){
+        return mediaHookServiceFeign.onRecordMp4(param);
+    }
+
+
 }
