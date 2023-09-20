@@ -531,4 +531,9 @@ public class MediaHookServer {
         });
         return new NotNullMap(){{putInteger("code",0);putString("msg","success");}};
     }
+
+    public NotNullMap onRecordMp4(OnRecordMp4HookVo hookVo) {
+        log.info("[ZLM HOOK] 录像回调参数：{}->({})", hookVo.getMediaServerId(),JSONUtil.toJsonStr(hookVo));
+        return new NotNullMap(){{putInteger("code",0);putString("msg","success");}};
+    }
 }
