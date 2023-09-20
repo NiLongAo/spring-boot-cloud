@@ -259,10 +259,17 @@ public class DeviceChannel extends LongIdEntity {
     private String streamId;
 
     /**
-     * 是否含有音频
+     * 是否开启录像
+     */
+    @TableField(value = "has_record")
+    @ApiModelProperty(value="是否开启录像")
+    private Integer hasRecord;
+
+    /**
+     * 是否开启音频
      */
     @TableField(value = "has_audio")
-    @ApiModelProperty(value="是否含有音频")
+    @ApiModelProperty(value="是否开启音频")
     private Integer hasAudio;
 
     /**

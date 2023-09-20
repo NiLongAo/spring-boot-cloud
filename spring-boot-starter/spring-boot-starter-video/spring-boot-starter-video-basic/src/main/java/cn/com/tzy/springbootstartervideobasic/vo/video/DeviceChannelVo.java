@@ -4,6 +4,7 @@ import cn.com.tzy.springbootcomm.common.bean.LongIdEntity;
 import cn.com.tzy.springbootcomm.common.enumcom.ConstEnum;
 import cn.com.tzy.springbootstartervideobasic.enums.GbIdConstant;
 import cn.com.tzy.springbootstartervideobasic.utils.Coordtransform;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -182,10 +183,14 @@ public class DeviceChannelVo extends LongIdEntity {
     private String streamId;
 
     /**
-     * 是否含有音频
+     * 是否开启录像
+     */
+    private Integer hasRecord;
+
+    /**
+     * 是否开启音频
      */
     private Integer hasAudio;
-
     /**
      * 标记通道的类型，0->国标通道 1->直播流通道 2->业务分组/虚拟组织/行政区划
      */

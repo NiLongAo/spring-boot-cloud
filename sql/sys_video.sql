@@ -39,24 +39,6 @@ CREATE TABLE video_device (
     UNIQUE KEY idx_device_id (device_id)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8  ROW_FORMAT = DYNAMIC COMMENT ='设备信息';
 
-CREATE TABLE video_device_alarm (
-    id                  bigint unsigned not null auto_increment COMMENT '主键id',
-    device_id           varchar(50)  NOT NULL COMMENT '设备的国标编号',
-    channel_id          varchar(50)  NOT NULL COMMENT '通道的国标编号',
-    alarm_priority      tinyint(4)  NOT NULL COMMENT '报警级别, 1为一级警情, 2为二级警情, 3为三级警情, 4为四级警情',
-    alarm_method        tinyint(4)  DEFAULT NULL COMMENT '报警方式 , 1为电话报警, 2为设备报警, 3为短信报警, 4为 GPS报警, 5为视频报警, 6为设备故障报警,7其他报警;可以为直接组合如12为电话报警或 设备报警-',
-    alarm_time          datetime  NOT NULL COMMENT '报警时间',
-    alarm_description   varchar(255)  DEFAULT NULL COMMENT '报警内容描述',
-    longitude           double DEFAULT NULL COMMENT '经度',
-    latitude            double DEFAULT NULL COMMENT '纬度',
-    alarm_type          tinyint(4)  DEFAULT NULL COMMENT '报警类型 报警方式为2时， 1-视频丢失报警 2-设备防拆报警 3-存储设备磁盘满报警 4-设备高温报警 5-设备低温报警， 报警方式为5时,取值如下，1-人工视频报警 2-运动目标检测报警 3-遗留物检测报警 4-物体移除检测报警 5-绊线检测报警  6-入侵检测报警 7-逆行检测报警 8-徘徊检测报警 9-流量统计报警 10-密度检测报警 11-视频异常检测报警 12-快速移动报警 报警方式为6时,取值下， 1-存储设备磁盘故障报警 2-存储设备风扇故障报警' ,
-    create_user_id      bigint unsigned comment '创建人编号',
-    create_time         datetime  NOT NULL COMMENT '创建时间',
-    update_user_id      bigint unsigned comment '修改人编号',
-    update_time         datetime  NOT NULL COMMENT '更新时间',
-    PRIMARY KEY (id) USING BTREE
-) ENGINE = InnoDB DEFAULT CHARSET = utf8  ROW_FORMAT = DYNAMIC COMMENT ='报警信息' ;
-
 CREATE TABLE video_device_channel (
     id                  bigint unsigned not null auto_increment COMMENT '主键id',
     parent_id           varchar(50)  DEFAULT NULL COMMENT '父级id',
@@ -91,7 +73,8 @@ CREATE TABLE video_device_channel (
     latitude_wgs84      double DEFAULT 0 COMMENT '纬度 WGS84',
     sub_count           int unsigned DEFAULT '0' COMMENT '子设备数',
     stream_id           varchar(255)  DEFAULT NULL COMMENT '流唯一编号，存在表示正在直播',
-    has_audio           tinyint(4) DEFAULT 0 COMMENT '是否含有音频',
+    has_audio           tinyint(4) DEFAULT 0 COMMENT '是否开启音频',
+    has_record          tinyint(4) DEFAULT 0 COMMENT '是否开启录像',
     channel_type        tinyint(4) DEFAULT 0 COMMENT '标记通道的类型，0->国标通道 1->直播流通道 2->业务分组/虚拟组织/行政区划',
     business_group_id   varchar(50)  DEFAULT NULL COMMENT '业务分组',
     gps_time            datetime  DEFAULT NULL COMMENT 'GPS的更新时间',
@@ -102,6 +85,25 @@ CREATE TABLE video_device_channel (
     PRIMARY KEY (id),
     UNIQUE KEY idx_channel_id (channel_id)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8  ROW_FORMAT = DYNAMIC COMMENT ='通道信息';
+
+
+CREATE TABLE video_device_alarm (
+    id                  bigint unsigned not null auto_increment COMMENT '主键id',
+    device_id           varchar(50)  NOT NULL COMMENT '设备的国标编号',
+    channel_id          varchar(50)  NOT NULL COMMENT '通道的国标编号',
+    alarm_priority      tinyint(4)  NOT NULL COMMENT '报警级别, 1为一级警情, 2为二级警情, 3为三级警情, 4为四级警情',
+    alarm_method        tinyint(4)  DEFAULT NULL COMMENT '报警方式 , 1为电话报警, 2为设备报警, 3为短信报警, 4为 GPS报警, 5为视频报警, 6为设备故障报警,7其他报警;可以为直接组合如12为电话报警或 设备报警-',
+    alarm_time          datetime  NOT NULL COMMENT '报警时间',
+    alarm_description   varchar(255)  DEFAULT NULL COMMENT '报警内容描述',
+    longitude           double DEFAULT NULL COMMENT '经度',
+    latitude            double DEFAULT NULL COMMENT '纬度',
+    alarm_type          tinyint(4)  DEFAULT NULL COMMENT '报警类型 报警方式为2时， 1-视频丢失报警 2-设备防拆报警 3-存储设备磁盘满报警 4-设备高温报警 5-设备低温报警， 报警方式为5时,取值如下，1-人工视频报警 2-运动目标检测报警 3-遗留物检测报警 4-物体移除检测报警 5-绊线检测报警  6-入侵检测报警 7-逆行检测报警 8-徘徊检测报警 9-流量统计报警 10-密度检测报警 11-视频异常检测报警 12-快速移动报警 报警方式为6时,取值下， 1-存储设备磁盘故障报警 2-存储设备风扇故障报警' ,
+    create_user_id      bigint unsigned comment '创建人编号',
+    create_time         datetime  NOT NULL COMMENT '创建时间',
+    update_user_id      bigint unsigned comment '修改人编号',
+    update_time         datetime  NOT NULL COMMENT '更新时间',
+    PRIMARY KEY (id) USING BTREE
+) ENGINE = InnoDB DEFAULT CHARSET = utf8  ROW_FORMAT = DYNAMIC COMMENT ='报警信息' ;
 
 CREATE TABLE video_device_mobile_position (
     id                  bigint unsigned not null auto_increment COMMENT '主键id',

@@ -179,6 +179,7 @@ public class MediaHookServer {
             DeviceChannelVo deviceChannelVo = deviceChannelVoService.findDeviceIdChannelId(ssrcTransaction.getDeviceId(), ssrcTransaction.getChannelId());
             if(deviceChannelVo !=null){
                 map.put("enable_audio", deviceChannelVo.getHasAudio() == ConstEnum.Flag.YES.getValue());
+                map.put("enable_mp4", deviceChannelVo.getHasRecord() == ConstEnum.Flag.YES.getValue());
             }
             // 如果是录像下载就设置视频间隔十秒
             if(ssrcTransaction.getType() == VideoStreamType.download){

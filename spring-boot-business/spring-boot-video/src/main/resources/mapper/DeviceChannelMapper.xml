@@ -37,6 +37,7 @@
     <result column="sub_count" property="subCount" />
     <result column="stream_id" property="streamId" />
     <result column="has_audio" property="hasAudio" />
+    <result column="has_record" property="hasRecord" />
     <result column="channel_type" property="channelType" />
     <result column="business_group_id" property="businessGroupId" />
     <result column="gps_time" property="gpsTime" />
@@ -50,7 +51,7 @@
     block, address, parental, safety_way, register_way, cert_num, certifiable, err_code, 
     end_time, secrecy, ip_address, port, `password`, ptz_type, ptz_type_text, `status`, 
     longitude, latitude, longitude_gcj02, latitude_gcj02, longitude_wgs84, latitude_wgs84, 
-    sub_count, stream_id, has_audio, channel_type, business_group_id, gps_time, create_user_id, 
+    sub_count, stream_id, has_audio,has_record, channel_type, business_group_id, gps_time, create_user_id,
     create_time, update_user_id, update_time
   </sql>
 
