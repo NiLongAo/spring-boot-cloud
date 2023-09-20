@@ -10,13 +10,12 @@
 
     <groupId>cn.com.tzy</groupId>
     <artifactId>spring-boot-cloud</artifactId>
-    <version>${cloud.version}</version>
+    <version>1.0.0</version>
     <name>spring-boot-cloud</name>
     <description>spring-boot-cloud</description>
     <packaging>pom</packaging>
 
     <properties>
-        <cloud.version>1.0.0</cloud.version>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring-cloud.version>Hoxton.SR9</spring-cloud.version>
