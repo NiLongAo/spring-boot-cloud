@@ -104,12 +104,12 @@ public class ConstEnum {
         /**
          * 静态文件路径
          */
-        USER_IMAGE_PATH(1, "用户图像路径","/image/user/%s/%s.%s"),
-        EXPERIMENT_TEMPLATE_VIDEO_PATH(2, "模板任务视频路径","/video/experiment_template/%s/%s.%s"),
-        TEACHING_TASK_VIDEO_PATH(3, "课程任务视频路径","/video/teaching_task/%s/%s.%s"),
-        IMAGE_RICH_TEXT_PATH(4, "富文本图片","/images/rich_text/%s/%s.%s"),
-        HTML_RICH_TEXT_PATH(5, "HTML富文本地址","/html/rich_text/%s/%s.%s"),
-        FILE_EXPORT_PATH(6, "导出文件","/file/export/%s/%s.%s"),
+        USER_IMAGE_PATH(1, "用户图像路径","/image/user/%s"),
+        EXPERIMENT_TEMPLATE_VIDEO_PATH(2, "模板任务视频路径","/video/experiment_template/%s"),
+        TEACHING_TASK_VIDEO_PATH(3, "课程任务视频路径","/video/teaching_task/%s"),
+        IMAGE_RICH_TEXT_PATH(4, "富文本图片","/images/rich_text/%s"),
+        HTML_RICH_TEXT_PATH(5, "HTML富文本地址","/html/rich_text/%s"),
+        FILE_EXPORT_PATH(6, "导出文件","/file/export/%s"),
         ;
         private final int type;
         private final String name;

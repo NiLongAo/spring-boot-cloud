@@ -8,7 +8,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.netflix.ribbon.RibbonClients;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
-@EnableFeignClients(basePackages = {"cn.com.tzy.springbootfeignsso.api"}) //开启feign
+@EnableFeignClients(basePackages = {"cn.com.tzy.springbootfeignsso.api","cn.com.tzy.springbootfeignbean.api"}) //开启feign
 @EnableDiscoveryClient //开启nacos服务站注册发现
 @SpringBootApplication(exclude={DataSourceAutoConfiguration.class})
 @RibbonClients(defaultConfiguration = MyRibbonConfig.class)

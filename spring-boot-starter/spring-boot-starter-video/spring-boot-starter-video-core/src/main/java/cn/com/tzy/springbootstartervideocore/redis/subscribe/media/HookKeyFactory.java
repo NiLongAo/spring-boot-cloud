@@ -36,19 +36,26 @@ public class HookKeyFactory {
         return new HookKey(HookType.on_server_keepalive,BeanUtil.beanToMap(build));
     }
 
+    public static HookKey onRecordMp4(String mediaServerId) {
+        RecordMp4Content build = RecordMp4Content.builder().mediaServerId(mediaServerId).build();
+        return new HookKey(HookType.on_record_mp4,BeanUtil.beanToMap(build));
+    }
+
     public static Map<String,Object> buildContent(MediaHookVo vo){
         Map<String, Object> hookResponse = BeanUtil.beanToMap(vo.getHookVo());
         Content content = null;
         if(vo.getType() == HookType.on_stream_changed){
-             content = BeanUtil.toBean(hookResponse, StreamChangedContent.class);
+            content = BeanUtil.toBean(hookResponse, StreamChangedContent.class);
         }else if(vo.getType() == HookType.on_rtp_server_timeout){
             content = BeanUtil.toBean(hookResponse, RtpServerTimeoutContent.class);
         }else if(vo.getType() == HookType.on_server_started){
             content = BeanUtil.toBean(hookResponse, ServerStartedContent.class);
         }else if(vo.getType() == HookType.on_server_keepalive){
             content = BeanUtil.toBean(hookResponse, ServerKeepaliveContent.class);
+        }else if(vo.getType() == HookType.on_record_mp4){
+            content = BeanUtil.toBean(hookResponse, RecordMp4Content.class);
         }
-        if(content == null){
+        if( content == null ){
             return null;
         }
         return BeanUtil.beanToMap(content);
@@ -76,6 +83,12 @@ public class HookKeyFactory {
     @Data
     @Builder
     public static class ServerKeepaliveContent extends Content{
+        private String mediaServerId;
+    }
+
+    @Data
+    @Builder
+    public static class RecordMp4Content extends Content{
         private String mediaServerId;
     }
 

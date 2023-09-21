@@ -39,7 +39,7 @@ public class UpLoadController extends ApiController {
 
     @ResponseBody
     @PostMapping(value = "/upload.htm")
-    public RestResult<?> upload(@RequestParam("type") Integer type,@RequestParam (required = false) Boolean isBuildName, @RequestParam("file")MultipartFile file) throws Exception {
+    public RestResult<?> upload(@RequestParam("type") Integer type,@RequestParam (name = "isBuildName",required = false) Boolean isBuildName,@RequestParam("file")MultipartFile file) throws Exception {
         Long userId = JwtUtils.getUserId();
         String url = ConstEnum.StaticPath.getUrl(type);
         if(StringUtils.isEmpty(url)){
@@ -49,18 +49,30 @@ public class UpLoadController extends ApiController {
             return RestResult.result(RespCode.CODE_2.getValue(),"未获取到文件信息");
         }
         String[] split = Objects.requireNonNull(file.getOriginalFilename()).split("\\.");
-        String suffix = split[split.length - 1];
         String fileName =UUID.randomUUID().toString();
         if(isBuildName != null && isBuildName){
             fileName = userId+"/"+split[0];
         }
-        String format = String.format(url, DateFormatUtils.format(new Date(), Constant.DATE_FORMAT), fileName, suffix);
-        minioUtils.putObject(BUCKETNAME,format,file);
-        Map<String,String> map = new HashMap();
+        String format = minioUtils.upload(BUCKETNAME, String.format(url, DateFormatUtils.format(new Date(), Constant.DATE_FORMAT)), fileName, file);
+        Map<String,String> map =new HashMap<>();
         map.put("path",format);
         map.put("fullPath",appConfig.findStaticPath(format));
         return RestResult.result(RespCode.CODE_0.getValue(),"上传成功",map);
     }
+
+    @ResponseBody
+    @PostMapping(value = "/bucket_upload.htm")
+    public RestResult<?> bucketUpload(@RequestParam(value = "bucketName",required = false) String bucketName, @RequestParam("path") String path,@RequestParam("fileName") String fileName, @RequestParam("file")MultipartFile file
+    ) throws Exception {
+        String format = minioUtils.upload(bucketName,path, fileName, file);
+        Map<String,String> map = new HashMap<>();
+        map.put("path",format);
+        map.put("fullPath",appConfig.findStaticPath(format));
+        return RestResult.result(RespCode.CODE_0.getValue(),"上传成功",map);
+    }
+
+
+
 
     @ResponseBody
     @PostMapping(value = "/delete.htm")

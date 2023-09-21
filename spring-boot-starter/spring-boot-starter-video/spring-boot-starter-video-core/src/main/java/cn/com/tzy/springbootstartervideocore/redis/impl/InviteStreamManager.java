@@ -204,6 +204,12 @@ public class InviteStreamManager {
         return getInviteInfo(type, deviceId, channelId, null,null);
     }
 
+    /**
+     * 流规则Id目前规则
+     * 实时播放 流Id规则 国标编号+通道编号
+     * 历史播放 流Id规则 国标编号+通道编号+开始时间戳+结束时间戳
+     * 下载 流Id规则 ssrc 的16进制 取前8位
+     */
     public InviteInfo getInviteInfoByStream(VideoStreamType type, String stream) {
         return getInviteInfo(type, null, null, stream,null);
     }

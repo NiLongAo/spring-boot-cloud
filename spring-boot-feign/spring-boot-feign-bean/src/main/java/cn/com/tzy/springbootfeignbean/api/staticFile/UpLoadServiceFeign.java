@@ -19,6 +19,9 @@ public interface UpLoadServiceFeign {
     @RequestMapping(value = "/upload.htm", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,method = RequestMethod.POST)
     RestResult<?> upload(@RequestParam("type") Integer type,@RequestParam("isBuildName") Boolean isBuildName, @RequestPart("file") MultipartFile file);
 
+    @RequestMapping(value = "/bucket_upload.htm", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,method = RequestMethod.POST)
+    RestResult<?> bucketUpload(@RequestParam(value = "bucketName") String bucketName, @RequestParam("path") String path, @RequestParam("fileName") String fileName, @RequestParam("file")MultipartFile file);
+
     @RequestMapping(value = "/delete.htm", consumes = MediaType.APPLICATION_JSON_VALUE,method = RequestMethod.POST)
     RestResult<?> delete(@RequestParam("name") String name);
 

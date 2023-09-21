@@ -37,7 +37,7 @@ public class OnRecordMp4HookVo extends HookVo{
      */
     private String folder;
     /**
-     * 开始录制时间戳
+     * 开始录制时间戳(秒)
      */
     private Integer start_time;
     /**

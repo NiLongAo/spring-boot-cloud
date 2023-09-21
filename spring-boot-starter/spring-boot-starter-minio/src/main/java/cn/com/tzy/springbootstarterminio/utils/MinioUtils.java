@@ -20,8 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -536,5 +535,17 @@ public class MinioUtils {
         }
         long end = System.currentTimeMillis();
         log.info("下载 {} 文件，总耗时为：{} ms", objectName, end - start);
+    }
+
+
+    public String upload(String bucketName,String path,String fileName,MultipartFile file){
+        if(StringUtils.isEmpty(bucketName)){
+            bucketName = minioProperties.getBucketName();
+        }
+        String[] split = Objects.requireNonNull(file.getOriginalFilename()).split("\\.");
+        String suffix = split[split.length - 1];
+        String format = String.format("%s/%s.%s",path, fileName, suffix);
+        putObject(bucketName,format,file);
+        return format;
     }
 }

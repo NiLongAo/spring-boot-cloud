@@ -12,10 +12,7 @@ import cn.com.tzy.springbootstartervideobasic.exception.SsrcTransactionNotFoundE
 import cn.com.tzy.springbootstartervideobasic.vo.media.*;
 import cn.com.tzy.springbootstartervideobasic.vo.sip.SendRtp;
 import cn.com.tzy.springbootstartervideobasic.vo.video.*;
-import cn.com.tzy.springbootstartervideocore.demo.InviteInfo;
-import cn.com.tzy.springbootstartervideocore.demo.MediaHookVo;
-import cn.com.tzy.springbootstartervideocore.demo.SsrcTransaction;
-import cn.com.tzy.springbootstartervideocore.demo.VideoRestResult;
+import cn.com.tzy.springbootstartervideocore.demo.*;
 import cn.com.tzy.springbootstartervideocore.media.client.ZlmService;
 import cn.com.tzy.springbootstartervideocore.properties.VideoProperties;
 import cn.com.tzy.springbootstartervideocore.redis.RedisService;
@@ -32,6 +29,7 @@ import cn.com.tzy.springbootstartervideocore.sip.SipServer;
 import cn.com.tzy.springbootstartervideocore.sip.cmd.SIPCommander;
 import cn.com.tzy.springbootstartervideocore.sip.cmd.SIPCommanderForPlatform;
 import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
@@ -48,11 +46,10 @@ import org.springframework.web.context.request.async.DeferredResult;
 import javax.annotation.Resource;
 import javax.sip.InvalidArgumentException;
 import javax.sip.SipException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.ParseException;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 流媒体服务回调事件
@@ -128,6 +125,7 @@ public class MediaHookServer {
      */
     public NotNullMap onPublish(OnPublishHookVo hookVo){
         MediaServerVoService mediaServerVoService = VideoService.getMediaServerService();
+        StreamProxyVoService streamProxyService = VideoService.getStreamProxyService();
         DeviceChannelVoService deviceChannelVoService = VideoService.getDeviceChannelService();
         SsrcTransactionManager ssrcTransactionManager = RedisService.getSsrcTransactionManager();
         TokenService tokenService = MediaService.getTokenService();
@@ -139,7 +137,6 @@ public class MediaHookServer {
         map.putInteger("code",0);
         map.putString("msg","success");
         map.putInteger("mp4_max_second",0);
-        String streamId =  hookVo.getStream();
         if(!"rtp".equals(hookVo.getApp())){
             //是否开启鉴权
             if(videoProperties.getPushAuthority()){
@@ -159,8 +156,14 @@ public class MediaHookServer {
                     return  new NotNullMap(){{putInteger("code",401);putString("msg","Unauthorized");}};
                 }
             }
-            map.put("enable_audio",true);
-            map.put("enable_mp4",videoProperties.getRecordPushLive());
+            StreamProxyVo appStream = streamProxyService.findAppStream(hookVo.getApp(), hookVo.getStream());
+            if(appStream != null){
+                map.put("enable_audio", Objects.equals(appStream.getEnableAudio(),ConstEnum.Flag.YES.getValue()));
+                map.put("enable_mp4",Objects.equals(appStream.getEnableMp4(),ConstEnum.Flag.YES.getValue()));
+            }else {
+                map.put("enable_audio",true);
+                map.put("enable_mp4",videoProperties.getRecordPushLive());
+            }
         }else {
             map.put("enable_mp4",videoProperties.getRecordSip());
             // 替换流地址
@@ -168,13 +171,13 @@ public class MediaHookServer {
                 String ssrc = String.format("%010d", Long.parseLong(hookVo.getStream(), 16));;
                 InviteInfo inviteInfo = inviteStreamManager.getInviteInfoBySSRC(ssrc);
                 if (inviteInfo != null) {
-                    map.put("stream_replace",inviteInfo.getStream());
-                    streamId = inviteInfo.getStream();
                     log.info("[ZLM HOOK]推流鉴权 stream: {} 替换为 {}", hookVo.getStream(), inviteInfo.getStream());
+                    map.put("stream_replace",inviteInfo.getStream());
+                    hookVo.setStream(inviteInfo.getStream());
                 }
             }
         }
-        SsrcTransaction ssrcTransaction = ssrcTransactionManager.getParamOne(null, null, null,streamId,null);
+        SsrcTransaction ssrcTransaction = ssrcTransactionManager.getParamOne(null, null, null,hookVo.getStream(),null);
         if(ssrcTransaction != null){
             DeviceChannelVo deviceChannelVo = deviceChannelVoService.findDeviceIdChannelId(ssrcTransaction.getDeviceId(), ssrcTransaction.getChannelId());
             if(deviceChannelVo !=null){
@@ -534,6 +537,11 @@ public class MediaHookServer {
 
     public NotNullMap onRecordMp4(OnRecordMp4HookVo hookVo) {
         log.info("[ZLM HOOK] 录像回调参数：{}->({})", hookVo.getMediaServerId(),JSONUtil.toJsonStr(hookVo));
+        MediaServerVoService mediaServerVoService = VideoService.getMediaServerService();
+        ThreadUtil.execute(()->{
+            MediaServerVo mediaServerVo = mediaServerVoService.findOnLineMediaServerId(hookVo.getMediaServerId());
+            mediaHookSubscribe.sendNotify(MediaHookVo.builder().type(HookType.on_record_mp4).onAll(ConstEnum.Flag.NO.getValue()).mediaServerVo(mediaServerVo).hookVo(hookVo).build());
+        });
         return new NotNullMap(){{putInteger("code",0);putString("msg","success");}};
     }
 }

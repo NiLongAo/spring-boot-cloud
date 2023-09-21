@@ -2,14 +2,17 @@ package cn.com.tzy.springbootstartervideocore.media.client;
 
 import cn.com.tzy.springbootcomm.common.enumcom.ConstEnum;
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
+import cn.com.tzy.springbootcomm.constant.NotNullMap;
 import cn.com.tzy.springbootstartervideobasic.common.VideoConstant;
 import cn.com.tzy.springbootstartervideobasic.enums.OriginType;
+import cn.com.tzy.springbootstartervideobasic.enums.VideoStreamType;
 import cn.com.tzy.springbootstartervideobasic.exception.SsrcTransactionNotFoundException;
 import cn.com.tzy.springbootstartervideobasic.vo.media.*;
 import cn.com.tzy.springbootstartervideobasic.vo.sip.SendRtp;
 import cn.com.tzy.springbootstartervideobasic.vo.video.*;
 import cn.com.tzy.springbootstartervideocore.demo.InviteInfo;
 import cn.com.tzy.springbootstartervideocore.demo.SsrcTransaction;
+import cn.com.tzy.springbootstartervideocore.demo.StreamInfo;
 import cn.com.tzy.springbootstartervideocore.media.hook.MediaHookServer;
 import cn.com.tzy.springbootstartervideocore.pool.task.DynamicTask;
 import cn.com.tzy.springbootstartervideocore.redis.RedisService;
@@ -23,6 +26,8 @@ import cn.com.tzy.springbootstartervideocore.sip.SipServer;
 import cn.com.tzy.springbootstartervideocore.sip.cmd.SIPCommander;
 import cn.com.tzy.springbootstartervideocore.sip.cmd.SIPCommanderForPlatform;
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.json.JSONUtil;
@@ -32,6 +37,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import javax.annotation.Resource;
 import javax.sip.InvalidArgumentException;
 import javax.sip.SipException;
+import java.math.RoundingMode;
 import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -105,6 +111,8 @@ public class ZlmService {
         zlmKeepaliveTask(mediaServerVo,false);
         //定时检测流上下线操作并相关处理
         zlmStreamChanged(mediaServerVo);
+        //订阅录像事件
+        zlmRecordMp4(mediaServerVo,false);
         //上线操作
         zlmOnline(mediaServerVo);
     }
@@ -171,7 +179,22 @@ public class ZlmService {
         });
     }
 
-
+    /**
+     * 上线订阅流媒体录像
+     */
+    private void zlmRecordMp4(MediaServerVo mediaServerVo,boolean isDel){
+        MediaHookSubscribe mediaHookSubscribe = MediaService.getMediaHookSubscribe();
+        HookKey hookKey = HookKeyFactory.onRecordMp4(mediaServerVo.getId());
+        if(isDel){
+            mediaHookSubscribe.removeSubscribe(hookKey);
+            zlmKeepalive(mediaServerVo, true);
+        }else {
+            HookKey key = mediaHookSubscribe.getHookKey(hookKey);
+            if(key == null){
+                mediaHookSubscribe.addSubscribe(hookKey, this::onRecordMp4);
+            }
+        }
+    }
     /**
      * zlm上线需操作的
      */
@@ -247,7 +270,9 @@ public class ZlmService {
         SendRtpManager sendRtpManager = RedisService.getSendRtpManager();
         SsrcTransactionManager ssrcTransactionManager = RedisService.getSsrcTransactionManager();
         //取消zlm在线认证
-        zlmKeepaliveTask(mediaServerVo,false);
+        zlmKeepaliveTask(mediaServerVo,true);
+        //取消订阅录像事件
+        zlmRecordMp4(mediaServerVo,true);
         //删除无人观看自动移除的流
         List<StreamProxyVo> streamProxyVoList = streamProxyVoService.findAutoRemoveMediaServerIdList(mediaServerVo.getId());
         if(! streamProxyVoList.isEmpty()){
@@ -348,5 +373,48 @@ public class ZlmService {
             }
 
         }
+    }
+
+    /**
+     * 处理 录像相关功能
+     * @param mediaServerVo
+     * @param vo
+     */
+    private void onRecordMp4(MediaServerVo mediaServerVo,HookVo vo){
+        OnRecordMp4HookVo hookVo = (OnRecordMp4HookVo) vo;
+        InviteStreamManager inviteStreamManager = RedisService.getInviteStreamManager();
+        UpLoadService upLoadService = VideoService.getUpLoadService();
+        InviteInfo inviteInfo = inviteStreamManager.getInviteInfoByStream(null, hookVo.getStream());
+        if(inviteInfo == null ||  inviteInfo.getStreamInfo() == null){
+            log.error("[ZLM HOOK] 录像回调时 未获取 InviteInfo {}：({})",hookVo.getMediaServerId(),JSONUtil.toJsonStr(hookVo));
+            return ;
+        }else if(inviteInfo.getType()== VideoStreamType.audio){
+            //音频流暂不支持存储
+            return;
+        }
+        if(upLoadService == null){
+            log.error("未获取到上传接口实现");
+            return;
+        }
+        String path , fileName =null;
+        Date startTime , entTime= null;
+        int len = hookVo.getTime_len().setScale(0, RoundingMode.UP).intValue();
+        if(inviteInfo.getType() == VideoStreamType.play){
+            startTime = new Date(hookVo.getStart_time() * 1000L);
+            entTime = DateUtil.offsetSecond(startTime,len);
+            path = String.format("/play/%s/%s",hookVo.getApp(),hookVo.getStream());
+            fileName = String.format("%s_%s",startTime.getTime(),entTime.getTime());
+        }else {
+            //录像播放 与 录像下载
+            StreamInfo streamInfo = inviteInfo.getStreamInfo();
+            startTime = DateUtil.parse(streamInfo.getStartTime());
+            entTime = DateUtil.parse(streamInfo.getEndTime());
+            int i = Integer.parseInt(hookVo.getFile_name().substring(hookVo.getFile_name().lastIndexOf("-") + 1, hookVo.getFile_name().lastIndexOf(".")));
+            DateTime startFileTime = DateUtil.offsetSecond(startTime, (i + 1) * len);
+            path = String.format("/record/%s/%s/%s",hookVo.getApp(),hookVo.getStream(),String.format("%s_%s",startTime.getTime(),entTime.getTime()));
+            fileName = String.format("%s_%s",startFileTime.getTime(),DateUtil.offsetSecond(startFileTime,len));
+        }
+        log.info("文件上传：filePath:{},upLoadPath:{},fileName:{}",hookVo.getFile_path(),path,fileName);
+        upLoadService.send(hookVo.getFile_path(),path,fileName);
     }
 }
