@@ -4,7 +4,7 @@ import cn.com.tzy.springbootbean.mapper.sql.MenuMapper;
 import cn.com.tzy.springbootbean.mapper.sql.PrivilegeMapper;
 import cn.com.tzy.springbootbean.mapper.sql.UserSetMapper;
 import cn.com.tzy.springbootbean.service.api.MenuService;
-import cn.com.tzy.springbootcomm.common.bean.Tree;
+import cn.com.tzy.springbootcomm.common.bean.TreeNode;
 import cn.com.tzy.springbootentity.common.info.VueRoutes;
 import cn.com.tzy.springbootcomm.common.enumcom.ConstEnum;
 import cn.com.tzy.springbootcomm.common.vo.PageResult;
@@ -45,7 +45,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         // parentId,id,menuName
         List<Map> menuList = baseMapper.findAvailableTree(isShowPrivilege,menuName);
 
-        List<Tree<Map>> tree = TreeUtil.getTree(menuList, "parentId", "id", null);
+        List<TreeNode<Map>> treeNode = TreeUtil.getTree(menuList, "parentId", "id", null);
         //顶级树
         Map map = null;
         if(StringUtils.isNotEmpty(topName)){
@@ -55,7 +55,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
             map.put("menuName",topName);
         }
         //转换树结构
-        List<Map> maps = AppUtils.transformationTree(map,"children",tree);
+        List<Map> maps = AppUtils.transformationTree(map,"children", treeNode);
         return RestResult.result(RespCode.CODE_0.getValue(), null,maps);
     }
 
@@ -75,26 +75,26 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         menuList = new ArrayList<>(menuMap.values());
         menuList = menuList.stream().sorted((k,v)-> Integer.parseInt(k.get("num").toString()) - Integer.parseInt(v.get("num").toString())).collect(Collectors.toList());
         //查询操作结束...
-        List<Tree<Map>> tree = TreeUtil.getTree(menuList, "parentId", "id", null);
+        List<TreeNode<Map>> treeNode = TreeUtil.getTree(menuList, "parentId", "id", null);
         List<String> stringList = new ArrayList<>();
         //所有子集菜单编号，以及转换树
-        selectLastId(stringList,tree);
+        selectLastId(stringList, treeNode);
         List<Map> privileges = privilegeMapper.findMenuList(stringList);
-        Map<String,List<Tree<Map>>> map = new HashMap<>();
+        Map<String,List<TreeNode<Map>>> map = new HashMap<>();
         privileges.forEach(obj ->{
-            List<Tree<Map>> parentMap = map.get(obj.get("parentId"));
+            List<TreeNode<Map>> parentMap = map.get(obj.get("parentId"));
             if(parentMap == null){
                 parentMap = new ArrayList<>();
                 map.put(obj.get("parentId").toString(),parentMap);
             }
-            Tree<Map> mapTree = new Tree<>();
-            mapTree.setT(obj);
-            mapTree.setIsChildren(false);
-            parentMap.add(mapTree);
+            TreeNode<Map> mapTreeNode = new TreeNode<>();
+            mapTreeNode.setT(obj);
+            mapTreeNode.setIsChildren(false);
+            parentMap.add(mapTreeNode);
         });
-        addLastTree(tree,map);
+        addLastTree(treeNode,map);
         //转换树结构
-        List<Map> maps = AppUtils.transformationTree("children",tree);
+        List<Map> maps = AppUtils.transformationTree("children", treeNode);
         return PageResult.result(RespCode.CODE_0.getValue(),menuList.size(),null,maps);
     }
 
@@ -103,27 +103,27 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     public RestResult<?> menuPrivilegeTree () {
         //所有菜单
         List<Map> menuList = baseMapper.findMenuPrivilegeTree();
-        List<Tree<Map>> tree = TreeUtil.getTree(menuList, "parentId", "v", null);
+        List<TreeNode<Map>> treeNode = TreeUtil.getTree(menuList, "parentId", "v", null);
         List<String> stringList = new ArrayList<>();
         //所有子集菜单编号，以及转换树
-        selectLastV(stringList,tree);
+        selectLastV(stringList, treeNode);
         List<Map> privileges = privilegeMapper.findMenuPrivilegeTree(stringList);
-        Map<String,List<Tree<Map>>> map = new HashMap<>();
+        Map<String,List<TreeNode<Map>>> map = new HashMap<>();
         privileges.forEach(obj ->{
-            List<Tree<Map>> parentMap = map.get(obj.get("parentId"));
+            List<TreeNode<Map>> parentMap = map.get(obj.get("parentId"));
             if(parentMap == null){
                 parentMap = new ArrayList<>();
                 map.put(obj.get("parentId").toString(),parentMap);
             }
-            Tree<Map> mapTree = new Tree<>();
-            mapTree.setT(obj);
-            mapTree.setIsChildren(false);
-            parentMap.add(mapTree);
+            TreeNode<Map> mapTreeNode = new TreeNode<>();
+            mapTreeNode.setT(obj);
+            mapTreeNode.setIsChildren(false);
+            parentMap.add(mapTreeNode);
         });
-        addLastTreeV(tree,map);
+        addLastTreeV(treeNode,map);
 
         //转换树结构
-        List<Map> maps = AppUtils.transformationTree("children",tree);
+        List<Map> maps = AppUtils.transformationTree("children", treeNode);
         return RestResult.result(RespCode.CODE_0.getValue(),null,maps);
     }
 
@@ -227,9 +227,9 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         }
         //排序
         userMenu.sort(Comparator.comparing(Menu::getNum));
-        List<Tree<Menu>> tree = TreeUtil.getTree(new ArrayList<>(userMenu), Menu::getParentId, Menu::getId, null);
+        List<TreeNode<Menu>> treeNode = TreeUtil.getTree(new ArrayList<>(userMenu), Menu::getParentId, Menu::getId, null);
         //树转vue路由
-        List<VueRoutes> routes = findRoutes(null,tree);
+        List<VueRoutes> routes = findRoutes(null, treeNode);
         return RestResult.result(RespCode.CODE_0.getValue(), null, routes);
     }
 
@@ -238,10 +238,10 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         //所有菜单
         List<Map> menuList = baseMapper.findMenuPrivilegeTree();
         Map<String, Map> mapMap = menuList.stream().collect(Collectors.toMap(s -> String.valueOf(s.get("v")), s -> s,throwingMerger(),LinkedHashMap::new));
-        List<Tree<Map>> tree = TreeUtil.getTree(menuList, "parentId", "v", null);
+        List<TreeNode<Map>> treeNode = TreeUtil.getTree(menuList, "parentId", "v", null);
         List<String> stringList = new ArrayList<>();
         //所有子集菜单编号，以及转换树
-        selectLastV(stringList,tree);
+        selectLastV(stringList, treeNode);
         List<Map> privileges = privilegeMapper.findTenantMenuPrivilegeTree(tenantId,stringList);
         Set<String> parentIdSet = privileges.stream().map(v -> String.valueOf(v.get("parentId"))).collect(Collectors.toSet());
         Set<String> newMenuIdSet = new HashSet<>();
@@ -256,8 +256,8 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         newMenuList.addAll(mapMap.values());
         newMenuList.addAll(privileges);
         //转换树结构
-        tree = TreeUtil.getTree(newMenuList, "parentId", "v", null);
-        List<Map> maps = AppUtils.transformationTree("children",tree);
+        treeNode = TreeUtil.getTree(newMenuList, "parentId", "v", null);
+        List<Map> maps = AppUtils.transformationTree("children", treeNode);
         return RestResult.result(RespCode.CODE_0.getValue(),null,maps);
     }
 
@@ -266,9 +266,9 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
      *
      * @return
      */
-    private List<VueRoutes> findRoutes(VueRoutes routes,List<Tree<Menu>> tree) {
+    private List<VueRoutes> findRoutes(VueRoutes routes,List<TreeNode<Menu>> treeNode) {
         List<VueRoutes> routesList = new ArrayList<>();
-        tree.forEach(obj -> {
+        treeNode.forEach(obj -> {
             VueRoutes vueRoutes = new VueRoutes();
             if (obj.getChildren().size() > 0) {
                 List<VueRoutes> routes1 = findRoutes(routes,obj.getChildren());
@@ -303,11 +303,11 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
 
     /**
      * 获取最后子集编号
-     * @param tree
+     * @param treeNode
      * @return
      */
-    private void selectLastId(List<String> stringList,List<Tree<Map>> tree){
-        tree.forEach(obj->{
+    private void selectLastId(List<String> stringList,List<TreeNode<Map>> treeNode){
+        treeNode.forEach(obj->{
             if(obj.getIsChildren()){
                 selectLastId(stringList,obj.getChildren());
             }else {
@@ -319,11 +319,11 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
 
     /**
      * 获取最后子集编号
-     * @param tree
+     * @param treeNode
      * @return
      */
-    private void selectLastV(List<String> stringList,List<Tree<Map>> tree){
-        tree.forEach(obj->{
+    private void selectLastV(List<String> stringList,List<TreeNode<Map>> treeNode){
+        treeNode.forEach(obj->{
             if(obj.getIsChildren()){
                 selectLastV(stringList,obj.getChildren());
             }else {
@@ -346,36 +346,36 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
 
     /**
      * 给树添加子元素
-     * @param tree
+     * @param treeNode
      * @return
      */
-    private void addLastTree(List<Tree<Map>> tree, Map<String,List<Tree<Map>>> map){
-        tree.forEach(obj->{
+    private void addLastTree(List<TreeNode<Map>> treeNode, Map<String,List<TreeNode<Map>>> map){
+        treeNode.forEach(obj->{
             if(obj.getIsChildren()){
                 addLastTree(obj.getChildren(),map);
             }
-            List<Tree<Map>> treeList = map.get(obj.getT().get("id"));
-            if(treeList != null && treeList.size() > 0){
+            List<TreeNode<Map>> treeNodeList = map.get(obj.getT().get("id"));
+            if(treeNodeList != null && treeNodeList.size() > 0){
                 obj.setIsChildren(true);
-                obj.setChildren(treeList);
+                obj.setChildren(treeNodeList);
             }
         });
     }
 
     /**
      * 给树添加子元素
-     * @param tree
+     * @param treeNode
      * @return
      */
-    private void addLastTreeV(List<Tree<Map>> tree, Map<String,List<Tree<Map>>> map){
-        tree.forEach(obj->{
+    private void addLastTreeV(List<TreeNode<Map>> treeNode, Map<String,List<TreeNode<Map>>> map){
+        treeNode.forEach(obj->{
             if(obj.getIsChildren()){
                 addLastTreeV(obj.getChildren(),map);
             }
-            List<Tree<Map>> treeList = map.get(obj.getT().get("v"));
-            if(treeList != null && treeList.size() > 0){
+            List<TreeNode<Map>> treeNodeList = map.get(obj.getT().get("v"));
+            if(treeNodeList != null && treeNodeList.size() > 0){
                 obj.setIsChildren(true);
-                obj.setChildren(treeList);
+                obj.setChildren(treeNodeList);
             }
         });
     }

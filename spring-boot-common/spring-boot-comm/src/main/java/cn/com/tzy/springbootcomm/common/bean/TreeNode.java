@@ -14,7 +14,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Tree<T> {
+public class TreeNode<T> {
 
     /**
      * 本级
@@ -27,13 +27,13 @@ public class Tree<T> {
     /**
      * 子级
      */
-    private List<Tree<T>> children = new ArrayList<>();
+    private List<TreeNode<T>> children = new ArrayList<>();
 
-    public void addChild(Tree<T> child) {
+    public void addChild(TreeNode<T> child) {
         children.add(child);
     }
 
-    public List<Tree<T>> getChildren() {
+    public List<TreeNode<T>> getChildren() {
         return children;
     }
 }

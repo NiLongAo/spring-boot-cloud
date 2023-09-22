@@ -1,8 +1,8 @@
 package cn.com.tzy.springbootcomm.utils;
 
 
+import cn.com.tzy.springbootcomm.common.bean.TreeNode;
 import cn.com.tzy.springbootcomm.constant.Constant;
-import cn.com.tzy.springbootcomm.common.bean.Tree;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.JsonParser;
@@ -176,28 +176,28 @@ public class AppUtils {
     }
 
 
-    public static <T> List<Map> transformationTree(T map,String childrenName,List<Tree<T>> tree){
-        List<Tree<T>> treeList = new ArrayList<>();
+    public static <T> List<Map> transformationTree(T map,String childrenName,List<TreeNode<T>> treeNode){
+        List<TreeNode<T>> treeNodeList = new ArrayList<>();
         if(map != null){
-            Tree<T> mapTree = new Tree<>();
-            if(tree.size()> 0){
-                mapTree.setIsChildren(true);
+            TreeNode<T> mapTreeNode = new TreeNode<>();
+            if(treeNode.size()> 0){
+                mapTreeNode.setIsChildren(true);
             }else {
-                mapTree.setIsChildren(false);
+                mapTreeNode.setIsChildren(false);
             }
-            mapTree.setT(map);
-            mapTree.setChildren(tree);
-            treeList.add(mapTree);
+            mapTreeNode.setT(map);
+            mapTreeNode.setChildren(treeNode);
+            treeNodeList.add(mapTreeNode);
         }else {
-            treeList.addAll(tree);
+            treeNodeList.addAll(treeNode);
         }
-       return transformationTree(childrenName,treeList);
+       return transformationTree(childrenName, treeNodeList);
     }
 
     //树处理
-    public static <T> List<Map> transformationTree(String childrenName,List<Tree<T>> tree){
+    public static <T> List<Map> transformationTree(String childrenName,List<TreeNode<T>> treeNode){
         List<Map> areaInitList = new ArrayList<>();
-        tree.forEach(obj->{
+        treeNode.forEach(obj->{
             Map map = decodeJson2(encodeJson2(obj.getT()), Map.class);
             if(obj.getIsChildren()){
                 List<Map> areaInfoList = transformationTree(childrenName,obj.getChildren());

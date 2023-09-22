@@ -1,22 +1,25 @@
 package cn.com.tzy.springbootentity.utils;
 
 
-import cn.com.tzy.springbootcomm.common.bean.Tree;
+import cn.com.tzy.springbootcomm.common.bean.TreeNode;
 import cn.com.tzy.springbootcomm.utils.AppUtils;
 import cn.com.tzy.springbootcomm.interfaces.SFunction;
 import cn.com.tzy.springbootentity.dome.bean.Menu;
+import cn.hutool.core.lang.tree.Tree;
 import cn.hutool.json.JSONUtil;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Log4j2
 public class TreeUtil {
 
-    public static <T> List<Tree<T>> getTree(List<T> originalList, SFunction<T,?> parentKey, SFunction<T,?> idKey, Object parentValue){
+    public static <T> List<TreeNode<T>> getTree(List<T> originalList, SFunction<T,?> parentKey, SFunction<T,?> idKey, Object parentValue){
        return getTree(originalList, AppUtils.getFieldName(parentKey),AppUtils.getFieldName(idKey),parentValue);
     }
 
@@ -28,7 +31,7 @@ public class TreeUtil {
      * @param parentValue 查询哪个父级开始
      * @return 组装后的集合
      */
-    public static <T> List<Tree<T>> getTree(List<T> originalList, String parentKey, String idKey, Object parentValue){
+    public static <T> List<TreeNode<T>> getTree(List<T> originalList, String parentKey, String idKey, Object parentValue){
         if(parentValue instanceof Collection){
             return getTreeV2(originalList,parentKey,idKey,(Collection<Object>)parentValue);
         }else {
@@ -39,53 +42,41 @@ public class TreeUtil {
     /**
      * 树结构优化，降低时间复杂度，
      */
-    public static <T> List<Tree<T>> getTreeV2(Collection<T> originalList, String parentKey, String idKey, Collection<Object> parentValueList) {
-        Map<String, Tree<T>> parentNodeMap = new LinkedHashMap<>();
-        try {
-            Map<String, Tree<T>> nodeMap = new LinkedHashMap<>();
-            for (T t : originalList) {
-                String id = BeanUtils.getProperty(t, idKey);
-                String parentId = BeanUtils.getProperty(t, parentKey);
-                //兼容 父节点不规范 可能为 null 或者 ''
-                if(StringUtils.isEmpty(parentId) && !parentValueList.contains(parentId)){
-                    parentId = parentId == null?"":null;
-                }
-                if(parentValueList.contains(parentId)){
-                    parentNodeMap.put(id,new Tree<>(t, false, new ArrayList<>()));
-                }else {
-                    nodeMap.put(id,new Tree<>(t, false, new ArrayList<>()));
-                }
+    public static <T> List<TreeNode<T>> getTreeV2(Collection<T> originalList, String parentKey, String idKey, Collection<Object> parentValueList) {
+        List<TreeNode<T>> parentNodeMap = new ArrayList<>();
+        Map<String, TreeNode<T>> collect = originalList.stream().collect(Collectors.toMap(o -> {
+            try {
+                return BeanUtils.getProperty(o, idKey);
+            } catch (Exception e) {
+                throw new RuntimeException("解析值错误：", e);
             }
+        }, o -> new TreeNode<>(o, false, new ArrayList<>())));
+        try {
             for (T node : originalList) {
                 String id = BeanUtils.getProperty(node, idKey);
                 String parentId = BeanUtils.getProperty(node, parentKey);
+                TreeNode<T> treeNode = collect.get(id);
                 if(parentValueList.contains(parentId)){
+                    parentNodeMap.add(treeNode);
                     continue;
                 }
-                Tree<T> parentTree = nodeMap.get(parentId);
-                if(parentTree == null){
-                    parentTree = parentNodeMap.get(parentId);
-                }
-                if(parentTree == null){
+                TreeNode<T> parentTreeNode = collect.get(parentId);
+                if(parentTreeNode == null){
                     continue;
                 }
-                Tree<T> nodeTree = nodeMap.get(id);
-                if(nodeTree == null){
-                    continue;
-                }
-                parentTree.setIsChildren(true);
-                parentTree.addChild(nodeTree);
+                parentTreeNode.setIsChildren(true);
+                parentTreeNode.addChild(treeNode);
             }
         } catch (Exception e) {
             throw new RuntimeException("解析值错误：", e);
         }
-        return new ArrayList<>(parentNodeMap.values());
+        return parentNodeMap;
     }
 
 //    public static void main(String[] args) throws Exception {
 //        List<Menu> menuList = new ArrayList<>();
 //        String parentId = null;
-//        for (int i = 1; i <=10000; i++) {
+//        for (int i = 1; i <=100000; i++) {
 //            if(i%10==0){
 //                parentId = String.format("%s",i/2);
 //            }
@@ -96,10 +87,9 @@ public class TreeUtil {
 //            menuList.add(menu);
 //        }
 //        Instant now = Instant.now();
-//        List<Tree<Menu>> tree = getTree(menuList, Menu::getParentId, Menu::getId, null);
+//        List<TreeNode<Menu>> tree = getTree(menuList, Menu::getParentId, Menu::getId, null);
 //        Instant now1 = Instant.now();
 //        System.out.println(now1.toEpochMilli() - now.toEpochMilli());
-//        System.out.println(JSONUtil.toJsonStr(tree));
 //    }
 
 }

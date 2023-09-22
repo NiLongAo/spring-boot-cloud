@@ -1,6 +1,6 @@
 package cn.com.tzy.springbootvideo.service.impl;
 
-import cn.com.tzy.springbootcomm.common.bean.Tree;
+import cn.com.tzy.springbootcomm.common.bean.TreeNode;
 import cn.com.tzy.springbootcomm.common.enumcom.ConstEnum;
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
@@ -68,8 +68,8 @@ public class PlatformCatalogServiceImpl extends ServiceImpl<PlatformCatalogMappe
                 .civilCode(null)
                 .businessGroupId(null)
                 .build());
-        List<Tree<PlatformCatalog>> tree =TreeUtil.getTree(platformCatalogs, PlatformCatalog::getParentId, PlatformCatalog::getId, null);
-        List<Map> mapList = AppUtils.transformationTree("children", tree);
+        List<TreeNode<PlatformCatalog>> treeNode =TreeUtil.getTree(platformCatalogs, PlatformCatalog::getParentId, PlatformCatalog::getId, null);
+        List<Map> mapList = AppUtils.transformationTree("children", treeNode);
         return RestResult.result(RespCode.CODE_0.getValue(),null,mapList);
     }
     @Override

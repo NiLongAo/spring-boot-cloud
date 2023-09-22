@@ -2,11 +2,11 @@ package cn.com.tzy.springbootbean.service.api.impl;
 
 import cn.com.tzy.springbootbean.mapper.sql.PositionMapper;
 import cn.com.tzy.springbootbean.service.api.PositionService;
+import cn.com.tzy.springbootcomm.common.bean.TreeNode;
 import cn.com.tzy.springbootcomm.common.enumcom.ConstEnum;
 import cn.com.tzy.springbootcomm.common.vo.PageResult;
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
-import cn.com.tzy.springbootcomm.common.bean.Tree;
 import cn.com.tzy.springbootcomm.constant.NotNullMap;
 import cn.com.tzy.springbootentity.dome.bean.Position;
 import cn.com.tzy.springbootentity.param.bean.PositionParam;
@@ -41,9 +41,9 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, Position> i
             findParent(map,onj);
         });
         pageResult = new ArrayList<>(map.values());
-        List<Tree<Position>> tree = TreeUtil.getTree(pageResult, Position::getParentId, Position::getId, null);
+        List<TreeNode<Position>> treeNode = TreeUtil.getTree(pageResult, Position::getParentId, Position::getId, null);
         //转换树结构
-        List<Map> maps = AppUtils.transformationTree("children",tree);
+        List<Map> maps = AppUtils.transformationTree("children", treeNode);
         return PageResult.result(RespCode.CODE_0.getValue(), pageResult.size(), null, maps);
     }
 
@@ -97,7 +97,7 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, Position> i
     @Override
     public RestResult<?> tree(String topName, String positionName) {
         List<Map> positionList = baseMapper.findAvailableTree(positionName);
-        List<Tree<Map>> tree = TreeUtil.getTree(positionList, "parentId", "id", null);
+        List<TreeNode<Map>> treeNode = TreeUtil.getTree(positionList, "parentId", "id", null);
         //顶级树
         Map map = null;
         if(StringUtils.isNotEmpty(topName)){
@@ -108,7 +108,7 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, Position> i
             map.put("positionName",topName);
         }
         //转换树结构
-        List<Map> maps = AppUtils.transformationTree(map,"children",tree);
+        List<Map> maps = AppUtils.transformationTree(map,"children", treeNode);
         return RestResult.result(RespCode.CODE_0.getValue(),  null, maps);
     }
 

@@ -1,6 +1,6 @@
 package cn.com.tzy.springbootvideo.service.impl;
 
-import cn.com.tzy.springbootcomm.common.bean.Tree;
+import cn.com.tzy.springbootcomm.common.bean.TreeNode;
 import cn.com.tzy.springbootcomm.common.vo.PageResult;
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
@@ -87,13 +87,13 @@ public class DeviceChannelServiceImpl extends ServiceImpl<DeviceChannelMapper, D
         strings.add(sipInfoAll.getId());
         if(GbIdConstant.Type.TYPE_216.getValue() == deviceVo.getTreeType()){
             List<DeviceChannel> deviceChannelList = baseMapper.businessGroupList(param.deviceId,param.online,true);
-            List<Tree<DeviceChannel>> tree = TreeUtil.getTree(deviceChannelList, DeviceChannel::getCivilCode, DeviceChannel::getChannelId, strings);
-            List<Map> maps = AppUtils.transformationTree("children",tree);
+            List<TreeNode<DeviceChannel>> treeNode = TreeUtil.getTree(deviceChannelList, DeviceChannel::getCivilCode, DeviceChannel::getChannelId, strings);
+            List<Map> maps = AppUtils.transformationTree("children", treeNode);
             return PageResult.result(RespCode.CODE_0.getValue(),deviceChannelList.size(),null,maps);
         }else if(GbIdConstant.Type.TYPE_215.getValue() == deviceVo.getTreeType()){
             List<DeviceChannel> deviceChannelList = baseMapper.businessGroupList(param.deviceId,param.online,false);
-            List<Tree<DeviceChannel>> tree = TreeUtil.getTree(deviceChannelList, DeviceChannel::getParentId, DeviceChannel::getChannelId, strings);
-            List<Map> maps = AppUtils.transformationTree("children",tree);
+            List<TreeNode<DeviceChannel>> treeNode = TreeUtil.getTree(deviceChannelList, DeviceChannel::getParentId, DeviceChannel::getChannelId, strings);
+            List<Map> maps = AppUtils.transformationTree("children", treeNode);
             return PageResult.result(RespCode.CODE_0.getValue(),deviceChannelList.size(),null,maps);
         }else {
             return PageResult.result(RespCode.CODE_2.getValue(),"设备业务类型错误");
@@ -138,8 +138,8 @@ public class DeviceChannelServiceImpl extends ServiceImpl<DeviceChannelMapper, D
     @Override
     public RestResult<?> findTreeDeviceChannel() throws Exception {
         List<DeviceChannelTreeVo> tree = baseMapper.findTreeDeviceChannel();
-        List<Tree<DeviceChannelTreeVo>> dcTree = TreeUtil.getTree(tree, DeviceChannelTreeVo::getParentId, DeviceChannelTreeVo::getId, null);
-        List<Map> mapList = AppUtils.transformationTree("children", dcTree);
+        List<TreeNode<DeviceChannelTreeVo>> dcTreeNode = TreeUtil.getTree(tree, DeviceChannelTreeVo::getParentId, DeviceChannelTreeVo::getId, null);
+        List<Map> mapList = AppUtils.transformationTree("children", dcTreeNode);
         return RestResult.result(RespCode.CODE_0.getValue(),null,mapList);
     }
 

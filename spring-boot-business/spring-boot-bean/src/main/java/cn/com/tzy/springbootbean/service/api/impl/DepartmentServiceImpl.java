@@ -2,11 +2,11 @@ package cn.com.tzy.springbootbean.service.api.impl;
 
 import cn.com.tzy.springbootbean.mapper.sql.DepartmentMapper;
 import cn.com.tzy.springbootbean.service.api.DepartmentService;
+import cn.com.tzy.springbootcomm.common.bean.TreeNode;
 import cn.com.tzy.springbootcomm.common.enumcom.ConstEnum;
 import cn.com.tzy.springbootcomm.common.vo.PageResult;
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
-import cn.com.tzy.springbootcomm.common.bean.Tree;
 import cn.com.tzy.springbootcomm.constant.NotNullMap;
 import cn.com.tzy.springbootentity.dome.bean.Department;
 import cn.com.tzy.springbootentity.param.bean.DepartmentParam;
@@ -32,7 +32,7 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
     @Override
     public RestResult<?> tree(String topName, String departmentName) {
         List<Map> departmentList = baseMapper.findAvailableTree( departmentName);
-        List<Tree<Map>> tree = TreeUtil.getTree(departmentList, "parentId", "id", null);
+        List<TreeNode<Map>> treeNode = TreeUtil.getTree(departmentList, "parentId", "id", null);
         //顶级树
         Map map = null;
         if(StringUtils.isNotEmpty(topName)){
@@ -43,7 +43,7 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
             map.put("departmentName",topName);
         }
         //转换树结构
-        List<Map> maps = AppUtils.transformationTree(map,"children",tree);
+        List<Map> maps = AppUtils.transformationTree(map,"children", treeNode);
         return RestResult.result(RespCode.CODE_0.getValue(),  null, maps);
     }
 
@@ -79,9 +79,9 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
             findParent(map,onj);
         });
         pageResult = new ArrayList<>(map.values());
-        List<Tree<Department>> tree = TreeUtil.getTree(pageResult, Department::getParentId, Department::getId, null);
+        List<TreeNode<Department>> treeNode = TreeUtil.getTree(pageResult, Department::getParentId, Department::getId, null);
         //转换树结构
-        List<Map> maps = AppUtils.transformationTree("children",tree);
+        List<Map> maps = AppUtils.transformationTree("children", treeNode);
         return PageResult.result(RespCode.CODE_0.getValue(), pageResult.size(), null, maps);
     }
 
