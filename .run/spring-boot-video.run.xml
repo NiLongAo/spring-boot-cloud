@@ -39,11 +39,6 @@
               <option name="hostIp" value="0.0.0.0" />
               <option name="hostPort" value="14004" />
             </DockerPortBindingImpl>
-            <DockerPortBindingImpl>
-              <option name="containerPort" value="6081" />
-              <option name="hostIp" value="0.0.0.0" />
-              <option name="hostPort" value="6081" />
-            </DockerPortBindingImpl>
           </list>
         </option>
         <option name="sourceFilePath" value="spring-boot-business/spring-boot-video/Dockerfile" />

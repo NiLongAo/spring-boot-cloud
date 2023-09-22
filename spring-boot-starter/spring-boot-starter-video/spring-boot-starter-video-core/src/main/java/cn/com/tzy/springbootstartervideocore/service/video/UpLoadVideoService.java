@@ -1,6 +1,6 @@
 package cn.com.tzy.springbootstartervideocore.service.video;
 
-public interface UpLoadService {
+public interface UpLoadVideoService {
     /**
      * 文件上传
      * @param filePath 原文件路径

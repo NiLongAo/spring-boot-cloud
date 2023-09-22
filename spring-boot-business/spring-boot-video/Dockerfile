@@ -2,11 +2,11 @@ FROM anapsix/alpine-java:8_server-jre_unlimited
 MAINTAINER 18789432816@126.com
 # 同步时区
 ENV TZ=Asia/Shanghai
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-
-RUN mkdir -p /spring-boot-video/lib
-RUN mkdir -p /spring-boot-video/skywalking-agent-lib
-RUN mkdir -p /spring-boot-video/logs
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
+    echo $TZ > /etc/timezone &&\
+    mkdir -p /spring-boot-video/lib &&\
+    mkdir -p /spring-boot-video/skywalking-agent-lib &&\
+    mkdir -p /spring-boot-video/logs
 
 WORKDIR /spring-boot-video
 EXPOSE 8660

@@ -27,5 +27,5 @@ public class VideoService {
 
     public static DeviceAlarmVoService getDeviceAlarmService(){return SpringUtil.getBean(DeviceAlarmVoService.class);}
 
-    public static UpLoadService getUpLoadService(){return SpringUtil.getBean(UpLoadService.class);}
+    public static UpLoadVideoService getUpLoadService(){return SpringUtil.getBean(UpLoadVideoService.class);}
 }

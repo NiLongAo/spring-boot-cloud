@@ -2,7 +2,6 @@ package cn.com.tzy.springbootstartervideocore.media.client;
 
 import cn.com.tzy.springbootcomm.common.enumcom.ConstEnum;
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
-import cn.com.tzy.springbootcomm.constant.NotNullMap;
 import cn.com.tzy.springbootstartervideobasic.common.VideoConstant;
 import cn.com.tzy.springbootstartervideobasic.enums.OriginType;
 import cn.com.tzy.springbootstartervideobasic.enums.VideoStreamType;
@@ -25,14 +24,11 @@ import cn.com.tzy.springbootstartervideocore.service.video.*;
 import cn.com.tzy.springbootstartervideocore.sip.SipServer;
 import cn.com.tzy.springbootstartervideocore.sip.cmd.SIPCommander;
 import cn.com.tzy.springbootstartervideocore.sip.cmd.SIPCommanderForPlatform;
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.map.MapUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.json.JSONUtil;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.ObjectUtils;
 
 import javax.annotation.Resource;
 import javax.sip.InvalidArgumentException;
@@ -383,7 +379,7 @@ public class ZlmService {
     private void onRecordMp4(MediaServerVo mediaServerVo,HookVo vo){
         OnRecordMp4HookVo hookVo = (OnRecordMp4HookVo) vo;
         InviteStreamManager inviteStreamManager = RedisService.getInviteStreamManager();
-        UpLoadService upLoadService = VideoService.getUpLoadService();
+        UpLoadVideoService upLoadVideoService = VideoService.getUpLoadService();
         InviteInfo inviteInfo = inviteStreamManager.getInviteInfoByStream(null, hookVo.getStream());
         if(inviteInfo == null ||  inviteInfo.getStreamInfo() == null){
             log.error("[ZLM HOOK] 录像回调时 未获取 InviteInfo {}：({})",hookVo.getMediaServerId(),JSONUtil.toJsonStr(hookVo));
@@ -392,7 +388,7 @@ public class ZlmService {
             //音频流暂不支持存储
             return;
         }
-        if(upLoadService == null){
+        if(upLoadVideoService == null){
             log.error("未获取到上传接口实现");
             return;
         }
@@ -415,6 +411,6 @@ public class ZlmService {
             fileName = String.format("%s_%s",startFileTime.getTime(),DateUtil.offsetSecond(startFileTime,len));
         }
         log.info("文件上传：filePath:{},upLoadPath:{},fileName:{}",hookVo.getFile_path(),path,fileName);
-        upLoadService.send(hookVo.getFile_path(),path,fileName);
+        upLoadVideoService.send(hookVo.getFile_path(),path,fileName);
     }
 }
