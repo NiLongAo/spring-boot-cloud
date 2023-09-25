@@ -87,14 +87,9 @@ public class MinioUtils {
      */
     @SneakyThrows
     public boolean makeBucket(String bucketName) {
-        boolean flag = bucketExists(bucketName);
-        if (!flag) {
-            minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
-            setBucketPolicy(minioClient,bucketName,"read-write");
-            return true;
-        } else {
-            return false;
-        }
+        minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
+        setBucketPolicy(minioClient,bucketName,"read-write");
+        return true;
     }
 
     /**

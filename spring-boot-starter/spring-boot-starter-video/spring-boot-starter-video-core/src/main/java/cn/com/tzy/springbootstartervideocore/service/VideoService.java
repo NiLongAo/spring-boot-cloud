@@ -26,6 +26,4 @@ public class VideoService {
     public static DeviceMobilePositionVoService getDeviceMobilePositionService(){return SpringUtil.getBean(DeviceMobilePositionVoService.class);}
 
     public static DeviceAlarmVoService getDeviceAlarmService(){return SpringUtil.getBean(DeviceAlarmVoService.class);}
-
-    public static UpLoadVideoService getUpLoadService(){return SpringUtil.getBean(UpLoadVideoService.class);}
 }

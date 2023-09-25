@@ -523,7 +523,7 @@ public class MediaClient {
             putString("hook.on_server_keepalive",String.format("%s%s/%s", finalHookUrl,ZLMediaKitConstant.HOOK_URL_PREFIX,ZLMediaKitConstant.MEDIA_HOOK_ON_SERVER_KEEPALIVE));
             putString("hook.on_send_rtp_stopped",String.format("%s%s/%s", finalHookUrl,ZLMediaKitConstant.HOOK_URL_PREFIX,ZLMediaKitConstant.MEDIA_HOOK_ON_SEND_RTP_STOPPED));
             putString("hook.on_rtp_server_timeout",String.format("%s%s/%s", finalHookUrl,ZLMediaKitConstant.HOOK_URL_PREFIX,ZLMediaKitConstant.MEDIA_HOOK_ON_RTP_SERVER_TIMEOUT));
-            putString("hook.on_record_mp4",String.format("%s/%s/%s", finalHookUrl,ZLMediaKitConstant.HOOK_URL_PREFIX,ZLMediaKitConstant.MEDIA_HOOK_ON_RECORD_MP4));
+            putString("hook.on_record_mp4", mediaServerVo.getRecordAssistPort() <= 0 ? "" : String.format("http://127.0.0.1:%s/%s/%s",mediaServerVo.getRecordAssistPort(),ZLMediaKitConstant.HOOK_URL_PREFIX,ZLMediaKitConstant.MEDIA_HOOK_ON_RECORD_MP4));
             //事件触发http post超时时间
             putString("hook.timeout_sec","20");
             //断连续推延时，单位毫秒，置空使用配置文件默认值
