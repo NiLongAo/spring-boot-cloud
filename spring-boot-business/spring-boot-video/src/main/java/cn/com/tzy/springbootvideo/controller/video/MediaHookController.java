@@ -117,13 +117,4 @@ public class MediaHookController extends ApiController {
         return mediaHookServer.onRtpServerTimeout(param);
     }
 
-    /**
-     * 录制mp4完成后通知事件
-     * @param param
-     * @return
-     */
-    @PostMapping(ZLMediaKitConstant.MEDIA_HOOK_ON_RECORD_MP4)
-    public NotNullMap onRecordMp4(@RequestBody OnRecordMp4HookVo param){
-        return mediaHookServer.onRecordMp4(param);
-    }
 }

@@ -534,14 +534,4 @@ public class MediaHookServer {
         });
         return new NotNullMap(){{putInteger("code",0);putString("msg","success");}};
     }
-
-    public NotNullMap onRecordMp4(OnRecordMp4HookVo hookVo) {
-        log.info("[ZLM HOOK] 录像回调参数：{}->({})", hookVo.getMediaServerId(),JSONUtil.toJsonStr(hookVo));
-        MediaServerVoService mediaServerVoService = VideoService.getMediaServerService();
-        ThreadUtil.execute(()->{
-            MediaServerVo mediaServerVo = mediaServerVoService.findOnLineMediaServerId(hookVo.getMediaServerId());
-            mediaHookSubscribe.sendNotify(MediaHookVo.builder().type(HookType.on_record_mp4).onAll(ConstEnum.Flag.NO.getValue()).mediaServerVo(mediaServerVo).hookVo(hookVo).build());
-        });
-        return new NotNullMap(){{putInteger("code",0);putString("msg","success");}};
-    }
 }
