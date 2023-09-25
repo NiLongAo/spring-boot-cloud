@@ -46,7 +46,7 @@ seata:
       video-server-group: default #虚拟组和分组的映射
 sip:
   # 信令服务器ip 没有服务ip时取nacos中注册的ip
-  ip : 172.18.0.11
+  ip : 0.0.0.0
   # 信令服务器端口 6080
   port: 6082
   # 信令区域编号 4401020051
