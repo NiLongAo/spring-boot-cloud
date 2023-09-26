@@ -7,6 +7,8 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
+import org.springframework.amqp.support.converter.ContentTypeDelegatingMessageConverter;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.amqp.support.converter.SimpleMessageConverter;
 import org.springframework.beans.factory.ObjectProvider;
@@ -27,17 +29,14 @@ public class MQConfig<T> {
     private final ConnectionFactory connectionFactory;
     private final RabbitTemplate rabbitTemplate;
     private final List<AbstractMessageListener>  abstractMessageListenerList;
-    private final MessageConverter messageConverter;
 
     public MQConfig(ConnectionFactory connectionFactory,
                     RabbitTemplate rabbitTemplate,
-                    ObjectProvider<AbstractMessageListener> abstractMessageListeners,
-                    ObjectProvider<MessageConverter> messageConverters
+                    ObjectProvider<AbstractMessageListener> abstractMessageListeners
                     ){
         this.connectionFactory =connectionFactory;
         this.rabbitTemplate = rabbitTemplate;
         this.abstractMessageListenerList = abstractMessageListeners.stream().collect(Collectors.toList());
-        this.messageConverter = messageConverters.getIfAvailable();
     }
 
 
@@ -82,7 +81,11 @@ public class MQConfig<T> {
           }
         }
         tMqListener.setAbstractMessageListeners(map);
-        tMqListener.setMessageConverter(messageConverter);
+        ContentTypeDelegatingMessageConverter converter = new ContentTypeDelegatingMessageConverter();
+        converter.setDelegates(new HashMap<String, MessageConverter>(){{
+            put("application/json",new Jackson2JsonMessageConverter());
+        }});
+        tMqListener.setMessageConverter(converter);
         return tMqListener;
     }
 
