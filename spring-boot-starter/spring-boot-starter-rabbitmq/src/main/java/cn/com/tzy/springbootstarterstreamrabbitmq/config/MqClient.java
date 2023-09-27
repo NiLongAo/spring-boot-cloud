@@ -2,6 +2,7 @@ package cn.com.tzy.springbootstarterstreamrabbitmq.config;
 
 import lombok.extern.log4j.Log4j2;
 import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
@@ -13,15 +14,9 @@ public class MqClient {
 
     private final RabbitAdmin rabbitAdmin;
 
-    private final RabbitTemplate rabbitTemplate;
 
-    private final SimpleMessageListenerContainer simpleMessageListenerContainer;
-
-
-    public MqClient(RabbitAdmin rabbitAdmin, RabbitTemplate rabbitTemplate,SimpleMessageListenerContainer simpleMessageListenerContainer){
-        this.rabbitAdmin =rabbitAdmin;
-        this.rabbitTemplate =rabbitTemplate;
-        this.simpleMessageListenerContainer =simpleMessageListenerContainer;
+    public MqClient(ConnectionFactory connectionFactory){
+        this.rabbitAdmin =new RabbitAdmin(connectionFactory);
     }
 
     public Binding binding(String exchangeName,String routingKey,String queueName,String type,boolean isExchange){
@@ -79,7 +74,6 @@ public class MqClient {
         log.info("声明消息队列：{}",queue.getName());
         Binding with = BindingBuilder.bind(queue).to(directExchange).with(routingKey).noargs();
         rabbitAdmin.declareBinding(with);
-        simpleMessageListenerContainer.addQueues(queue);
         log.info("声明交换机与消息队列绑定关系,交换机：{},routingKey：{},消息队列：{}",directExchange.getName(),routingKey,queue.getName());
         return with;
     }
@@ -99,7 +93,6 @@ public class MqClient {
         log.info("声明消息队列：{}",queue.getName());
         Binding with = BindingBuilder.bind(queue).to(directExchange).with(routingKey).and(headerValues);
         rabbitAdmin.declareBinding(with);
-        simpleMessageListenerContainer.addQueues(queue);
         log.info("声明交换机与消息队列绑定关系,交换机：{},routingKey：{},消息队列：{}",directExchange.getName(),routingKey,queue.getName());
         return with;
     }
@@ -142,7 +135,7 @@ public class MqClient {
      * @param msg 消息主体
      */
     public void send(String exchangeName,String routingKey,Object msg){
-        rabbitTemplate.convertAndSend(exchangeName, routingKey, msg);
+        rabbitAdmin.getRabbitTemplate().convertAndSend(exchangeName, routingKey, msg);
     }
     /**
      * 发送延迟消息
@@ -153,7 +146,7 @@ public class MqClient {
      * @param expiration 延迟时间(毫秒)
      */
     public void sendDelay(String exchangeName,String queueName,Object msg,Integer expiration){
-        rabbitTemplate.convertAndSend(exchangeName, queueName, msg,message -> {
+        rabbitAdmin.getRabbitTemplate().convertAndSend(exchangeName, queueName, msg,message -> {
             message.getMessageProperties().setDelay(expiration);
             return message;
         });

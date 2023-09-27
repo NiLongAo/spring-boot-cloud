@@ -1,13 +1,16 @@
 package cn.com.tzy.springbootsms.config.rabbitmq;
 
 import cn.com.tzy.springbootcomm.common.mq.MqConstant;
-import cn.com.tzy.springbootstarterstreamrabbitmq.listenter.AbstractMessageListener;
 import com.rabbitmq.client.Channel;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.rabbit.annotation.*;
+import org.springframework.amqp.support.converter.ContentTypeDelegatingMessageConverter;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+import java.io.IOException;
 import java.util.HashMap;
 
 /**
@@ -15,17 +18,21 @@ import java.util.HashMap;
  */
 @Log4j2
 @Component
-public class DeadLetterReceiver extends AbstractMessageListener<HashMap<String,Object>> {
+@RabbitListener(bindings = {@QueueBinding(
+    exchange = @Exchange(value = MqConstant.DEAD_LETTER_EXCHANGE,durable = "true"),
+    value = @Queue(value = MqConstant.DEAD_LETTER_QUEUE,durable = "true"),
+    key = MqConstant.DEAD_LETTER_ROUTING_KEY
+)})
+public class DeadLetterReceiver {
 
-    @Resource
-    private MessageConverter messageConverter;
-
-    public DeadLetterReceiver() {
-        super(MqConstant.DEAD_LETTER_EXCHANGE,MqConstant.DEAD_LETTER_ROUTING_KEY,MqConstant.DEAD_LETTER_QUEUE);
-    }
-
-    @Override
-    public void onMessage(HashMap<String,Object>  message, Channel channel) {
+    @RabbitHandler
+    public void onMessage(Object  obj, Channel channel, Message message) throws IOException {
+        ContentTypeDelegatingMessageConverter converter = new ContentTypeDelegatingMessageConverter();
+        converter.setDelegates(new HashMap<String, MessageConverter>(){{
+            put("application/json",new Jackson2JsonMessageConverter());
+        }});
+        Object o1 = converter.fromMessage(message);
         log.info("死信队列[DeadLetterReceiver]接收到的消息为：MyAckReceiver  data:{}", message);
+        channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
     }
 }
