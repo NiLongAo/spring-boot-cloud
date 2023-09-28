@@ -46,6 +46,10 @@ public class VideoConstant {
      */
     public static final String PLATFORM_SEND_RTP_INFO_PREFIX = "VIDEO_PLATFORM_SEND_RTP_INFO";
     /**
+     * 录像上传缓存
+     */
+    public static final String VIDEO_RECORD_MP4_INFO = "VIDEO_RECORD_MP4_INFO";
+    /**
      * Invite播放相关key 播放 回放 下载
      */
     public static final String INVITE_PREFIX = "VMP_INVITE";

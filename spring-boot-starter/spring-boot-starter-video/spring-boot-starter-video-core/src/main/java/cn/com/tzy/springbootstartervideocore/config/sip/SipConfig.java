@@ -49,7 +49,7 @@ import org.springframework.context.annotation.Import;
 @Import({
         SipServer.class, DeferredResultHolder.class,
         ZlmService.class, MediaHookServer.class, MediaHookSubscribe.class,
-        PlatformRegisterManager.class, SendRtpManager.class, SipTransactionManager.class, SsrcConfigManager.class, SsrcTransactionManager.class, MediaServerManager.class, InviteStreamManager.class, CseqManager.class,RegisterServerManager.class, PlatformNotifySubscribeManager.class, CatalogDataManager.class,StreamChangedManager.class,
+        PlatformRegisterManager.class, SendRtpManager.class, SipTransactionManager.class, SsrcConfigManager.class, SsrcTransactionManager.class, MediaServerManager.class, InviteStreamManager.class, CseqManager.class,RegisterServerManager.class, PlatformNotifySubscribeManager.class, CatalogDataManager.class,StreamChangedManager.class,RecordMp4Manager.class,
         SipMessageHandle.class, SipRegisterHandle.class,
         MessageRequestProcessor.class,AckRequestProcessor.class, ByeRequestProcessor.class, CancelRequestProcessor.class, InfoRequestProcessor.class, InviteRequestProcessor.class, NotifyRequestProcessor.class, RegisterRequestProcessor.class, SubscribeRequestProcessor.class,
         ControlMessageHandler.class, DeviceControlQueryMessageHandler.class,

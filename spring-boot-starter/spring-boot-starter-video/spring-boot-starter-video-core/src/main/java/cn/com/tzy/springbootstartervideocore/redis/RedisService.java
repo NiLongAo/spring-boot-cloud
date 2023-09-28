@@ -21,5 +21,6 @@ public class RedisService {
     public static DeviceNotifySubscribeManager getDeviceNotifySubscribeManager(){return SpringUtil.getBean(DeviceNotifySubscribeManager.class);}
     public static PlatformNotifySubscribeManager getPlatformNotifySubscribeManager(){return SpringUtil.getBean(PlatformNotifySubscribeManager.class);}
     public static StreamChangedManager getStreamChangedManager(){return SpringUtil.getBean(StreamChangedManager.class);}
+    public static RecordMp4Manager getRecordMp4Manager(){return SpringUtil.getBean(RecordMp4Manager.class);}
 
 }

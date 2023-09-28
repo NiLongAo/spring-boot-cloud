@@ -31,7 +31,7 @@ public class SsrcConfigManager {
         SipConfigProperties deviceSipConfig = sipServer.getSipConfigProperties();
         String ssrcPrefix = deviceSipConfig.getDomain().substring(3, 8);
         String redisKey = String.format("%s%s:%s",SSRC_CONFIG_INFO_PREFIX,videoProperties.getServerId(),mediaServerId);
-        if (hasMediaServerSSRC(mediaServerId)) {
+        if (!hasMediaServerSSRC(mediaServerId)) {
             RedisUtils.del(redisKey);
         }
         List<String> ssrcList = new ArrayList<>();
@@ -117,7 +117,7 @@ public class SsrcConfigManager {
      */
     public void del(String mediaServerId) {
         String redisKey = String.format("%s%s:%s",SSRC_CONFIG_INFO_PREFIX,videoProperties.getServerId(),mediaServerId);
-        if (hasMediaServerSSRC(mediaServerId)) {
+        if (!hasMediaServerSSRC(mediaServerId)) {
             RedisUtils.del(redisKey);
         }
     }

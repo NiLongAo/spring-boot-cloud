@@ -137,6 +137,8 @@ public class MediaHookServer {
         map.putInteger("code",0);
         map.putString("msg","success");
         map.putInteger("mp4_max_second",0);
+        boolean enableAudio = false;
+        boolean enableMp4 = false;
         if(!"rtp".equals(hookVo.getApp())){
             //是否开启鉴权
             if(videoProperties.getPushAuthority()){
@@ -158,14 +160,14 @@ public class MediaHookServer {
             }
             StreamProxyVo appStream = streamProxyService.findAppStream(hookVo.getApp(), hookVo.getStream());
             if(appStream != null){
-                map.put("enable_audio", Objects.equals(appStream.getEnableAudio(),ConstEnum.Flag.YES.getValue()));
-                map.put("enable_mp4",Objects.equals(appStream.getEnableMp4(),ConstEnum.Flag.YES.getValue()));
+                enableAudio = Objects.equals(appStream.getEnableAudio(),ConstEnum.Flag.YES.getValue());
+                enableMp4 = Objects.equals(appStream.getEnableMp4(),ConstEnum.Flag.YES.getValue());
             }else {
-                map.put("enable_audio",true);
-                map.put("enable_mp4",videoProperties.getRecordPushLive());
+                enableAudio = true;
+                enableMp4 = videoProperties.getRecordPushLive();
             }
         }else {
-            map.put("enable_mp4",videoProperties.getRecordSip());
+            enableMp4 = videoProperties.getRecordSip();
             // 替换流地址
             if(mediaServerVo.getRtpEnable() == ConstEnum.Flag.NO.getValue()){
                 String ssrc = String.format("%010d", Long.parseLong(hookVo.getStream(), 16));;
@@ -181,15 +183,19 @@ public class MediaHookServer {
         if(ssrcTransaction != null){
             DeviceChannelVo deviceChannelVo = deviceChannelVoService.findDeviceIdChannelId(ssrcTransaction.getDeviceId(), ssrcTransaction.getChannelId());
             if(deviceChannelVo !=null){
-                map.put("enable_audio", deviceChannelVo.getHasAudio() == ConstEnum.Flag.YES.getValue());
-                map.put("enable_mp4", deviceChannelVo.getHasRecord() == ConstEnum.Flag.YES.getValue());
+                enableAudio = deviceChannelVo.getHasAudio() == ConstEnum.Flag.YES.getValue();
+                enableMp4 = deviceChannelVo.getHasRecord() == ConstEnum.Flag.YES.getValue();
             }
             // 如果是录像下载就设置视频间隔十秒
             if(ssrcTransaction.getType() == VideoStreamType.download){
-                map.put("enable_audio",true);
-                map.put("enable_mp4",true);
+                enableAudio = true;
+                enableMp4 = true;
                 map.putInteger("mp4_max_second",10);
             }
+        }
+        //有录像
+        if(enableMp4){
+
         }
         //发送推流事件处理
         ThreadUtil.execute(()->{
@@ -197,6 +203,8 @@ public class MediaHookServer {
                 mediaHookSubscribe.sendNotify(MediaHookVo.builder().type(HookType.on_publish).onAll(ConstEnum.Flag.NO.getValue()).mediaServerVo(mediaServerVo).hookVo(hookVo).build());
             }
         });
+        map.put("enable_audio",enableAudio);
+        map.put("enable_mp4",enableMp4);
         log.info("[ZLM HOOK]推流鉴权 响应：{}->{}->>>>{}", hookVo.getMediaServerId(), JSONUtil.toJsonStr(hookVo), JSONUtil.toJsonStr(map));
         return map;
     }

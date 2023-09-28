@@ -125,6 +125,7 @@ public class InviteStreamManager {
             RedisUtils.sSet(userKey,inviteInfoForUpdate.getStream());
         }
         RedisUtils.set(key, inviteInfoForUpdate);
+        RedisService.getRecordMp4Manager().put(inviteInfoForUpdate.getStream(),inviteInfoForUpdate);
     }
 
     public InviteInfo getInviteInfo(VideoStreamType type, String deviceId, String channelId, String stream,String ssrc) {
@@ -190,6 +191,7 @@ public class InviteStreamManager {
                 StreamInfo streamInfo = inviteInfo.getStreamInfo();
                 MediaServerVo mediaServerVo = VideoService.getMediaServerService().findOnLineMediaServerId(streamInfo.getMediaServerId());
                 MediaClient.deleteRecordDirectory(mediaServerVo,"__defaultVhost__",streamInfo.getApp(),streamInfo.getStream(),null);
+                RedisService.getRecordMp4Manager().del(inviteInfo.getStream());
                 RedisUtils.del(key);
             }
             RedisUtils.setRemove(userKey,key);
@@ -241,6 +243,7 @@ public class InviteStreamManager {
                 }
                 if(del){
                     RedisUtils.del(key);
+                    RedisService.getRecordMp4Manager().del(inviteInfo.getStream());
                     String userKey = String.format("%s:%s",INVITE_DOWNLOAD_USER_PREFIX,inviteInfo.getUserId());
                     RedisUtils.setRemove(userKey,key);
                     inviteErrorCallbackMap.remove(buildKey(type, deviceId, channelId, inviteInfo.getStream()));
