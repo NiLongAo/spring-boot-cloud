@@ -56,4 +56,8 @@ public class StreamURL implements Serializable {
             return null;
         }
     }
+    @Override
+    public StreamURL clone() throws CloneNotSupportedException {
+        return (StreamURL) super.clone();
+    }
 }

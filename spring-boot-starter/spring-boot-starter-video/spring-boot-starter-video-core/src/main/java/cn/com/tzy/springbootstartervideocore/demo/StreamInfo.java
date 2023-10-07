@@ -362,6 +362,69 @@ public class StreamInfo implements Serializable, Cloneable{
         StreamInfo instance = null;
         try{
             instance = (StreamInfo)super.clone();
+            if (this.flv != null) {
+                instance.flv=this.flv.clone();
+            }
+            if (this.wsFlv != null ){
+                instance.wsFlv= this.wsFlv.clone();
+            }
+            if (this.hls != null ) {
+                instance.hls= this.hls.clone();
+            }
+            if (this.wsHls != null ) {
+                instance.wsHls= this.wsHls.clone();
+            }
+            if (this.ts != null ) {
+                instance.ts= this.ts.clone();
+            }
+            if (this.wsTs != null ) {
+                instance.wsTs= this.wsTs.clone();
+            }
+            if (this.fmp4 != null ) {
+                instance.fmp4= this.fmp4.clone();
+            }
+            if (this.wsFmp4 != null ) {
+                instance.wsFmp4= this.wsFmp4.clone();
+            }
+            if (this.rtc != null ) {
+                instance.rtc= this.rtc.clone();
+            }
+            if (this.httpsFlv != null) {
+                instance.httpsFlv= this.httpsFlv.clone();
+            }
+            if (this.wssFlv != null) {
+                instance.wssFlv= this.wssFlv.clone();
+            }
+            if (this.httpsHls != null) {
+                instance.httpsHls= this.httpsHls.clone();
+            }
+            if (this.wssHls != null) {
+                instance.wssHls= this.wssHls.clone();
+            }
+            if (this.wssTs != null) {
+                instance.wssTs= this.wssTs.clone();
+            }
+            if (this.httpsFmp4 != null) {
+                instance.httpsFmp4= this.httpsFmp4.clone();
+            }
+            if (this.wssFmp4 != null) {
+                instance.wssFmp4= this.wssFmp4.clone();
+            }
+            if (this.rtcs != null) {
+                instance.rtcs= this.rtcs.clone();
+            }
+            if (this.rtsp != null) {
+                instance.rtsp= this.rtsp.clone();
+            }
+            if (this.rtsps != null) {
+                instance.rtsps= this.rtsps.clone();
+            }
+            if (this.rtmp != null) {
+                instance.rtmp= this.rtmp.clone();
+            }
+            if (this.rtmps != null) {
+                instance.rtmps= this.rtmps.clone();
+            }
         }catch(CloneNotSupportedException e) {
             e.printStackTrace();
         }
