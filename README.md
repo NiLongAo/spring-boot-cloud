@@ -44,14 +44,14 @@
 ├─spring-boot-business  项目具体业务模块
 │  ├─spring-boot-activiti  工作流底层模块
 │  │  └─start liunx项目运行相关脚本
-│  ├─spring-boot-bean 项目基础业务模块
+│  ├─spring-boot-bean 项目基础业务模块 如：用户丶权限丶部门丶菜单丶角色等相关逻辑
 │  │  └─start liunx项目运行相关脚本
-│  ├─spring-boot-face 人脸识别模块
+│  ├─spring-boot-face 人脸识别模块 人脸模块底层为 人脸识别算法SeetaFace6（主要是免费） 已有liunx版本与Windows版本 
 │  │  ├─conf  人脸识别模块所需第三方包：核心                                 [ 2.此包文件过大，无法上传，已被移除，需要可自行下载，文件在最下方 ]
 │  │  └─start liunx项目运行相关脚本
-│  ├─spring-boot-oa 工作流业务模块
+│  ├─spring-boot-oa 工作流业务模块 用于工作流实际业务模块 目前只有：请假流程。此处只给举例，其他业务自行开发！
 │  │  └─start liunx项目运行相关脚本
-│  └─spring-boot-sms 因服务不足模块合并，模块包含 ：短信发送模块  netty-sockit模块 job定时器模块 redis订阅模块
+│  └─spring-boot-sms 本应是短信模块，因服务不足模块合并，模块包含 ：短信发送模块丶netty-sockit模块丶job定时器模块丶redis订阅模块
 │     └─start liunx项目运行相关脚本
 │  └─spring-boot-video 国标28181模块,模块功能 ：分屏调度丶国标设备实时播放丶历史回放丶云台控制丶流媒体管理丶国标级联丶拉流管理丶推流管理等模块
 │     └─start liunx项目运行相关脚本
@@ -62,7 +62,7 @@
 │     └─start ....
 ├─spring-boot-common 公共底层数据结构模块
 │  ├─spring-boot-comm 所有服务底层公共模块
-│  └─spring-boot-entity 业务底层公共模块  vo model param entity 等相关实体
+│  └─spring-boot-entity 业务底层公共模块  如：vo丶model丶param丶entity等相关实体
 ├─spring-boot-feign 各个服务相互调用 feign 服务
 │  ├─spring-boot-feign-activiti 工作流底层对外开放相关接口
 │  ├─spring-boot-feign-bean 基础业务对外开放相关接口
@@ -70,20 +70,25 @@
 │  ├─spring-boot-feign-oa 工作流业务模块对外开放相关接口
 │  ├─spring-boot-feign-sms 短信发送模块对外开放相关接口
 │  └─spring-boot-feign-sso 统一认证鉴权对外开放相关接口
-├─spring-boot-service 第三方模块服务
+├─spring-boot-service 第三方模块服务 此模块只用于本地启动，也可自行用官方服务启动。
 │  ├─spring-boot-service-nacos nacos服务
 │  ├─spring-boot-service-seata 分布式事务服务
 │  ├─spring-boot-service-sentinel 熔断限流服务
 │  └─spring-boot-service-xxl-job xxl-job服务
 ├─spring-boot-starter 相关模块底层依赖
-│  ├─spring-boot-starter-cloud 所有运行模块公共加载配置模块
-│  ├─spring-boot-starter-elasticsearch 引擎搜索elasticsearch加载配置模块
+│  ├─spring-boot-starter-autopoi POI导入导出功能底层 使用 easypoi-spring-boot-starter 包并进行二次封装，有使用举例。
+│  ├─spring-boot-starter-cloud 所有运行模块公共加载配置模块 如：controller公共继承类，请求路径丶请求参数打印功能。
+│  ├─spring-boot-starter-elasticsearch 引擎搜索elasticsearch加载配置模块 使用 easy-es-boot-starter 包
 │  ├─spring-boot-starter-feign feign相关加载配置模块
 │  │  ├─spring-boot-starter-feign-config 服务feign调用异常拦截
 │  │  └─spring-boot-starter-feign-core  feign的调用拦截器 主要在请求前存放相关认证 header
-│  ├─spring-boot-starter-minio 静态资源minio加载配置模块
+│  ├─spring-boot-starter-logs 日志封装相关加载配置模块
+│  │  ├─spring-boot-starter-logs-basic 日志注解 及 枚举
+│  │  └─spring-boot-starter-logs-core  日志核心实现逻辑，使用AOP切面
+│  ├─spring-boot-starter-minio minio静态资源 加载配置模块
 │  ├─spring-boot-starter-mybatis mybatis加载配置模块  主要 1.统一字段自动填充 比如：创建人，修改人   2.租户相关配置
 │  ├─spring-boot-starter-nacos nacos加载配置模块 naocs 负载均衡配置   现在默认走 NacosRule naocs权重策略
+│  ├─spring-boot-starter-netty  对netty进行二次业务封装，更加方便简便的使用。项目中有举例
 │  ├─spring-boot-starter-quartz  定时器加载配置模块 -------已弃用  改用 xxl-job
 │  ├─spring-boot-starter-rabbitmq 消息队列加载配置模块 对mq相关操作进行封装
 │  ├─spring-boot-starter-redis redis缓存加载配置模块 1.redis操作工具类  2.发布订阅模块封装  3.redis整合spring-cache配置
