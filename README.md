@@ -125,7 +125,7 @@
 
 
 ## 前端整合示例
-- [vue3-admin-cloud](https://gitee.com/tong_zi_yong/vue-admin-cloud) - 基于 SpringCloud Alibaba 的微服务中后台快速开发平台
+- [vue3-admin-cloud](https://github.com/tongzeyong/vue-admin-cloud) - 基于 SpringCloud Alibaba 的微服务中后台快速开发平台
 
 ## 备注
 - 由于项目文件过大，将部分大文件剔除，有需要者，自行下载
