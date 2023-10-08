@@ -123,9 +123,8 @@
 
 
 <p align="center">
-    <img alt="NiLongAo Logo" width="100%" src="https://NiLongAo.github.io/static/images/home.jpg">
-    <img alt="NiLongAo Logo" width="100%" src="https://anncwb.github.io/anncwb/images/preview2.png">
-    <img alt="NiLongAo Logo" width="100%" src="https://anncwb.github.io/anncwb/images/preview3.png">
+    <img alt="NiLongAo Logo" width="100%" src="https://nilongao.github.io/NiLongAo/images/home.jpg">
+    <img alt="NiLongAo Logo" width="100%" src="https://nilongao.github.io/NiLongAo/images/privilege.jpg">
 </p>
 
 
