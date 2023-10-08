@@ -41,7 +41,7 @@ services:
     container_name: spring-boot-nacos
     hostname: spring-boot-nacos
     environment:
-      - PREFER_HOST_MODE:1.15.9.228
+      - PREFER_HOST_MODE:192.168.9.228
       - MODE:standalone
       - SPRING_DATASOURCE_PLATFORM:mysql
       - JVM_XMS:256m
@@ -50,8 +50,8 @@ services:
       - NACOS_SECURITY_IGNORE_URLS:/**
       - MYSQL_SERVICE_HOST:sh-cdb-ort8kycm.sql.tencentcdb.com
       - MYSQL_SERVICE_PORT:59151
-      - MYSQL_SERVICE_USER:mysql
-      - MYSQL_SERVICE_PASSWORD:tzy116131151
+      - MYSQL_SERVICE_USER:*******
+      - MYSQL_SERVICE_PASSWORD:*******
       - MYSQL_SERVICE_DB_NAME:nacos
       - TIME_ZONE:Asia/Shanghai
     networks:
@@ -69,8 +69,8 @@ services:
     container_name: spring-boot-minio
     hostname: spring-boot-minio
     environment:
-      - MINIO_ACCESS_KEY:admin # 账号
-      - MINIO_SECRET_KEY:tzy116131151 #密码
+      - MINIO_ACCESS_KEY:******* # 账号
+      - MINIO_SECRET_KEY:******* #密码
     command:  ['server --console-address ":9090" -address ":9000"  /data']
     networks:
       - app
@@ -144,7 +144,7 @@ services:
     container_name: spring-boot-seata
     hostname: spring-boot-seata
     environment:
-      - SEATA_IP:1.15.9.228
+      - SEATA_IP:192.168.9.228
       - SEATA_PORT:8091
     networks:
       - app
@@ -175,10 +175,10 @@ services:
     environment:
       - SW_CLUSTER:nacos
       - SW_SERVICE_NAME:skywalking-service
-      - SW_CLUSTER_NACOS_HOST_PORT:1.15.9.228:8848
+      - SW_CLUSTER_NACOS_HOST_PORT:192.168.9.228:8848
       - SW_CLUSTER_NACOS_NAMESPACE:4fff92eb-d3b0-4603-bffd-d83cfd915eec
       - SW_STORAGE:elasticsearch
-      - SW_STORAGE_ES_CLUSTER_NODES:1.15.9.228:10010
+      - SW_STORAGE_ES_CLUSTER_NODES:192.168.9.228:10010
     networks:
       - app
   spring-boot-skywalking-ui:
@@ -190,7 +190,7 @@ services:
     container_name: spring-boot-skywalking-ui
     hostname: spring-boot-skywalking-ui
     environment:
-      - SW_OAP_ADDRESS:http://1.15.9.228:12012
+      - SW_OAP_ADDRESS:http://192.168.9.228:12012
     networks:
       - app
 

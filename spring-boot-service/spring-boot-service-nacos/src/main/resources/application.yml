@@ -17,7 +17,7 @@ db:
   user:
     '0': ${MYSQL-USER:root}
   password:
-    '0': ${MYSQL-PWD:tzy116131151}
+    '0': ${MYSQL-PWD:123456}
 management:
   metrics:
     export:

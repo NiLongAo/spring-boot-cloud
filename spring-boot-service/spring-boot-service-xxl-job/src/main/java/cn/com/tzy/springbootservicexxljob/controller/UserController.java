@@ -176,10 +176,4 @@ public class UserController {
 
         return ReturnT.SUCCESS;
     }
-
-    public static void main(String[] args) {
-        String passwork="tzy116131151";
-        String md5Password = DigestUtils.md5DigestAsHex(passwork.getBytes());
-        System.out.println(md5Password);
-    }
 }

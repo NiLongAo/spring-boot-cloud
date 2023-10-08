@@ -43,7 +43,7 @@ seata:
       driver-class-name: com.mysql.cj.jdbc.Driver
       url: jdbc:mysql://sh-cdb-ort8kycm.sql.tencentcdb.com:59151/seata?useUnicode=true
       user: mysql
-      password: tzy116131151
+      password: 123456
       min-conn: 5
       max-conn: 100
       global-table: global_table

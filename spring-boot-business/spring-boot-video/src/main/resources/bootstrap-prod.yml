@@ -1,4 +1,7 @@
 spring:
+  #更换流媒体 redis     database 位置
+  redis:
+    database: 1
   cloud:
     nacos:
       config:

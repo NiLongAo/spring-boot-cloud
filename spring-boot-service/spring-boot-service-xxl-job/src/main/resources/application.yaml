@@ -17,8 +17,8 @@ spring:
   ### xxl-job, datasource
   datasource:
     url: jdbc:mysql://sh-cdb-ort8kycm.sql.tencentcdb.com:59151/xxl_job?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai
-    username: mysql
-    password: tzy116131151
+    username: *******
+    password: *******
     driver-class-name: com.mysql.cj.jdbc.Driver
     ### datasource-pool
     type: com.zaxxer.hikari.HikariDataSource
