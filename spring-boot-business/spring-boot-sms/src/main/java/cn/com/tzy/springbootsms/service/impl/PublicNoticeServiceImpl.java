@@ -18,7 +18,7 @@ import cn.com.tzy.springbootsms.config.init.AppConfig;
 import cn.com.tzy.springbootsms.mapper.PublicNoticeMapper;
 import cn.com.tzy.springbootsms.mapper.ReadNoticeUserMapper;
 import cn.com.tzy.springbootsms.service.PublicNoticeService;
-import cn.com.tzy.springbootsms.utils.MockMultipartFile;
+import cn.com.tzy.springbootstartercloud.utils.MockMultipartFile;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FileUtils;

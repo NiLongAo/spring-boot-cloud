@@ -1,6 +1,7 @@
 package com.seeta.sdk.util;
 
 
+import cn.com.tzy.springbootstartercloud.utils.MockMultipartFile;
 import cn.hutool.core.img.ImgUtil;
 import com.seeta.sdk.SeetaImageData;
 import com.seeta.sdk.SeetaRect;
@@ -28,10 +29,6 @@ public class SeetafaceUtil {
 
     /**
      * 将MultipartFile转为BufferedImage
-     * @param file 图片
-     * @return BGR属性
-     * @author Onion_Ye
-     * @time 2020年6月18日 下午1:14:39
      */
     public static SeetaImageData toMultipartData(MultipartFile file) {
         BufferedImage read = null;
@@ -41,6 +38,13 @@ public class SeetafaceUtil {
             throw new RuntimeException(e);
         }
         return toSeetaImageData(read);
+    }
+
+    /**
+     * 将SeetaImageData转为MultipartFile
+     */
+    public static MultipartFile toMultipartData(String name,SeetaImageData data) {
+        return new MockMultipartFile(name,data.data);
     }
 
     /**

@@ -26,7 +26,7 @@ public class FaceDetectorController extends ApiController {
      * @return
      */
     @PostMapping(value = "/find_face_info.htm")
-    public RestResult<?> findFaceInfo(@RequestParam("file")MultipartFile file) throws Exception {
+    public RestResult<?> findFaceInfo(@RequestParam("file")MultipartFile file){
         return faceDetectorService.findFaceInfo(file);
     }
 
@@ -34,7 +34,7 @@ public class FaceDetectorController extends ApiController {
      * 1v1 图片比对 返回相似度
      */
     @PostMapping(value = "/comparison.htm")
-    public RestResult<?> comparison(@RequestParam("file1")MultipartFile file1,@RequestParam("file2")MultipartFile file2) throws Exception {
+    public RestResult<?> comparison(@RequestParam("file1")MultipartFile file1,@RequestParam("file2")MultipartFile file2){
         return faceDetectorService.comparison(file1,file2);
     }
 
@@ -50,7 +50,7 @@ public class FaceDetectorController extends ApiController {
             @RequestParam("file")MultipartFile file,
             @RequestParam(value = "size",required = false)Integer size,
             @RequestParam(value = "calculate",required = false)Integer calculate
-    ) throws Exception {
+    ) {
         return faceDetectorService.search(file,size,calculate);
     }
 

@@ -10,13 +10,13 @@ public interface FaceDetectorService {
      * @param file
      * @return
      */
-    RestResult<?> findFaceInfo(MultipartFile file) throws Exception;
+    RestResult<?> findFaceInfo(MultipartFile file);
 
 
     /**
      * 1v1 图片比对 返回相似度
      */
-    RestResult<?> comparison(MultipartFile file1,MultipartFile file2) throws Exception;
+    RestResult<?> comparison(MultipartFile file1,MultipartFile file2);
 
     /**
      * 图片检索 根据图片，在库中找到相似图片
@@ -25,6 +25,6 @@ public interface FaceDetectorService {
      * @param calculate 阀值
      * @return
      */
-    RestResult<?> search(MultipartFile file,Integer size,Integer calculate) throws Exception;
+    RestResult<?> search(MultipartFile file,Integer size,Integer calculate);
 
 }
