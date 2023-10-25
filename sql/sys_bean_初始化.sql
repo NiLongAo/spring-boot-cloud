@@ -195,7 +195,7 @@ insert into sms_mobile_message_template(id,config_id,code,type,title,content,rec
 /*初始化用户*/
 insert into bean_user(id,user_name,nick_name,login_account,password,credentialssalt,phone,gender,id_card,login_last_time,update_user_id,update_time,create_user_id,create_time)values
 (1,'root','root','root','$2a$10$7eW0yCH6YvIaQhdXpsO3L..vX9uaxUbznzr59l10a1HitY2QJ9uHW','789','18789432816',1,'610125199508234332',now(),1,now(),1,now());
-insert into bean_user_set(id,is_admin,is_enabled)values (1,1,0);
+insert into bean_user_set(id,is_admin,is_enabled)values (1,1,1);
 
 
 /*初始化客户端*/

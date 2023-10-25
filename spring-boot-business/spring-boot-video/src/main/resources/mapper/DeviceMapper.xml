@@ -31,6 +31,7 @@
     <result column="subscribe_cycle_for_mobile_position" property="subscribeCycleForMobilePosition" />
     <result column="subscribe_cycle_for_alarm" property="subscribeCycleForAlarm" />
     <result column="as_message_channel" property="asMessageChannel" />
+    <result column="has_administrator" property="hasAdministrator" />
     <result column="switch_primary_sub_stream" property="switchPrimarySubStream" />
     <result column="ssrc_check" property="ssrcCheck" />
     <result column="create_user_id" property="createUserId" />
@@ -43,7 +44,7 @@
     port, host_address, `password`, sdp_ip, local_ip, charset, tree_type, geo_coord_sys,
     `online`, register_time, keepalive_time, keepalive_interval_time,stream_mode, expires, mobile_position_submission_interval,
     subscribe_cycle_for_catalog, subscribe_cycle_for_mobile_position, subscribe_cycle_for_alarm,
-    as_message_channel,switch_primary_sub_stream,ssrc_check, create_user_id, create_time, update_user_id, update_time
+    has_administrator,as_message_channel,switch_primary_sub_stream,ssrc_check, create_user_id, create_time, update_user_id, update_time
   </sql>
 
   <select id="findPlatformIdChannelId" resultType="cn.com.tzy.springbootentity.dome.video.Device">
@@ -70,13 +71,14 @@
 
   <select id="findPage" resultType="cn.com.tzy.springbootentity.dome.video.Device">
     select
-        video_device.*,
-        (select count(id) from video_device_channel vdc where video_device.device_id = vdc.device_id) as channelCount
-    from video_device
+        vd.*,
+        (select count(vdc.id) from video_device_channel vdc where video_device.device_id = vdc.device_id) as channelCount
+    from video_device vd
     <trim prefix="where" prefixOverrides="and">
       <if test="param.query != null and param.query != ''">
-        and (name like concat('%',#{param.query},'%') or ip like concat('%',#{param.query},'%') or sdp_ip like concat('%',#{param.query},'%'))
+        and (vd.name like concat('%',#{param.query},'%') or vd.ip like concat('%',#{param.query},'%') or vd.sdp_ip like concat('%',#{param.query},'%'))
       </if>
+      and(vd.has_administrator = 0 or (vd.has_administrator = 1 and vd.has_administrator = #{administrator}))
     </trim>
   </select>
 </mapper>

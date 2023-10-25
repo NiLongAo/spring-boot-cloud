@@ -10,7 +10,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 public interface DeviceService extends IService<Device>{
     Device findPlatformIdChannelId(String platformId, String channelId);
     Device findDeviceInfoPlatformIdChannelId(String platformId, String channelId);
-    PageResult findPage(PageModel param);
+    PageResult findPage(PageModel param, boolean administrator);
     RestResult<?> findDeviceId(String deviceId);
     RestResult<?> del(String deviceId);
     RestResult<?> updateTransport(String deviceId, Integer streamMode);

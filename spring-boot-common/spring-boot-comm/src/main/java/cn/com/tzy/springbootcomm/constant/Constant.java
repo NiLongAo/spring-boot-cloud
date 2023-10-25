@@ -70,6 +70,7 @@ public class Constant {
 
     public final static  String USER_ID_KEY = "userId";
     public final static  String TENANT_ID_KEY = "tenantId";
+    public final static String ADMIN_KEY = "isAdmin";
     public final static  String ROLE_ID_LIST_KEY = "roleIdList";
     public final static  String POSITION_ID_LIST_KEY = "positionIdList";
     public final static  String DEPARTMENT_ID_LIST_KEY = "departmentIdList";

@@ -3,6 +3,7 @@ package cn.com.tzy.springbootvideo.controller.api;
 import cn.com.tzy.springbootcomm.common.model.PageModel;
 import cn.com.tzy.springbootcomm.common.vo.PageResult;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
+import cn.com.tzy.springbootcomm.utils.JwtUtils;
 import cn.com.tzy.springbootentity.dome.video.Device;
 import cn.com.tzy.springbootstartercloud.api.ApiController;
 import cn.com.tzy.springbootvideo.service.DeviceService;
@@ -29,7 +30,8 @@ public class DeviceController extends ApiController {
      */
     @PostMapping("/page")
     public PageResult page(@Validated @RequestBody PageModel param){
-        return  deviceService.findPage(param);
+        boolean administrator = JwtUtils.getAdministrator();
+        return  deviceService.findPage(param,administrator);
     }
 
     /**

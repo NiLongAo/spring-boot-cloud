@@ -10,6 +10,7 @@ import cn.com.tzy.springbootcomm.constant.NotNullMap;
 import cn.com.tzy.springbootentity.dome.video.Device;
 import cn.com.tzy.springbootentity.dome.video.DeviceChannel;
 import cn.com.tzy.springbootentity.dome.video.PlatformGbChannel;
+import cn.com.tzy.springbootfeignbean.api.bean.UserServiceFeign;
 import cn.com.tzy.springbootstartervideobasic.enums.StreamModeType;
 import cn.com.tzy.springbootstartervideobasic.vo.video.DeviceVo;
 import cn.com.tzy.springbootstartervideocore.demo.VideoRestResult;
@@ -62,9 +63,9 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
     }
 
     @Override
-    public PageResult findPage(PageModel param) {
+    public PageResult findPage(PageModel param, boolean administrator) {
         Page<Device> page = MyBatisUtils.buildPage(param);
-        return MyBatisUtils.selectPage(baseMapper.findPage(page,param));
+        return MyBatisUtils.selectPage(baseMapper.findPage(page,param,administrator?ConstEnum.Flag.YES.getValue():ConstEnum.Flag.NO.getValue()));
     }
 
     @Override

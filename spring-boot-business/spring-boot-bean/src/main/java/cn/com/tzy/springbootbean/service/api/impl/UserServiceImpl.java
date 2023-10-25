@@ -54,8 +54,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Autowired
     private MiniUserMapper miniUserMapper;
 
-
-
     @Override
     public PageResult choiceUserPage(UserParam userPageModel) {
         int total =  baseMapper.findChoiceUserPageCount(userPageModel);
@@ -250,6 +248,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 .build();
         return RestResult.result(RespCode.CODE_0.getValue(), null, build);
     }
+
+
 
     /**
      * 获取用户基本信息

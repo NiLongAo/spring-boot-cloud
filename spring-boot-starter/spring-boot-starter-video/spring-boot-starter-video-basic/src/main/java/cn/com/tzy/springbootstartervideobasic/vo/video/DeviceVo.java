@@ -167,6 +167,11 @@ public class DeviceVo extends LongIdEntity {
     private Integer asMessageChannel = 0;
 
     /**
+     * 是否开启超管权限(只有超级管理员才可查看) 1.是 0.否 默认 ：0
+     */
+    private Integer hasAdministrator;
+
+    /**
      * 开启主子码流切换的开关
      */
     private Integer switchPrimarySubStream;

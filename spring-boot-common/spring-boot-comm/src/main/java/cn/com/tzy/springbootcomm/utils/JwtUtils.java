@@ -90,7 +90,28 @@ public class JwtUtils {
         }
         return Long.parseLong(String.valueOf(getJwtPayload().get(Constant.TENANT_ID_KEY)));
     }
-
+    /**
+     * 解析JWT获取用户是否超级管理员
+     *
+     * @return
+     */
+    public static boolean getAdministrator() {
+        Object object = getJwtPayload().get(Constant.ADMIN_KEY);
+        if(object == null){
+            return false;
+        }
+        if(Long.parseLong(String.valueOf(object)) != 1L){
+            return false;
+        }
+        Long tenantId = getTenantId();
+        if(tenantId == null){
+            return false;
+        }
+        if(!Constant.TENANT_ID.equals(tenantId)){
+            return false;
+        }
+        return true;
+    }
 
     /**
      * 获取登录认证的客户端ID

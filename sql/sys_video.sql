@@ -30,6 +30,7 @@ CREATE TABLE video_device (
     ssrc_check                          tinyint(4) DEFAULT '0' COMMENT '是否开启ssrc校验，默认关闭，开启可以防止串流',
     media_server_id                     varchar(255)  DEFAULT NULL COMMENT '流媒体编号 默认为null',
     as_message_channel                  tinyint(4) DEFAULT '0' COMMENT '是否作为消息通道 1.是 0.否',
+    has_administrator                   tinyint(4) DEFAULT '0' COMMENT '是否开启超管权限(只有超级管理员才可查看)',
     switch_primary_sub_stream           tinyint(4) DEFAULT '0' COMMENT '是否开启主子码流开关 1.是 0.否',
     create_user_id                      bigint unsigned comment '创建人编号',
     create_time                         datetime  NOT NULL COMMENT '创建时间',
