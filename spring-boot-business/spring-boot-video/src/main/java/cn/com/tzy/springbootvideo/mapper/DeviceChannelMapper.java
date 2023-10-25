@@ -20,5 +20,5 @@ public interface DeviceChannelMapper extends BaseMapper<DeviceChannel> {
 
     List<DeviceChannel> businessGroupList(@Param("deviceId") String deviceId, @Param("online") Integer online, @Param("isCivilCode") Boolean isCivilCode);
 
-    List<DeviceChannelTreeVo> findTreeDeviceChannel();
+    List<DeviceChannelTreeVo> findTreeDeviceChannel(@Param("administrator") Integer administrator);
 }

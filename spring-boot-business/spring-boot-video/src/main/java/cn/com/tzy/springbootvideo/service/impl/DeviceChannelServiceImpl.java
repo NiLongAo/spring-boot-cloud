@@ -1,6 +1,7 @@
 package cn.com.tzy.springbootvideo.service.impl;
 
 import cn.com.tzy.springbootcomm.common.bean.TreeNode;
+import cn.com.tzy.springbootcomm.common.enumcom.ConstEnum;
 import cn.com.tzy.springbootcomm.common.vo.PageResult;
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
@@ -136,8 +137,8 @@ public class DeviceChannelServiceImpl extends ServiceImpl<DeviceChannelMapper, D
     }
 
     @Override
-    public RestResult<?> findTreeDeviceChannel() throws Exception {
-        List<DeviceChannelTreeVo> tree = baseMapper.findTreeDeviceChannel();
+    public RestResult<?> findTreeDeviceChannel(boolean administrator) throws Exception {
+        List<DeviceChannelTreeVo> tree = baseMapper.findTreeDeviceChannel(administrator? ConstEnum.Flag.YES.getValue() :ConstEnum.Flag.NO.getValue());
         List<TreeNode<DeviceChannelTreeVo>> dcTreeNode = TreeUtil.getTree(tree, DeviceChannelTreeVo::getParentId, DeviceChannelTreeVo::getId, null);
         List<Map> mapList = AppUtils.transformationTree("children", dcTreeNode);
         return RestResult.result(RespCode.CODE_0.getValue(),null,mapList);

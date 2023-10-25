@@ -2,6 +2,7 @@ package cn.com.tzy.springbootvideo.controller.api;
 
 import cn.com.tzy.springbootcomm.common.vo.PageResult;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
+import cn.com.tzy.springbootcomm.utils.JwtUtils;
 import cn.com.tzy.springbootentity.dome.video.DeviceChannel;
 import cn.com.tzy.springbootentity.param.video.DeviceChannelPageParam;
 import cn.com.tzy.springbootstartercloud.api.ApiController;
@@ -28,7 +29,8 @@ public class DeviceChannelController extends ApiController {
      */
     @GetMapping("/tree")
     public RestResult<?> tree() throws Exception {
-        return  deviceChannelService.findTreeDeviceChannel();
+        boolean administrator = JwtUtils.getAdministrator();
+        return  deviceChannelService.findTreeDeviceChannel(administrator);
     }
 
     /**

@@ -28,7 +28,7 @@ public interface DeviceChannelService extends IService<DeviceChannel>{
     RestResult<?> sync(String deviceId);
     RestResult<?> syncStatus(String deviceId);
 
-    RestResult<?> findTreeDeviceChannel() throws Exception;
+    RestResult<?> findTreeDeviceChannel(boolean administrator) throws Exception;
 
     RestResult<?> detail(String channelId);
 
