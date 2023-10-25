@@ -72,7 +72,7 @@
   <select id="findPage" resultType="cn.com.tzy.springbootentity.dome.video.Device">
     select
         vd.*,
-        (select count(vdc.id) from video_device_channel vdc where video_device.device_id = vdc.device_id) as channelCount
+        (select count(vdc.id) from video_device_channel vdc where vd.device_id = vdc.device_id) as channelCount
     from video_device vd
     <trim prefix="where" prefixOverrides="and">
       <if test="param.query != null and param.query != ''">

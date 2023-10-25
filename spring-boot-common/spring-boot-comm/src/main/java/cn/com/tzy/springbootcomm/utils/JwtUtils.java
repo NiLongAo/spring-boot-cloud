@@ -100,7 +100,7 @@ public class JwtUtils {
         if(object == null){
             return false;
         }
-        if(!Boolean.getBoolean(String.valueOf(object))){
+        if(!Boolean.parseBoolean(String.valueOf(object))){
             return false;
         }
         Long tenantId = getTenantId();
