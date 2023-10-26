@@ -2,10 +2,13 @@ package cn.com.tzy.springbootvideo.mapper;
 
 import cn.com.tzy.springbootcomm.common.model.PageModel;
 import cn.com.tzy.springbootentity.dome.video.Device;
+import cn.com.tzy.springbootentity.vo.video.DeviceChannelTreeVo;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 @Mapper
 public interface DeviceMapper extends BaseMapper<Device> {

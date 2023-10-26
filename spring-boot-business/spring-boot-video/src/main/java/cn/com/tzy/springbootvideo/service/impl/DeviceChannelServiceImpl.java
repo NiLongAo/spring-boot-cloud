@@ -75,7 +75,7 @@ public class DeviceChannelServiceImpl extends ServiceImpl<DeviceChannelMapper, D
         }
     }
     @Override
-    public PageResult findPage(DeviceChannelPageParam param) throws Exception {
+    public PageResult findPage(DeviceChannelPageParam param){
         DeviceVo deviceVo = VideoService.getDeviceService().findDeviceGbId(param.deviceId);
         if(deviceVo == null){
             return PageResult.result(RespCode.CODE_2.getValue(),"未获取设备信息");
@@ -137,11 +137,15 @@ public class DeviceChannelServiceImpl extends ServiceImpl<DeviceChannelMapper, D
     }
 
     @Override
-    public RestResult<?> findTreeDeviceChannel(boolean administrator) throws Exception {
+    public RestResult<?> findTreeDeviceChannel(boolean administrator){
         List<DeviceChannelTreeVo> tree = baseMapper.findTreeDeviceChannel(administrator? ConstEnum.Flag.YES.getValue() :ConstEnum.Flag.NO.getValue());
         List<TreeNode<DeviceChannelTreeVo>> dcTreeNode = TreeUtil.getTree(tree, DeviceChannelTreeVo::getParentId, DeviceChannelTreeVo::getId, null);
         List<Map> mapList = AppUtils.transformationTree("children", dcTreeNode);
         return RestResult.result(RespCode.CODE_0.getValue(),null,mapList);
     }
 
+    @Override
+    public List<DeviceChannelTreeVo> findAdministratorList(boolean administrator) {
+        return baseMapper.findTreeDeviceChannel(administrator? ConstEnum.Flag.YES.getValue() :ConstEnum.Flag.NO.getValue());
+    }
 }

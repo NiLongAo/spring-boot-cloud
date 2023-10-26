@@ -28,7 +28,7 @@ public class DeviceChannelController extends ApiController {
      * 设备通道树
      */
     @GetMapping("/tree")
-    public RestResult<?> tree() throws Exception {
+    public RestResult<?> tree(){
         boolean administrator = JwtUtils.getAdministrator();
         return  deviceChannelService.findTreeDeviceChannel(administrator);
     }
@@ -37,7 +37,7 @@ public class DeviceChannelController extends ApiController {
      * 通道分页 44010200501010000001
      */
     @PostMapping("page")
-    public PageResult page(@Validated @RequestBody DeviceChannelPageParam param) throws Exception {
+    public PageResult page(@Validated @RequestBody DeviceChannelPageParam param) {
         return  deviceChannelService.findPage(param);
     }
 
@@ -45,7 +45,7 @@ public class DeviceChannelController extends ApiController {
      * 通道详情
      */
     @GetMapping("detail")
-    public RestResult<?> detail(@RequestParam("channelId") String channelId) throws Exception {
+    public RestResult<?> detail(@RequestParam("channelId") String channelId){
         return  deviceChannelService.detail(channelId);
     }
 
@@ -53,7 +53,7 @@ public class DeviceChannelController extends ApiController {
      * 保存通道信息
      */
     @PostMapping("save")
-    public RestResult<?> save(@Validated @RequestBody DeviceChannel param) throws Exception {
+    public RestResult<?> save(@Validated @RequestBody DeviceChannel param){
         return  deviceChannelService.saveDeviceChannel(param);
     }
 
@@ -61,7 +61,7 @@ public class DeviceChannelController extends ApiController {
      * 同步设备通道
      */
     @GetMapping("sync")
-    public RestResult<?> sync(@RequestParam("deviceId") String deviceId) throws Exception {
+    public RestResult<?> sync(@RequestParam("deviceId") String deviceId){
         return  deviceChannelService.sync(deviceId);
     }
 

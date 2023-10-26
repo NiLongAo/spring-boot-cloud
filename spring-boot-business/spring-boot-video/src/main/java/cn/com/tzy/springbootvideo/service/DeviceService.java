@@ -4,8 +4,11 @@ import cn.com.tzy.springbootcomm.common.model.PageModel;
 import cn.com.tzy.springbootcomm.common.vo.PageResult;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootentity.dome.video.Device;
+import cn.com.tzy.springbootentity.vo.video.DeviceChannelTreeVo;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.springframework.web.context.request.async.DeferredResult;
+
+import java.util.List;
 
 public interface DeviceService extends IService<Device>{
     Device findPlatformIdChannelId(String platformId, String channelId);

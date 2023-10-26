@@ -9,13 +9,13 @@ import com.baomidou.mybatisplus.extension.service.IService;
 public interface PlatformGbChannelService extends IService<PlatformGbChannel>{
 
 
-    RestResult<?> findDeviceChannelList() throws Exception;
+    RestResult<?> findDeviceChannelList(boolean administrator) throws Exception;
 
-    RestResult<?> findChannelBindKey(PlatformGbChannelParam param);
+    RestResult<?> findChannelBindKey(PlatformGbChannelParam param,boolean administrator);
 
-    RestResult<?> insert(PlatformGbChannelSaveParam param);
+    RestResult<?> insert(PlatformGbChannelSaveParam param,boolean administrator);
 
-    RestResult<?> delete(PlatformGbChannelSaveParam param);
+    RestResult<?> delete(PlatformGbChannelSaveParam param,boolean administrator);
 
 
     void delPlatformGbChannel(String app,String stream);

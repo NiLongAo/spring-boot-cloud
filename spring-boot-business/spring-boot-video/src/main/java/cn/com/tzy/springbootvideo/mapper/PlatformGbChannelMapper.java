@@ -12,6 +12,7 @@ import java.util.List;
 public interface PlatformGbChannelMapper extends BaseMapper<PlatformGbChannel> {
     List<DeviceChannel> findDeviceChannelList(
             @Param("isOn") int isOn,
+            @Param("administrator") Integer administrator,
             @Param("online") Integer online,
             @Param("platformId") String platformId,
             @Param("catalogIdList") List<String> catalogIdList,

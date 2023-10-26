@@ -4,6 +4,7 @@ import cn.com.tzy.springbootcomm.common.vo.PageResult;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootentity.dome.video.DeviceChannel;
 import cn.com.tzy.springbootentity.param.video.DeviceChannelPageParam;
+import cn.com.tzy.springbootentity.vo.video.DeviceChannelTreeVo;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
@@ -23,12 +24,15 @@ public interface DeviceChannelService extends IService<DeviceChannel>{
      */
     void updateChannelSubCount(String deviceId, String channelId);
 
-    PageResult findPage(DeviceChannelPageParam param) throws Exception;
+    PageResult findPage(DeviceChannelPageParam param) ;
     RestResult<?> saveDeviceChannel(DeviceChannel param);
     RestResult<?> sync(String deviceId);
     RestResult<?> syncStatus(String deviceId);
 
-    RestResult<?> findTreeDeviceChannel(boolean administrator) throws Exception;
+    RestResult<?> findTreeDeviceChannel(boolean administrator);
+
+
+    List<DeviceChannelTreeVo> findAdministratorList(boolean administrator);
 
     RestResult<?> detail(String channelId);
 

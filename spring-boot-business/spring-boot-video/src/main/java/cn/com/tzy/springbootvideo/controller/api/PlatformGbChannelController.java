@@ -2,6 +2,7 @@ package cn.com.tzy.springbootvideo.controller.api;
 
 import cn.com.tzy.springbootcomm.common.model.BaseModel;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
+import cn.com.tzy.springbootcomm.utils.JwtUtils;
 import cn.com.tzy.springbootentity.param.video.PlatformGbChannelParam;
 import cn.com.tzy.springbootentity.param.video.PlatformGbChannelSaveParam;
 import cn.com.tzy.springbootstartercloud.api.ApiController;
@@ -28,7 +29,8 @@ public class PlatformGbChannelController extends ApiController {
      */
     @GetMapping("device_channel_list")
     public RestResult<?> findDeviceChannelList() throws Exception {
-        return platformGbChannelService.findDeviceChannelList();
+        boolean administrator = JwtUtils.getAdministrator();
+        return platformGbChannelService.findDeviceChannelList(administrator);
     }
 
     /**
@@ -36,7 +38,8 @@ public class PlatformGbChannelController extends ApiController {
      */
     @PostMapping("channel_bind_key")
     public RestResult<?> findChannelBindKey(@Validated @RequestBody PlatformGbChannelParam param){
-        return platformGbChannelService.findChannelBindKey(param);
+        boolean administrator = JwtUtils.getAdministrator();
+        return platformGbChannelService.findChannelBindKey(param,administrator);
     }
 
     /**
@@ -46,7 +49,8 @@ public class PlatformGbChannelController extends ApiController {
      */
     @PostMapping("insert")
     public RestResult<?> insert(@Validated({BaseModel.add.class}) @RequestBody PlatformGbChannelSaveParam param){
-        return platformGbChannelService.insert(param);
+        boolean administrator = JwtUtils.getAdministrator();
+        return platformGbChannelService.insert(param,administrator);
     }
 
     /**
@@ -56,7 +60,8 @@ public class PlatformGbChannelController extends ApiController {
      */
     @PostMapping("delete")
     public RestResult<?> delete(@Validated({BaseModel.add.class}) @RequestBody PlatformGbChannelSaveParam param){
-        return platformGbChannelService.delete(param);
+        boolean administrator = JwtUtils.getAdministrator();
+        return platformGbChannelService.delete(param,administrator);
     }
 
 }

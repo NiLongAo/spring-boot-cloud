@@ -140,7 +140,7 @@
   <select id="findTreeDeviceChannel" resultType="cn.com.tzy.springbootentity.vo.video.DeviceChannelTreeVo">
     select null as parentId, vd.device_id as id,vd.device_id as name ,vd.device_id as deviceId,1 as type, vd.online as status from video_device vd where vd.has_administrator = 0 or (vd.has_administrator = 1 and vd.has_administrator = #{administrator})
     union all
-    select vdc.device_id as parentId ,vdc.channel_id as id ,vdc.channel_id as name,vdc.device_id as deviceId,2 as type, vdc.status as status from video_device_channel vdc
+    select vdc.device_id as parentId ,vdc.channel_id as id ,vdc.channel_id as name,vdc.device_id as deviceId,2 as type, vdc.status as status from video_device_channel vdc where exists(select 1 from video_device vd where vd.device_id = vdc.device_id and  vd.has_administrator = 0 or (vd.has_administrator = 1 and vd.has_administrator = #{administrator}))
   </select>
 
 </mapper>

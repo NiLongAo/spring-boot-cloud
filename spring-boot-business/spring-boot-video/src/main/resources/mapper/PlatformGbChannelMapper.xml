@@ -31,6 +31,7 @@
       left join video_platform_gb_channel vpgc on  vdc.channel_id = vpgc.device_channel_id
     </if>
     where vdc.device_id = vd.device_id
+    and (vd.has_administrator = 0 or (vd.has_administrator = 1 and vd.has_administrator = #{administrator}))
     <if test="gbIdList != null and gbIdList.size() != 0">
       <foreach collection="gbIdList"  item="item" open="and vdc.channel_id in (" separator="," close=")">
         #{item}

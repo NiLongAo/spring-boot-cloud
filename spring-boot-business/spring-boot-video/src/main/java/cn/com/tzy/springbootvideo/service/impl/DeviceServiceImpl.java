@@ -10,6 +10,7 @@ import cn.com.tzy.springbootcomm.constant.NotNullMap;
 import cn.com.tzy.springbootentity.dome.video.Device;
 import cn.com.tzy.springbootentity.dome.video.DeviceChannel;
 import cn.com.tzy.springbootentity.dome.video.PlatformGbChannel;
+import cn.com.tzy.springbootentity.vo.video.DeviceChannelTreeVo;
 import cn.com.tzy.springbootfeignbean.api.bean.UserServiceFeign;
 import cn.com.tzy.springbootstartervideobasic.enums.StreamModeType;
 import cn.com.tzy.springbootstartervideobasic.vo.video.DeviceVo;

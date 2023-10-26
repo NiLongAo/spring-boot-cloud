@@ -36,42 +36,21 @@ public class PlatformGbChannelServiceImpl extends ServiceImpl<PlatformGbChannelM
     private PlatformCatalogService platformCatalogService;
     @Resource
     private DeviceChannelService deviceChannelService;
-    @Resource
-    private DeviceService deviceService;
 
     @Override
-    public RestResult<?> findDeviceChannelList(){
-        List<Device> list = deviceService.list();
-        List<DeviceChannel> list1 = deviceChannelService.list();
-        List<DeviceChannelTreeVo> collect = list.stream().map(o -> DeviceChannelTreeVo.builder()
-                .parentId(null)
-                .type(1)
-                .id(o.getDeviceId())
-                .name(o.getName())
-                .status(o.getOnline())
-                .deviceId(o.getDeviceId())
-                .build()
-        ).collect(Collectors.toList());
-        collect.addAll(list1.stream().map(o -> DeviceChannelTreeVo.builder()
-                .parentId(o.getParentId())
-                .type(2)
-                .id(o.getChannelId())
-                .name(o.getName())
-                .status(o.getStatus())
-                .deviceId(o.getDeviceId())
-                .build()
-        ).collect(Collectors.toList()));
+    public RestResult<?> findDeviceChannelList(boolean administrator){
+        List<DeviceChannelTreeVo> collect = deviceChannelService.findAdministratorList(administrator);
         return RestResult.result(RespCode.CODE_0.getValue(),null,collect);
     }
     @Override
-    public RestResult<?> findChannelBindKey(PlatformGbChannelParam param) {
+    public RestResult<?> findChannelBindKey(PlatformGbChannelParam param,boolean administrator) {
         List<String> catalogIdList = new ArrayList<>();
         if(param.getIsSub() == ConstEnum.Flag.YES.getValue()){
             catalogIdList.addAll(platformCatalogService.findCatalogIdByAllSubList(param.getPlatformId(),param.getCatalogId()));
         }else {
             catalogIdList.add(param.getCatalogId());
         }
-        List<DeviceChannel> allGbList = baseMapper.findDeviceChannelList(ConstEnum.Flag.YES.getValue(),null,param.getPlatformId(), null,null,null);
+        List<DeviceChannel> allGbList = baseMapper.findDeviceChannelList(ConstEnum.Flag.YES.getValue(),administrator?ConstEnum.Flag.YES.getValue():ConstEnum.Flag.NO.getValue(),null,param.getPlatformId(), null,null,null);
         List<DeviceChannel> useCatalogList = allGbList.stream().filter(o -> catalogIdList.contains(o.getCatalogId())).collect(Collectors.toList());
         List<String> allGbIdList = allGbList.stream().map(DeviceChannel::getChannelId).collect(Collectors.toList());
         if(!allGbIdList.isEmpty()){
@@ -89,16 +68,16 @@ public class PlatformGbChannelServiceImpl extends ServiceImpl<PlatformGbChannelM
         }});
     }
     @Override
-    public RestResult<?> insert(PlatformGbChannelSaveParam param) {
+    public RestResult<?> insert(PlatformGbChannelSaveParam param,boolean administrator) {
         ParentPlatform platform = parentPlatformService.getOne(new LambdaQueryWrapper<ParentPlatform>().eq(ParentPlatform::getServerGbId, param.getPlatformId()));
         if(platform == null){
             return RestResult.result(RespCode.CODE_2.getValue(),"未获取上级平台信息");
         }
         List<DeviceChannel> deviceChannelList = null;
         if(param.getIsAll()== ConstEnum.Flag.YES.getValue()){
-            deviceChannelList = baseMapper.findDeviceChannelList(ConstEnum.Flag.NO.getValue(),null,param.getPlatformId(), Collections.singletonList(param.getCatalogId()),null,null);
+            deviceChannelList = baseMapper.findDeviceChannelList(ConstEnum.Flag.NO.getValue(),administrator?ConstEnum.Flag.YES.getValue():ConstEnum.Flag.NO.getValue(),null,param.getPlatformId(), Collections.singletonList(param.getCatalogId()),null,null);
         }else{
-            deviceChannelList = baseMapper.findDeviceChannelList(ConstEnum.Flag.NO.getValue(),null,param.getPlatformId(), Collections.singletonList(param.getCatalogId()),param.getGbIdList(),null);
+            deviceChannelList = baseMapper.findDeviceChannelList(ConstEnum.Flag.NO.getValue(),administrator?ConstEnum.Flag.YES.getValue():ConstEnum.Flag.NO.getValue(),null,param.getPlatformId(), Collections.singletonList(param.getCatalogId()),param.getGbIdList(),null);
         }
         if(deviceChannelList.isEmpty()){
             return RestResult.result(RespCode.CODE_2.getValue(),"未获取添加通道信息");
@@ -122,7 +101,7 @@ public class PlatformGbChannelServiceImpl extends ServiceImpl<PlatformGbChannelM
     }
 
     @Override
-    public RestResult<?> delete(PlatformGbChannelSaveParam param) {
+    public RestResult<?> delete(PlatformGbChannelSaveParam param,boolean administrator) {
         ParentPlatform platform = parentPlatformService.getOne(new LambdaQueryWrapper<ParentPlatform>().eq(ParentPlatform::getServerGbId, param.getPlatformId()));
         if(platform == null){
             return RestResult.result(RespCode.CODE_2.getValue(),"未获取上级平台信息");
@@ -135,9 +114,9 @@ public class PlatformGbChannelServiceImpl extends ServiceImpl<PlatformGbChannelM
         }
         List<DeviceChannel> deviceChannelList;
         if(param.getIsAll()== ConstEnum.Flag.YES.getValue()){
-            deviceChannelList = baseMapper.findDeviceChannelList(ConstEnum.Flag.YES.getValue(),null,param.getPlatformId(),catalogIdList,null,null);
+            deviceChannelList = baseMapper.findDeviceChannelList(ConstEnum.Flag.YES.getValue(),administrator?ConstEnum.Flag.YES.getValue():ConstEnum.Flag.NO.getValue(),null,param.getPlatformId(),catalogIdList,null,null);
         }else {
-            deviceChannelList = baseMapper.findDeviceChannelList(ConstEnum.Flag.YES.getValue(),null,param.getPlatformId(),catalogIdList,param.getGbIdList(),null);
+            deviceChannelList = baseMapper.findDeviceChannelList(ConstEnum.Flag.YES.getValue(),administrator?ConstEnum.Flag.YES.getValue():ConstEnum.Flag.NO.getValue(),null,param.getPlatformId(),catalogIdList,param.getGbIdList(),null);
         }
         if(deviceChannelList.isEmpty()){
             return RestResult.result(RespCode.CODE_2.getValue(),"未获取移除通道信息");
