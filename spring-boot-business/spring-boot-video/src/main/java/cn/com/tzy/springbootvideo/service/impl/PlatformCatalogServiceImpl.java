@@ -228,7 +228,7 @@ public class PlatformCatalogServiceImpl extends ServiceImpl<PlatformCatalogMappe
                     .catalogId(catalog.getId())
                     .isAll(ConstEnum.Flag.YES.getValue())
                     .isSub(ConstEnum.Flag.NO.getValue())
-                    .build());
+                    .build(),true);
         }else if(type == 2){
             platformCatalogs =baseMapper.findGbChannel(catalog.getId(),catalog.getPlatformId());
             platformGbStreamService.delete(PlatformGbStreamSaveParam.builder()
@@ -245,7 +245,7 @@ public class PlatformCatalogServiceImpl extends ServiceImpl<PlatformCatalogMappe
                     .catalogId(catalog.getId())
                     .isAll(ConstEnum.Flag.YES.getValue())
                     .isSub(ConstEnum.Flag.NO.getValue())
-                    .build());
+                    .build(),true);
             platformGbStreamService.delete(PlatformGbStreamSaveParam.builder()
                     .platformId(catalog.getPlatformId())
                     .catalogId(catalog.getId())
