@@ -45,9 +45,9 @@ public class WxMiniAuthenticationProvider implements AuthenticationProvider{
         //解析用户信息
         WxMaUserInfo userInfo = wxMaService.getUserService().getUserInfo(sessionInfo.getSessionKey(), token.getEncryptedData(), token.getIv());
         log.info("微信用户信息解析：{}",userInfo.toString());
-        userInfo.setOpenId(sessionInfo.getOpenid());
         WxMaUserInfoVo wxMaUserInfoVo = new WxMaUserInfoVo();
         BeanUtil.copyProperties(userInfo,wxMaUserInfoVo);
+        wxMaUserInfoVo.setOpenId(sessionInfo.getOpenid());
         wxMaUserInfoVo.setScene(token.getScene());
         //处理用户信息
         OAuthUserDetails userDetails = (OAuthUserDetails) baseUserService.loadUserByUsername(JSONUtil.toJsonStr(wxMaUserInfoVo));

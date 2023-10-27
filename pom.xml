@@ -57,7 +57,7 @@
         <alipay-easysdk.version>2.1.0</alipay-easysdk.version>
         <transmittable-thread-local.version>2.12.2</transmittable-thread-local.version>
         <mapstruct.version>1.4.1.Final</mapstruct.version>
-        <wx.binarywang.version>4.3.0</wx.binarywang.version>
+        <wx.binarywang.version>4.5.5.B</wx.binarywang.version>
         <spring.boot.version>2.3.2.RELEASE</spring.boot.version>
         <easy-es.version>1.0.3</easy-es.version>
         <elasticsearch.version>7.14.0</elasticsearch.version>

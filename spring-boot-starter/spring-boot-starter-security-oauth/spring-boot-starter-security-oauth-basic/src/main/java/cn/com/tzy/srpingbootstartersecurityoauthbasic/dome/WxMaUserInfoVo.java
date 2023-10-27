@@ -6,4 +6,5 @@ import lombok.Data;
 @Data
 public class WxMaUserInfoVo extends WxMaUserInfo {
     private String scene;
+    private String openId;
 }

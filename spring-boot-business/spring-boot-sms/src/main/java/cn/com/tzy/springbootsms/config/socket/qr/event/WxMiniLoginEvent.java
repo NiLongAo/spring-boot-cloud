@@ -100,7 +100,7 @@ public class WxMiniLoginEvent implements EventListener<WxMiniLoginData> {
         if(StringUtils.isNotEmpty(mini.getScene())){
             String uuid = client.getSessionId().toString().replaceAll("-", "");
             NotNullMap data = new NotNullMap();
-            data.put("mini_scene",uuid);
+            data.putString("mini_scene",uuid);
             data.put("data",build);
             //登录成功后存储
             String key = String.format("%s%s", WxMiniConstant.WX_MINI_LOGIN_SCENE, mini.getScene());
