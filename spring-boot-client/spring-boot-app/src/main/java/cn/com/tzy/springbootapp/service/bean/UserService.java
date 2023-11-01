@@ -126,7 +126,7 @@ public class UserService {
             return RestResult.result(RespCode.CODE_2.getValue(),"未获取到用户信息");
         }
         UserPayload userJwtPayload = AppUtils.convertValue2(map, UserPayload.class);
-        return userServiceFeign.openId(userJwtPayload.getUser_name());
+        return userServiceFeign.findLoginUserId(userJwtPayload.getUserId());
     }
 
     public RestResult<?> logout(){
