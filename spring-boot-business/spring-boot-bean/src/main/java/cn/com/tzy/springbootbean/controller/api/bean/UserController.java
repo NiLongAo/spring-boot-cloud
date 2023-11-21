@@ -86,6 +86,15 @@ public class UserController extends ApiController {
     }
 
     /**
+     * 根据小程序用户编号获取用户信息
+     */
+    @GetMapping("mp_user_id")
+    @ResponseBody
+    public RestResult<?> findMpUserId(@RequestParam("miniId")Long miniId){
+        return userService.findMpUserId(miniId);
+    }
+
+    /**
      * 根据手机号获取用户信息
      * @return
      */

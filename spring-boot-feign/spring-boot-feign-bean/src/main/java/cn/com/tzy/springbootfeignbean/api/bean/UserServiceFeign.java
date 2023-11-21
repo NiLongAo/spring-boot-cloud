@@ -31,6 +31,9 @@ public interface UserServiceFeign {
     @RequestMapping(value = "/login_user_id",method = RequestMethod.GET)
     RestResult<?> findLoginUserId(@RequestParam(value = "userId") Long userId);
 
+    @RequestMapping(value = "/mp_user_id",method = RequestMethod.GET)
+    RestResult<?> findMpUserId(@RequestParam(value = "miniId") Long miniId);
+
     @RequestMapping(value = "/choice_user_page",method = RequestMethod.POST)
     PageResult choiceUserPage(@RequestBody UserParam userPageModel);
 

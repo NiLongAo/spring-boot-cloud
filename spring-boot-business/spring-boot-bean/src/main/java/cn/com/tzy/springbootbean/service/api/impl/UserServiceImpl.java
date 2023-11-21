@@ -121,27 +121,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             return RestResult.result(RespCode.CODE_2.getValue(), "未获取到用户信息");
         }
         RestResult<?> result = findUserInfo(user.getId());
-        if (result.getCode() != RespCode.CODE_0.getValue()) {
-            return result;
-        }
-        UserInfoVo userInfoVo = BeanUtil.toBean(result.getData(),UserInfoVo.class) ;
-        SecurityBaseUser build = SecurityBaseUser.builder()
-                .id(userInfoVo.getId())
-                .userName(userInfoVo.getUserName())
-                .nickName(userInfoVo.getNickName())
-                .imageUrl(userInfoVo.getImageUrl())
-                //.password(user.getPassword())
-                //.credentialssalt(user.getCredentialssalt())
-                .isAdmin(userInfoVo.getIsAdmin())
-                .isEnabled(userInfoVo.getIsEnabled())
-                .tenantId(userInfoVo.getTenantId())
-                .tenantStatus(userInfoVo.getTenantStatus())
-                .roleIdList(userInfoVo.getRoleIdList())
-                .positionIdList(userInfoVo.getPositionIdList())
-                .departmentIdList(userInfoVo.getDepartmentIdList())
-                .privilegeList(userInfoVo.getPrivilegeList())
-                .build();
-        return RestResult.result(RespCode.CODE_0.getValue(), null, build);
+        return getUserLoginInfo(result);
     }
 
     @Override
@@ -154,27 +134,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             return RestResult.result(RespCode.CODE_315.getValue(), "请先登录web端登录绑定微信");
         }
         RestResult<?> result = findUserInfo(user.getId());
-        if (result.getCode() != RespCode.CODE_0.getValue()) {
-            return result;
-        }
-        UserInfoVo userInfoVo = BeanUtil.toBean(result.getData(),UserInfoVo.class) ;
-        SecurityBaseUser build = SecurityBaseUser.builder()
-                .id(userInfoVo.getId())
-                .userName(userInfoVo.getUserName())
-                .nickName(userInfoVo.getNickName())
-                .imageUrl(userInfoVo.getImageUrl())
-                //.password(user.getPassword())
-                //.credentialssalt(user.getCredentialssalt())
-                .isAdmin(userInfoVo.getIsAdmin())
-                .isEnabled(userInfoVo.getIsEnabled())
-                .tenantId(userInfoVo.getTenantId())
-                .tenantStatus(userInfoVo.getTenantStatus())
-                .roleIdList(userInfoVo.getRoleIdList())
-                .positionIdList(userInfoVo.getPositionIdList())
-                .departmentIdList(userInfoVo.getDepartmentIdList())
-                .privilegeList(userInfoVo.getPrivilegeList())
-                .build();
-        return RestResult.result(RespCode.CODE_0.getValue(), null, build);
+        return getUserLoginInfo(result);
     }
 
     /**
@@ -226,30 +186,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             return RestResult.result(RespCode.CODE_2.getValue(), "未获取到用户信息");
         }
         RestResult<?> result = findUserInfo(user.getId());
-        if (result.getCode() != RespCode.CODE_0.getValue()) {
-            return result;
-        }
-        UserInfoVo userInfoVo = BeanUtil.toBean(result.getData(),UserInfoVo.class) ;
-        SecurityBaseUser build = SecurityBaseUser.builder()
-                .id(userInfoVo.getId())
-                .userName(userInfoVo.getUserName())
-                .nickName(userInfoVo.getNickName())
-                .imageUrl(userInfoVo.getImageUrl())
-                //.password(user.getPassword())
-                //.credentialssalt(user.getCredentialssalt())
-                .isAdmin(userInfoVo.getIsAdmin())
-                .isEnabled(userInfoVo.getIsEnabled())
-                .tenantId(userInfoVo.getTenantId())
-                .tenantStatus(userInfoVo.getTenantStatus())
-                .roleIdList(userInfoVo.getRoleIdList())
-                .positionIdList(userInfoVo.getPositionIdList())
-                .departmentIdList(userInfoVo.getDepartmentIdList())
-                .privilegeList(userInfoVo.getPrivilegeList())
-                .build();
-        return RestResult.result(RespCode.CODE_0.getValue(), null, build);
+        return getUserLoginInfo(result);
     }
 
-
+    @Override
+    public RestResult<?> findMpUserId(Long miniId) {
+        MiniUser miniUser = miniUserMapper.selectOne(new LambdaQueryWrapper<MiniUser>().eq(MiniUser::getMiniId, miniId));
+        if(miniUser == null){
+            return RestResult.result(RespCode.CODE_2.getValue(),"未获取用户信息");
+        }
+        RestResult<?> result = findUserInfo(miniUser.getUserId());
+        return getUserLoginInfo(result);
+    }
 
     /**
      * 获取用户基本信息
@@ -332,6 +280,30 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 .positionIdList(positionIdList.isEmpty()?new ArrayList<>():positionIdList.stream().map(o->Long.parseLong(o.get("positionId").toString())).collect(Collectors.toList()))
                 .departmentIdList(departmentIdList.isEmpty()?new ArrayList<>():departmentIdList.stream().map(o->Long.parseLong(o.get("departmentId").toString())).collect(Collectors.toList()))
                 .privilegeList(new ArrayList<>(userPrivilegeSet))
+                .build();
+        return RestResult.result(RespCode.CODE_0.getValue(), null, build);
+    }
+
+    private RestResult<?> getUserLoginInfo(RestResult<?> result) {
+        if (result.getCode() != RespCode.CODE_0.getValue()) {
+            return result;
+        }
+        UserInfoVo userInfoVo = BeanUtil.toBean(result.getData(),UserInfoVo.class) ;
+        SecurityBaseUser build = SecurityBaseUser.builder()
+                .id(userInfoVo.getId())
+                .userName(userInfoVo.getUserName())
+                .nickName(userInfoVo.getNickName())
+                .imageUrl(userInfoVo.getImageUrl())
+                //.password(user.getPassword())
+                //.credentialssalt(user.getCredentialssalt())
+                .isAdmin(userInfoVo.getIsAdmin())
+                .isEnabled(userInfoVo.getIsEnabled())
+                .tenantId(userInfoVo.getTenantId())
+                .tenantStatus(userInfoVo.getTenantStatus())
+                .roleIdList(userInfoVo.getRoleIdList())
+                .positionIdList(userInfoVo.getPositionIdList())
+                .departmentIdList(userInfoVo.getDepartmentIdList())
+                .privilegeList(userInfoVo.getPrivilegeList())
                 .build();
         return RestResult.result(RespCode.CODE_0.getValue(), null, build);
     }
