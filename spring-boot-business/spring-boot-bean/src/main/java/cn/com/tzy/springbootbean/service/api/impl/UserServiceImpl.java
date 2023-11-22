@@ -161,23 +161,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             return RestResult.result(RespCode.CODE_2.getValue(),"解析用户信息失败");
         }
         TypeEnum clientType = TypeEnum.getClientType(userJwtPayload.getLoginType());
-        return findLoginTypeByUserInfo(clientType,String.valueOf(userJwtPayload.getUserId()));
+        return findLoginTypeByUserInfo(clientType==TypeEnum.APP_WX_MINI?clientType:TypeEnum.WEB_ID,String.valueOf(userJwtPayload.getUserId()));
     }
     private RestResult<?> findLoginTypeByUserInfo(TypeEnum clientType,String userNo){
         Long userId = null;
         SecurityBaseUser user = null;
         switch (clientType){
-            case WEB_ID:
-                user = baseMapper.findLoginUserId(Long.valueOf(userNo));
-                if (user == null) {
-                    return RestResult.result(RespCode.CODE_2.getValue(), "未获取到用户信息");
-                }
-                break;
             case WEB_ACCOUNT:
                 user = baseMapper.findLoginAccount(userNo);
                 if (user == null) {
                     return RestResult.result(RespCode.CODE_2.getValue(), "未获取到用户信息");
                 }
+                userId = user.getId();
+                user = baseMapper.findLoginUserId(userId);
                 break;
             case WEB_MOBILE:
                 user = baseMapper.selectPhone(userNo);
@@ -185,6 +181,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     return RestResult.result(RespCode.CODE_2.getValue(), "未获取到用户信息");
                 }
                 userId = user.getId();
+                user = baseMapper.findLoginUserId(userId);
                 break;
             case WEB_WX_MINI:
                 user = baseMapper.selectOpenId(userNo);
@@ -192,6 +189,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     return RestResult.result(RespCode.CODE_315.getValue(), "请先登录web端登录绑定微信");
                 }
                 userId = user.getId();
+                user = baseMapper.findLoginUserId(userId);
                 break;
             case APP_WX_MINI:
                 MiniUser miniUser = miniUserMapper.selectOne(new LambdaQueryWrapper<MiniUser>().eq(MiniUser::getMiniId, Long.valueOf(userNo)));
@@ -199,6 +197,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     return RestResult.result(RespCode.CODE_2.getValue(),"未获取用户信息");
                 }
                 userId = miniUser.getUserId();
+                user = baseMapper.findLoginUserId(userId);
+                break;
+            case WEB_ID:
+                user = baseMapper.findLoginUserId(Long.valueOf(userNo));
+                if (user == null) {
+                    return RestResult.result(RespCode.CODE_2.getValue(), "未获取到用户信息");
+                }
+                userId = user.getId();
                 break;
             default:
                 return RestResult.result(RespCode.CODE_2.getValue(), "登陆类型错误");
@@ -226,7 +232,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 .build();
         return RestResult.result(RespCode.CODE_0.getValue(), null, build);
     }
-    
+
     /**
      * 获取用户基本信息
      *
