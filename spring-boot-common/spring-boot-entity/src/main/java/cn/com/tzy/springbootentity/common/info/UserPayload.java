@@ -17,4 +17,6 @@ public class UserPayload {
     private Long userId;
 
     private String user_name;
+
+    private String loginType;
 }

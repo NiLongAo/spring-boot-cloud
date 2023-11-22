@@ -55,6 +55,7 @@ public class PhoneUserServiceImpl implements UserDetailsService, UserDetailsType
             throw new UsernameNotFoundException("用户:" + phone + ",不存在!");
         }
         OAuthUserDetails oauthUserDetails = new OAuthUserDetails(sysUser);
+        oauthUserDetails.setLoginType(getTypeEnum().getType());
         if (oauthUserDetails.getId() == null) {
             throw new UsernameNotFoundException(RespCode.CODE_311.getName());
         } else if (oauthUserDetails.getTenantId() == null) {

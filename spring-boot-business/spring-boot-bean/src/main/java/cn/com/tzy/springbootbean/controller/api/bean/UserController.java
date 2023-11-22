@@ -88,10 +88,10 @@ public class UserController extends ApiController {
     /**
      * 根据小程序用户编号获取用户信息
      */
-    @GetMapping("mp_user_id")
+    @GetMapping("login_info")
     @ResponseBody
-    public RestResult<?> findMpUserId(@RequestParam("miniId")Long miniId){
-        return userService.findMpUserId(miniId);
+    public RestResult<?> findLoginInfo(){
+        return userService.findLoginInfo();
     }
 
     /**

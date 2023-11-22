@@ -31,8 +31,8 @@ public interface UserServiceFeign {
     @RequestMapping(value = "/login_user_id",method = RequestMethod.GET)
     RestResult<?> findLoginUserId(@RequestParam(value = "userId") Long userId);
 
-    @RequestMapping(value = "/mp_user_id",method = RequestMethod.GET)
-    RestResult<?> findMpUserId(@RequestParam(value = "miniId") Long miniId);
+    @RequestMapping(value = "/login_info",method = RequestMethod.GET)
+    RestResult<?> findLoginInfo();
 
     @RequestMapping(value = "/choice_user_page",method = RequestMethod.POST)
     PageResult choiceUserPage(@RequestBody UserParam userPageModel);
@@ -65,7 +65,6 @@ public interface UserServiceFeign {
 
     @RequestMapping(value = "/find_position_id_list",method = RequestMethod.GET)
     RestResult<?> findPositionIdList(@RequestParam("idList") List<Long> idList);
-
     /**
      * 获取用户角色信息
      */
@@ -76,7 +75,6 @@ public interface UserServiceFeign {
      */
     @RequestMapping(value = "/save_user_role",method = RequestMethod.POST)
     RestResult<?> saveUserConnectRole(@Validated @RequestBody UserConnectRoleParam param);
-
     /**
      * 获取用户部门信息
      */
@@ -98,6 +96,5 @@ public interface UserServiceFeign {
      */
     @RequestMapping(value = "/save_user_position",method = RequestMethod.POST)
     RestResult<?> saveUserConnectPosition(@Validated @RequestBody UserConnectPositionParam param);
-
 
 }

@@ -27,7 +27,6 @@ public class SecurityBaseUser implements BaseUser,Serializable {
      * 昵称
      */
     private String nickName;
-
     /**
      * 图像
      */
@@ -36,37 +35,30 @@ public class SecurityBaseUser implements BaseUser,Serializable {
      * 密码
      */
     private String password;
-
     /**
      * 加盐
      */
     private String credentialssalt;
-
     /**
      * 是否核心管理员 1是 0否
      */
     private Integer isAdmin;
-
     /**
      * 是否禁止登录 1是 0否
      */
     private Integer isEnabled;
-
     /**
      * 是否小程序认证
      */
     private Boolean isMaAuthentication = true;
-
     /**
      * 租户编号
      */
     private Long tenantId;
-
     /**
      * 租户编号
      */
     private Integer tenantStatus;
-
     /**
      * 角色集合
      */
@@ -79,7 +71,6 @@ public class SecurityBaseUser implements BaseUser,Serializable {
      * 部门集合
      */
     private List<Long> departmentIdList;
-
     /**
      * 权限信息
      */

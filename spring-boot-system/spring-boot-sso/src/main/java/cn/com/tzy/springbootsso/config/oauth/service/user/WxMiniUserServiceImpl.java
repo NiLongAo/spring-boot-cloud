@@ -88,6 +88,7 @@ public class WxMiniUserServiceImpl implements UserDetailsService, UserDetailsTyp
                 .tenantStatus(ConstEnum.Flag.YES.getValue()) //默认启用
                 .build();
         OAuthUserDetails oauthUserDetails = new OAuthUserDetails(user);
+        oauthUserDetails.setLoginType(getTypeEnum().getType());
         if (oauthUserDetails.getId() == null) {
             throw new UsernameNotFoundException(RespCode.CODE_311.getName());
         } else if (oauthUserDetails.getTenantId() == null) {

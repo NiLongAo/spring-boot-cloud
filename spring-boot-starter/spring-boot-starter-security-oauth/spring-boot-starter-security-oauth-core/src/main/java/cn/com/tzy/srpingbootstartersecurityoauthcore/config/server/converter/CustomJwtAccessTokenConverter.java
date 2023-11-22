@@ -88,6 +88,7 @@ public class CustomJwtAccessTokenConverter extends JwtAccessTokenConverter {
             info.put(Common.JWT_USER_ID, oAuthUserDetails.getId());
             info.put(Common.JWT_ADMIN, oAuthUserDetails.getIsAdmin());
             info.put(Common.JWT_TENANT_ID, oAuthUserDetails.getTenantId());
+            info.put(Common.JWT_LOGIN_TYPE, oAuthUserDetails.getLoginType());
         }
         result.setAdditionalInformation(info);
         return enhanceCustom(result, authentication);

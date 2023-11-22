@@ -18,9 +18,17 @@ public interface UserService extends IService<User> {
      */
     RestResult<?> findLoginUserId(Long userId);
     /**
+     * oauth2获取登录用户信息
+     */
+    RestResult<?> phone(String phone);
+    /**
+     * oauth2获取登录用户信息
+     */
+    RestResult<?> openId(String token);
+    /**
      * 根据小程序用户编号获取用户信息
      */
-    RestResult<?> findMpUserId(Long miniId);
+    RestResult<?> findLoginInfo();
     /**
      * 获取用户基本信息
      *
@@ -38,10 +46,7 @@ public interface UserService extends IService<User> {
      * 删除用户
      */
     RestResult<?> remove(Long id);
-
     PageResult findPage(UserParam userPageModel);
-    RestResult<?> phone(String phone);
-    RestResult<?> openId(String token);
     RestResult<?> findUserIdList(List<Long> idList);
     RestResult<?> findRoleIdList(List<Long> idList);
     RestResult<?> findDepartmentIdList(List<Long> idList);

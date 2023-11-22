@@ -56,6 +56,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, UserDetailsTy
             throw new UsernameNotFoundException("用户:" + username + ",不存在!");
         }
         OAuthUserDetails oauthUserDetails = new OAuthUserDetails(sysUser);
+        oauthUserDetails.setLoginType(getTypeEnum().getType());
         if (oauthUserDetails.getId() == null) {
             throw new UsernameNotFoundException(RespCode.CODE_311.getName());
         } else if (oauthUserDetails.getTenantId() == null) {

@@ -121,12 +121,7 @@ public class UserService {
     }
 
     public RestResult<?> findLoginInfo(){
-        Map map = JwtUtils.getJwtPayload();
-        if(map == null){
-            return RestResult.result(RespCode.CODE_2.getValue(),"未获取到用户信息");
-        }
-        UserPayload userJwtPayload = AppUtils.convertValue2(map, UserPayload.class);
-        return userServiceFeign.findMpUserId(userJwtPayload.getUserId());
+        return userServiceFeign.findLoginInfo();
     }
 
     public RestResult<?> logout(){

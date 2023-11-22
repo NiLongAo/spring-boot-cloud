@@ -46,12 +46,10 @@ public class WxMiniUserOpenIdServiceImpl implements UserDetailsService, UserDeta
             throw new UsernameNotFoundException(result.getMessage());
         }
         SecurityBaseUser sysUser = null;
-        if (RespCode.CODE_0.getValue()==result.getCode()) {
-            try {
-                sysUser =  AppUtils.decodeJson2(AppUtils.encodeJson(result.getData()), SecurityBaseUser.class);
-            } catch (IOException e) {
-                throw new RuntimeException("用户openId:" + openId + ",Json解析失败");
-            }
+        try {
+            sysUser = AppUtils.decodeJson2(AppUtils.encodeJson(result.getData()), SecurityBaseUser.class);
+        } catch (IOException e) {
+            throw new RuntimeException("用户openId:" + openId + ",Json解析失败");
         }
         //判断是否请求成功
         if (sysUser==null) {
@@ -59,6 +57,7 @@ public class WxMiniUserOpenIdServiceImpl implements UserDetailsService, UserDeta
             throw new UsernameNotFoundException("用户openId:" + openId + ",不存在!");
         }
         OAuthUserDetails oauthUserDetails = new OAuthUserDetails(sysUser);
+        oauthUserDetails.setLoginType(getTypeEnum().getType());
         if (oauthUserDetails.getId() == null) {
             throw new UsernameNotFoundException(RespCode.CODE_311.getName());
         } else if (oauthUserDetails.getTenantId() == null) {

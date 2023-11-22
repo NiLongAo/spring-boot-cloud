@@ -15,6 +15,10 @@ public class Common {
      */
     public final static String JWT_TENANT_ID = "tenantId";
     /**
+     * JWT 当前用户编号所属租户
+     */
+    public final static String JWT_LOGIN_TYPE = "loginType";
+    /**
      * JWT ID 唯一标识
      */
     public final static String JWT_JTI = "jti";

@@ -35,6 +35,10 @@ public class OAuthUserDetails implements UserDetails {
 
     private String credentialssalt;
     /**
+     * 登陆方式
+     */
+    private String loginType;
+    /**
      * 租户编号
      */
     private Long tenantId;
