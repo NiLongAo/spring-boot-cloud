@@ -205,6 +205,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     return RestResult.result(RespCode.CODE_2.getValue(), "未获取到用户信息");
                 }
                 userId = user.getId();
+                user.setPassword(null);
+                user.setCredentialssalt(null);
                 break;
             default:
                 return RestResult.result(RespCode.CODE_2.getValue(), "登陆类型错误");
