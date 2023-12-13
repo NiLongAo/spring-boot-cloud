@@ -503,7 +503,7 @@ public class MediaClient {
         NotNullMap map = new NotNullMap() {{
             putString("api.secret", mediaServerVo.getSecret());
             if (mediaServerVo.getRtspPort() != 0) {
-                putString("ffmpeg.snap", URLUtil.encode("%s -rtsp_transport tcp -i %s -y -f mjpeg -t 0.001 %s", CharsetUtil.CHARSET_UTF_8));
+                putString("ffmpeg.snap", URLUtil.encode("%s -rtsp_transport tcp -i %s -y -f mjpeg -frames:v 1 %s", CharsetUtil.CHARSET_UTF_8));
             }
             putString("rtc.externIP", mediaServerVo.getSdpIp());
             putInteger("hook.enable", 1);

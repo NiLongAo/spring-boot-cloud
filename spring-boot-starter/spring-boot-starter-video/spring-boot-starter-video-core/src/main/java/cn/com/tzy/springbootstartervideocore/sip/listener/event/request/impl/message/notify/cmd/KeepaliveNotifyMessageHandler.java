@@ -88,6 +88,15 @@ public class KeepaliveNotifyMessageHandler extends SipResponseEvent implements M
             deviceVo.setPort(remoteAddressInfo.getPort());
             deviceVo.setHostAddress(remoteAddressInfo.getIp().concat(":").concat(String.valueOf(remoteAddressInfo.getPort())));
             deviceVo.setIp(remoteAddressInfo.getIp());
+            // 设备地址变化会引起目录订阅任务失效，需要重新添加
+            if (deviceVo.getSubscribeCycleForCatalog() > 0) {
+                RedisService.getDeviceNotifySubscribeManager().removeCatalogSubscribe(deviceVo);
+                RedisService.getDeviceNotifySubscribeManager().addCatalogSubscribe(deviceVo);
+            }
+            if( deviceVo.getSubscribeCycleForMobilePosition() < 0){
+                RedisService.getDeviceNotifySubscribeManager().removeMobilePositionSubscribe(deviceVo);
+                RedisService.getDeviceNotifySubscribeManager().addMobilePositionSubscribe(deviceVo);
+            }
         }
         if (deviceVo.getKeepaliveTime() == null) {
             deviceVo.setKeepaliveIntervalTime(60);

@@ -433,7 +433,7 @@ public class MediaHookServer {
             String deviceId = split[0];
             String channelId = split[1];
             DeviceVo deviceVo = deviceVoService.findDeviceGbId(deviceId);
-            if(deviceVo == null){
+            if(deviceVo == null || deviceVo.getOnline()==ConstEnum.Flag.NO.getValue()){
                 deferredResult.setResult(new NotNullMap(){{putInteger("code",404);putString("msg","资源未找到");}});
                 return deferredResult;
             }

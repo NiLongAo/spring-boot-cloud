@@ -39,5 +39,4 @@ public class SpringBootSmsApplicationTests {
         System.out.println(data1);
 
     }
-
 }
