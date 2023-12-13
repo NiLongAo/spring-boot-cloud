@@ -29,4 +29,11 @@ public class DictionaryItemController extends ApiController {
         return dictionaryItemService.findItemList(typeId);
     }
 
+    @ApiOperation(value = "获取有效字典条目", notes = "获取有效字典条目")
+    @GetMapping("find_dict")
+    @ResponseBody
+    public RestResult<?> findDict() {
+        return dictionaryItemService.findDict();
+    }
+
 }

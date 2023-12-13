@@ -19,5 +19,7 @@ public class DictionaryItemService {
      */
     public RestResult<?> findItemList(String typeId){return dictionaryItemServiceFeign.findItemList(typeId);}
 
-
+    public RestResult<?> findDict() {
+        return dictionaryItemServiceFeign.findDict();
+    }
 }
