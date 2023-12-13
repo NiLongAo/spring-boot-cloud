@@ -165,6 +165,15 @@ public class Device extends LongIdEntity {
     private Date registerTime;
 
     /**
+     * 续订时间
+     */
+    @TableField(value = "renew_time")
+    @ApiModelProperty(value="注册时间")
+    @DateTimeFormat(pattern = Constant.DATE_TIME_FORMAT)
+    @JsonFormat(pattern =  Constant.DATE_TIME_FORMAT)
+    private Date renewTime;
+
+    /**
      * 心跳时间
      */
     @TableField(value = "keepalive_time")

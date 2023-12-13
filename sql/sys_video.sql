@@ -19,6 +19,7 @@ CREATE TABLE video_device (
     geo_coord_sys                       tinyint(4)  default 1 COMMENT '地理坐标系， 目前支持 1.WGS84,2.GCJ02',
     online                              tinyint(4)  default 2 COMMENT '是否在线，1.为在线，0.为离线',
     register_time                       datetime  DEFAULT NULL COMMENT '注册时间',
+    renew_time                          datetime  DEFAULT NULL COMMENT '续订时间',
     keepalive_time                      datetime  DEFAULT NULL COMMENT '心跳时间',
     keepalive_interval_time             int default 30 COMMENT '心跳间隔 (最低25秒)',
     stream_mode                         tinyint(4)  DEFAULT 0 COMMENT '数据流传输模式 0.UDP:udp传输 1.TCP-PASSIVE：tcp被动模式 2.TCP-ACTIVE：tcp主动模式',

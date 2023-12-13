@@ -110,7 +110,10 @@ public class DeviceVo extends LongIdEntity {
      * 注册时间
      */
     private Date registerTime;
-
+    /**
+     * 续订时间
+     */
+    private Date renewTime;
     /**
      * 心跳时间
      */
@@ -177,10 +180,10 @@ public class DeviceVo extends LongIdEntity {
     private Integer switchPrimarySubStream;
 
     public boolean expire(){
-        if(registerTime == null || expires == null){
+        if(renewTime == null || expires == null){
             return true;
         }
-        DateTime endTime = DateUtil.offsetSecond(registerTime, expires+ VideoConstant.DELAY_TIME);
+        DateTime endTime = DateUtil.offsetSecond(renewTime, expires+ VideoConstant.DELAY_TIME);
         return endTime.isBefore(new Date());
     }
 

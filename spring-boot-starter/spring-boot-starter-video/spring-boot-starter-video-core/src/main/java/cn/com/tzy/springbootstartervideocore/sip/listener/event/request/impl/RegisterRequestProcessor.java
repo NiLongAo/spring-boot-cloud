@@ -78,6 +78,7 @@ public class RegisterRequestProcessor extends AbstractSipRequestEvent implements
                     deviceVo.setPort(remoteAddress.getPort());
                     deviceVo.setHostAddress(remoteAddress.getIp().concat(":").concat(String.valueOf(remoteAddress.getPort())));
                     deviceVo.setLocalIp(request.getLocalAddress().getHostAddress());
+                    deviceVo.setRenewTime(new Date());
                     response = getRegisterOkResponse(request);
                     // 判断TCP还是UDP
                     ViaHeader reqViaHeader = (ViaHeader) request.getHeader(ViaHeader.NAME);
@@ -150,6 +151,7 @@ public class RegisterRequestProcessor extends AbstractSipRequestEvent implements
                 String transport = reqViaHeader.getTransport();
                 deviceVo.setTransport("TCP".equalsIgnoreCase(transport) ? 2 : 1);
                 deviceVo.setRegisterTime(new Date());
+                deviceVo.setRenewTime(new Date());
                 deviceVoService.online(deviceVo,sipServer,sipCommander,videoProperties,new SipTransactionInfo((SIPResponse)response));
             } else {
                 log.info("[{}] deviceId: {}->{}",title ,deviceId, requestAddress);
