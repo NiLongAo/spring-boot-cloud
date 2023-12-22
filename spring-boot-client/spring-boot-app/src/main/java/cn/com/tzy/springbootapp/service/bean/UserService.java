@@ -18,6 +18,7 @@ import cn.com.tzy.springbootfeignbean.api.sys.ConfigServiceFeign;
 import cn.com.tzy.springbootfeignsso.api.oauth.OAuthUserServiceFeign;
 import cn.com.tzy.springbootstarterredis.utils.RedisUtils;
 import cn.com.tzy.srpingbootstartersecurityoauthbasic.common.TypeEnum;
+import cn.hutool.captcha.AbstractCaptcha;
 import cn.hutool.core.lang.UUID;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
@@ -61,28 +62,12 @@ public class UserService {
     public RestResult<?> getCode() {
         // 返回的数组第一个参数是生成的验证码，第二个参数是生成的图片
         String key = UUID.fastUUID().toString(true);
-        Object[] objs = VerifyUtil.newBuilder()
-                .setWidth(120)   //设置图片的宽度
-                .setHeight(40)   //设置图片的高度
-                .setSize(4)      //设置字符的个数
-                .setLines(6)    //设置干扰线的条数
-                .setFontSize(25) //设置字体的大小
-                .setTilt(true)   //设置是否需要倾斜
-                .setBackgroundColor(Color.LIGHT_GRAY) //设置验证码的背景颜色
-                .build()         //构建VerifyUtil项目
-                .createImage();  //生成图片
+        AbstractCaptcha lineCaptcha = VerifyUtil.createLineCaptcha(120, 40, 4, 0);
         // 验证码缓存三分钟
-        RedisUtils.set(Constant.VERIFY_CODE_PREFIX+key,String.valueOf(objs[0]).trim().toUpperCase(),Constant.EXRP_MINUTE * 3);
-        // 将图片输出给浏览器
-        BufferedImage image = (BufferedImage) objs[1];
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();//io流  1	1	1	1	2022-10-15 18:56:45	1	2022-10-15 18:56:45
-        ImageIO.write(image, "png", baos);//写入流中
-        byte[] bytes = baos.toByteArray();//转换成字节
-        Base64.Encoder encoder = Base64.getMimeEncoder();
-        String png_base64 = encoder.encodeToString(bytes);//转换成base64串
+        RedisUtils.set(Constant.VERIFY_CODE_PREFIX+key,lineCaptcha.getCode(),Constant.EXRP_MINUTE * 3);
         NotNullMap map = new NotNullMap();
         map.putString("key",key);
-        map.putString("image", ImgConstant.IMAGE_JPG+png_base64);
+        map.putString("image",lineCaptcha.getImageBase64Data());
         return RestResult.result(RespCode.CODE_0.getValue(),null,map);
     }
 
