@@ -10,6 +10,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @EnableFeignClients(basePackages = {
         "cn.com.tzy.springbootfeignbean.api",
         "cn.com.tzy.springbootfeignsms.api",
+        "cn.com.tzy.springbootfeignvideo.api",
         "cn.com.tzy.springbootfeignsso.api",
         "cn.com.tzy.springbootfeignoa.api",
         "cn.com.tzy.springbootfeignacitiviti.api",
