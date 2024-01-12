@@ -32,7 +32,7 @@ public class PageSortModel {
 
     public String getOrder() {
         if(StringUtils.isNotEmpty(this.order)){
-            if(this.order.equals(DESCEND)){
+            if(order.equals(DESCEND)){
                 return DESC;
             }else if(order.equals(ASCEND)){
                 return ASC;
