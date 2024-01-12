@@ -33,9 +33,9 @@ public class PageSortModel {
     public String getOrder() {
         if(StringUtils.isNotEmpty(this.order)){
             if(this.order.equals(DESCEND)){
-                return ASC;
-            }else if(order.equals(ASCEND)){
                 return DESC;
+            }else if(order.equals(ASCEND)){
+                return ASC;
             }else {
                 return order;
             }
