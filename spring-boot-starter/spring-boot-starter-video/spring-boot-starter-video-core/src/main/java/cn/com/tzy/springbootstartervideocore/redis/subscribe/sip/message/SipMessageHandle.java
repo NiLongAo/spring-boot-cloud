@@ -1,6 +1,7 @@
 package cn.com.tzy.springbootstartervideocore.redis.subscribe.sip.message;
 
 
+import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootstarterredis.pool.AbstractMessageListener;
 import cn.com.tzy.springbootstarterredis.utils.RedisUtils;
 import cn.com.tzy.springbootstartervideobasic.common.VideoConstant;
@@ -8,6 +9,8 @@ import cn.com.tzy.springbootstartervideobasic.vo.sip.Address;
 import cn.com.tzy.springbootstartervideobasic.vo.video.DeviceVo;
 import cn.com.tzy.springbootstartervideobasic.vo.video.ParentPlatformVo;
 import cn.com.tzy.springbootstartervideocore.demo.MessageTypeVo;
+import cn.com.tzy.springbootstartervideocore.model.EventResult;
+import cn.com.tzy.springbootstartervideocore.model.RestResultEvent;
 import cn.com.tzy.springbootstartervideocore.redis.RedisService;
 import cn.com.tzy.springbootstartervideocore.service.VideoService;
 import cn.com.tzy.springbootstartervideocore.sip.SipServer;
@@ -25,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.SerializationUtils;
 
 import javax.sip.SipException;
+import javax.sip.header.CallIdHeader;
 import javax.sip.header.UserAgentHeader;
 import javax.sip.header.ViaHeader;
 import javax.sip.message.Message;
@@ -60,6 +64,7 @@ public class SipMessageHandle extends AbstractMessageListener {
                     handleMessage(localIp,vo.getMessage());
                 }else {
                     log.error("[SIP接收消息] [设备] 未获取注册地址 gbId : {}",vo.getGbId());
+                    sendErrorMsg(sipServer, vo.getMessage(), String.format("未获取设备注册地址 国标编号 :%s",vo.getGbId()));
                 }
             }else if(MessageTypeVo.TypeEnum.PLATFORM.getValue()== (vo.getType())){
                 Address address = RedisService.getRegisterServerManager().getPlatform(vo.getGbId());
@@ -69,9 +74,11 @@ public class SipMessageHandle extends AbstractMessageListener {
                     handleMessage(localIp,vo.getMessage());
                 }else {
                     log.error("[SIP接收消息] [国标级联] 未获取注册地址 gbId : {}",vo.getGbId());
+                    sendErrorMsg(sipServer, vo.getMessage(), String.format("未获取国标级联注册地址 国标编号 :%s",vo.getGbId()));
                 }
             }else {
                 log.error("[SIP接收消息] 类型错误:{}", JSONUtil.toJsonStr(vo));
+                sendErrorMsg(sipServer, vo.getMessage(), String.format("消息类型错误 :%s",JSONUtil.toJsonStr(vo)));
             }
         }catch (Exception e){
             log.error("[SIP接收消息] 发生错误:", e);
@@ -95,6 +102,7 @@ public class SipMessageHandle extends AbstractMessageListener {
             try {
                 message.addHeader(SipUtils.createUserAgentHeader(sipServer.getSipFactory()));
             } catch (ParseException e) {
+                sendErrorMsg(sipServer, message, "添加UserAgentHeader失败");
                 log.error("添加UserAgentHeader失败", e);
             }
         }
@@ -104,24 +112,22 @@ public class SipMessageHandle extends AbstractMessageListener {
             SipProviderImpl tcpSipProvider = sipServer.getTcpSipProvider(ip);
             if (tcpSipProvider == null) {
                 log.error("[发送信息失败] 未找到tcp://{}的监听信息", ip);
+                sendErrorMsg(sipServer, message, String.format("未找到tcp://%s的监听信息",ip));
                 return;
             }
-            sendSip(ip, sipServer.getTcpSipProvider(ip), message);
+            sendSip(tcpSipProvider, message);
         } else if ("UDP".equals(transport)) {
             SipProviderImpl sipProvider = sipServer.getUdpSipProvider(ip);
             if (sipProvider == null) {
                 log.error("[发送信息失败] 未找到udp://{}的监听信息", ip);
+                sendErrorMsg(sipServer, message, String.format("未找到udp://%s的监听信息",ip));
                 return;
             }
-            sendSip(ip, sipServer.getUdpSipProvider(ip), message);
+            sendSip(sipProvider, message);
         }
     }
 
-    private static void sendSip(String ip, SipProviderImpl sipProvider, Message message) throws SipException {
-        if (sipProvider == null) {
-            log.error("[发送信息失败] 未找到udp://{}的监听信息", ip);
-            return;
-        }
+    private static void sendSip(SipProviderImpl sipProvider, Message message) throws SipException {
         if (message instanceof Request) {
             List<String> methodList = Arrays.asList(Request.ACK,Request.BYE);
             if(methodList.contains(((SIPRequest)message).getMethod())){
@@ -136,6 +142,19 @@ public class SipMessageHandle extends AbstractMessageListener {
             }
         } else if (message instanceof Response) {
             sipProvider.sendResponse((Response) message);
+        }
+    }
+
+    private void sendErrorMsg(SipServer sipServer,Message message,String error){
+        if(message == null){
+            log.error("[发送信息失败] 发送错误消息时,未获取消息主体");
+            return;
+        }
+        CallIdHeader callIdHeader = (CallIdHeader) message.getHeader(CallIdHeader.NAME);
+        SipSubscribeHandle sipSubscribeHandle = sipServer.getSubscribeManager();
+        SipSubscribeEvent errorSubscribe = sipSubscribeHandle.getErrorSubscribe(callIdHeader.getCallId());
+        if(errorSubscribe !=null){
+            errorSubscribe.response(new EventResult<RestResultEvent>(new RestResultEvent(RespCode.CODE_2.getValue(),error)));
         }
     }
 
