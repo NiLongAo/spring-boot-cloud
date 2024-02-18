@@ -16,9 +16,7 @@ import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -30,7 +28,7 @@ public class MyBatisUtils {
 
 
     public static <T> Page<T> buildPage(PageModel pageParam) {
-        return buildPage(pageParam, null);
+        return buildPage(pageParam, pageParam.getSort()== null?null: Collections.singletonList(pageParam.getSort()));
     }
 
     public static <T> Page<T> buildPage(PageModel pageParam, Collection<PageSortModel> sortingFields) {

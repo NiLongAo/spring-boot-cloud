@@ -24,7 +24,7 @@ public class PageModel extends BaseModel{
     @ApiModelProperty("查询其实行")
     private Integer startRow;
     @ApiModelProperty("排序对象")
-    transient PageSortModel sort;
+    private PageSortModel sort;
 
     //pageNumber有-1的操作，可能出现负数，所以进行整数判断！
     public Integer getStartRow(){
