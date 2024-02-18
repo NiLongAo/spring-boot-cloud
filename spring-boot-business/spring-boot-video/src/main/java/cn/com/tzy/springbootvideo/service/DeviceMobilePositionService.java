@@ -14,7 +14,7 @@ public interface DeviceMobilePositionService extends IService<DeviceMobilePositi
 
     DeferredResult<RestResult<?>> findRealtime(String deviceId,String channelId);
 
-    RestResult<?> subscribe(String deviceId, Integer expires, Integer interval);
+    RestResult<?> subscribe(String deviceId, Integer type, Integer expires);
 
     RestResult<?> transform(String deviceId);
 }

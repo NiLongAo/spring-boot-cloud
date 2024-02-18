@@ -1373,6 +1373,42 @@ public class SIPCommanderImpl implements SIPCommander {
     }
 
     @Override
+    public SIPRequest alarmSubscribe(SipServer sipServer, DeviceVo deviceVo,String channelId, SIPRequest requestOld, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws InvalidArgumentException, SipException, ParseException {
+        String deviceId =StringUtils.isEmpty(channelId)?deviceVo.getDeviceId():channelId;
+        StringBuffer cmdXml = new StringBuffer(200);
+        String charset = CharsetType.getName(deviceVo.getCharset());
+        cmdXml.append("<?xml version=\"1.0\" encoding=\"" + charset + "\"?>\r\n");
+        cmdXml.append("<Query>\r\n");
+        cmdXml.append("<SN>" + (int) ((Math.random() * 9 + 1) * 100000) + "</SN>\r\n");
+        cmdXml.append("<CmdType>Alarm</CmdType>\r\n");
+//        cmdXml.append("<StartAlarmPriority>0</StartAlarmPriority>\r\n");
+//        cmdXml.append("<EndAlarmPriority>0</EndAlarmPriority>\r\n");
+//        cmdXml.append("<AlarmMethod>0</AlarmMethod>\r\n");
+//        cmdXml.append("<AlarmType>0</AlarmType>\r\n");
+        cmdXml.append("<DeviceID>" + deviceId + "</DeviceID>\r\n");
+        cmdXml.append("</Query>\r\n");
+
+        String localIp = sipServer.getLocalIp(deviceVo.getLocalIp());
+        SipConfigProperties sipConfigProperties = sipServer.getSipConfigProperties();;
+        //构建器
+        Request request = SIPRequestProvider.builder(sipServer, null, Request.SUBSCRIBE, cmdXml.toString())
+                .createSipURI(deviceVo.getDeviceId(), deviceVo.getHostAddress())
+                .addViaHeader(localIp, sipConfigProperties.getPort(), TransportType.getName(deviceVo.getTransport()), true)
+                .createFromHeader(sipConfigProperties.getId(), sipConfigProperties.getDomain(), SipUtils.getNewFromTag())
+                .createToHeader(deviceVo.getDeviceId(), deviceVo.getHostAddress(), null)
+                .createCallIdHeader(localIp,TransportType.getName(deviceVo.getTransport()),requestOld == null?null:requestOld.getCallIdHeader().getCallId())
+                .createCSeqHeader(RedisService.getCseqManager().getCSEQ())
+                .createUserAgentHeader()
+                .createContactHeader(sipConfigProperties.getId(),String.format("%s:%s",localIp, sipConfigProperties.getPort()))
+                .createExpiresHeader(deviceVo.getSubscribeCycleForAlarm())
+                .createEventHeader(String.valueOf((int) Math.floor(Math.random() * 10000)),CmdType.ALARM_RESPONSE.getValue())
+                .createContentTypeHeader("Application", "MANSCDP+xml")
+                .buildRequest();
+        SipSendMessage.sendMessage(sipServer,deviceVo, request,okEvent,errorEvent);
+        return (SIPRequest)  request;
+    }
+
+    @Override
     public void dragZoomCmd(SipServer sipServer, DeviceVo deviceVo, String channelId, String cmdString, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws InvalidArgumentException, SipException, ParseException {
         String deviceID = ObjectUtils.isEmpty(channelId)?deviceVo.getDeviceId():channelId;
         StringBuffer dragXml = new StringBuffer(200);

@@ -48,7 +48,7 @@ public interface DeviceMobilePositionServiceFeign {
      * @param interval 位置订阅周期
      */
     @RequestMapping(value = "/subscribe",method = RequestMethod.GET)
-    RestResult<?> subscribe(@RequestParam("deviceId") String deviceId,@RequestParam("expires") Integer expires,@RequestParam("interval") Integer interval);
+    RestResult<?> subscribe(@RequestParam("deviceId") String deviceId,@RequestParam("type") Integer type,@RequestParam("expires") Integer expires);
 
 
     /**

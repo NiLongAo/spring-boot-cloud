@@ -36,9 +36,4 @@ public class SipConfigProperties {
 	 */
 	private String password="123456";
 
-	/**
-	 * 是否开启报警
-	 */
-	private Boolean alarm = false;
-
 }

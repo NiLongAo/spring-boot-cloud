@@ -6,9 +6,13 @@ import cn.com.tzy.springbootstartervideobasic.vo.video.DeviceChannelVo;
 import java.util.List;
 
 public interface DeviceChannelVoService {
+
+    DeviceChannelVo findLastDevice(String deviceId);
     DeviceChannelVo findChannelId(String channelId);
 
     DeviceChannelVo findPlatformIdChannelId(String platformId, String channelId);
+
+
 
     DeviceChannelVo findDeviceIdChannelId(String deviceId, String channelId);
 

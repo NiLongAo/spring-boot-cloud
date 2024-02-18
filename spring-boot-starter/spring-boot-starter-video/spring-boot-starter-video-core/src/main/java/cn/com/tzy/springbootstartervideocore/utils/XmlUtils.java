@@ -7,9 +7,11 @@ import cn.com.tzy.springbootstartervideobasic.enums.PtzTypeEnum;
 import cn.com.tzy.springbootstartervideobasic.interfaces.MessageElement;
 import cn.com.tzy.springbootstartervideobasic.vo.video.DeviceChannelVo;
 import cn.com.tzy.springbootstartervideobasic.vo.video.DeviceVo;
+import cn.com.tzy.springbootstartervideocore.properties.SipConfigProperties;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.XmlUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import lombok.extern.log4j.Log4j2;
@@ -272,6 +274,10 @@ public class XmlUtils {
                 if (StringUtils.isNotEmpty(parentId) ) {
                     if (parentId.contains("/")) {
                         parentId = parentId.substring(0, parentId.indexOf("/"));
+                    }
+                    SipConfigProperties bean = SpringUtil.getBean(SipConfigProperties.class);
+                    if(StringUtils.equals(bean.getId(),parentId)){
+                        parentId = deviceVo.getDeviceId();
                     }
                     deviceChannelVo.setParentId(parentId);
                 }else {

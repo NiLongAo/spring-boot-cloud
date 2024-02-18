@@ -86,20 +86,23 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
         if(device == null){
             return RestResult.result(RespCode.CODE_2.getValue(),"未获取设备信息");
         }
-        //1.删除设备
-        baseMapper.deleteById(device.getId());
         List<DeviceChannel> list = deviceChannelService.list(new LambdaQueryWrapper<DeviceChannel>().eq(DeviceChannel::getDeviceId, deviceId));
+        //1.删除上级通道
         if(!list.isEmpty()){
-            //2.删除上级通道
             platformGbChannelService.remove(new LambdaQueryWrapper<PlatformGbChannel>().in(PlatformGbChannel::getDeviceChannelId,list.stream().map(DeviceChannel::getChannelId).collect(Collectors.toSet())));
         }
-        //3.上级设备通道
+        //2.上级设备通道
         VideoService.getDeviceChannelService().delAll(device.getDeviceId());
-        //4.删除播放缓存
+        //3.删除播放缓存
         RedisService.getInviteStreamManager().clearInviteInfo(deviceId);
-        //5.删除定时设备
+        //4.删除定时设备
+        RedisService.getDeviceNotifySubscribeManager().removeAlarmSubscribe(DeviceConvert.INSTANCE.convert(device));
         RedisService.getDeviceNotifySubscribeManager().removeCatalogSubscribe(DeviceConvert.INSTANCE.convert(device));
         RedisService.getDeviceNotifySubscribeManager().removeMobilePositionSubscribe(DeviceConvert.INSTANCE.convert(device));
+        //5设备下线
+        VideoService.getDeviceService().offline(deviceId);
+        //6.删除设备
+        baseMapper.deleteById(device.getId());
         return RestResult.result(RespCode.CODE_0.getValue(),"删除成功");
     }
 
@@ -126,6 +129,10 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
         DeviceVo deviceVo = DeviceConvert.INSTANCE.convert(param);
         int save = VideoService.getDeviceService().save(deviceVo);
         if(save > 0){
+            Device device = baseMapper.selectOne(new LambdaQueryWrapper<Device>().eq(Device::getDeviceId, deviceVo.getDeviceId()));
+            if(device.getOnline()==ConstEnum.Flag.YES.getValue()){
+                VideoService.getDeviceService().offline(deviceVo.getDeviceId());
+            }
             return RestResult.result(RespCode.CODE_0.getValue(),"保存成功");
         }else {
             return RestResult.result(RespCode.CODE_2.getValue(),"保存失败");
@@ -181,6 +188,7 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
             return RestResult.result(RespCode.CODE_2.getValue(),"未获取设备信息");
         }
         NotNullMap data = new NotNullMap() {{
+            putInteger("alarm", RedisService.getDeviceNotifySubscribeManager().getAlarmSubscribe(device.getDeviceId())?ConstEnum.Flag.YES.getValue():ConstEnum.Flag.NO.getValue());
             putInteger("catalog", RedisService.getDeviceNotifySubscribeManager().getCatalogSubscribe(device.getDeviceId())?ConstEnum.Flag.YES.getValue():ConstEnum.Flag.NO.getValue());
             putInteger("mobilePosition", RedisService.getDeviceNotifySubscribeManager().getMobilePositionSubscribe(device.getDeviceId())?ConstEnum.Flag.YES.getValue():ConstEnum.Flag.NO.getValue());
         }};

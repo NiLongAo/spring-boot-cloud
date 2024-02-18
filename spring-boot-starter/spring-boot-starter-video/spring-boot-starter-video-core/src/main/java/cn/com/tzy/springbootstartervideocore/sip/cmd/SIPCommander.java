@@ -287,6 +287,13 @@ public interface SIPCommander {
 	SIPRequest catalogSubscribe(SipServer sipServer, DeviceVo deviceVo, SIPRequest request, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws InvalidArgumentException, SipException, ParseException;
 
 	/**
+	 * 订阅、取消订阅目录信息
+	 * @param deviceVo		视频设备
+	 * @return				true = 命令发送成功
+	 */
+	SIPRequest alarmSubscribe(SipServer sipServer, DeviceVo deviceVo,String channelId, SIPRequest request, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws InvalidArgumentException, SipException, ParseException;
+
+	/**
 	 * 拉框控制命令
 	 *
 	 * @param deviceVo    控制设备

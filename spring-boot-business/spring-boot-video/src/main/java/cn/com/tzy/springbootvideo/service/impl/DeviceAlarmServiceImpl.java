@@ -2,8 +2,15 @@ package cn.com.tzy.springbootvideo.service.impl;
 
 import cn.com.tzy.spingbootstartermybatis.core.mapper.utils.MyBatisUtils;
 import cn.com.tzy.springbootcomm.common.vo.PageResult;
+import cn.com.tzy.springbootcomm.common.vo.RespCode;
+import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootentity.dome.video.ParentPlatform;
 import cn.com.tzy.springbootentity.param.video.DeviceAlarmPageParam;
+import cn.com.tzy.springbootstartervideocore.properties.VideoProperties;
+import cn.com.tzy.springbootstartervideocore.service.VideoService;
+import cn.com.tzy.springbootstartervideocore.sip.SipServer;
+import cn.com.tzy.springbootstartervideocore.sip.cmd.SIPCommander;
+import cn.com.tzy.springbootvideo.convert.video.DeviceAlarmConvert;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.commons.lang3.StringUtils;
@@ -17,6 +24,14 @@ import cn.com.tzy.springbootvideo.service.DeviceAlarmService;
 @Service
 public class DeviceAlarmServiceImpl extends ServiceImpl<DeviceAlarmMapper, DeviceAlarm> implements DeviceAlarmService{
 
+    @Resource
+    protected SIPCommander sipCommander;
+    @Resource
+    protected SipServer sipServer;
+    @Resource
+    protected VideoProperties videoProperties;
+
+
     @Override
     public PageResult findPage(DeviceAlarmPageParam param) {
         Page<DeviceAlarm> page = MyBatisUtils.buildPage(param);
@@ -28,6 +43,5 @@ public class DeviceAlarmServiceImpl extends ServiceImpl<DeviceAlarmMapper, Devic
                 .between(param.startTime!= null && param.endTime != null,DeviceAlarm::getDeviceId,param.startTime,param.endTime)
                 ;
         return MyBatisUtils.selectPage(baseMapper, page, wrapper);
-
     }
 }

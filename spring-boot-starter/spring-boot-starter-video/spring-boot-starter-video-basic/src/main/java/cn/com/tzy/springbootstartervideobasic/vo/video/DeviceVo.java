@@ -133,17 +133,15 @@ public class DeviceVo extends LongIdEntity {
      * 注册有效期
      */
     private Integer expires;
-
-    /**
-     * 移动设备位置信息上报时间间隔,单位:秒,默认值5
-     */
-    private Integer mobilePositionSubmissionInterval= 0;
-
     /**
      * 目录订阅周期，0为不订阅
      */
     private Integer subscribeCycleForCatalog= 0;
 
+    /**
+     * 移动设备位置信息上报时间间隔,单位:秒,默认值5
+     */
+    private Integer mobilePositionSubmissionInterval= 0;
     /**
      * 移动设备位置订阅周期，0为不订阅
      */

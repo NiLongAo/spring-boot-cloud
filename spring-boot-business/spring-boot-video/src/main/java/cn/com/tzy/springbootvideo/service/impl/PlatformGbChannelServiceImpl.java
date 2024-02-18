@@ -135,5 +135,10 @@ public class PlatformGbChannelServiceImpl extends ServiceImpl<PlatformGbChannelM
         baseMapper.delPlatformGbChannel(deviceId,channelId);
     }
 
+    @Override
+    public List<ParentPlatform> findChannelIdList(String channelId) {
+        return baseMapper.findChannelIdList(channelId);
+    }
+
 
 }

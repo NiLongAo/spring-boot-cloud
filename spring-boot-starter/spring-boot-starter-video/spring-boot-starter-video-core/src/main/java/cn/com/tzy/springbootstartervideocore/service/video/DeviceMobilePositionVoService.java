@@ -23,7 +23,7 @@ public abstract class DeviceMobilePositionVoService {
     private SIPCommanderForPlatform sipCommanderForPlatform;
     public abstract void save(DeviceMobilePositionVo deviceMobilePositionVo);
 
-    public abstract DeviceMobilePositionVo findChannelId(String channelId);
+    public abstract DeviceMobilePositionVo findLastChannelId(String channelId);
     /**
      * 发送位置订阅通知
      * @param platformId
@@ -34,7 +34,7 @@ public abstract class DeviceMobilePositionVoService {
        if (platformVo == null || platformVo.getStatus() == ConstEnum.Flag.NO.getValue()) {
            return;
        }
-       DeviceMobilePositionVo deviceMobilePositionVo = findChannelId(info.getId());
+       DeviceMobilePositionVo deviceMobilePositionVo = findLastChannelId(info.getId());
        if(deviceMobilePositionVo == null){
            log.info("[发送设备位置通知]： 未获取位置信息 channelId ：{}",info.getId());
            return;

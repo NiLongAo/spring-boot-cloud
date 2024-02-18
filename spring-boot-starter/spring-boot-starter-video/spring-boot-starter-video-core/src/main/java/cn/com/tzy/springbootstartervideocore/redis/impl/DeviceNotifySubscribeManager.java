@@ -10,11 +10,15 @@ import org.apache.commons.lang3.ObjectUtils;
 
 @Log4j2
 public class DeviceNotifySubscribeManager {
-
     /**
      * 设备订阅缓存key
      */
     public static final String VIDEO_DEVICE_NOTIFY_SUBSCRIBE = VideoConstant.VIDEO_DEVICE_NOTIFY_SUBSCRIBE;
+
+    /**
+     * 设备报警订阅缓存key(服务器共享数据)
+     */
+    public static final String VIDEO_DEVICE_ALARM_NOTIFY_SUBSCRIBE = VideoConstant.VIDEO_DEVICE_ALARM_NOTIFY_SUBSCRIBE;
     /**
      * 设备目录订阅缓存key(服务器共享数据)
      */
@@ -24,6 +28,11 @@ public class DeviceNotifySubscribeManager {
      */
     public static final String VIDEO_DEVICE_MOBILE_POSITION_NOTIFY_SUBSCRIBE = VideoConstant.VIDEO_DEVICE_MOBILE_POSITION_NOTIFY_SUBSCRIBE;
 
+    public boolean getAlarmSubscribe(String gbId){
+        String key = String.format("%s%s",VIDEO_DEVICE_ALARM_NOTIFY_SUBSCRIBE, gbId);
+        return ObjectUtils.isNotEmpty(RedisUtils.get(key));
+    }
+
     public boolean getCatalogSubscribe(String gbId){
         String key = String.format("%s%s",VIDEO_DEVICE_CATALOG_NOTIFY_SUBSCRIBE, gbId);
         return ObjectUtils.isNotEmpty(RedisUtils.get(key));
@@ -32,6 +41,26 @@ public class DeviceNotifySubscribeManager {
     public boolean getMobilePositionSubscribe(String gbId){
         String key = String.format("%s%s",VIDEO_DEVICE_MOBILE_POSITION_NOTIFY_SUBSCRIBE, gbId);
         return ObjectUtils.isNotEmpty(RedisUtils.get(key));
+    }
+
+    public boolean addAlarmSubscribe(DeviceVo deviceVo){
+        if (deviceVo == null || deviceVo.getSubscribeCycleForAlarm() < 0) {
+            return false;
+        }
+        log.info("[添加目录订阅] 设备{}", deviceVo.getDeviceId());
+        DeviceNotifyVo build = DeviceNotifyVo.builder().type(DeviceNotifyVo.TypeEnum.ALARM.getValue()).operate(DeviceNotifyVo.OperateEnum.ADD.getValue()).gbId(deviceVo.getDeviceId()).build();
+        RedisUtils.redisTemplate.convertAndSend(VIDEO_DEVICE_NOTIFY_SUBSCRIBE,build);
+        return true;
+    }
+
+    public boolean removeAlarmSubscribe(DeviceVo deviceVo) {
+        if (deviceVo == null || deviceVo.getSubscribeCycleForAlarm() < 0) {
+            return false;
+        }
+        log.info("[移除目录订阅]: {}", deviceVo.getDeviceId());
+        DeviceNotifyVo build = DeviceNotifyVo.builder().type(DeviceNotifyVo.TypeEnum.ALARM.getValue()).operate(DeviceNotifyVo.OperateEnum.DEL.getValue()).gbId(deviceVo.getDeviceId()).build();
+        RedisUtils.redisTemplate.convertAndSend(VIDEO_DEVICE_NOTIFY_SUBSCRIBE,build);
+        return true;
     }
 
 
@@ -65,7 +94,7 @@ public class DeviceNotifySubscribeManager {
     }
 
     public boolean removeMobilePositionSubscribe(DeviceVo deviceVo) {
-        if (deviceVo == null || deviceVo.getSubscribeCycleForCatalog() < 0) {
+        if (deviceVo == null || deviceVo.getSubscribeCycleForMobilePosition() < 0) {
             return false;
         }
         log.info("[移除移动位置订阅]: {}", deviceVo.getDeviceId());

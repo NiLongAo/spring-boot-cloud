@@ -41,7 +41,7 @@ public abstract class ParentPlatformVoService {
     private DynamicTask dynamicTask;
     @Resource
     private SIPCommanderForPlatform sipCommanderForPlatform;
-    @Autowired
+    @Resource
     private NacosDiscoveryProperties nacosDiscoveryProperties;
 
     public abstract ParentPlatformVo getParentPlatformByServerGbId(String platformGbId);
@@ -68,6 +68,9 @@ public abstract class ParentPlatformVoService {
     public abstract List<ParentPlatformVo> queryPlatFormListForStreamWithGBId(String app, String stream, List<String> allPlatformId);
 
     public abstract void delPlatformGbStream(String app,String stream);
+
+    public abstract List<ParentPlatformVo> findPlatformGbChannel(String channelId);
+
     /**
      * 向上级平台注册
      */

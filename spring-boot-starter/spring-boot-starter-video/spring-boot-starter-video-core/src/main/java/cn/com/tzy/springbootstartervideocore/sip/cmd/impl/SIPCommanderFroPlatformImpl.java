@@ -543,6 +543,11 @@ public class SIPCommanderFroPlatformImpl implements SIPCommanderForPlatform {
         if (parentPlatformVo == null) {
             return;
         }
+        NotifySubscribeInfo catalogSubscribe = RedisService.getPlatformNotifySubscribeManager().getAlarmSubscribe(parentPlatformVo.getServerGbId());
+        if(catalogSubscribe == null){
+            log.debug("[发送 报警订阅] {},未获取上级报警订阅通知", parentPlatformVo.getServerGbId());
+            return;
+        }
         log.info("[发送报警通知] {}/{}->{},{}: {}", parentPlatformVo.getServerGbId(), deviceAlarmVo.getChannelId(),
                 deviceAlarmVo.getLongitude(), deviceAlarmVo.getLatitude(), JSONUtil.toJsonStr(deviceAlarmVo));
         String characterSet = CharsetType.getName(parentPlatformVo.getCharacterSet());

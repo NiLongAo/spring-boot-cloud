@@ -64,12 +64,12 @@ public class DeviceMobilePositionController extends ApiController {
     @ApiOperation(value = "订阅位置信息", notes = "订阅位置信息")
     @ApiImplicitParams({
             @ApiImplicitParam(name="deviceId", value="设备编号", required=true, paramType="query", dataType="String", defaultValue=""),
-            @ApiImplicitParam(name="expires", value="目录订阅周期", required=true, paramType="query", dataType="Integer", example="0"),
-            @ApiImplicitParam(name="interval", value="位置订阅周期", required=true, paramType="query", dataType="Integer", example="0"),
+            @ApiImplicitParam(name="type", value="订阅类型", required=true, paramType="query", dataType="Integer", example="0"),
+            @ApiImplicitParam(name="expires", value="订阅时间", required=true, paramType="query", dataType="Integer", example="0"),
     })
     @GetMapping("/subscribe")
-    public RestResult<?> subscribe(@RequestParam("deviceId") String deviceId,@RequestParam("expires") Integer expires,@RequestParam("interval") Integer interval){
-        return deviceMobilePositionService.subscribe(deviceId,expires,interval);
+    public RestResult<?> subscribe(@RequestParam("deviceId") String deviceId,@RequestParam("type") Integer type,@RequestParam("expires") Integer expires){
+        return deviceMobilePositionService.subscribe(deviceId,type,expires);
     }
 
     @ApiOperation(value = "数据位置信息格式处理", notes = "数据位置信息格式处理")

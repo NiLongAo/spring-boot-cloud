@@ -1,6 +1,7 @@
 package cn.com.tzy.springbootvideo.mapper;
 
 import cn.com.tzy.springbootentity.dome.video.DeviceChannel;
+import cn.com.tzy.springbootentity.dome.video.ParentPlatform;
 import cn.com.tzy.springbootentity.dome.video.PlatformGbChannel;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
@@ -21,4 +22,6 @@ public interface PlatformGbChannelMapper extends BaseMapper<PlatformGbChannel> {
     );
 
     void delPlatformGbChannel(@Param("deviceId") String deviceId, @Param("channelId") String channelId);
+
+    List<ParentPlatform> findChannelIdList(@Param("channelId") String channelId);
 }

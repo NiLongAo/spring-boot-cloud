@@ -77,7 +77,7 @@ public interface SIPCommanderForPlatform {
     void sendNotifyMobilePosition(SipServer sipServer, ParentPlatformVo parentPlatformVo, DeviceMobilePositionVo deviceMobilePositionVo, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws InvalidArgumentException, ParseException, NoSuchFieldException, SipException, IllegalAccessException;
 
     /**
-     * 向上级回复报警消息
+     * 向上级发送报警消息
      * @param parentPlatformVo 平台信息
      * @param deviceAlarmVo 报警信息信息
      * @return

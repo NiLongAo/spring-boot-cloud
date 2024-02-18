@@ -69,8 +69,8 @@ public class DeviceMobilePositionController extends ApiController {
      * @param interval 位置订阅周期
      */
     @GetMapping("/subscribe")
-    public RestResult<?> subscribe(@RequestParam("deviceId") String deviceId,@RequestParam("expires") Integer expires,@RequestParam("interval") Integer interval){
-        return deviceMobilePositionService.subscribe(deviceId,expires,interval);
+    public RestResult<?> subscribe(@RequestParam("deviceId") String deviceId,@RequestParam("type") Integer type,@RequestParam("expires") Integer expires){
+        return deviceMobilePositionService.subscribe(deviceId,type,expires);
     }
 
     /**

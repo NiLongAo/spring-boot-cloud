@@ -48,11 +48,11 @@ public class DeviceMobilePositionService {
     /**
      * 订阅位置信息
      * @param deviceId 设备ID
-     * @param expires 目录订阅周期
-     * @param interval 位置订阅周期
+     * @param type 目录订阅周期
+     * @param expires 位置订阅周期
      */
-    public RestResult<?> subscribe(String deviceId,Integer expires,Integer interval){
-        return deviceMobilePositionServiceFeign.subscribe(deviceId,expires,interval);
+    public RestResult<?> subscribe(String deviceId,Integer type,Integer expires){
+        return deviceMobilePositionServiceFeign.subscribe(deviceId,type,expires);
     }
 
 

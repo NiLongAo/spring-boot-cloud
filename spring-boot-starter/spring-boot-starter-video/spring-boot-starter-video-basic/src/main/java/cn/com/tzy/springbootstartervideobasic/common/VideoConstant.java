@@ -104,15 +104,24 @@ public class VideoConstant {
     /**
      * 上级平台目录订阅缓存key(服务器共享数据)
      */
+    public static final String VIDEO_PLATFORM_ALARM_NOTIFY_SUBSCRIBE = "VIDEO_PLATFORM_ALARM_NOTIFY_SUBSCRIBE:";
+    /**
+     * 上级平台目录订阅缓存key(服务器共享数据)
+     */
     public static final String VIDEO_PLATFORM_CATALOG_NOTIFY_SUBSCRIBE = "VIDEO_PLATFORM_CATALOG_NOTIFY_SUBSCRIBE:";
     /**
      * 上级平台移动位置订阅缓存key(服务器共享数据)
      */
     public static final String VIDEO_PLATFORM_MOBILE_POSITION_NOTIFY_SUBSCRIBE = "VIDEO_PLATFORM_MOBILE_POSITION_NOTIFY_SUBSCRIBE:";
+
     /**
      * 设备订阅缓存key
      */
     public static final String VIDEO_DEVICE_NOTIFY_SUBSCRIBE = "VIDEO_DEVICE_NOTIFY_SUBSCRIBE";
+    /**
+     * 设备报警订阅缓存key
+     */
+    public static final String VIDEO_DEVICE_ALARM_NOTIFY_SUBSCRIBE = "VIDEO_DEVICE_ALARM_SUBSCRIBE:";
     /**
      * 设备目录订阅缓存key(服务器共享数据)
      */

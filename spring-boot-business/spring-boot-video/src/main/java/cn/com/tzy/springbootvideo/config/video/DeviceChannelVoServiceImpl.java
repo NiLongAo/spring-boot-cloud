@@ -56,6 +56,12 @@ public class DeviceChannelVoServiceImpl implements DeviceChannelVoService {
     private PlatformGbChannelService platformGbChannelService;
 
     @Override
+    public DeviceChannelVo findLastDevice(String deviceId) {
+        DeviceChannel one = deviceChannelService.getOne(new LambdaQueryWrapper<DeviceChannel>().eq(DeviceChannel::getDeviceId, deviceId).orderByDesc(DeviceChannel::getCreateTime).last("limit 1"));
+        return DeviceChannelConvert.INSTANCE.convert(one);
+    }
+
+    @Override
     public DeviceChannelVo findChannelId(String channelId) {
         List<DeviceChannel> deviceChannels = deviceChannelService.list(new LambdaQueryWrapper<DeviceChannel>().eq(DeviceChannel::getChannelId, channelId));
             try {

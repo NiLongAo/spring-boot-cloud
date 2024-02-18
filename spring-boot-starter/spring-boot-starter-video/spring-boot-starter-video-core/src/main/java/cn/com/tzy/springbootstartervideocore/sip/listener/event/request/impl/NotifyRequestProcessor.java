@@ -197,14 +197,15 @@ public class NotifyRequestProcessor extends AbstractSipRequestEvent implements S
             log.warn("[ NotifyAlarm ] 未找到通道信息：{}", deviceId);
             return;
         }
+        if(StringUtils.equals(channel,deviceId)){
+            DeviceChannelVo lastDevice = deviceChannelVoService.findLastDevice(deviceId);
+            if(lastDevice != null){
+                channel = lastDevice.getChannelId();
+            }
+        }
         DeviceVo deviceVo = deviceVoService.findDeviceGbId(deviceId);
         if (deviceVo == null) {
             log.warn("[ NotifyAlarm ] 未找到设备：{}", deviceId);
-            return;
-        }
-        SipConfigProperties sipConfig = sipServer.getSipConfigProperties();
-        if(sipConfig.getAlarm()){
-            log.warn("[ NotifyAlarm ] 信令服务拒绝接收报警信息");
             return;
         }
         rootElement = getRootElement(event, CharsetType.getName(deviceVo.getCharset()));
@@ -214,6 +215,7 @@ public class NotifyRequestProcessor extends AbstractSipRequestEvent implements S
         }
         DeviceAlarmVo deviceAlarmVo = DeviceAlarmVo.builder()
                 .deviceId(deviceId)
+                .channelId(channel)
                 .alarmPriority(Integer.valueOf(XmlUtils.getText(rootElement, "AlarmPriority")))
                 .alarmMethod(Integer.valueOf(XmlUtils.getText(rootElement, "AlarmMethod")))
                 .alarmTime(DateUtil.parse(XmlUtils.getText(rootElement, "AlarmMethod")))
@@ -253,7 +255,9 @@ public class NotifyRequestProcessor extends AbstractSipRequestEvent implements S
             }
             deviceChannelVoService.updateMobilePosition(build);
         }
-        deviceAlarmVoService.insert(deviceAlarmVo);
+        if(deviceVo.getSubscribeCycleForAlarm() > 0){
+            deviceAlarmVoService.insert(deviceAlarmVo);
+        }
     }
 
     /**

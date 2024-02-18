@@ -17,9 +17,11 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.thread.GlobalThreadPool;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.XmlUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.json.JSONUtil;
 import gov.nist.javax.sip.message.SIPRequest;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.ObjectUtils;
 import org.w3c.dom.Element;
 
@@ -51,7 +53,6 @@ public class AlarmNotifyMessageHandler extends SipResponseEvent implements Messa
         } catch (SipException | InvalidArgumentException | ParseException e) {
             log.error("[命令发送失败] 报警通知回复: {}", e.getMessage());
         }
-        DeviceVoService deviceVoService = VideoService.getDeviceService();
         DeviceAlarmVoService deviceAlarmVoService = VideoService.getDeviceAlarmService();
         DeviceChannelVoService deviceChannelVoService = VideoService.getDeviceChannelService();
         DeviceMobilePositionVoService deviceMobilePositionVoService = VideoService.getDeviceMobilePositionService();
@@ -60,6 +61,12 @@ public class AlarmNotifyMessageHandler extends SipResponseEvent implements Messa
         executor.execute(()->{
             try {
                 String channelId = XmlUtils.getText(element,"DeviceID");
+                if(StringUtils.equals(channelId,deviceVo.getDeviceId())){
+                    DeviceChannelVo lastDevice = deviceChannelVoService.findLastDevice(deviceVo.getDeviceId());
+                    if(lastDevice != null){
+                        channelId = lastDevice.getChannelId();
+                    }
+                }
                 DeviceAlarmVo deviceAlarmVo = new DeviceAlarmVo();
                 deviceAlarmVo.setCreateTime(new Date());
                 deviceAlarmVo.setDeviceId(deviceVo.getDeviceId());
@@ -130,14 +137,13 @@ public class AlarmNotifyMessageHandler extends SipResponseEvent implements Messa
                 // 作者自用判断，其他小伙伴需要此消息可以自行修改，但是不要提在pr里
                 log.debug("存储报警信息、报警分类");
                 // 存储报警信息、报警分类
-                SipConfigProperties sipConfigProperties = sipServer.getSipConfigProperties();
-                if (sipConfigProperties.getAlarm()) {
+                if (deviceVo.getSubscribeCycleForAlarm() > 0) {
                     deviceAlarmVoService.insert(deviceAlarmVo);
                 }
                 //发送警报消息
                 deviceAlarmVoService.sendAlarmMessage(sipServer,sipCommander,sipCommanderForPlatform,videoProperties,deviceAlarmVo);
+                //设备在线时推送报警消息
                 //if (deviceService.deviceIsOnline(deviceVo.getDeviceId())) {
-                    //设备在线时推送报警消息
                     //publisher.deviceAlarmEventPublish(deviceAlarm);
                 //}
             }catch (Exception e) {
@@ -158,7 +164,6 @@ public class AlarmNotifyMessageHandler extends SipResponseEvent implements Messa
             log.error("[命令发送失败] 国标级联 报警通知回复: {}", e.getMessage());
         }
         String channelId = XmlUtils.getText(element,"DeviceID");
-
         DeviceAlarmVo deviceAlarmVo = new DeviceAlarmVo();
         deviceAlarmVo.setCreateTime(new Date());
         deviceAlarmVo.setDeviceId(parentPlatformVo.getServerGbId());
@@ -197,11 +202,9 @@ public class AlarmNotifyMessageHandler extends SipResponseEvent implements Messa
         // 作者自用判断，其他小伙伴需要此消息可以自行修改，但是不要提在pr里
         log.debug("存储报警信息、报警分类");
         // 存储报警信息、报警分类
-        SipConfigProperties sipConfigProperties = sipServer.getSipConfigProperties();
-        if (sipConfigProperties.getAlarm()) {
-            deviceAlarmVoService.insert(deviceAlarmVo);
-        }
+        deviceAlarmVoService.insert(deviceAlarmVo);
         //发送警报消息
+        deviceAlarmVo.setDeviceId(sipServer.getSipConfigProperties().getId());
         deviceAlarmVoService.sendAlarmMessage(sipServer,sipCommander,sipCommanderForPlatform,videoProperties,deviceAlarmVo);
     }
 }

@@ -5,6 +5,7 @@ import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootentity.dome.video.DeviceMobilePosition;
 import cn.com.tzy.springbootstartervideobasic.vo.video.DeviceChannelVo;
 import cn.com.tzy.springbootstartervideobasic.vo.video.DeviceVo;
+import cn.com.tzy.springbootstartervideocore.demo.DeviceNotifyVo;
 import cn.com.tzy.springbootstartervideocore.demo.VideoRestResult;
 import cn.com.tzy.springbootstartervideocore.redis.RedisService;
 import cn.com.tzy.springbootstartervideocore.redis.subscribe.result.DeferredResultHolder;
@@ -77,21 +78,34 @@ public class DeviceMobilePositionServiceImpl extends ServiceImpl<DeviceMobilePos
     }
 
     @Override
-    public RestResult<?> subscribe(String deviceId, Integer expires, Integer interval) {
+    public RestResult<?> subscribe(String deviceId, Integer type, Integer expires) {
         DeviceVo deviceVo = VideoService.getDeviceService().findDeviceGbId(deviceId);
-        if(expires > 0){
-            deviceVo.setSubscribeCycleForCatalog(expires);
-            VideoService.getDeviceService().save(deviceVo);
-            RedisService.getDeviceNotifySubscribeManager().addCatalogSubscribe(deviceVo);
+        if(type== DeviceNotifyVo.TypeEnum.CATALOG.getValue()){
+            if(expires > 0){
+                deviceVo.setSubscribeCycleForCatalog(expires);
+                VideoService.getDeviceService().save(deviceVo);
+                RedisService.getDeviceNotifySubscribeManager().addCatalogSubscribe(deviceVo);
+            }else {
+                RedisService.getDeviceNotifySubscribeManager().removeCatalogSubscribe(deviceVo);
+            }
+        }else if(type== DeviceNotifyVo.TypeEnum.MOBILE_POSITION.getValue()){
+            if(expires > 0){
+                deviceVo.setSubscribeCycleForMobilePosition(expires);
+                VideoService.getDeviceService().save(deviceVo);
+                RedisService.getDeviceNotifySubscribeManager().addMobilePositionSubscribe(deviceVo);
+            }else {
+                RedisService.getDeviceNotifySubscribeManager().removeMobilePositionSubscribe(deviceVo);
+            }
+        }else if(type== DeviceNotifyVo.TypeEnum.ALARM.getValue()){
+            if(expires > 0){
+                deviceVo.setSubscribeCycleForAlarm(expires);
+                VideoService.getDeviceService().save(deviceVo);
+                RedisService.getDeviceNotifySubscribeManager().addAlarmSubscribe(deviceVo);
+            }else {
+                RedisService.getDeviceNotifySubscribeManager().removeAlarmSubscribe(deviceVo);
+            }
         }else {
-            RedisService.getDeviceNotifySubscribeManager().removeCatalogSubscribe(deviceVo);
-        }
-        if(interval > 0){
-            deviceVo.setSubscribeCycleForMobilePosition(interval);
-            VideoService.getDeviceService().save(deviceVo);
-            RedisService.getDeviceNotifySubscribeManager().addMobilePositionSubscribe(deviceVo);
-        }else {
-            RedisService.getDeviceNotifySubscribeManager().removeMobilePositionSubscribe(deviceVo);
+            return RestResult.result(RespCode.CODE_2.getValue(),"订阅类型错误");
         }
         return RestResult.result(RespCode.CODE_0.getValue(),"订阅成功");
     }

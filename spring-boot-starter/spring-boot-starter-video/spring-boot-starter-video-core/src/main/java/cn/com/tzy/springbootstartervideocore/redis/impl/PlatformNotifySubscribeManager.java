@@ -16,6 +16,8 @@ import java.util.List;
  * redis 订阅方式
  */
 public class PlatformNotifySubscribeManager {
+    //报警订阅缓存key
+    private static final String VIDEO_PLATFORM_ALARM_NOTIFY_SUBSCRIBE = VideoConstant.VIDEO_PLATFORM_ALARM_NOTIFY_SUBSCRIBE;
     //目录订阅缓存key
     private static final String VIDEO_CATALOG_NOTIFY_SUBSCRIBE = VideoConstant.VIDEO_PLATFORM_CATALOG_NOTIFY_SUBSCRIBE;
     //目录订阅缓存key
@@ -26,7 +28,10 @@ public class PlatformNotifySubscribeManager {
         this.dynamicTask= dynamicTask;
     }
 
-
+    public NotifySubscribeInfo getAlarmSubscribe(String platformId) {
+        String key = String.format("%s%s", VIDEO_PLATFORM_ALARM_NOTIFY_SUBSCRIBE, platformId);
+        return (NotifySubscribeInfo)SerializationUtils.deserialize(Base64.decode((String) RedisUtils.get(key)));
+    }
     public  NotifySubscribeInfo getCatalogSubscribe(String platformId){
         String key = String.format("%s%s", VIDEO_CATALOG_NOTIFY_SUBSCRIBE, platformId);
         Object o = RedisUtils.get(key);
@@ -35,6 +40,16 @@ public class PlatformNotifySubscribeManager {
     public NotifySubscribeInfo getMobilePositionSubscribe(String platformId) {
         String key = String.format("%s%s", VIDEO_MOBILE_POSITION_NOTIFY_SUBSCRIBE, platformId);
         return (NotifySubscribeInfo)SerializationUtils.deserialize(Base64.decode((String) RedisUtils.get(key)));
+    }
+    public void putAlarmSubscribe(String platformId, NotifySubscribeInfo info) {
+        String key = String.format("%s%s", VIDEO_PLATFORM_ALARM_NOTIFY_SUBSCRIBE, platformId);
+        //缓存订阅信息并 添加缓存时间
+        RedisUtils.set(key,SerializationUtils.serialize(info),info.getExpires());
+    }
+    public void removeAlarmSubscribe(String platformId){
+        String key = String.format("%s%s", VIDEO_PLATFORM_ALARM_NOTIFY_SUBSCRIBE, platformId);
+        //删除订阅信息
+        RedisUtils.del(key);
     }
 
     public void putCatalogSubscribe(String platformId, NotifySubscribeInfo info) {
@@ -78,6 +93,7 @@ public class PlatformNotifySubscribeManager {
     public void removeAllSubscribe(String platformId) {
         removeMobilePositionSubscribe(platformId);
         removeCatalogSubscribe(platformId);
+        removeAlarmSubscribe(platformId);
     }
 
 }

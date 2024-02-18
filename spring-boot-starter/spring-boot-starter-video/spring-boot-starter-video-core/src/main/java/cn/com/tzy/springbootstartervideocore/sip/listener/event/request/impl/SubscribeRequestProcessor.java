@@ -163,6 +163,37 @@ public class SubscribeRequestProcessor extends AbstractSipRequestEvent implement
      * 处理报警订阅
      */
     private void processNotifyAlarm(SIPRequest request, Element rootElement) {
-
+        if (request == null) {
+            return;
+        }
+        ParentPlatformVoService parentPlatformVoService = VideoService.getParentPlatformService();
+        String platformId = SipUtils.getUserIdFromFromHeader(request);
+        String deviceId = XmlUtils.getText(rootElement, "DeviceID");
+        ParentPlatformVo platform = parentPlatformVoService.getParentPlatformByServerGbId(platformId);
+        if (platform == null){
+            return;
+        }
+        NotifySubscribeInfo subscribeInfo = new NotifySubscribeInfo(request, deviceId);
+        String sn = XmlUtils.getText(rootElement, "SN");
+        log.info("[回复上级的目录订阅请求]: {}/{}", platformId, deviceId);
+        StringBuilder resultXml = new StringBuilder(200);
+        resultXml.append("<?xml version=\"1.0\" ?>\r\n")
+                .append("<Response>\r\n")
+                .append("<CmdType>Alarm</CmdType>\r\n")
+                .append("<SN>").append(sn).append("</SN>\r\n")
+                .append("<DeviceID>").append(deviceId).append("</DeviceID>\r\n")
+                .append("<Result>OK</Result>\r\n")
+                .append("</Response>\r\n");
+        try {
+            SIPResponse response = responseXmlAck(request, resultXml.toString(), platform, subscribeInfo.getExpires());
+            if (subscribeInfo.getExpires() > 0) {
+                subscribeInfo.setResponse(response);
+                RedisService.getPlatformNotifySubscribeManager().putAlarmSubscribe(platformId, subscribeInfo);
+            }else if (subscribeInfo.getExpires() == 0) {
+                RedisService.getPlatformNotifySubscribeManager().removeAlarmSubscribe(platformId);
+            }
+        } catch (SipException | InvalidArgumentException | ParseException e) {
+            e.printStackTrace();
+        }
     }
 }

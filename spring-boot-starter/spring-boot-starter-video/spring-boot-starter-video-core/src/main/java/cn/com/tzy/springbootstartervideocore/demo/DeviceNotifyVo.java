@@ -34,6 +34,7 @@ public class DeviceNotifyVo implements Serializable {
     public enum TypeEnum {
         CATALOG(1, "目录订阅"),
         MOBILE_POSITION(2, "移动位置订阅"),
+        ALARM(3, "报警订阅"),
         ;
 
         private final int value;

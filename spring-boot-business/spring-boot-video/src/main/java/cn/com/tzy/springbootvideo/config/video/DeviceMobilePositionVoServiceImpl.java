@@ -27,8 +27,8 @@ public class DeviceMobilePositionVoServiceImpl extends DeviceMobilePositionVoSer
     }
 
     @Override
-    public DeviceMobilePositionVo findChannelId(String channelId) {
-        DeviceMobilePosition deviceMobilePosition = deviceMobilePositionService.getOne(new LambdaQueryWrapper<DeviceMobilePosition>().eq(DeviceMobilePosition::getChannelId, channelId));
+    public DeviceMobilePositionVo findLastChannelId(String channelId) {
+        DeviceMobilePosition deviceMobilePosition = deviceMobilePositionService.getOne(new LambdaQueryWrapper<DeviceMobilePosition>().eq(DeviceMobilePosition::getChannelId, channelId).orderByDesc(DeviceMobilePosition::getCreateTime).last("limit 1"));
         if(deviceMobilePosition != null){
             return null;
         }

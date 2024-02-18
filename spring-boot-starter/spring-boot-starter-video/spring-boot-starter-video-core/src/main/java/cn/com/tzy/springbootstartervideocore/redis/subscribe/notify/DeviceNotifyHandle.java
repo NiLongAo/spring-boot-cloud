@@ -31,6 +31,11 @@ public class DeviceNotifyHandle extends AbstractMessageListener {
 
     @Resource
     private DynamicTask dynamicTask;
+
+    /**
+     * 设备报警订阅缓存key(服务器共享数据)
+     */
+    public static final String VIDEO_DEVICE_ALARM_NOTIFY_SUBSCRIBE = VideoConstant.VIDEO_DEVICE_ALARM_NOTIFY_SUBSCRIBE;
     /**
      * 设备目录订阅缓存key(服务器共享数据)
      */
@@ -74,11 +79,18 @@ public class DeviceNotifyHandle extends AbstractMessageListener {
             }else {
                 log.error("[订阅消息]：消息操作类型错误！");
             }
+        }else if(event.getType().equals(DeviceNotifyVo.TypeEnum.ALARM.getValue())){
+            if(event.getOperate().equals(DeviceNotifyVo.OperateEnum.ADD.getValue())){
+                addAlarmSubscribe(event.getGbId());
+            }else if(event.getOperate().equals(DeviceNotifyVo.OperateEnum.DEL.getValue())){
+                delAlarmSubscribe(event.getGbId());
+            }else {
+                log.error("[订阅消息]：消息操作类型错误！");
+            }
         }else {
             log.error("[订阅消息]：消息类型错误！");
         }
     }
-
 
     private void addCatalogSubscribe(String gbId){
         SipServer sipServer = SpringUtil.getBean(SipServer.class);
@@ -206,6 +218,71 @@ public class DeviceNotifyHandle extends AbstractMessageListener {
         }
         log.info("[移除目录订阅]: {}", deviceVo.getDeviceId());
         String key = String.format("%s%s",VIDEO_DEVICE_MOBILE_POSITION_NOTIFY_SUBSCRIBE, deviceVo.getDeviceId());
+        dynamicTask.stop(key);
+        RedisUtils.del(key);
+    }
+
+    private void addAlarmSubscribe(String gbId){
+        SipServer sipServer = SpringUtil.getBean(SipServer.class);
+        SIPCommander sipCommander = SpringUtil.getBean(SIPCommander.class);
+        DeviceVo deviceVo = VideoService.getDeviceService().findDeviceGbId(gbId);
+        if(deviceVo == null || deviceVo.getSubscribeCycleForAlarm() < 0){
+            return;
+        }
+        String key = String.format("%s%s",VIDEO_DEVICE_ALARM_NOTIFY_SUBSCRIBE, deviceVo.getDeviceId());
+        if(dynamicTask.contains(key)){
+            return;
+        }
+        dynamicTask.startCron(key, deviceVo.getSubscribeCycleForAlarm(),()->{
+            SIPRequest request = null;
+            Object req = RedisUtils.get(key);
+            if(ObjectUtils.isNotEmpty(req)){
+                Object deserialize = SerializationUtils.deserialize(Base64.decode((String) req));
+                request = (SIPRequest) deserialize;
+            }
+            SIPRequest sipRequest = null;
+            try {
+                sipRequest = sipCommander.alarmSubscribe(sipServer, deviceVo,null, request, eventResult -> {
+                    ResponseEvent event = (ResponseEvent) eventResult.getEvent();
+                    // 成功
+                    log.info("[报警订阅]成功： {}", deviceVo.getDeviceId());
+                    ToHeader toHeader = (ToHeader)event.getResponse().getHeader(ToHeader.NAME);
+                    Object o = RedisUtils.get(key);
+                    if(ObjectUtils.isEmpty(o)){
+                        return;
+                    }
+                    Object deserialize = SerializationUtils.deserialize(Base64.decode((String) o));
+                    SIPRequest rq = (SIPRequest) deserialize;
+                    try {
+                        rq.getToHeader().setTag(toHeader.getTag());
+                        long expire = RedisUtils.getExpire(key);
+                        RedisUtils.set(key,SerializationUtils.serialize(rq),expire);
+                    } catch (ParseException e) {
+                        log.info("[报警订阅]成功： 但为request设置ToTag失败");
+                        RedisUtils.del(key);
+                    }
+
+                },eventResult -> {
+                    RedisUtils.del(key);
+                    // 失败
+                    log.warn("[报警订阅]失败，信令发送失败： {}-{} ", deviceVo.getDeviceId(), eventResult.getMsg());
+                });
+            } catch (InvalidArgumentException | SipException | ParseException e) {
+                log.error("[命令发送失败] 报警订阅: {}", e.getMessage());
+            }
+            if (sipRequest != null) {
+                RedisUtils.set(key, SerializationUtils.serialize(sipRequest),deviceVo.getSubscribeCycleForCatalog()+VideoConstant.DELAY_TIME);
+            }
+
+        });
+    }
+    private void delAlarmSubscribe(String gbId){
+        DeviceVo deviceVo = VideoService.getDeviceService().findDeviceGbId(gbId);
+        if(deviceVo == null){
+            return;
+        }
+        log.info("[移除报警订阅]: {}", deviceVo.getDeviceId());
+        String key = String.format("%s%s",VIDEO_DEVICE_ALARM_NOTIFY_SUBSCRIBE, deviceVo.getDeviceId());
         dynamicTask.stop(key);
         RedisUtils.del(key);
     }

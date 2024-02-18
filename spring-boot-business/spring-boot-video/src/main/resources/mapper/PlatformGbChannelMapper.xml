@@ -74,4 +74,12 @@
         </trim>
     )
   </delete>
+
+  <select id="findChannelIdList" resultType="cn.com.tzy.springbootentity.dome.video.ParentPlatform">
+    select
+      a.*
+    from video_parent_platform a,video_platform_gb_channel b
+    where a.server_gb_id = b.platform_id
+    and b.device_channel_id = #{channelId}
+  </select>
 </mapper>

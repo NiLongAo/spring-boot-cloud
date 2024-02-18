@@ -1,6 +1,7 @@
 package cn.com.tzy.springbootstartervideocore.service.video;
 
 import cn.com.tzy.springbootstartervideobasic.vo.video.DeviceAlarmVo;
+import cn.com.tzy.springbootstartervideobasic.vo.video.DeviceChannelVo;
 import cn.com.tzy.springbootstartervideobasic.vo.video.DeviceVo;
 import cn.com.tzy.springbootstartervideobasic.vo.video.ParentPlatformVo;
 import cn.com.tzy.springbootstartervideocore.sip.SipServer;
@@ -26,24 +27,26 @@ public abstract class DeviceAlarmVoService {
      */
     public void sendAlarmMessage(SipServer sipServer, SIPCommander sipCommander, SIPCommanderForPlatform sipCommanderForPlatform, VideoProperties videoProperties, DeviceAlarmVo deviceAlarmVo){
         if(StringUtils.isNotEmpty(deviceAlarmVo.getChannelId())){
-            DeviceVo deviceVo = VideoService.getDeviceService().findDeviceGbId(deviceAlarmVo.getChannelId());
-            ParentPlatformVo platformVo = VideoService.getParentPlatformService().getParentPlatformByServerGbId(deviceAlarmVo.getChannelId());
-            if (deviceVo != null && platformVo == null) {
+            DeviceChannelVo deviceChannelVo = VideoService.getDeviceChannelService().findChannelId(deviceAlarmVo.getChannelId());
+            if(sipServer.getSipConfigProperties().getId().equals(deviceAlarmVo.getDeviceId()) && deviceChannelVo!= null){
                 try {
-                    sipCommander.sendAlarmMessage(sipServer,deviceVo, deviceAlarmVo,null,null);
+                    sipCommander.sendAlarmMessage(sipServer,VideoService.getDeviceService().findDeviceGbId(deviceChannelVo.getDeviceId()), deviceAlarmVo,null,null);
                 } catch (InvalidArgumentException | SipException | ParseException e) {
                     log.error("[命令发送失败] 发送报警: {}", e.getMessage());
                 }
-            }else if (deviceVo == null && platformVo != null){
-                try {
-                    sipCommanderForPlatform.sendAlarmMessage(sipServer,platformVo, deviceAlarmVo,null,null);
-                } catch (InvalidArgumentException | SipException | ParseException e) {
-                    log.error("[命令发送失败] 发送报警: {}", e.getMessage());
+            }else if(deviceChannelVo!= null){
+                List<ParentPlatformVo> platformGbChannel = VideoService.getParentPlatformService().findPlatformGbChannel(deviceAlarmVo.getChannelId());
+                if(platformGbChannel == null || platformGbChannel.isEmpty()){
+                    return;
                 }
-            }else {
-                log.warn("无法确定" + deviceAlarmVo.getChannelId() + "是平台还是设备");
+                for (ParentPlatformVo parentPlatformVo : platformGbChannel) {
+                    try {
+                        sipCommanderForPlatform.sendAlarmMessage(sipServer,parentPlatformVo, deviceAlarmVo,null,null);
+                    } catch (InvalidArgumentException | SipException | ParseException e) {
+                        log.error("[命令发送失败] 发送报警: {}", e.getMessage());
+                    }
+                }
             }
-            return;
         }else {
             if(videoProperties.getSendToPlatformsWhenIdLost()){
                 List<ParentPlatformVo> parentPlatformVos = VideoService.getParentPlatformService().queryEnableParentPlatformList();

@@ -6,6 +6,7 @@ import cn.com.tzy.springbootstartervideobasic.vo.video.ParentPlatformVo;
 import cn.com.tzy.springbootstartervideobasic.vo.sip.ChannelSourceInfo;
 import cn.com.tzy.springbootstartervideocore.service.video.ParentPlatformVoService;
 import cn.com.tzy.springbootvideo.convert.video.ParentPlatformConvert;
+import cn.com.tzy.springbootvideo.service.PlatformGbChannelService;
 import cn.com.tzy.springbootvideo.service.PlatformGbStreamService;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -26,6 +27,8 @@ public class ParentPlatformVoServiceImpl extends ParentPlatformVoService {
 
     @Resource
     private PlatformGbStreamService platformGbStreamService;
+    @Resource
+    private PlatformGbChannelService platformGbChannelService;
     @Resource
     private cn.com.tzy.springbootvideo.service.ParentPlatformService parentPlatformService;
 
@@ -137,5 +140,11 @@ public class ParentPlatformVoServiceImpl extends ParentPlatformVoService {
     @Override
     public void delPlatformGbStream(String app, String stream) {
         platformGbStreamService.delPlatformGbStream(app,stream);
+    }
+
+    @Override
+    public List<ParentPlatformVo> findPlatformGbChannel(String channelId) {
+        List<ParentPlatform> list = platformGbChannelService.findChannelIdList(channelId);
+       return ParentPlatformConvert.INSTANCE.convertVo(list);
     }
 }

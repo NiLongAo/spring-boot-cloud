@@ -110,6 +110,9 @@ public abstract class DeviceVoService {
         if (deviceVo.getSubscribeCycleForMobilePosition() > 0) {
             RedisService.getDeviceNotifySubscribeManager().addMobilePositionSubscribe(deviceVo);
         }
+        if (deviceVo.getSubscribeCycleForAlarm() > 0) {
+            RedisService.getDeviceNotifySubscribeManager().addAlarmSubscribe(deviceVo);
+        }
         String key = String.format("%s_%s", VideoConstant.REGISTER_EXPIRE_TASK_KEY_PREFIX, deviceVo.getDeviceId());
         //设置设备过期任务
         dynamicTask.startDelay(key, deviceVo.getKeepaliveIntervalTime(),()->offline(deviceVo.getDeviceId()));
@@ -149,6 +152,7 @@ public abstract class DeviceVoService {
         // 移除订阅
         RedisService.getDeviceNotifySubscribeManager().removeCatalogSubscribe(deviceVo);
         RedisService.getDeviceNotifySubscribeManager().removeMobilePositionSubscribe(deviceVo);
+        RedisService.getDeviceNotifySubscribeManager().removeAlarmSubscribe(deviceVo);
         RedisService.getRegisterServerManager().delDevice(deviceId);
     }
 
