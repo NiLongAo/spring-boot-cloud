@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="spring-boot-video" type="docker-deploy" factoryName="dockerfile" server-name="122.51.147.244">
+  <configuration default="false" name="spring-boot-video" type="docker-deploy" factoryName="dockerfile" server-name="1.82.217.118">
     <deployment type="dockerfile">
       <settings>
         <option name="imageTag" value="ccr.ccs.tencentyun.com/spring_boot_cloud/spring_cloud_video" />
@@ -9,6 +9,10 @@
             <DockerEnvVarImpl>
               <option name="name" value="--spring.profiles.active" />
               <option name="value" value="prod" />
+            </DockerEnvVarImpl>
+            <DockerEnvVarImpl>
+              <option name="name" value="NACOS_SERVER_IP" />
+              <option name="value" value="1.82.217.118" />
             </DockerEnvVarImpl>
             <DockerEnvVarImpl>
               <option name="name" value="TZ" />
@@ -46,7 +50,7 @@
           <list>
             <DockerVolumeBindingImpl>
               <option name="containerPath" value="/spring-boot-video/logs" />
-              <option name="hostPath" value="/usr/local/program/spring-cloud/spring-boot-video/logs" />
+              <option name="hostPath" value="/work/spring-cloud/spring-boot-video/logs" />
             </DockerVolumeBindingImpl>
             <DockerVolumeBindingImpl>
               <option name="containerPath" value="/etc/localtime" />

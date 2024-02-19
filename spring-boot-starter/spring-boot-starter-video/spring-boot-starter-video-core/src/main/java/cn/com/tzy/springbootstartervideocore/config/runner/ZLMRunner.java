@@ -41,7 +41,7 @@ public class ZLMRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        MediaServerVoService mediaServerVoService = VideoService.getMediaServerService();
+
         MediaServerManager mediaServerManager = RedisService.getMediaServerManager();
         //清除缓存
         mediaServerManager.clearMediaServerForOnline();
@@ -52,14 +52,21 @@ public class ZLMRunner implements CommandLineRunner {
                 ZLMServerConfig config = (ZLMServerConfig) response;
                 if(allZML != null){
                     allZML.remove(config.getGeneralMediaServerId());
-                    if(allZML.size() == 0){
-                        mediaHookSubscribe.removeSubscribe(hookKey);
-                    }
+//                    if(allZML.size() == 0){
+//                        mediaHookSubscribe.removeSubscribe(hookKey);
+//                    }
                 }
             }
         });
-        //60秒未检测到流媒体启动，则放弃
-        dynamicTask.startDelay("zlm-connect-timeout",60,()->{
+        log.info("[ZML] 启动中  每5分钟定时检测......]");
+        //动态检测是否有空闲流媒体 5分钟检测
+        dynamicTask.startCron("zlm-connect-5m",300,()->detection(hookKey));
+    }
+    //动态检测是否有空闲流媒体
+    private void detection(HookKey hookKey){
+        dynamicTask.stop("zlm-connect-timeout");
+        //30秒未检测到流媒体启动，则放弃
+        dynamicTask.startDelay("zlm-connect-timeout",40,()->{
             if (allZML != null && allZML.size() > 0) {
                 for (String id : allZML) {
                     log.error("[ {} ]]主动连接失败，不再尝试连接", id);
@@ -68,8 +75,7 @@ public class ZLMRunner implements CommandLineRunner {
             }
             mediaHookSubscribe.removeSubscribe(hookKey);
         });
-        log.info("[ZML] 启动中  ......]");
-
+        MediaServerVoService mediaServerVoService = VideoService.getMediaServerService();
         List<MediaServerVo> serviceAll = mediaServerVoService.findConnectZlmList();
         if(serviceAll.isEmpty()){
             log.error("[ZML] 当前服务未绑定ZLM");
@@ -80,6 +86,8 @@ public class ZLMRunner implements CommandLineRunner {
             ThreadUtil.execute(()->connectZlmServer(mediaServerVo));
         }
     }
+
+
     //连接服务
     private void connectZlmServer(MediaServerVo mediaServerVo){
         ZLMServerConfig config = MediaClient.getZLMServerConfig(mediaServerVo);
@@ -96,6 +104,8 @@ public class ZLMRunner implements CommandLineRunner {
         config.setRestart("0".equals(config.getHookEnable())? ConstEnum.Flag.YES.getValue() :ConstEnum.Flag.NO.getValue());
         zlmService.zlmOnline(config);
     }
+
+
 
 }
 
