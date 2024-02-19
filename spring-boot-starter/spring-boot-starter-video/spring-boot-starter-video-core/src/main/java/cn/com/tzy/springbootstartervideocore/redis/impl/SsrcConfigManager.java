@@ -15,9 +15,6 @@ public class SsrcConfigManager {
 
     @Resource
     private SipServer sipServer;
-    @Resource
-    private VideoProperties videoProperties;
-
     /**
      * 播流最大并发个数
      */
@@ -30,7 +27,7 @@ public class SsrcConfigManager {
     public void initMediaServerSSRC(String mediaServerId, Set<String> usedSet) {
         SipConfigProperties deviceSipConfig = sipServer.getSipConfigProperties();
         String ssrcPrefix = deviceSipConfig.getDomain().substring(3, 8);
-        String redisKey = String.format("%s%s:%s",SSRC_CONFIG_INFO_PREFIX,videoProperties.getServerId(),mediaServerId);
+        String redisKey = String.format("%s:%s",SSRC_CONFIG_INFO_PREFIX,mediaServerId);
         if (!hasMediaServerSSRC(mediaServerId)) {
             RedisUtils.del(redisKey);
         }
@@ -65,7 +62,7 @@ public class SsrcConfigManager {
      */
     private String getSN(String mediaServerId) {
         String sn = null;
-        String redisKey = String.format("%s%s:%s",SSRC_CONFIG_INFO_PREFIX,videoProperties.getServerId(),mediaServerId);
+        String redisKey = String.format("%s:%s",SSRC_CONFIG_INFO_PREFIX,mediaServerId);
         Long size = RedisUtils.sGetSetSize(redisKey);
         if (size == null || size == 0) {
             throw new RuntimeException("ssrc已经用完");
@@ -87,7 +84,7 @@ public class SsrcConfigManager {
             return;
         }
         String sn = ssrc.substring(1);
-        String redisKey = String.format("%s%s:%s",SSRC_CONFIG_INFO_PREFIX,videoProperties.getServerId(),mediaServerId);
+        String redisKey = String.format("%s:%s",SSRC_CONFIG_INFO_PREFIX,mediaServerId);
         RedisUtils.sSet(redisKey, sn);
     }
 
@@ -106,7 +103,7 @@ public class SsrcConfigManager {
      * @param mediaServerId 流媒体服务ID
      */
     public boolean hasMediaServerSSRC(String mediaServerId) {
-        String redisKey = String.format("%s%s:%s",SSRC_CONFIG_INFO_PREFIX,videoProperties.getServerId(),mediaServerId);
+        String redisKey = String.format("%s:%s",SSRC_CONFIG_INFO_PREFIX,mediaServerId);
         return RedisUtils.hasKey(redisKey);
     }
 
@@ -116,7 +113,7 @@ public class SsrcConfigManager {
      * @param mediaServerId 流媒体服务ID
      */
     public void del(String mediaServerId) {
-        String redisKey = String.format("%s%s:%s",SSRC_CONFIG_INFO_PREFIX,videoProperties.getServerId(),mediaServerId);
+        String redisKey = String.format("%s:%s",SSRC_CONFIG_INFO_PREFIX,mediaServerId);
         if (!hasMediaServerSSRC(mediaServerId)) {
             RedisUtils.del(redisKey);
         }
@@ -130,7 +127,7 @@ public class SsrcConfigManager {
      */
     public boolean checkSsrc(String mediaServerId, String ssrc) {
         String sn = ssrc.substring(1);
-        String redisKey = String.format("%s%s:%s",SSRC_CONFIG_INFO_PREFIX,videoProperties.getServerId(),mediaServerId);
+        String redisKey = String.format("%s:%s",SSRC_CONFIG_INFO_PREFIX,mediaServerId);
         return RedisUtils.sHasKey(redisKey, sn) != null && RedisUtils.sHasKey(redisKey, sn);
     }
 

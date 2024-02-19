@@ -74,7 +74,7 @@ public class StreamPush extends LongIdEntity {
     private String mediaServerId;
 
     /**
-     * 使用的服务ID
+     * 使用的流媒体服务ID
      */
     @TableField(value = "server_id")
     @ApiModelProperty(value="使用的服务ID")

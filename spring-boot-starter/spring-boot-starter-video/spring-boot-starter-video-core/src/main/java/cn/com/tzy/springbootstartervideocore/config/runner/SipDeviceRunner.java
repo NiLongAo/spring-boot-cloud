@@ -1,11 +1,13 @@
 package cn.com.tzy.springbootstartervideocore.config.runner;
 
+import cn.com.tzy.springbootstartervideobasic.common.VideoConstant;
 import cn.com.tzy.springbootstartervideobasic.vo.media.MediaRestResult;
 import cn.com.tzy.springbootstartervideobasic.vo.sip.SendRtp;
 import cn.com.tzy.springbootstartervideobasic.vo.video.DeviceVo;
 import cn.com.tzy.springbootstartervideobasic.vo.video.MediaServerVo;
 import cn.com.tzy.springbootstartervideobasic.vo.video.ParentPlatformVo;
 import cn.com.tzy.springbootstartervideocore.media.client.MediaClient;
+import cn.com.tzy.springbootstartervideocore.pool.task.DynamicTask;
 import cn.com.tzy.springbootstartervideocore.redis.RedisService;
 import cn.com.tzy.springbootstartervideocore.redis.impl.SendRtpManager;
 import cn.com.tzy.springbootstartervideocore.redis.impl.SsrcConfigManager;
@@ -30,24 +32,28 @@ import java.util.List;
 public class SipDeviceRunner implements CommandLineRunner {
 
     @Resource
+    private DynamicTask dynamicTask;
+    @Resource
     private SipServer sipServer;
     @Resource
     private SIPCommanderForPlatform sipCommanderForPlatform;
 
     @Override
     public void run(String... args) throws Exception {
-        DeviceVoService deviceVoService = VideoService.getDeviceService();
         MediaServerVoService mediaServerVoService = VideoService.getMediaServerService();
         ParentPlatformVoService parentPlatformVoService = VideoService.getParentPlatformService();
         SendRtpManager sendRtpManager = RedisService.getSendRtpManager();
         SsrcConfigManager ssrcConfigManager = RedisService.getSsrcConfigManager();
-        List<DeviceVo> allDeviceVo = deviceVoService.getAllOnlineDevice();
-        //所有在线设备设置在线
-        for (DeviceVo deviceVo : allDeviceVo) {
-            if(deviceVo.expire()){
-                deviceVoService.offline(deviceVo.getDeviceId());
+        // 设备离线定时任务
+        dynamicTask.startCron("device-offline-5m", 300,()->{
+            DeviceVoService deviceVoService = VideoService.getDeviceService();
+            List<DeviceVo> allDeviceVo = deviceVoService.getAllOnlineDevice();
+            for (DeviceVo deviceVo : allDeviceVo) {
+                if(deviceVo.keepalive()){
+                    deviceVoService.offline(deviceVo.getDeviceId());
+                }
             }
-        }
+        });
         //查找有国标推流全部关闭
         List<SendRtp> sendRtpList = sendRtpManager.queryAllSendRTPServer();
         for (SendRtp sendRtp : sendRtpList) {

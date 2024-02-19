@@ -29,8 +29,8 @@ public class MediaHookSubscribe {
     private final static Integer millis = 20;
 
     private final RedisMessageListenerContainer redisMessageListenerContainer;
-    private final Map<HookType, Map<HookKey, HookEvent>> allSubscribes = new ConcurrentHashMap<>();
-    private final Map<String, AbstractMessageListener> allListenerMap = new ConcurrentHashMap<>();
+    private final Map<HookType, Map<HookKey, HookEvent>> allSubscribes = new HashMap<>();
+    private final Map<String, AbstractMessageListener> allListenerMap = new HashMap<>();
 
     public MediaHookSubscribe(DynamicTask dynamicTask,RedisMessageListenerContainer redisMessageListenerContainer){
         dynamicTask.startCron(MEDIA_HOOK_SUBSCRIBE_MANAGER,millis, this::execute);

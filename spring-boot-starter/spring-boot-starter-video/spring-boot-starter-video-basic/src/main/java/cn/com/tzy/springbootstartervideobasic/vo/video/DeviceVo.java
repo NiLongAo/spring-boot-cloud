@@ -185,4 +185,12 @@ public class DeviceVo extends LongIdEntity {
         return endTime.isBefore(new Date());
     }
 
+    public boolean keepalive(){
+        if(keepaliveTime == null || keepaliveIntervalTime == null){
+            return true;
+        }
+        DateTime endTime = DateUtil.offsetSecond(keepaliveTime, keepaliveIntervalTime+ VideoConstant.DELAY_TIME);
+        return endTime.isBefore(new Date());
+    }
+
 }

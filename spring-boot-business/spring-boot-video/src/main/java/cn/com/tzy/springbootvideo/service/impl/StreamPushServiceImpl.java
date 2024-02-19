@@ -60,7 +60,6 @@ public class StreamPushServiceImpl extends ServiceImpl<StreamPushMapper, StreamP
         StreamPush build = StreamPush.builder()
                 .app(param.getApp())
                 .stream(param.getStream())
-                .serverId(videoProperties.getServerId())
                 .status(ConstEnum.Flag.NO.getValue())
                 .pushIng(ConstEnum.Flag.NO.getValue())
                 .onSelf(ConstEnum.Flag.YES.getValue())

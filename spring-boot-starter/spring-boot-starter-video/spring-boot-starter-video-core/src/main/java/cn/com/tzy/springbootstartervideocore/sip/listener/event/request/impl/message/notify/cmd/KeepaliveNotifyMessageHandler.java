@@ -82,6 +82,8 @@ public class KeepaliveNotifyMessageHandler extends SipResponseEvent implements M
                 return;
             }
         }
+        // 刷新过期任务,如果三次心跳失败，则设置设备离线
+        dynamicTask.startDelay(String.format("%s_%s", VideoConstant.REGISTER_EXPIRE_TASK_KEY_PREFIX, deviceVo.getDeviceId()), deviceVo.getKeepaliveIntervalTime()*3,()-> deviceVoService.offline(deviceVo.getDeviceId()));
         Address remoteAddressInfo = SipUtils.getRemoteAddressFromRequest(request, videoProperties.getSipUseSourceIpAsRemoteAddress());
         if (!deviceVo.getIp().equalsIgnoreCase(remoteAddressInfo.getIp()) || deviceVo.getPort() != remoteAddressInfo.getPort()) {
             log.info("[心跳] 设备{}地址变化, 远程地址为: {}:{}", deviceVo.getDeviceId(), remoteAddressInfo.getIp(), remoteAddressInfo.getPort());
@@ -115,12 +117,8 @@ public class KeepaliveNotifyMessageHandler extends SipResponseEvent implements M
         }else{
             deviceVoService.online(deviceVo,sipServer,sipCommander,videoProperties,null);
         }
-        // 刷新过期任务
-        String registerExpireTaskKey = String.format("%s_%s", VideoConstant.REGISTER_EXPIRE_TASK_KEY_PREFIX, deviceVo.getDeviceId());
         //缓存设备注册服务
         RedisService.getRegisterServerManager().putDevice(deviceVo.getDeviceId(),deviceVo.getKeepaliveIntervalTime()+VideoConstant.DELAY_TIME ,Address.builder().gbId(deviceVo.getDeviceId()).ip(nacosDiscoveryProperties.getIp()).port(nacosDiscoveryProperties.getPort()).build());
-        // 如果三次心跳失败，则设置设备离线
-        dynamicTask.startDelay(registerExpireTaskKey, deviceVo.getKeepaliveIntervalTime()*3,()-> deviceVoService.offline(deviceVo.getDeviceId()));
     }
 
     @Override
