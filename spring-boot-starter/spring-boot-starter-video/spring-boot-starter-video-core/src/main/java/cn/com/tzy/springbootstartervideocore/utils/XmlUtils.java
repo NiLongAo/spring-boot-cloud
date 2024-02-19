@@ -8,6 +8,7 @@ import cn.com.tzy.springbootstartervideobasic.interfaces.MessageElement;
 import cn.com.tzy.springbootstartervideobasic.vo.video.DeviceChannelVo;
 import cn.com.tzy.springbootstartervideobasic.vo.video.DeviceVo;
 import cn.com.tzy.springbootstartervideocore.properties.SipConfigProperties;
+import cn.com.tzy.springbootstartervideocore.redis.RedisService;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.XmlUtil;
@@ -275,8 +276,8 @@ public class XmlUtils {
                     if (parentId.contains("/")) {
                         parentId = parentId.substring(0, parentId.indexOf("/"));
                     }
-                    SipConfigProperties bean = SpringUtil.getBean(SipConfigProperties.class);
-                    if(StringUtils.equals(bean.getId(),parentId)){
+                    //如果是SIP国标 改为设备国标
+                    if(RedisService.getRegisterServerManager().getSip(parentId)!=null){
                         parentId = deviceVo.getDeviceId();
                     }
                     deviceChannelVo.setParentId(parentId);
