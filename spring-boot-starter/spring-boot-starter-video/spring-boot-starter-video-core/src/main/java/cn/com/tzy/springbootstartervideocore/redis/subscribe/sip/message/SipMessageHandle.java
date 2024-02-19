@@ -57,24 +57,37 @@ public class SipMessageHandle extends AbstractMessageListener {
             Object deserialize = SerializationUtils.deserialize(Base64.decode((String) body));
             MessageTypeVo vo = (MessageTypeVo) deserialize;
             if(MessageTypeVo.TypeEnum.DEVICE.getValue()== (vo.getType())){
-                Address address = RedisService.getRegisterServerManager().getDevice(vo.getGbId());
-                DeviceVo deviceVo = VideoService.getDeviceService().findDeviceGbId(vo.getGbId());
-                if(address != null && deviceVo != null &&  nacosDiscoveryProperties.getIp().equals(address.getIp()) &&  nacosDiscoveryProperties.getPort() == address.getPort()){
-                    String localIp = sipServer.getLocalIp(deviceVo.getLocalIp());
-                    handleMessage(localIp,vo.getMessage());
-                }else {
+                if(!RedisService.getRegisterServerManager().isNotServerDevice(vo.getGbId())){
                     log.error("[SIP接收消息] [设备] 未获取注册地址 gbId : {}",vo.getGbId());
                     sendErrorMsg(sipServer, vo.getMessage(), String.format("未获取设备注册地址 国标编号 :%s",vo.getGbId()));
+                    return;
+                }
+                Address address = RedisService.getRegisterServerManager().getDevice(vo.getGbId());
+                if(address == null){
+                    log.warn("[SIP接收消息] [设备] 在其他服务注册 gbId : {}",vo.getGbId());
+                    return;
+                }
+                DeviceVo deviceVo = VideoService.getDeviceService().findDeviceGbId(vo.getGbId());
+                if(deviceVo != null &&  nacosDiscoveryProperties.getIp().equals(address.getIp()) &&  nacosDiscoveryProperties.getPort() == address.getPort()){
+                    String localIp = sipServer.getLocalIp(deviceVo.getLocalIp());
+                    handleMessage(localIp,vo.getMessage());
                 }
             }else if(MessageTypeVo.TypeEnum.PLATFORM.getValue()== (vo.getType())){
-                Address address = RedisService.getRegisterServerManager().getPlatform(vo.getGbId());
-                ParentPlatformVo platform = VideoService.getParentPlatformService().getParentPlatformByServerGbId(vo.getGbId());
-                if(address != null && platform != null &&  nacosDiscoveryProperties.getIp().equals(address.getIp()) &&  nacosDiscoveryProperties.getPort() == address.getPort()){
-                    String localIp = sipServer.getLocalIp(platform.getDeviceIp());
-                    handleMessage(localIp,vo.getMessage());
-                }else {
+                if(!RedisService.getRegisterServerManager().isNotPlatformDevice(vo.getGbId())){
                     log.error("[SIP接收消息] [国标级联] 未获取注册地址 gbId : {}",vo.getGbId());
                     sendErrorMsg(sipServer, vo.getMessage(), String.format("未获取国标级联注册地址 国标编号 :%s",vo.getGbId()));
+                    return;
+                }
+                Address address = RedisService.getRegisterServerManager().getPlatform(vo.getGbId());
+                if(address == null){
+                    log.warn("[SIP接收消息] [设备] 在其他服务注册 gbId : {}",vo.getGbId());
+                    return;
+                }
+
+                ParentPlatformVo platform = VideoService.getParentPlatformService().getParentPlatformByServerGbId(vo.getGbId());
+                if(platform != null &&  nacosDiscoveryProperties.getIp().equals(address.getIp()) &&  nacosDiscoveryProperties.getPort() == address.getPort()){
+                    String localIp = sipServer.getLocalIp(platform.getDeviceIp());
+                    handleMessage(localIp,vo.getMessage());
                 }
             }else {
                 log.error("[SIP接收消息] 类型错误:{}", JSONUtil.toJsonStr(vo));

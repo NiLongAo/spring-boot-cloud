@@ -78,7 +78,7 @@ public class ZLMRunner implements CommandLineRunner {
         MediaServerVoService mediaServerVoService = VideoService.getMediaServerService();
         List<MediaServerVo> serviceAll = mediaServerVoService.findConnectZlmList();
         if(serviceAll.isEmpty()){
-            log.error("[ZML] 当前服务未绑定ZLM");
+            log.warn("[ZML] 没有空闲流媒体需注册");
             return;
         }
         allZML = serviceAll.stream().map(MediaServerVo::getId).collect(Collectors.toList());

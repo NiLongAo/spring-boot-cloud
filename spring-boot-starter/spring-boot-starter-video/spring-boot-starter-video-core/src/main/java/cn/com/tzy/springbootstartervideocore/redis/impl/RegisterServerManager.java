@@ -61,11 +61,11 @@ public class RegisterServerManager {
     }
 
     public void putDevice(String gbId,int time, Address address) {
-        RedisUtils.set(getDeviceKey(gbId), address,time);
+        RedisUtils.set(getDeviceKey(gbId,true), address,time);
     }
 
     public Address getDevice(String gbId) {
-        List<String> scan = RedisUtils.keys(getDeviceKey(gbId));
+        List<String> scan = RedisUtils.keys(getDeviceKey(gbId,true));
         if (scan.size() > 0) {
             return (Address)RedisUtils.get((String)scan.get(0));
         }else {
@@ -74,35 +74,53 @@ public class RegisterServerManager {
     }
 
     public void delDevice(String gbId) {
-        RedisUtils.del(getDeviceKey(gbId));
+        RedisUtils.del(getDeviceKey(gbId,true));
     }
 
     public void putPlatform(String gbId,int time, Address address) {
-        RedisUtils.set(getPlatformKey(gbId), address,time);
+        RedisUtils.set(getPlatformKey(gbId,true), address,time);
     }
 
     public Address getPlatform(String gbId) {
-        List<String> scan = RedisUtils.keys(getPlatformKey(gbId));
-        if (scan.size() > 0) {
+        List<String> scan = RedisUtils.keys(getPlatformKey(gbId,true));
+        if (!scan.isEmpty()) {
             return (Address)RedisUtils.get((String)scan.get(0));
         }else {
             return null;
         }
     }
 
+    public boolean isNotServerDevice(String gbId){
+        List<String> scan = RedisUtils.keys(getDeviceKey(gbId,false));
+        if (!scan.isEmpty()) {
+            return true;
+        }else {
+            return false;
+        }
+    }
+
+    public boolean isNotPlatformDevice(String gbId){
+        List<String> scan = RedisUtils.keys(getPlatformKey(gbId,false));
+        if (!scan.isEmpty()) {
+            return true;
+        }else {
+            return false;
+        }
+    }
+
     public void delPlatform(String gbId) {
-        RedisUtils.del(getPlatformKey(gbId));
+        RedisUtils.del(getPlatformKey(gbId,true));
     }
 
     private String getSipKey(String gbId){
         return String.format("%s%s",VIDEO_SIP_CACHE_SERVER,gbId);
     }
 
-    private String getDeviceKey(String gbId){
-        return String.format("%s%s:%s",VIDEO_DEVICE_CACHE_SERVER,videoProperties.getServerId(),gbId);
+    private String getDeviceKey(String gbId,boolean isServer){
+        return String.format("%s%s:%s",VIDEO_DEVICE_CACHE_SERVER,isServer?videoProperties.getServerId():"*",gbId);
     }
 
-    private String getPlatformKey(String gbId){
-        return String.format("%s%s:%s",VIDEO_PLATFORM_CACHE_SERVER,videoProperties.getServerId(),gbId);
+    private String getPlatformKey(String gbId,boolean isServer){
+        return String.format("%s%s:%s",VIDEO_PLATFORM_CACHE_SERVER,isServer?videoProperties.getServerId():"*",gbId);
     }
 }

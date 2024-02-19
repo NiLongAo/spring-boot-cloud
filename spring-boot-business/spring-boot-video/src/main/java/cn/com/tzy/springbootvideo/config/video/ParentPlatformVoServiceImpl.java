@@ -53,10 +53,10 @@ public class ParentPlatformVoServiceImpl extends ParentPlatformVoService {
         }
         List<ParentPlatform> list = parentPlatformService.list(new LambdaQueryWrapper<ParentPlatform>().eq(ParentPlatform::getDeviceGbId, deviceGbId));
         if(list.isEmpty()){
-            log.info("[上级平台 ] ： 未获取到上级平台信息");
+            log.info("[上级平台 ] ： 当前平台{}没有添加级联平台",deviceGbId);
             return  null;
         }
-        return ParentPlatformConvert.INSTANCE.convertVo(list);
+        return ParentPlatformConvert.INSTANCE.convertVo(list.stream().filter(o->ConstEnum.Flag.YES.getValue()==o.getEnable()).collect(Collectors.toList()));
     }
 
     @Override
