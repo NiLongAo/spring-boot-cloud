@@ -25,12 +25,10 @@ ENTRYPOINT [ \
 #    "-Dskywalking.agent.service_name=spring-boot-activiti", \
 #    "-Dskywalking.collector.backend_service=1.15.9.228:12011", \
     "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=14006", \
-    "-Xmx256m","-Xms256m", \
+    "-XX:MetaspaceSize=64m", "-XX:MaxMetaspaceSize=128m", "-Xms128m", "-Xmx256m", "-Xmn128m", "-Xss256k", "-XX:SurvivorRatio=8",\
     "-Dloader.path=/spring-boot-activiti/lib", \
     "-Dfile.encoding=utf-8", \
     "-Djava.security.egd=file:/dev/./urandom", \
-    "-XX:+UnlockExperimentalVMOptions", \
-    "-XX:+UseCGroupMemoryLimitForHeap", \
     "-jar","/spring-boot-activiti/spring-boot-activiti.jar", \
     "--logging.config=/spring-boot-activiti/logback.xml" \
 ]

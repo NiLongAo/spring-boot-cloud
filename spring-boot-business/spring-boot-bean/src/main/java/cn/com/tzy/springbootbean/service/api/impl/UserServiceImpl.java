@@ -3,6 +3,7 @@ package cn.com.tzy.springbootbean.service.api.impl;
 import cn.com.tzy.spingbootstartermybatis.core.tenant.context.TenantContextHolder;
 import cn.com.tzy.springbootbean.config.init.AppConfig;
 import cn.com.tzy.springbootbean.mapper.sql.*;
+import cn.com.tzy.springbootbean.service.api.AreaService;
 import cn.com.tzy.springbootbean.service.api.TenantService;
 import cn.com.tzy.springbootbean.service.api.UserService;
 import cn.com.tzy.springbootbean.utils.PassWordUtils;
@@ -36,6 +37,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
+import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -46,8 +48,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Autowired
     private UserSetMapper userSetMapper;
     @Autowired
-    private AppConfig appConfig;
-    @Autowired
     private TenantService tenantService;
     @Autowired
     private UserConnectDepartmentMapper userConnectDepartmentMapper;
@@ -57,6 +57,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private UserConnectRoleMapper userConnectRoleMapper;
     @Autowired
     private MiniUserMapper miniUserMapper;
+    @Resource
+    private AreaService areaService;
+
 
     @Override
     public PageResult choiceUserPage(UserParam userPageModel) {
@@ -342,7 +345,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         param.setCredentialssalt(PassWordUtils.getSalt());
         param.setPassword(PassWordUtils.getEncryptionPassWord(param.getPassword(), param.getCredentialssalt()));
-        param.setAddress(appConfig.findAddress(param.getProvinceId(), param.getCityId(), param.getAreaId()));
+
+        param.setAddress(areaService.findAddress(param.getProvinceId(), param.getCityId(), param.getAreaId()));
         param.setLoginLastTime(new Date());
         baseMapper.insert(param);
         UserSet userSet = new UserSet();
@@ -383,7 +387,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 userSetMapper.updateById(userSet);
             }
         }
-        param.setAddress(appConfig.findAddress(param.getProvinceId(), param.getCityId(), param.getAreaId()));
+        param.setAddress(areaService.findAddress(param.getProvinceId(), param.getCityId(), param.getAreaId()));
         baseMapper.updateById(param);
         return RestResult.result(RespCode.CODE_0);
     }

@@ -24,12 +24,10 @@ ENTRYPOINT [ \
 #    "-Dskywalking.agent.service_name=spring-boot-video", \
 #    "-Dskywalking.collector.backend_service=1.15.9.228:12011", \
     "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=14004", \
+    "-XX:MetaspaceSize=64m", "-XX:MaxMetaspaceSize=128m", "-Xms128m", "-Xmx256m", "-Xmn128m", "-Xss256k", "-XX:SurvivorRatio=8",\
     "-Dloader.path=/spring-boot-video/lib", \
     "-Dfile.encoding=utf-8", \
     "-Djava.security.egd=file:/dev/./urandom", \
-    "-XX:+UnlockExperimentalVMOptions", \
-    "-XX:+UseCGroupMemoryLimitForHeap", \
-    "-Xmx256m","-Xms64m","-Xss256k", "-XX:ParallelGCThreads=2",\
     "-jar","/spring-boot-video/spring-boot-video.jar", \
     "--logging.config=/spring-boot-video/logback.xml" \
 ]

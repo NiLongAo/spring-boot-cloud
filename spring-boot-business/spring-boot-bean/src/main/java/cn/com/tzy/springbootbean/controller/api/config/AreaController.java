@@ -21,4 +21,6 @@ public class AreaController  extends ApiController {
     public RestResult<?> findAreaAll(){
         return areaService.findAreaAll();
     }
+
+
 }

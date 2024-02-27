@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="spring-boot-app" type="docker-deploy" factoryName="dockerfile" server-name="1.82.217.118">
+  <configuration default="false" name="spring-boot-app" type="docker-deploy" factoryName="dockerfile">
     <deployment type="dockerfile">
       <settings>
         <option name="imageTag" value="ccr.ccs.tencentyun.com/spring_boot_cloud/spring_cloud_app" />
