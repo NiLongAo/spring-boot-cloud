@@ -3,6 +3,7 @@ package cn.com.tzy.springbootentity.common.info;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -10,7 +11,7 @@ import java.util.List;
  */
 @Getter
 @Setter
-public class AreaInfo {
+public class AreaInfo implements Serializable {
     private Integer value;
     private String label;
     private List<AreaInfo> children;

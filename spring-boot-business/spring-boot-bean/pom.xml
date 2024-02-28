@@ -21,7 +21,7 @@
             <groupId>cn.com.tzy</groupId>
             <artifactId>spring-boot-starter-minio</artifactId>
         </dependency>
-<!--   服务器已关闭 elasticsearch服务    -->
+        <!--   服务器已关闭 elasticsearch服务    -->
         <dependency>
             <groupId>cn.com.tzy</groupId>
             <artifactId>spring-boot-starter-elasticsearch</artifactId>

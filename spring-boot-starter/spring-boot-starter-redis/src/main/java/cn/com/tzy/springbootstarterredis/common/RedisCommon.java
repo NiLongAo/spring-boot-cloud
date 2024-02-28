@@ -19,6 +19,14 @@ public class RedisCommon {
      */
     public static final String AREA_ADDRESS= "REDIS_CACHE:AREA:ADDRESS:";
     /**
+     * 缓存系统配置信息
+     */
+    public static final String CONFIG_INFO= "REDIS_CACHE:CONFIG:INFO:";
+    /**
+     * 缓存全部区域名称信息
+     */
+    public static final String CONFIG_ALL_INFO= "REDIS_CACHE:CONFIG:ALL_INFO";
+    /**
      * redis 发布订阅监听  扫描监听
      */
     public final static String Q_R_EVENT = "qr_event";

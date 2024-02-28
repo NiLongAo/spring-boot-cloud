@@ -25,6 +25,8 @@ spring:
             group: DEFAULT_GROUP
           - data-id: nacos-config-dev.yaml
             group: DEFAULT_GROUP
+          - data-id: feign-config-dev.yaml
+            group: DEFAULT_GROUP
 sip:
   # 信令服务器ip 没有服务ip时取nacos中注册的ip
   ip : 0.0.0.0

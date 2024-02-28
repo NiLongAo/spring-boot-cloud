@@ -1,6 +1,5 @@
 package cn.com.tzy.springbootbean.service.api.impl;
 
-import cn.com.tzy.springbootbean.config.init.AppConfig;
 import cn.com.tzy.springbootcomm.common.bean.TreeNode;
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
@@ -8,7 +7,6 @@ import cn.com.tzy.springbootentity.common.info.AreaInfo;
 import cn.com.tzy.springbootentity.utils.TreeUtil;
 import cn.com.tzy.springbootstarterredis.common.RedisCommon;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -24,9 +22,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class AreaServiceImpl extends ServiceImpl<AreaMapper, Area> implements AreaService{
-
-    @Resource
-    private AppConfig appConfig;
 
 
     @Override

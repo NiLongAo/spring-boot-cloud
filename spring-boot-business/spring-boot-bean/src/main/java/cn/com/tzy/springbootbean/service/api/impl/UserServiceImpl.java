@@ -1,7 +1,6 @@
 package cn.com.tzy.springbootbean.service.api.impl;
 
 import cn.com.tzy.spingbootstartermybatis.core.tenant.context.TenantContextHolder;
-import cn.com.tzy.springbootbean.config.init.AppConfig;
 import cn.com.tzy.springbootbean.mapper.sql.*;
 import cn.com.tzy.springbootbean.service.api.AreaService;
 import cn.com.tzy.springbootbean.service.api.TenantService;

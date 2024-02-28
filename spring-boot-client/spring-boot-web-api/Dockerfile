@@ -36,7 +36,7 @@ ENTRYPOINT [ \
 #    "-Dskywalking.agent.service_name=spring-boot-web-api", \
 #    "-Dskywalking.collector.backend_service=1.15.9.228:12011", \
     "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=14001", \
-    "-XX:MetaspaceSize=64m", "-XX:MaxMetaspaceSize=128m", "-Xms128m", "-Xmx256m", "-Xmn128m", "-Xss256k", "-XX:SurvivorRatio=8",\
+    "-XX:MetaspaceSize=64m", "-XX:MaxMetaspaceSize=128m","-XX:+AlwaysPreTouch", "-Xms128m", "-Xmx256m", "-Xmn128m", "-Xss256k", "-XX:SurvivorRatio=8",\
     "-Dloader.path=/spring-boot-web-api/lib", \
     "-Dfile.encoding=utf-8", \
     "-Djava.security.egd=file:/dev/./urandom", \

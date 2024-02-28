@@ -22,12 +22,10 @@ ENTRYPOINT [ \
 #    "-Dskywalking.agent.service_name=spring-boot-sso", \
 #    "-Dskywalking.collector.backend_service=1.15.9.228:12011", \
     "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=14005", \
-    "-Xmx256m","-Xms256m", \
+    "-XX:MetaspaceSize=64m", "-XX:MaxMetaspaceSize=128m","-XX:+AlwaysPreTouch", "-Xms128m", "-Xmx256m", "-Xmn128m", "-Xss256k", "-XX:SurvivorRatio=8",\
     "-Dloader.path=/spring-boot-sso/lib", \
     "-Dfile.encoding=utf-8", \
     "-Djava.security.egd=file:/dev/./urandom", \
-    "-XX:+UnlockExperimentalVMOptions", \
-    "-XX:+UseCGroupMemoryLimitForHeap", \
     "-jar","/spring-boot-sso/spring-boot-sso.jar", \
     "--logging.config=/spring-boot-sso/logback.xml" \
 ]

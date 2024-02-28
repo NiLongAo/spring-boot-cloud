@@ -1,11 +1,12 @@
 package cn.com.tzy.springbootbean.controller.api.staticFile;
 
-import cn.com.tzy.springbootbean.config.init.AppConfig;
+import cn.com.tzy.springbootbean.service.api.ConfigService;
 import cn.com.tzy.springbootcomm.common.enumcom.ConstEnum;
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootcomm.constant.Constant;
 import cn.com.tzy.springbootcomm.utils.JwtUtils;
+import cn.com.tzy.springbootentity.dome.sys.Config;
 import cn.com.tzy.springbootstartercloud.api.ApiController;
 import cn.com.tzy.springbootstarterminio.utils.MinioUtils;
 import lombok.extern.log4j.Log4j2;
@@ -32,10 +33,10 @@ public class UpLoadController extends ApiController {
 
     @Value("${minio.bucketName}")
     private String BUCKETNAME;
-    @Autowired
-    private AppConfig appConfig;
     @Resource
     private MinioUtils minioUtils;
+    @Resource
+    private ConfigService configService;
 
     @ResponseBody
     @PostMapping(value = "/upload.htm")
@@ -53,10 +54,11 @@ public class UpLoadController extends ApiController {
         if(isBuildName != null && isBuildName){
             fileName = userId+"/"+split[0];
         }
+        Config config = configService.find(ConstEnum.ConfigEnum.STATIC_PATH.getValue());
         String format = minioUtils.upload(BUCKETNAME, String.format(url, DateFormatUtils.format(new Date(), Constant.DATE_FORMAT)), fileName, file);
         Map<String,String> map =new HashMap<>();
         map.put("path",format);
-        map.put("fullPath",appConfig.findStaticPath(format));
+        map.put("fullPath",String.format("%s%s",config.getV(),format));
         return RestResult.result(RespCode.CODE_0.getValue(),"上传成功",map);
     }
 
@@ -65,9 +67,10 @@ public class UpLoadController extends ApiController {
     public RestResult<?> bucketUpload(@RequestParam(value = "bucketName",required = false) String bucketName, @RequestParam("path") String path,@RequestParam("fileName") String fileName, @RequestParam("file")MultipartFile file
     ) throws Exception {
         String format = minioUtils.upload(bucketName,path, fileName, file);
+        Config config = configService.find(ConstEnum.ConfigEnum.STATIC_PATH.getValue());
         Map<String,String> map = new HashMap<>();
         map.put("path",format);
-        map.put("fullPath",appConfig.findStaticPath(format));
+        map.put("fullPath",String.format("%s%s",config.getV(),format));
         return RestResult.result(RespCode.CODE_0.getValue(),"上传成功",map);
     }
 

@@ -25,6 +25,8 @@ spring:
             group: DEFAULT_GROUP
           - data-id: nacos-config-dev.yaml
             group: DEFAULT_GROUP
+          - data-id: feign-config-dev.yaml
+            group: DEFAULT_GROUP
 server:
   port: 8662
 seata:
