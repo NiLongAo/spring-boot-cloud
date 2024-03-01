@@ -21,7 +21,7 @@ ENTRYPOINT [ \
 #    "-javaagent:/spring-boot-oa/skywalking-agent-lib/skywalking-agent.jar", \
 #    "-Dskywalking.agent.service_name=spring-boot-oa", \
 #    "-Dskywalking.collector.backend_service=1.15.9.228:12011", \
-    "-XX:MetaspaceSize=64m", "-XX:MaxMetaspaceSize=128m","-XX:+AlwaysPreTouch", "-Xms128m", "-Xmx256m", "-Xmn128m", "-Xss256k", "-XX:SurvivorRatio=8",\
+    "-XX:MetaspaceSize=256M", "-XX:MaxMetaspaceSize=256M","-XX:+AlwaysPreTouch","-XX:ReservedCodeCacheSize=128m", "-Xms256m", "-Xmx256m", "-Xss512k", "-XX:+UseG1GC","-XX:G1HeapRegionSize=4M",\
     "-Dloader.path=/spring-boot-oa/lib", \
     "-Dfile.encoding=utf-8", \
     "-Djava.security.egd=file:/dev/./urandom", \
