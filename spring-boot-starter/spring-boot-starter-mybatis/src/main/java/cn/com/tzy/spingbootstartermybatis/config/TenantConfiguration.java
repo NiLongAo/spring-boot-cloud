@@ -53,16 +53,4 @@ public class TenantConfiguration {
         return registrationBean;
     }
 
-    @Bean
-    public MybatisPlusInterceptor mybatisPlusInterceptor() {
-        MybatisPlusInterceptor mybatisPlusInterceptor = new MybatisPlusInterceptor();
-        mybatisPlusInterceptor.addInnerInterceptor(new PaginationInnerInterceptor()); // 分页插件
-        return mybatisPlusInterceptor;
-    }
-
-    @Bean
-    public MetaObjectHandler defaultMetaObjectHandler(){
-        return new DefaultDBFieldHandler(); // 自动填充参数类
-    }
-
 }

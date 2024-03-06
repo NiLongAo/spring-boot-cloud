@@ -167,9 +167,6 @@ public class UserController extends ApiController {
         return userService.findUserBind(userId);
     }
 
-    /**
-     *
-     */
     @ApiOperation(value = "保存用户角色信息", notes = "保存用户角色信息")
     @PostMapping("save_user_role")
     @ResponseBody

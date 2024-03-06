@@ -6,6 +6,8 @@ import cn.com.tzy.springbootentity.param.bean.LogsParam;
 import cn.com.tzy.springbootstartercloud.api.ApiController;
 import cn.com.tzy.springbootwebapi.service.config.LogsService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +31,9 @@ public class LogsController extends ApiController {
     }
 
     @ApiOperation(value = "系统日志详情", notes = "系统日志详情")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="id", value="日志编号", required=true, paramType="query", dataType="String", defaultValue="")
+    })
     @GetMapping("detail")
     @ResponseBody
     public RestResult<?> detail(@RequestParam("id") Long id) {
