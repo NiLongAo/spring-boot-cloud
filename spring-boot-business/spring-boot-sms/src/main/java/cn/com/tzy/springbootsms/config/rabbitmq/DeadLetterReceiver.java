@@ -5,13 +5,9 @@ import com.rabbitmq.client.Channel;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.*;
-import org.springframework.amqp.support.converter.ContentTypeDelegatingMessageConverter;
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.HashMap;
 
 /**
  * 死信消息
@@ -26,13 +22,8 @@ import java.util.HashMap;
 public class DeadLetterReceiver {
 
     @RabbitHandler
-    public void onMessage(Object  obj, Channel channel, Message message) throws IOException {
-        ContentTypeDelegatingMessageConverter converter = new ContentTypeDelegatingMessageConverter();
-        converter.setDelegates(new HashMap<String, MessageConverter>(){{
-            put("application/json",new Jackson2JsonMessageConverter());
-        }});
-        Object o1 = converter.fromMessage(message);
-        log.info("死信队列[DeadLetterReceiver]接收到的消息为：MyAckReceiver  data:{}", message);
+    public void onMessage(Object obj, Channel channel, Message message) throws IOException {
+        log.info("死信队列[DeadLetterReceiver]接收到的消息为：MyAckReceiver  data:{}", obj);
         channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
     }
 }
