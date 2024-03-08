@@ -3,11 +3,7 @@ package cn.com.tzy.springbootapp.service.bean;
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootcomm.constant.Constant;
-import cn.com.tzy.springbootcomm.constant.ImgConstant;
 import cn.com.tzy.springbootcomm.constant.NotNullMap;
-import cn.com.tzy.springbootcomm.utils.AppUtils;
-import cn.com.tzy.springbootcomm.utils.JwtUtils;
-import cn.com.tzy.springbootentity.common.info.UserPayload;
 import cn.com.tzy.springbootentity.param.bean.*;
 import cn.com.tzy.springbootentity.utils.EncryptUtil;
 import cn.com.tzy.springbootentity.utils.VerifyUtil;
@@ -17,7 +13,7 @@ import cn.com.tzy.springbootfeignbean.api.staticFile.UpLoadServiceFeign;
 import cn.com.tzy.springbootfeignbean.api.sys.ConfigServiceFeign;
 import cn.com.tzy.springbootfeignsso.api.oauth.OAuthUserServiceFeign;
 import cn.com.tzy.springbootstarterredis.utils.RedisUtils;
-import cn.com.tzy.srpingbootstartersecurityoauthbasic.common.TypeEnum;
+import cn.com.tzy.srpingbootstartersecurityoauthbasic.common.LoginTypeEnum;
 import cn.hutool.captcha.AbstractCaptcha;
 import cn.hutool.core.lang.UUID;
 import lombok.SneakyThrows;
@@ -26,13 +22,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.util.Base64;
-import java.util.Map;
 
 @Log4j2
 @Service
@@ -76,6 +65,8 @@ public class UserService {
     public RestResult<?> login(LoginParam param){
         if(param.grantType == null){
             return RestResult.result(RespCode.CODE_2.getValue(),"未获取登录类型");
+        }if(param.loginType == null){
+            return RestResult.result(RespCode.CODE_2.getValue(),"未获取登录方式");
         }
         switch (param.grantType) {
             case code:
@@ -89,13 +80,13 @@ public class UserService {
                 }
                 String username = EncryptUtil.aesDecrypt(code.username, Constant.SECRET_KEY,Constant.SECRET_IV);
                 String password = EncryptUtil.aesDecrypt(code.password, Constant.SECRET_KEY,Constant.SECRET_IV);
-                return oAuthUserServiceFeign.tokenCode(clientId,clientSecret,TypeEnum.WEB_ACCOUNT.getType(),"code",VERIFY_CODE,code.verificationCode,username,password);
+                return oAuthUserServiceFeign.tokenCode(clientId,clientSecret, param.loginType.getType(),"code",VERIFY_CODE,code.verificationCode,username,password);
             case refresh_token:
                 LoginParam.RefreshToken refreshToken = param.refreshToken;
                 if(StringUtils.isEmpty(refreshToken.refreshToken)){
                     return RestResult.result(RespCode.CODE_2.getValue(),"未获取到刷新token");
                 }
-                RestResult<?> result = oAuthUserServiceFeign.refreshToken(clientId, clientSecret, TypeEnum.WEB_WX_MINI.getType(), "refresh_token", refreshToken.refreshToken);
+                RestResult<?> result = oAuthUserServiceFeign.refreshToken(clientId, clientSecret, param.loginType.getType(), "refresh_token", refreshToken.refreshToken);
                 if(result.getCode() != RespCode.CODE_0.getValue()){
                     result.setCode(RespCode.CODE_315.getValue());
                 }
@@ -109,8 +100,11 @@ public class UserService {
         return userServiceFeign.findLoginInfo();
     }
 
-    public RestResult<?> logout(){
-        RestResult<?> result = oAuthUserServiceFeign.logout(TypeEnum.WEB_WX_MINI.getType());
+    public RestResult<?> logout(LoginTypeEnum loginType){
+        if(loginType == null){
+            return RestResult.result(RespCode.CODE_2.getValue(),"未获取登录方式");
+        }
+        RestResult<?> result = oAuthUserServiceFeign.logout(loginType.getType());
         if(result.getCode() != RespCode.CODE_0.getValue()){
             result.setCode(RespCode.CODE_315.getValue());
         }

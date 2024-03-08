@@ -6,7 +6,7 @@ import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootcomm.utils.AppUtils;
 import cn.com.tzy.springbootentity.common.info.SecurityBaseUser;
 import cn.com.tzy.springbootfeignbean.api.bean.UserServiceFeign;
-import cn.com.tzy.srpingbootstartersecurityoauthbasic.common.TypeEnum;
+import cn.com.tzy.srpingbootstartersecurityoauthbasic.common.LoginTypeEnum;
 import cn.com.tzy.srpingbootstartersecurityoauthbasic.dome.OAuthUserDetails;
 import cn.com.tzy.srpingbootstartersecurityoauthcore.config.server.service.UserDetailsTypeService;
 import lombok.extern.log4j.Log4j2;
@@ -36,12 +36,12 @@ public class UserDetailsServiceImpl implements UserDetailsService, UserDetailsTy
     private UserServiceFeign userServiceFeign;
 
     @Override
-    public TypeEnum getTypeEnum() {
-        return TypeEnum.WEB_ACCOUNT;
+    public LoginTypeEnum getTypeEnum() {
+        return LoginTypeEnum.WEB_ACCOUNT;
     }
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        RestResult<?> result = userServiceFeign.getLoginAccount(username);
+        RestResult<?> result = userServiceFeign.findLoginTypeByUserInfo(getTypeEnum(),username);
         SecurityBaseUser sysUser = null;
         if (RespCode.CODE_0.getValue()==result.getCode()) {
             try {
@@ -56,6 +56,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, UserDetailsTy
             throw new UsernameNotFoundException("用户:" + username + ",不存在!");
         }
         OAuthUserDetails oauthUserDetails = new OAuthUserDetails(sysUser);
+        oauthUserDetails.setUsername(username);
         oauthUserDetails.setLoginType(getTypeEnum().getType());
         if (oauthUserDetails.getId() == null) {
             throw new UsernameNotFoundException(RespCode.CODE_311.getName());

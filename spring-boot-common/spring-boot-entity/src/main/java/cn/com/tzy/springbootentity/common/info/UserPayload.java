@@ -1,12 +1,9 @@
 package cn.com.tzy.springbootentity.common.info;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-
-import java.util.Set;
 
 @Data
 @SuperBuilder(toBuilder = true)
@@ -14,9 +11,9 @@ import java.util.Set;
 @NoArgsConstructor
 public class UserPayload {
 
-    private Long userId;
+    private Long user_id;
 
     private String user_name;
 
-    private String loginType;
+    private String login_type;
 }

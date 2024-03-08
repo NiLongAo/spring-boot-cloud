@@ -1,6 +1,7 @@
 package cn.com.tzy.springbootstartercloud.web.interceptor;
 
 import cn.com.tzy.springbootcomm.common.enumcom.ConstEnum;
+import cn.com.tzy.springbootcomm.common.jwt.JwtCommon;
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootcomm.constant.Constant;
 import lombok.extern.log4j.Log4j2;
@@ -29,7 +30,7 @@ public class LogonInterceptor extends HandlerInterceptorAdapter {
         //NotLogin notLogin = handlerMethod.getMethod().getAnnotation(NotLogin.class);
         if (log.isDebugEnabled()) {
             log.debug("URL = {}", request.getRequestURI());
-            log.debug("header payload = {} ", request.getHeader(Constant.JWT_PAYLOAD_KEY));
+            log.debug("header payload = {} ", request.getHeader(JwtCommon.JWT_AUTHORIZATION_KEY));
         }
         return true;
     }

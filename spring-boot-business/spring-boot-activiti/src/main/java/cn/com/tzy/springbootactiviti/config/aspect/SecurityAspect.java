@@ -1,7 +1,8 @@
 package cn.com.tzy.springbootactiviti.config.aspect;
 
-import cn.com.tzy.springbootcomm.constant.Constant;
 import cn.com.tzy.springbootcomm.utils.JwtUtils;
+import cn.com.tzy.springbootcomm.common.jwt.JwtCommon;
+import cn.hutool.core.map.MapUtil;
 import lombok.extern.log4j.Log4j2;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -38,7 +39,7 @@ public class SecurityAspect {
 
     @Around(value="postMapping() || getMapping() || putMapping() || deleteMapping() || requestMapping()")
     public Object aroundMethod(ProceedingJoinPoint point) throws Throwable {
-        Map map = JwtUtils.getJwtPayload();
+        Map<String, String> map = JwtUtils.getJwtUserMap();
         SecurityContextHolder.setContext(new SecurityContextImpl(new Authentication() {
             @Override
             public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -57,7 +58,7 @@ public class SecurityAspect {
 
             @Override
             public Object getPrincipal() {
-                return map.get(Constant.USER_ID_KEY);
+                return MapUtil.getLong(map, JwtCommon.JWT_USER_ID);
             }
 
             @Override
@@ -71,10 +72,10 @@ public class SecurityAspect {
             }
             @Override
             public String getName() {
-                return String.valueOf(map.get(Constant.USER_NAME_KEY));
+                return MapUtil.getStr(map, JwtCommon.JWT_USER_NAME);
             }
         }));
-        org.activiti.engine.impl.identity.Authentication.setAuthenticatedUserId(String.valueOf(map.get(Constant.USER_ID_KEY)));
+        org.activiti.engine.impl.identity.Authentication.setAuthenticatedUserId(MapUtil.getStr(map, JwtCommon.JWT_USER_ID));
         return  point.proceed();
     }
 }

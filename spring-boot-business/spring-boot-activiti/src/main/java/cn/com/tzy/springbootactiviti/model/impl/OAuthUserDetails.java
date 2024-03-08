@@ -23,6 +23,14 @@ public class OAuthUserDetails implements UserDetails {
     private Long id;
 
     private String username;
+    /**
+     * 手机号
+     */
+    private String phone;
+    /**
+     * 账号
+     */
+    private String loginType;
 
     private String password;
 
@@ -43,6 +51,8 @@ public class OAuthUserDetails implements UserDetails {
     public OAuthUserDetails(SecurityBaseUser user) {
         this.setId(user.getId());
         this.setUsername(user.getUserName());
+        this.setLoginType(user.getLoginType());
+        this.setPhone(user.getPhone());
         this.setImageUrl(user.getImageUrl());
         this.setTenantId(user.getTenantId());
         this.setPassword(ConstEnum.PasswordEncoderTypeEnum.BCRYPT.getPrefix() + user.getPassword());

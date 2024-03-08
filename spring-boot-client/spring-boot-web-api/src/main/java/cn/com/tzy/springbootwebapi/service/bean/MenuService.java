@@ -19,9 +19,7 @@ public class MenuService {
     MenuServiceFeign menuServiceFeign;
 
     public RestResult<?> findUserTreeMenu(){
-        Map map = JwtUtils.getJwtPayload();
-        UserPayload user = AppUtils.convertValue2(map, UserPayload.class);
-        return menuServiceFeign.findUserTreeMenu(user.getUserId());
+        return menuServiceFeign.findUserTreeMenu(JwtUtils.getUserId());
     }
 
     public PageResult page(MenuParam userPageModel){

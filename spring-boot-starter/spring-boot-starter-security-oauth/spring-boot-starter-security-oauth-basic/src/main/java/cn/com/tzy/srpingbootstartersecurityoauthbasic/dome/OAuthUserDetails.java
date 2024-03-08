@@ -31,8 +31,6 @@ public class OAuthUserDetails implements UserDetails {
 
     private Boolean enabled;
 
-    private Boolean isMaAuthentication;
-
     private String credentialssalt;
     /**
      * 登陆方式
@@ -64,7 +62,7 @@ public class OAuthUserDetails implements UserDetails {
     private Collection<SimpleGrantedAuthority> authorities;
     public OAuthUserDetails(BaseUser user) {
         this.setId(user.getId());
-        this.setUsername(user.getUserName());
+        this.setLoginType(user.getLoginType());
         this.setImageUrl(user.getImageUrl());
         this.setTenantId(user.getTenantId());
         this.setTenantStatus(user.getTenantStatus());

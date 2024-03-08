@@ -18,45 +18,45 @@ import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
-@Order(2)
+/**
+ * 【重要】从数据库获取用户信息，用于和前端传过来的用户信息进行密码判读
+ * @author haoxr
+ * @date 2020-05-27
+ */
 @Log4j2
-@Service
-public class WxMiniUserOpenIdServiceImpl implements UserDetailsService, UserDetailsTypeService {
+@Order(1)
+@Component
+public class MiniUserDetailsServiceImpl implements UserDetailsService, UserDetailsTypeService {
 
     @Autowired
     private UserServiceFeign userServiceFeign;
 
     @Override
     public LoginTypeEnum getTypeEnum() {
-        return LoginTypeEnum.WEB_WX_MINI;
+        return LoginTypeEnum.APP_ACCOUNT;
     }
-    /**
-     * 微信登陆用户操作
-     * @param openId 微信用户openId
-     */
     @Override
-    public UserDetails loadUserByUsername(String openId) throws UsernameNotFoundException {
-        RestResult<?> result = userServiceFeign.findLoginTypeByUserInfo(getTypeEnum(),openId);
-        if(result.getCode() != RespCode.CODE_0.getValue()){
-            throw new UsernameNotFoundException(result.getMessage());
-        }
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        RestResult<?> result = userServiceFeign.findLoginTypeByUserInfo(getTypeEnum(),username);
         SecurityBaseUser sysUser = null;
-        try {
-            sysUser = AppUtils.decodeJson2(AppUtils.encodeJson(result.getData()), SecurityBaseUser.class);
-        } catch (IOException e) {
-            throw new RuntimeException("用户openId:" + openId + ",Json解析失败");
+        if (RespCode.CODE_0.getValue()==result.getCode()) {
+            try {
+                sysUser =  AppUtils.decodeJson2(AppUtils.encodeJson(result.getData()), SecurityBaseUser.class);
+            } catch (IOException e) {
+                throw new RuntimeException("用户:" + username + ",Json解析失败");
+            }
         }
         //判断是否请求成功
         if (sysUser==null) {
             log.error("用户不存在");
-            throw new UsernameNotFoundException("用户openId:" + openId + ",不存在!");
+            throw new UsernameNotFoundException("用户:" + username + ",不存在!");
         }
         OAuthUserDetails oauthUserDetails = new OAuthUserDetails(sysUser);
-        oauthUserDetails.setUsername(openId);
+        oauthUserDetails.setUsername(username);
         oauthUserDetails.setLoginType(getTypeEnum().getType());
         if (oauthUserDetails.getId() == null) {
             throw new UsernameNotFoundException(RespCode.CODE_311.getName());

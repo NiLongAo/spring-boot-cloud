@@ -25,6 +25,11 @@
             <groupId>io.github.openfeign</groupId>
             <artifactId>feign-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>cn.com.tzy</groupId>
+            <artifactId>spring-boot-starter-security-oauth-basic</artifactId>
+            <scope>provided</scope>
+        </dependency>
 <!--        <dependency>-->
 <!--            <groupId>org.springframework.cloud</groupId>-->
 <!--            <artifactId>spring-cloud-starter-openfeign</artifactId>-->

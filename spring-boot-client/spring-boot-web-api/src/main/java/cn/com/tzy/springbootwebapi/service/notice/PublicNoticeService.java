@@ -32,6 +32,6 @@ public class PublicNoticeService {
     }
 
     public RestResult<?> userReadNoticeDetail(Long id) {
-        return publicNoticeServiceFeign.userReadNoticeDetail(JwtUtils.getUserId(),id);
+        return publicNoticeServiceFeign.userReadNoticeDetail(id);
     }
 }

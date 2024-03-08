@@ -1,6 +1,7 @@
 package cn.com.tzy.springbootentity.param.bean;
 
 import cn.com.tzy.springbootcomm.common.model.BaseModel;
+import cn.com.tzy.srpingbootstartersecurityoauthbasic.common.LoginTypeEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -28,6 +29,8 @@ public class LoginParam extends BaseModel{
             "wx_mini_web：微信小程序web模式"
     )
     public GrantType grantType;
+    @ApiModelProperty(value = "登录方式")
+    public LoginTypeEnum loginType;
     @ApiModelProperty(value = "授权码模式")
     public AuthorizationCode authorizationCode;
     @ApiModelProperty(value = "密码模式")

@@ -10,6 +10,7 @@ import cn.com.tzy.springbootstartercloud.api.ApiController;
 import cn.com.tzy.springbootstarterlogsbasic.annotation.ApiLog;
 import cn.com.tzy.springbootstarterlogsbasic.enums.LogsTypeEnum;
 import cn.com.tzy.springbootwebapi.service.bean.UserService;
+import cn.com.tzy.srpingbootstartersecurityoauthbasic.common.LoginTypeEnum;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -97,8 +98,8 @@ public class UserController extends ApiController {
     @ApiOperation(value = "注销登录", notes = "注销登录")
     @GetMapping("logout")
     @ResponseBody
-    public RestResult<?> logout(){
-        return userService.logout();
+    public RestResult<?> logout(@RequestParam("loginType") LoginTypeEnum loginType){
+        return userService.logout(loginType);
     }
 
 

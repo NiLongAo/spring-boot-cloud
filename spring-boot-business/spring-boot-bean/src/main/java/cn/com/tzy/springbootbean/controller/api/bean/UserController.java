@@ -13,6 +13,7 @@ import cn.com.tzy.springbootentity.param.bean.UserConnectPositionParam;
 import cn.com.tzy.springbootentity.param.bean.UserConnectRoleParam;
 import cn.com.tzy.springbootentity.param.bean.UserParam;
 import cn.com.tzy.springbootstartercloud.api.ApiController;
+import cn.com.tzy.srpingbootstartersecurityoauthbasic.common.LoginTypeEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -66,16 +67,6 @@ public class UserController extends ApiController {
     }
 
     /**
-     * 根据用户账号获取用户信息
-     * @return
-     */
-    @GetMapping("login_account")
-    @ResponseBody
-    public RestResult<?> findLoginAccount(@RequestParam("loginAccount")String loginAccount){
-        return userService.findLoginAccount(loginAccount);
-    }
-
-    /**
      * 根据用户编号获取用户信息
      * @return
      */
@@ -84,9 +75,9 @@ public class UserController extends ApiController {
     public RestResult<?> findLoginUserId(@RequestParam("userId")Long userId){
         return userService.findLoginUserId(userId);
     }
-
     /**
      * 根据小程序用户编号获取用户信息
+     * @return
      */
     @GetMapping("login_info")
     @ResponseBody
@@ -95,25 +86,13 @@ public class UserController extends ApiController {
     }
 
     /**
-     * 根据手机号获取用户信息
+     * 根据用户编号获取用户信息
      * @return
      */
-    @GetMapping("phone")
+    @GetMapping("login_type_by_user_info")
     @ResponseBody
-    public RestResult<?> phone(@RequestParam("phone")String phone){
-        return userService.phone(phone);
-    }
-
-
-    /**
-     * 根据微信token获取用户信息
-     * @param openId 微信openId
-     * @return
-     */
-    @GetMapping("openId")
-    @ResponseBody
-    public RestResult<?> token(@RequestParam("openId") String openId){
-        return userService.openId(openId);
+    public RestResult<?> findLoginTypeByUserInfo(@RequestParam("loginAccount") LoginTypeEnum clientType, @RequestParam("userNo")String userNo){
+        return userService.findLoginTypeByUserInfo(clientType,userNo);
     }
 
     /**

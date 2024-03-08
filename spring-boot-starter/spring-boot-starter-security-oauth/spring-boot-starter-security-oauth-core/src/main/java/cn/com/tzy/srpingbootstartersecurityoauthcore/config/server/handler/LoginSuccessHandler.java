@@ -6,7 +6,7 @@ import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootcomm.spring.SpringContextHolder;
 import cn.com.tzy.springbootcomm.utils.AppUtils;
 import cn.com.tzy.springbootstarterredis.utils.RedisUtils;
-import cn.com.tzy.srpingbootstartersecurityoauthbasic.common.Common;
+import cn.com.tzy.springbootcomm.common.jwt.JwtCommon;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -43,8 +43,8 @@ public class LoginSuccessHandler extends SavedRequestAwareAuthenticationSuccessH
     @Override
     public void onAuthenticationSuccess(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Authentication authentication) throws IOException, ServletException {
         PasswordEncoder passwordEncoder = SpringContextHolder.getBean(PasswordEncoder.class);
-        String client_id = httpServletRequest.getParameter(Common.SPRING_SECURITY_RESTFUL_CLIENT_ID_KEY);
-        String client_secret = httpServletRequest.getParameter(Common.SPRING_SECURITY_RESTFUL_CLIENT_SECRET_KEY);
+        String client_id = httpServletRequest.getParameter(JwtCommon.SPRING_SECURITY_RESTFUL_CLIENT_ID_KEY);
+        String client_secret = httpServletRequest.getParameter(JwtCommon.SPRING_SECURITY_RESTFUL_CLIENT_SECRET_KEY);
         RestResult<OAuth2AccessToken> result = new RestResult();
         boolean flas = true;
         ClientDetails clientDetails = null;
@@ -69,9 +69,9 @@ public class LoginSuccessHandler extends SavedRequestAwareAuthenticationSuccessH
             OAuth2AccessToken token = tokenServices.createAccessToken(oAuth2Authentication);
             result.setCode(RespCode.CODE_0.getValue());
             result.setData(token);
-            String jti= String.valueOf(token.getAdditionalInformation().get(Common.JWT_JTI));
-            String userId= String.valueOf(token.getAdditionalInformation().get(Common.JWT_USER_ID));
-            String clientId= String.valueOf(token.getAdditionalInformation().get(Common.SPRING_SECURITY_RESTFUL_CLIENT_ID_KEY));
+            String jti= String.valueOf(token.getAdditionalInformation().get(JwtCommon.JWT_JTI));
+            String userId= String.valueOf(token.getAdditionalInformation().get(JwtCommon.JWT_USER_ID));
+            String clientId= String.valueOf(token.getAdditionalInformation().get(JwtCommon.SPRING_SECURITY_RESTFUL_CLIENT_ID_KEY));
             long time =  Constant.EXRP_DAY*7;
             if(clientDetails.getAccessTokenValiditySeconds() != null && clientDetails.getAccessTokenValiditySeconds() > 0){ //与客户端token时间保持一致
                 time = clientDetails.getAccessTokenValiditySeconds();

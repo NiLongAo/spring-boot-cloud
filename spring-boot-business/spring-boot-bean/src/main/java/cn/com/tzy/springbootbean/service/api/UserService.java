@@ -4,6 +4,7 @@ import cn.com.tzy.springbootcomm.common.vo.PageResult;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootentity.dome.bean.User;
 import cn.com.tzy.springbootentity.param.bean.UserParam;
+import cn.com.tzy.srpingbootstartersecurityoauthbasic.common.LoginTypeEnum;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
@@ -12,23 +13,13 @@ public interface UserService extends IService<User> {
     /**
      * oauth2获取登录用户信息
      */
-    RestResult<?> findLoginAccount(String username);
-    /**
-     * oauth2获取登录用户信息
-     */
     RestResult<?> findLoginUserId(Long userId);
-    /**
-     * oauth2获取登录用户信息
-     */
-    RestResult<?> phone(String phone);
-    /**
-     * oauth2获取登录用户信息
-     */
-    RestResult<?> openId(String token);
     /**
      * 根据小程序用户编号获取用户信息
      */
     RestResult<?> findLoginInfo();
+
+    RestResult<?> findLoginTypeByUserInfo(LoginTypeEnum clientType, String userNo);
     /**
      * 获取用户基本信息
      *

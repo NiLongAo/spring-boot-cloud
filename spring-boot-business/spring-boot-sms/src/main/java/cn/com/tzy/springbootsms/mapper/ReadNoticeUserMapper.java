@@ -1,6 +1,5 @@
 package cn.com.tzy.springbootsms.mapper;
 
-import cn.com.tzy.springbootentity.dome.sms.PublicNotice;
 import cn.com.tzy.springbootentity.dome.sms.ReadNoticeUser;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
@@ -13,5 +12,5 @@ public interface ReadNoticeUserMapper extends BaseMapper<ReadNoticeUser> {
 
     int findUserIdNoticeIdCount(@Param("userId") Long userId, @Param("noticeId") Long noticeId);
 
-    List<Long> findNoticeIdCount(@Param("noticeId") Long noticeId);
+    List<ReadNoticeUser> findNoticeIdCount(@Param("noticeId") Long noticeId);
 }

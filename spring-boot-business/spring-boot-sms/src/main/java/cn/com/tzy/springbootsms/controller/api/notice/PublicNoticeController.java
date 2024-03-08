@@ -55,7 +55,7 @@ public class PublicNoticeController extends ApiController {
 
     @GetMapping("user_read_notice_detail")
     @ResponseBody
-    public RestResult<?> userReadNoticeDetail(@RequestParam("userId") Long userId,@RequestParam("publicNoticeId") Long publicNoticeId){
-        return publicNoticeService.userReadNoticeDetail(userId,publicNoticeId);
+    public RestResult<?> userReadNoticeDetail(@RequestParam("publicNoticeId") Long publicNoticeId){
+        return publicNoticeService.userReadNoticeDetail(publicNoticeId);
     }
 }

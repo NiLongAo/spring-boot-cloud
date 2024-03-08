@@ -1,6 +1,8 @@
 package cn.com.tzy.springbootentity.common.info;
 
 
+import cn.com.tzy.springbootentity.vo.bean.UserInfoVo;
+import cn.com.tzy.srpingbootstartersecurityoauthbasic.common.LoginTypeEnum;
 import cn.com.tzy.srpingbootstartersecurityoauthbasic.dome.BaseUser;
 import lombok.*;
 
@@ -16,13 +18,21 @@ import java.util.List;
 @NoArgsConstructor
 public class SecurityBaseUser implements BaseUser,Serializable {
     /**
-    * 编号
-    */
+     * 编号
+     */
     private Long id;
     /**
      * 账号
      */
     private String userName;
+    /**
+     * 手机号
+     */
+    private String phone;
+    /**
+     * 账号
+     */
+    private String loginType;
     /**
      * 昵称
      */
@@ -82,6 +92,16 @@ public class SecurityBaseUser implements BaseUser,Serializable {
     }
 
     @Override
+    public void setLoginType(String loginType) {
+        this.loginType = loginType;
+    }
+
+    @Override
+    public void sePhone(String phone) {
+        this.phone = phone;
+    }
+
+    @Override
     public void setUserName(String userName) {
         this.userName = userName;
     }
@@ -137,5 +157,25 @@ public class SecurityBaseUser implements BaseUser,Serializable {
     @Override
     public void setTenantStatus(Integer tenantStatus){
         this.tenantStatus = tenantStatus;
+    }
+
+    public SecurityBaseUser(String password, String credentialssalt, LoginTypeEnum loginTypeEnum, UserInfoVo userInfoVo){
+
+        this.id  = userInfoVo.getId();
+        this.userName  = userInfoVo.getUserName();
+        this.phone  = userInfoVo.getPhone();
+        this.loginType  = loginTypeEnum.getType();
+        this.nickName  = userInfoVo.getNickName();
+        this.imageUrl  = userInfoVo.getImageUrl();
+        this.password  = password;
+        this.credentialssalt  = credentialssalt;
+        this.isAdmin  = userInfoVo.getIsAdmin();
+        this.isEnabled  = userInfoVo.getIsEnabled();
+        this.tenantId  = userInfoVo.getTenantId();
+        this.tenantStatus  = userInfoVo.getTenantStatus();
+        this.roleIdList  = userInfoVo.getRoleIdList();
+        this.positionIdList  = userInfoVo.getPositionIdList();
+        this.departmentIdList  = userInfoVo.getDepartmentIdList();
+        this.privilegeList  = userInfoVo.getPrivilegeList();
     }
 }

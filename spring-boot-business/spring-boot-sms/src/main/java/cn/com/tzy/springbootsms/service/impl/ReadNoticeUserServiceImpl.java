@@ -17,7 +17,7 @@ public class ReadNoticeUserServiceImpl extends ServiceImpl<ReadNoticeUserMapper,
     }
 
     @Override
-    public List<Long> findNoticeIdCount(Long noticeId){
+    public List<ReadNoticeUser> findNoticeIdCount(Long noticeId){
         return  baseMapper.findNoticeIdCount(noticeId);
     }
 }

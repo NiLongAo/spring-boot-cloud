@@ -3,6 +3,7 @@ package cn.com.tzy.springbootsms.pool.job;
 import cn.com.tzy.springbootcomm.constant.Constant;
 import cn.com.tzy.springbootcomm.constant.NotNullMap;
 import cn.com.tzy.springbootentity.dome.sms.PublicNotice;
+import cn.com.tzy.springbootentity.dome.sms.ReadNoticeUser;
 import cn.com.tzy.springbootsms.config.socket.publicMessage.common.MessageType;
 import cn.com.tzy.springbootsms.config.socket.publicMessage.event.PublicMemberEvent;
 import cn.com.tzy.springbootsms.config.socket.publicMessage.namespace.PublicMemberNamespace;
@@ -39,33 +40,35 @@ public class PubLicJob {
 
 
     @XxlJob("pubLicMessageHandler")
-    public void demoJobHandler() throws Exception {
+    public void demoJobHandler(){
         try {
             log.info("检测未发送平台公告用户并发送。。。。开始");
             Date date = new Date();
             List<PublicNotice> dateRange = publicNoticeService.findDateRange(date);
             for (PublicNotice publicNotice : dateRange) {
-                List<Long> userIdList = publicMemberNamespace.getRoomId(String.format("%s:", Constant.USER_ID_KEY));
-                List<Long> copyUserIdList= new ArrayList<>(userIdList);
-                List<Long> collect = new ArrayList<>();
+
+                List<String> sendUserList = publicMemberNamespace.findAllRoom();
+                List<String> collect = new ArrayList<>();
                 //删除当天发送用户
                 String key = Constant.PUBLIC_NOTICE_USER_LIST+ DateFormatUtils.format(date,Constant.DATE_FORMAT) + publicNotice.getId();
                 if(RedisUtils.hasKey(key)){
                     List<Object> objects = RedisUtils.lGet(key, 0, -1);
-                    collect = objects.stream().map(obj -> Long.valueOf(String.valueOf(obj))).collect(Collectors.toList());
+                    if (objects != null) {
+                        collect = objects.stream().map(String::valueOf).collect(Collectors.toList());
+                    }
                 }
                 if(!collect.isEmpty()){
-                    copyUserIdList.removeAll(collect);
+                    sendUserList.removeAll(collect);
                 }
-                if(copyUserIdList.isEmpty()){
+                if(sendUserList.isEmpty()){
                     continue;
                 }
-                List<Long> noticeIdCount = readNoticeUserService.findNoticeIdCount(publicNotice.getId());
+                List<ReadNoticeUser> noticeIdCount = readNoticeUserService.findNoticeIdCount(publicNotice.getId());
                 //再删除掉已读用户
-                if(!noticeIdCount.isEmpty()){
-                    copyUserIdList.removeAll(noticeIdCount);
+                for (ReadNoticeUser readNoticeUser : noticeIdCount) {
+                    sendUserList.remove(String.format("%s:%s", readNoticeUser.getUserType(),readNoticeUser.getUserId()));
                 }
-                if(copyUserIdList.isEmpty()){
+                if(sendUserList.isEmpty()){
                     continue;
                 }
                 Message message = Message.builder()
@@ -81,9 +84,9 @@ public class PubLicJob {
                         }})
                         .build();
                 //直接发送socket消息
-                publicMemberEvent.send(copyUserIdList, Constant.USER_ID_KEY, message);
+                publicMemberEvent.sendList(sendUserList, message);
                 Date truncate = DateUtils.addDays(DateUtils.truncate(date, Calendar.DAY_OF_MONTH),1);
-                for (Long userId : copyUserIdList) {
+                for (String userId : sendUserList) {
                     RedisUtils.lSet(key,userId,(int)((truncate.getTime()-date.getTime())/1000));
                 }
             }

@@ -23,8 +23,8 @@ public interface OAuthUserServiceFeign {
     @RequestMapping(value = "/oauth/token", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,method = RequestMethod.POST)
     RestResult<?> tokenAuthorizationCode (@RequestParam(value = "client_id")String client_id,
                       @RequestParam(value = "client_secret") String client_secret,
-                      @RequestParam(value = "grant_type",defaultValue = "authorization_code") String grant_type,
                       @RequestParam(value = "login_type",defaultValue = "web_account")String login_type,
+                      @RequestParam(value = "grant_type",defaultValue = "authorization_code") String grant_type,
                       @RequestParam(value = "code")String code,
                       @RequestParam(value = "redirectUri")String redirectUri);
 

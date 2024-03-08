@@ -1,15 +1,15 @@
 package cn.com.tzy.srpingbootstartersecurityoauthcore.config.client.gateway;
 
 import cn.com.tzy.springbootcomm.constant.Constant;
+import cn.com.tzy.springbootcomm.utils.JwtUtils;
 import cn.com.tzy.springbootstarterredis.utils.RedisUtils;
-import cn.com.tzy.srpingbootstartersecurityoauthbasic.common.Common;
+import cn.com.tzy.springbootcomm.common.jwt.JwtCommon;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.map.MapUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.authorization.AuthorizationDecision;
@@ -54,27 +54,18 @@ public class ResourceServerManager implements ReactiveAuthorizationManager<Autho
         // Restful接口权限设计 @link https://www.cnblogs.com/haoxianrui/p/14961707.html
         //String restfulPath = method + ":" + path;
         String restfulPath =  path;
-
-        String token = request.getHeaders().getFirst(Constant.AUTHORIZATION_KEY);
-        if(StringUtils.isEmpty(token) && restfulPath.contains("/socket.io/")){
-            token = request.getQueryParams().getFirst(Constant.AUTHORIZATION_KEY);
-            if(StringUtils.isEmpty(token)){
-                return Mono.just(new AuthorizationDecision(true));
-            }
-        }
-        // 如果token以"bearer "为前缀，到这里说明JWT有效即已认证
-        if (!StringUtils.isNotBlank(token) || !token.startsWith(Common.AUTHORIZATION_PREFIX)) {
+        Map<String, String> jwtUserMap = JwtUtils.builder(JwtCommon.JWT_AUTHORIZATION_KEY, restfulPath.contains("/socket.io/"), request).builderJwtUser(JwtCommon.AUTHORIZATION_PREFIX, null);
+        if(jwtUserMap.isEmpty() && restfulPath.contains("/socket.io/")){
+            return Mono.just(new AuthorizationDecision(true));
+        }else if(jwtUserMap.isEmpty()){
             return Mono.just(new AuthorizationDecision(false));
         }
-        token = token.replace(Common.AUTHORIZATION_PREFIX, Strings.EMPTY);
         // 缓存取 URL权限-角色集合 规则数据
         // urlPermRolesRules = [{'key':'GET:/api/v1/users/*','value':['ADMIN','TEST']},...]
         Map<String, Object> urlPermRolesRules = (Map<String, Object>) RedisUtils.hmget(Constant.ALL_URL_KEY);
-
         // 根据请求路径判断有访问权限的角色列表
         List<String> authorizedRoles = new ArrayList<>(); // 拥有访问权限的角色
         boolean requireCheck = false; // 是否需要鉴权，默认“没有设置权限规则”不用鉴权
-
         for (Map.Entry<String, Object> permRoles : urlPermRolesRules.entrySet()) {
             String perm = permRoles.getKey();
             if (pathMatcher.match(perm, restfulPath)) {
@@ -87,11 +78,10 @@ public class ResourceServerManager implements ReactiveAuthorizationManager<Autho
         if (!requireCheck) {
             return Mono.just(new AuthorizationDecision(true));
         }
+        OAuth2Authentication authenticationFromCache = (OAuth2Authentication) tokenStore.readAuthentication(MapUtil.getStr(jwtUserMap, JwtCommon.JWT_AUTHORIZATION_KEY));
         // 判断JWT中携带的用户角色是否有权限访问
-        String finalToken = token;
         return mono.flatMapIterable(authentication -> {
             Collection<? extends GrantedAuthority> authorities = Collections.emptyList();
-            OAuth2Authentication authenticationFromCache = (OAuth2Authentication) tokenStore.readAuthentication(finalToken);
             if (authenticationFromCache != null) {
                 authorities = authenticationFromCache.getAuthorities();
             }

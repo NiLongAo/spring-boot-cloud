@@ -2,8 +2,8 @@
 package cn.com.tzy.srpingbootstartersecurityoauthcore.config.client.gateway;
 
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
-import cn.com.tzy.srpingbootstartersecurityoauthbasic.common.Common;
-import cn.com.tzy.srpingbootstartersecurityoauthcore.config.client.utils.ResponseUtils;
+import cn.com.tzy.springbootcomm.common.jwt.JwtCommon;
+import cn.com.tzy.srpingbootstartersecurityoauthbasic.properties.SecurityOauthProperties;
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.IoUtil;
@@ -12,7 +12,7 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -29,13 +29,13 @@ import org.springframework.security.oauth2.server.resource.authentication.Reacti
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.ServerAuthenticationEntryPoint;
 import org.springframework.security.web.server.authorization.ServerAccessDeniedHandler;
+import  cn.com.tzy.srpingbootstartersecurityoauthcore.utils.ResponseUtils;
 import reactor.core.publisher.Mono;
 
 import java.io.InputStream;
 import java.security.KeyFactory;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.List;
 
 /**
  * 资源服务器配置
@@ -50,15 +50,13 @@ import java.util.List;
 @EnableWebFluxSecurity
 @Log4j2
 @Import({ResourceServerManager.class,SecurityGlobalFilter.class})
-@ConfigurationProperties(prefix = "security")
+@EnableConfigurationProperties({SecurityOauthProperties.class})
 //网关才有此类
 @ConditionalOnProperty(value = "security-oauth.type",havingValue = "gateway")
 public class ResourceServerConfig {
 
     private ResourceServerManager resourceServerManager;
-
-    private List<String> ignoreUrls;
-
+    private SecurityOauthProperties securityOauthProperties;
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
@@ -69,7 +67,7 @@ public class ResourceServerConfig {
                 //.jwkSetUri()
         .and().authenticationEntryPoint(serverAuthenticationEntryPoint())
         .and().authorizeExchange()
-                .pathMatchers(Convert.toStrArray(ignoreUrls)).permitAll()
+                .pathMatchers(Convert.toStrArray(securityOauthProperties.getIgnoreUrls())).permitAll()
                 .anyExchange().access(resourceServerManager)
                 .and()
                 .exceptionHandling()
@@ -117,8 +115,8 @@ public class ResourceServerConfig {
     @Bean
     public Converter<Jwt, ? extends Mono<? extends AbstractAuthenticationToken>> jwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-        jwtGrantedAuthoritiesConverter.setAuthorityPrefix(Common.AUTHORITY_PREFIX);
-        jwtGrantedAuthoritiesConverter.setAuthoritiesClaimName(Common.JWT_AUTHORITIES_KEY);
+        jwtGrantedAuthoritiesConverter.setAuthorityPrefix(JwtCommon.AUTHORITY_PREFIX);
+        jwtGrantedAuthoritiesConverter.setAuthoritiesClaimName(JwtCommon.JWT_AUTHORITIES_KEY);
 
         JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);

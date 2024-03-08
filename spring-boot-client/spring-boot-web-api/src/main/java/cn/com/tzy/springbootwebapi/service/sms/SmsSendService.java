@@ -8,6 +8,7 @@ import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootfeignbean.api.bean.UserServiceFeign;
 import cn.com.tzy.springbootfeignsms.api.sms.SmsSendServiceFegin;
+import cn.com.tzy.srpingbootstartersecurityoauthbasic.common.LoginTypeEnum;
 import cn.com.tzy.srpingbootstartersecurityoauthbasic.common.MobileMessageType;
 import io.seata.spring.annotation.GlobalTransactional;
 import org.apache.commons.lang3.StringUtils;
@@ -33,7 +34,7 @@ public class SmsSendService {
         }
         //注册不需要校验用户是否存在
         if(param.getType() != MobileMessageType.REGISTER_VERIFICATION_CODE.getValue()){
-            RestResult<?> result = userServiceFeign.phone(param.getMobile());
+            RestResult<?> result = userServiceFeign.findLoginTypeByUserInfo(LoginTypeEnum.WEB_MOBILE,param.getMobile());
             if(result.getCode() != RespCode.CODE_0.getValue()){
                 return result;
             }

@@ -8,8 +8,8 @@ import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.SocketIOClient;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
+
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Log4j2
 @Component
@@ -53,8 +53,7 @@ public class PublicMemberEvent implements EventListener<Message> {
     }
 
 
-    public void send(List<Long> roomIdList, String prefix, Message message){
-        List<String> collect = roomIdList.stream().map(obj -> String.format("%s:%s", prefix, obj)).collect(Collectors.toList());
-        collect.forEach(obj -> publicMemberNamespace.getNamespace().getRoomOperations(obj).sendEvent(PUBLIC_MEMBER_EVENT,message));
+    public void sendList(List<String> roomIdList, Message message){
+        roomIdList.forEach(obj -> publicMemberNamespace.getNamespace().getRoomOperations(obj).sendEvent(PUBLIC_MEMBER_EVENT,message));
     }
 }

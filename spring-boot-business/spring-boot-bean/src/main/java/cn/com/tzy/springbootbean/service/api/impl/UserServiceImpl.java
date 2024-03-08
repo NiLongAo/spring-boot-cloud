@@ -12,10 +12,8 @@ import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootcomm.constant.Constant;
 import cn.com.tzy.springbootcomm.constant.NotNullMap;
-import cn.com.tzy.springbootcomm.utils.AppUtils;
 import cn.com.tzy.springbootcomm.utils.JwtUtils;
 import cn.com.tzy.springbootentity.common.info.SecurityBaseUser;
-import cn.com.tzy.springbootentity.common.info.UserPayload;
 import cn.com.tzy.springbootentity.dome.bean.MiniUser;
 import cn.com.tzy.springbootentity.dome.bean.User;
 import cn.com.tzy.springbootentity.dome.bean.UserSet;
@@ -23,7 +21,7 @@ import cn.com.tzy.springbootentity.dome.sys.Tenant;
 import cn.com.tzy.springbootentity.param.bean.UserParam;
 import cn.com.tzy.springbootentity.vo.bean.UserInfoVo;
 import cn.com.tzy.springbootstarterredis.common.RedisCommon;
-import cn.com.tzy.srpingbootstartersecurityoauthbasic.common.TypeEnum;
+import cn.com.tzy.srpingbootstartersecurityoauthbasic.common.LoginTypeEnum;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.Assert;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -118,58 +116,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public RestResult<?> phone(String phone) {
-        if(StringUtils.isEmpty(phone)){
-            return RestResult.result(RespCode.CODE_2.getValue(), "未获取到手机号");
-        }
-        return findLoginTypeByUserInfo(TypeEnum.WEB_MOBILE,phone);
+    public RestResult<?> findLoginInfo() {
+        return findLoginTypeByUserInfo(LoginTypeEnum.getClientType(JwtUtils.getLoginType()),JwtUtils.getUserName());
     }
 
     @Override
-    public RestResult<?> openId(String openId) {
-        if(StringUtils.isEmpty(openId)){
-            return RestResult.result(RespCode.CODE_2.getValue(), "未获取微信token");
-        }
-        return findLoginTypeByUserInfo(TypeEnum.WEB_WX_MINI,openId);
-    }
-    /**
-     * oauth2获取登录用户信息
-     *
-     * @param loginAccount
-     * @return
-     */
-    @Override
-    public RestResult<?> findLoginAccount(String loginAccount) {
-        return findLoginTypeByUserInfo(TypeEnum.WEB_ACCOUNT,String.valueOf(loginAccount));
-    }
-    /**
-     * oauth2获取登录用户信息
-     *
-     * @param id
-     * @return
-     */
-    @Override
-    public RestResult<?> findLoginUserId(Long id) {
-        return findLoginTypeByUserInfo(TypeEnum.WEB_ID,String.valueOf(id));
-    }
-    @Override
-    public RestResult<?> findLoginInfo() {
-        Map map = JwtUtils.getJwtPayload();
-        if(map == null){
-            return RestResult.result(RespCode.CODE_2.getValue(),"未获取到用户信息");
-        }
-        UserPayload userJwtPayload = AppUtils.convertValue2(map, UserPayload.class);
-        if(userJwtPayload == null){
-            return RestResult.result(RespCode.CODE_2.getValue(),"解析用户信息失败");
-        }
-        TypeEnum clientType = TypeEnum.getClientType(userJwtPayload.getLoginType());
-        return findLoginTypeByUserInfo(clientType==TypeEnum.APP_WX_MINI?clientType:TypeEnum.WEB_ID,String.valueOf(userJwtPayload.getUserId()));
-    }
-    private RestResult<?> findLoginTypeByUserInfo(TypeEnum clientType,String userNo){
+    public RestResult<?> findLoginTypeByUserInfo(LoginTypeEnum clientType, String userNo){
         Long userId = null;
         SecurityBaseUser user = null;
         switch (clientType){
             case WEB_ACCOUNT:
+            case APP_ACCOUNT:
                 user = baseMapper.findLoginAccount(userNo);
                 if (user == null) {
                     return RestResult.result(RespCode.CODE_2.getValue(), "未获取到用户信息");
@@ -186,6 +143,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 user = baseMapper.findLoginUserId(userId);
                 break;
             case WEB_WX_MINI:
+            case APP_WX_MINI:
                 user = baseMapper.selectOpenId(userNo);
                 if (user == null) {
                     return RestResult.result(RespCode.CODE_315.getValue(), "请先登录web端登录绑定微信");
@@ -193,50 +151,33 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 userId = user.getId();
                 user = baseMapper.findLoginUserId(userId);
                 break;
-            case APP_WX_MINI:
-                MiniUser miniUser = miniUserMapper.selectOne(new LambdaQueryWrapper<MiniUser>().eq(MiniUser::getMiniId, Long.valueOf(userNo)));
-                if(miniUser == null){
-                    return RestResult.result(RespCode.CODE_2.getValue(),"未获取用户信息");
-                }
-                userId = miniUser.getUserId();
-                user = baseMapper.findLoginUserId(userId);
-                break;
-            case WEB_ID:
-                user = baseMapper.findLoginUserId(Long.valueOf(userNo));
-                if (user == null) {
-                    return RestResult.result(RespCode.CODE_2.getValue(), "未获取到用户信息");
-                }
-                userId = user.getId();
-                user.setPassword(null);
-                user.setCredentialssalt(null);
-                break;
             default:
                 return RestResult.result(RespCode.CODE_2.getValue(), "登陆类型错误");
         }
-        RestResult<?> result = findUserInfo(userId);
+        RestResult<?> result = this.findUserInfo(userId);
         if (result.getCode() != RespCode.CODE_0.getValue()) {
             return result;
         }
         UserInfoVo userInfoVo = BeanUtil.toBean(result.getData(),UserInfoVo.class) ;
-        SecurityBaseUser build = SecurityBaseUser.builder()
-                .id(userInfoVo.getId())
-                .userName(userInfoVo.getUserName())
-                .nickName(userInfoVo.getNickName())
-                .imageUrl(userInfoVo.getImageUrl())
-                .password(user.getPassword())
-                .credentialssalt(user.getCredentialssalt())
-                .isAdmin(userInfoVo.getIsAdmin())
-                .isEnabled(userInfoVo.getIsEnabled())
-                .tenantId(userInfoVo.getTenantId())
-                .tenantStatus(userInfoVo.getTenantStatus())
-                .roleIdList(userInfoVo.getRoleIdList())
-                .positionIdList(userInfoVo.getPositionIdList())
-                .departmentIdList(userInfoVo.getDepartmentIdList())
-                .privilegeList(userInfoVo.getPrivilegeList())
-                .build();
-        return RestResult.result(RespCode.CODE_0.getValue(), null, build);
+        return RestResult.result(RespCode.CODE_0.getValue(), null, new SecurityBaseUser(user.getPassword(),user.getCredentialssalt(),clientType,userInfoVo));
     }
 
+
+    /**
+     * oauth2获取登录用户信息
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public RestResult<?> findLoginUserId(Long id) {
+        RestResult<?> result = this.findUserInfo(id);
+        if (result.getCode() != RespCode.CODE_0.getValue()) {
+            return result;
+        }
+        UserInfoVo userInfoVo = BeanUtil.toBean(result.getData(),UserInfoVo.class) ;
+        return RestResult.result(RespCode.CODE_0.getValue(), null, new SecurityBaseUser(null,null, LoginTypeEnum.WEB_ACCOUNT,userInfoVo));
+    }
     /**
      * 获取用户基本信息
      *

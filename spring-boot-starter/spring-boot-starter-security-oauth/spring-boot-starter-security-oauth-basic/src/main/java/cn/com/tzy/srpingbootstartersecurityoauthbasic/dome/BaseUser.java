@@ -16,6 +16,19 @@ public  interface BaseUser{
     public void setId(Long id);
 
     /**
+     * 编号
+     */
+    public String getLoginType();
+
+    public void setLoginType(String loginType);
+    /**
+     * 编号
+     */
+    public String getPhone();
+
+    public void sePhone(String phone);
+
+    /**
      * 账号
      */
     public String getUserName();

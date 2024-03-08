@@ -5,15 +5,11 @@ import cn.com.tzy.springbootcomm.common.mq.MqConstant;
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootcomm.constant.Constant;
-import cn.com.tzy.springbootcomm.utils.AppUtils;
 import cn.com.tzy.springbootentity.common.info.SecurityBaseUser;
 import cn.com.tzy.springbootentity.dome.bean.Mini;
 import cn.com.tzy.springbootfeignbean.api.bean.MiniServiceFeign;
-import cn.com.tzy.springbootstarterredis.common.RedisCommon;
-import cn.com.tzy.springbootstarterredis.utils.RedisUtils;
 import cn.com.tzy.springbootstarterstreamrabbitmq.config.MqClient;
-import cn.com.tzy.srpingbootstartersecurityoauthbasic.common.TypeEnum;
-import cn.com.tzy.srpingbootstartersecurityoauthbasic.constant.WxMiniConstant;
+import cn.com.tzy.srpingbootstartersecurityoauthbasic.common.LoginTypeEnum;
 import cn.com.tzy.srpingbootstartersecurityoauthbasic.dome.OAuthUserDetails;
 import cn.com.tzy.srpingbootstartersecurityoauthbasic.dome.WxMaUserInfoVo;
 import cn.com.tzy.srpingbootstartersecurityoauthcore.config.server.service.UserDetailsTypeService;
@@ -23,7 +19,6 @@ import cn.hutool.json.JSONUtil;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
@@ -47,8 +42,8 @@ public class WxMiniUserServiceImpl implements UserDetailsService, UserDetailsTyp
     private MqClient mqClient;
 
     @Override
-    public TypeEnum getTypeEnum() {
-        return TypeEnum.APP_WX_MINI;
+    public LoginTypeEnum getTypeEnum() {
+        return LoginTypeEnum.APP_WX_MINI;
     }
     /**
      * 微信登陆用户操作
@@ -81,6 +76,8 @@ public class WxMiniUserServiceImpl implements UserDetailsService, UserDetailsTyp
         SecurityBaseUser user = SecurityBaseUser.builder()
                 .id(build.getId())
                 .userName(build.getOpenId())//账号  唯一标识
+                .phone(build.getPhone())
+                .loginType(getTypeEnum().getType())
                 .imageUrl(build.getAvatarUrl())
                 .isAdmin(ConstEnum.Flag.YES.getValue()) //不是系统管理员
                 .isEnabled(ConstEnum.Flag.YES.getValue()) //启用
@@ -88,6 +85,7 @@ public class WxMiniUserServiceImpl implements UserDetailsService, UserDetailsTyp
                 .tenantStatus(ConstEnum.Flag.YES.getValue()) //默认启用
                 .build();
         OAuthUserDetails oauthUserDetails = new OAuthUserDetails(user);
+        oauthUserDetails.setUsername(build.getOpenId());
         oauthUserDetails.setLoginType(getTypeEnum().getType());
         if (oauthUserDetails.getId() == null) {
             throw new UsernameNotFoundException(RespCode.CODE_311.getName());

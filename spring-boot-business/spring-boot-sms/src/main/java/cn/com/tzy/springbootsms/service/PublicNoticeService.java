@@ -55,11 +55,10 @@ public interface PublicNoticeService extends IService<PublicNotice>{
 
     /**
      * 用户查看公告并标记已读
-     * @param userId
      * @param publicNoticeId
      * @return RestResult
      */
-    RestResult<?> userReadNoticeDetail(Long userId,Long publicNoticeId);
+    RestResult<?> userReadNoticeDetail(Long publicNoticeId);
 
     /**
      * 获取时间范围内所有平台公告

@@ -2,9 +2,8 @@ package cn.com.tzy.springbootsms.config.socket.qr.event;
 
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
-import cn.com.tzy.springbootcomm.constant.Constant;
 import cn.com.tzy.springbootcomm.constant.NotNullMap;
-import cn.com.tzy.springbootcomm.utils.AppUtils;
+import cn.com.tzy.springbootcomm.utils.JwtUtils;
 import cn.com.tzy.springbootentity.param.bean.MiniUserParam;
 import cn.com.tzy.springbootfeignsso.api.oauth.MiniServiceFeign;
 import cn.com.tzy.springbootfeignsso.api.oauth.OAuthUserServiceFeign;
@@ -14,22 +13,19 @@ import cn.com.tzy.springbootsms.config.socket.qr.namespace.QRNamespace;
 import cn.com.tzy.springbootstarterredis.utils.RedisUtils;
 import cn.com.tzy.springbootstartersocketio.pool.EventListener;
 import cn.com.tzy.springbootstartersocketio.pool.NamespaceListener;
-import cn.com.tzy.srpingbootstartersecurityoauthbasic.common.TypeEnum;
+import cn.com.tzy.springbootcomm.common.jwt.JwtCommon;
+import cn.com.tzy.srpingbootstartersecurityoauthbasic.common.LoginTypeEnum;
 import cn.com.tzy.srpingbootstartersecurityoauthbasic.constant.WxMiniConstant;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.map.MapUtil;
 import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.SocketIOClient;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 @Log4j2
@@ -113,7 +109,7 @@ public class WxMiniQrEvent implements EventListener<QRData> {
             qrNamespace.getNamespace().getRoomOperations(scene).sendEvent(QRSendEvent.OUT_LOGIN_INFO_EVENT,build);
             return;
         }
-        RestResult<?> result = oAuthUserServiceFeign.miniWeb(webClientId, webClientSecret, TypeEnum.WEB_WX_MINI.getType(), "wx_mini_web", openId);
+        RestResult<?> result = oAuthUserServiceFeign.miniWeb(webClientId, webClientSecret, LoginTypeEnum.WEB_WX_MINI.getType(), "wx_mini_web", openId);
         if(result.getCode() != RespCode.CODE_0.getValue()){
             QRData build = QRData.builder()
                     .code(QRData.Code.ERROR.getValue())
@@ -154,20 +150,9 @@ public class WxMiniQrEvent implements EventListener<QRData> {
 
         Long userId = null;
         for (SocketIOClient client : qrNamespace.getNamespace().getRoomOperations(scene).getClients()) {
-            String payload = client.getHandshakeData().getHttpHeaders().get(Constant.JWT_PAYLOAD_KEY);
-            if(StringUtils.isEmpty(payload)){
-                log.error("链接失效,未获取用户关键信息");
-                return;
-            }
-            //以mac地址为key,SocketIOClient 为value存入map,后续可以指定mac地址向客户端发送消息
-            Map map = null;
-            try {
-                map = (Map) AppUtils.decodeJson2(URLDecoder.decode(payload, StandardCharsets.UTF_8.name()), Map.class);
-            } catch (UnsupportedEncodingException e) {
-                log.error("认证Json转换失败:",e);
-                return;
-            }
-            userId = Long.valueOf(String.valueOf(map.get(Constant.USER_ID_KEY)));
+            String authorization = client.getHandshakeData().getHttpHeaders().get(JwtCommon.JWT_AUTHORIZATION_KEY);
+            Map<String, String> map = JwtUtils.builder(JwtCommon.JWT_AUTHORIZATION_KEY, authorization).builderJwtUser(JwtCommon.AUTHORIZATION_PREFIX, null);
+            userId = MapUtil.getLong(map, JwtCommon.JWT_USER_ID);
             break;
         }
         log.info("发送绑定消息 userId:{}",userId);

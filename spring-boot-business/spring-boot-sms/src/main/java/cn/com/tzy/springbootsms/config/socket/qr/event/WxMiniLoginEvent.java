@@ -2,11 +2,7 @@ package cn.com.tzy.springbootsms.config.socket.qr.event;
 
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
-import cn.com.tzy.springbootcomm.constant.Constant;
 import cn.com.tzy.springbootcomm.constant.NotNullMap;
-import cn.com.tzy.springbootcomm.utils.AppUtils;
-import cn.com.tzy.springbootentity.param.bean.MiniUserParam;
-import cn.com.tzy.springbootfeignsso.api.oauth.MiniServiceFeign;
 import cn.com.tzy.springbootfeignsso.api.oauth.OAuthUserServiceFeign;
 import cn.com.tzy.springbootsms.config.socket.qr.common.QRData;
 import cn.com.tzy.springbootsms.config.socket.qr.common.QRSendEvent;
@@ -15,9 +11,8 @@ import cn.com.tzy.springbootsms.config.socket.qr.namespace.QRNamespace;
 import cn.com.tzy.springbootstarterredis.utils.RedisUtils;
 import cn.com.tzy.springbootstartersocketio.pool.EventListener;
 import cn.com.tzy.springbootstartersocketio.pool.NamespaceListener;
-import cn.com.tzy.srpingbootstartersecurityoauthbasic.common.TypeEnum;
+import cn.com.tzy.srpingbootstartersecurityoauthbasic.common.LoginTypeEnum;
 import cn.com.tzy.srpingbootstartersecurityoauthbasic.constant.WxMiniConstant;
-import cn.hutool.core.bean.BeanUtil;
 import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.SocketIOClient;
 import lombok.extern.log4j.Log4j2;
@@ -27,10 +22,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
 
 @Log4j2
 @Component
@@ -74,7 +65,7 @@ public class WxMiniLoginEvent implements EventListener<WxMiniLoginData> {
      */
     @Override
     public void onData(SocketIOClient client, WxMiniLoginData mini, AckRequest request) throws IOException {
-        RestResult<?> result = oAuthUserServiceFeign.mini(appClientId, appClientSecret, TypeEnum.APP_WX_MINI.getType(), "wx_mini",
+        RestResult<?> result = oAuthUserServiceFeign.mini(appClientId, appClientSecret, LoginTypeEnum.APP_WX_MINI.getType(), "wx_mini",
                 mini.getCode(),
                 mini.getSessionKey(),
                 mini.getEncryptedData(),

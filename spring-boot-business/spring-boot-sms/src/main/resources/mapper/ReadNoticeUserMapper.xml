@@ -7,6 +7,7 @@
     <id column="id" property="id" />
     <result column="notice_id" property="noticeId" />
     <result column="user_id" property="userId" />
+    <result column="user_type" property="userType" />
     <result column="update_user_id" property="updateUserId" />
     <result column="update_time" property="updateTime" />
     <result column="create_user_id" property="createUserId" />
@@ -14,7 +15,7 @@
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    id, notice_id, user_id, update_user_id, update_time, create_user_id, create_time
+    id, notice_id, user_id,user_type, update_user_id, update_time, create_user_id, create_time
   </sql>
 
   <select id="findUserIdNoticeIdCount" resultType="int">
@@ -27,9 +28,9 @@
   </select>
 
 
-  <select id="findNoticeIdCount" resultType="java.lang.Long">
+  <select id="findNoticeIdCount" resultType="cn.com.tzy.springbootentity.dome.sms.ReadNoticeUser">
     select
-    user_id
+        *
     from sms_read_notice_user
     where notice_id = #{noticeId}
   </select>

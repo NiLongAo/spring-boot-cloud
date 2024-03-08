@@ -2,6 +2,7 @@ package cn.com.tzy.springbootstarterfeigncore.config.feign;
 
 import cn.com.tzy.springbootcomm.constant.Constant;
 import cn.com.tzy.springbootcomm.utils.JwtUtils;
+import cn.com.tzy.springbootcomm.common.jwt.JwtCommon;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import lombok.extern.log4j.Log4j2;
@@ -12,13 +13,9 @@ public class FeignConfiguration implements RequestInterceptor {
 
   @Override
   public void apply(RequestTemplate requestTemplate) {
-    String payload = JwtUtils.getPayload();
-    if (StringUtils.isNotBlank(payload)) {
-      requestTemplate.header(Constant.JWT_PAYLOAD_KEY, payload);
-    }
-    String authorization = JwtUtils.getAuthorization();
-    if (StringUtils.isNotBlank(authorization)) {
-      requestTemplate.header(Constant.AUTHORIZATION_KEY, authorization);
+    String authorization = JwtUtils.getAuthorization(true);
+    if(StringUtils.isNotEmpty(authorization)){
+      requestTemplate.header(JwtCommon.JWT_AUTHORIZATION_KEY, authorization);
     }
     Long schemasTenantId = JwtUtils.getSchemasTenantId();
     if(schemasTenantId != null){

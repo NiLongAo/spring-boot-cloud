@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -36,5 +35,14 @@ public class ReadNoticeUser extends LongIdEntity {
     @TableField(value = "user_id")
     @ApiModelProperty(value = "用户主键")
     private Long userId;
+
+    /**
+     * 用户主键
+     */
+    @TableField(value = "user_type")
+    @ApiModelProperty(value = "用户类型")
+    private String userType;
+
+
 
 }

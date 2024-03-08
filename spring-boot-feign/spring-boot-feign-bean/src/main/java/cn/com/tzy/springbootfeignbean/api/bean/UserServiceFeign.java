@@ -7,6 +7,7 @@ import cn.com.tzy.springbootentity.param.bean.UserConnectPositionParam;
 import cn.com.tzy.springbootentity.param.bean.UserConnectRoleParam;
 import cn.com.tzy.springbootentity.param.bean.UserParam;
 import cn.com.tzy.springbootstarterfeigncore.config.feign.FeignConfiguration;
+import cn.com.tzy.srpingbootstartersecurityoauthbasic.common.LoginTypeEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,15 +19,13 @@ import java.util.List;
 
 @FeignClient(value = "bean-server",contextId = "bean-server",path = "/api/bean/user",configuration = FeignConfiguration.class)
 public interface UserServiceFeign {
-
+    @RequestMapping(value = "/login_type_by_user_info",method = RequestMethod.GET)
+    RestResult<?> findLoginTypeByUserInfo(@RequestParam("loginAccount") LoginTypeEnum clientType, @RequestParam("userNo")String userNo);
     @RequestMapping(value = "/info",method = RequestMethod.GET)
     RestResult<?> getInfo(@RequestParam(value = "id") Long id);
 
     @RequestMapping(value = "/select",method = RequestMethod.GET)
     RestResult<?> select(@RequestParam(value = "userIdList",required = false)List<Long> userIdList,@RequestParam(value = "userName",required = false)String userName,@RequestParam("limit") Integer limit);
-
-    @RequestMapping(value = "/login_account",method = RequestMethod.GET)
-    RestResult<?> getLoginAccount(@RequestParam(value = "loginAccount") String loginAccount);
 
     @RequestMapping(value = "/login_user_id",method = RequestMethod.GET)
     RestResult<?> findLoginUserId(@RequestParam(value = "userId") Long userId);
@@ -49,11 +48,7 @@ public interface UserServiceFeign {
     @RequestMapping(value = "/delete",method = RequestMethod.GET)
     RestResult<?> delete(@RequestParam("id")Long id);
 
-    @RequestMapping(value = "/phone",method = RequestMethod.GET)
-    RestResult<?> phone(@RequestParam("phone")String phone);
 
-    @RequestMapping(value = "/openId",method = RequestMethod.GET)
-    RestResult<?> openId(@RequestParam("openId")String openId);
     @RequestMapping(value = "/find_user_id_list",method = RequestMethod.GET)
     RestResult<?> findUserIdList(@RequestParam("idList") List<Long> idList);
 

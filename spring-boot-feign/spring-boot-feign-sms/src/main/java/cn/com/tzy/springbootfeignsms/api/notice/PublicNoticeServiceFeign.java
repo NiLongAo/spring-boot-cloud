@@ -33,6 +33,6 @@ public interface PublicNoticeServiceFeign {
     RestResult<?> detail(@RequestParam(value = "id")Long id);
 
     @RequestMapping(value = "/user_read_notice_detail",method = RequestMethod.GET)
-    RestResult<?> userReadNoticeDetail(@RequestParam("userId") Long userId,@RequestParam("publicNoticeId") Long publicNoticeId);
+    RestResult<?> userReadNoticeDetail(@RequestParam("publicNoticeId") Long publicNoticeId);
 
 }

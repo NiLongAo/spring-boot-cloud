@@ -6,10 +6,8 @@ import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootcomm.utils.AppUtils;
 import cn.com.tzy.springbootentity.common.info.SecurityBaseUser;
 import cn.com.tzy.springbootfeignbean.api.bean.UserServiceFeign;
-import cn.com.tzy.srpingbootstartersecurityoauthbasic.common.TypeEnum;
-import cn.com.tzy.srpingbootstartersecurityoauthbasic.dome.BaseUser;
+import cn.com.tzy.srpingbootstartersecurityoauthbasic.common.LoginTypeEnum;
 import cn.com.tzy.srpingbootstartersecurityoauthbasic.dome.OAuthUserDetails;
-import cn.com.tzy.srpingbootstartersecurityoauthcore.config.server.service.BaseUserService;
 import cn.com.tzy.srpingbootstartersecurityoauthcore.config.server.service.UserDetailsTypeService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,13 +32,13 @@ public class PhoneUserServiceImpl implements UserDetailsService, UserDetailsType
     private UserServiceFeign userServiceFeign;
 
     @Override
-    public TypeEnum getTypeEnum() {
-        return TypeEnum.WEB_MOBILE;
+    public LoginTypeEnum getTypeEnum() {
+        return LoginTypeEnum.WEB_MOBILE;
     }
 
     @Override
     public UserDetails loadUserByUsername(String phone) throws UsernameNotFoundException {
-        RestResult<?> result = userServiceFeign.phone(phone);
+        RestResult<?> result = userServiceFeign.findLoginTypeByUserInfo(getTypeEnum(),phone);
         SecurityBaseUser sysUser = null;
         if (RespCode.CODE_0.getValue()==result.getCode()) {
             try {
@@ -55,6 +53,7 @@ public class PhoneUserServiceImpl implements UserDetailsService, UserDetailsType
             throw new UsernameNotFoundException("用户:" + phone + ",不存在!");
         }
         OAuthUserDetails oauthUserDetails = new OAuthUserDetails(sysUser);
+        oauthUserDetails.setUsername(phone);
         oauthUserDetails.setLoginType(getTypeEnum().getType());
         if (oauthUserDetails.getId() == null) {
             throw new UsernameNotFoundException(RespCode.CODE_311.getName());

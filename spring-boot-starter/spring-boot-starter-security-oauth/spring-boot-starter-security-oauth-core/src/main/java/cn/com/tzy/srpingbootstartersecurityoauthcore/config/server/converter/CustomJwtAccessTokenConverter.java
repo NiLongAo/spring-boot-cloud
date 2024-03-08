@@ -1,6 +1,6 @@
 package cn.com.tzy.srpingbootstartersecurityoauthcore.config.server.converter;
 
-import cn.com.tzy.srpingbootstartersecurityoauthbasic.common.Common;
+import cn.com.tzy.springbootcomm.common.jwt.JwtCommon;
 import cn.com.tzy.srpingbootstartersecurityoauthbasic.dome.OAuthUserDetails;
 import cn.com.tzy.srpingbootstartersecurityoauthcore.store.token.OAuth2ExpiringOAuth2RefreshToken;
 import cn.com.tzy.srpingbootstartersecurityoauthcore.store.token.OAuth2ExpiringRefreshToken;
@@ -35,7 +35,6 @@ import java.util.Map;
  */
 public class CustomJwtAccessTokenConverter extends JwtAccessTokenConverter {
 
-    private boolean includeGrantType;
     private final JsonParser objectMapper = JsonParserFactory.create();
     private Signer signer;
 
@@ -63,7 +62,7 @@ public class CustomJwtAccessTokenConverter extends JwtAccessTokenConverter {
             response.put(EXP, token.getExpiration().getTime() / 1000);
         }
 
-        if (includeGrantType && authentication.getOAuth2Request().getGrantType()!=null) {
+        if (authentication.getOAuth2Request().getGrantType()!=null) {
             response.put(GRANT_TYPE, authentication.getOAuth2Request().getGrantType());
         }
         response.putAll(token.getAdditionalInformation());
@@ -81,14 +80,13 @@ public class CustomJwtAccessTokenConverter extends JwtAccessTokenConverter {
         DefaultOAuth2AccessToken result = new DefaultOAuth2AccessToken(accessToken);
         Map<String, Object> additionalInformation = accessToken.getAdditionalInformation();
         Map<String, Object> info = new HashMap<>();
-        info.put(TOKEN_ID, MapUtil.getStr(additionalInformation,TOKEN_ID));
         info.put(JTI, MapUtil.getStr(additionalInformation,JTI));
         if(authentication.getUserAuthentication().getPrincipal() instanceof OAuthUserDetails){
             OAuthUserDetails oAuthUserDetails = (OAuthUserDetails) authentication.getUserAuthentication().getPrincipal();
-            info.put(Common.JWT_USER_ID, oAuthUserDetails.getId());
-            info.put(Common.JWT_ADMIN, oAuthUserDetails.getIsAdmin());
-            info.put(Common.JWT_TENANT_ID, oAuthUserDetails.getTenantId());
-            info.put(Common.JWT_LOGIN_TYPE, oAuthUserDetails.getLoginType());
+            info.put(JwtCommon.JWT_USER_ID, oAuthUserDetails.getId());
+            info.put(JwtCommon.JWT_ADMIN, oAuthUserDetails.getIsAdmin());
+            info.put(JwtCommon.JWT_TENANT_ID, oAuthUserDetails.getTenantId());
+            info.put(JwtCommon.JWT_LOGIN_TYPE, oAuthUserDetails.getLoginType());
         }
         result.setAdditionalInformation(info);
         return enhanceCustom(result, authentication);

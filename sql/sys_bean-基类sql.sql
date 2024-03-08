@@ -183,9 +183,10 @@ create table sms_public_notice (
 
 /*已读公告客户*/
 create table sms_read_notice_user (
-  id bigint unsigned not null auto_increment  COMMENT '主键',
-  notice_id bigint unsigned not null  COMMENT '平台通知公告主键',
-  user_id bigint unsigned not null  COMMENT '用户主键',
+  id                   bigint unsigned not null auto_increment  COMMENT '主键',
+  notice_id            bigint unsigned not null  COMMENT '平台通知公告主键',
+  user_id              bigint unsigned not null  COMMENT '用户主键',
+  user_type            varchar(80) default 'web_user' COMMENT '用户类型 web_user:web用户 wx_mini_user.小程序用户',
   update_user_id       bigint unsigned comment '修改人编号',
   update_time          datetime comment '修改时间',
   create_user_id       bigint unsigned comment '创建人编号',

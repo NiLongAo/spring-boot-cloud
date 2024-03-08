@@ -4,11 +4,8 @@ import cn.com.tzy.springbootcomm.constant.Constant;
 import cn.com.tzy.springbootcomm.common.vo.PageResult;
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
-import cn.com.tzy.springbootcomm.constant.ImgConstant;
 import cn.com.tzy.springbootcomm.constant.NotNullMap;
 import cn.com.tzy.springbootcomm.utils.AppUtils;
-import cn.com.tzy.springbootcomm.utils.JwtUtils;
-import cn.com.tzy.springbootentity.common.info.UserPayload;
 import cn.com.tzy.springbootentity.dome.bean.Mini;
 import cn.com.tzy.springbootentity.export.ExportEntity;
 import cn.com.tzy.springbootentity.export.entity.UserExportModel;
@@ -21,7 +18,7 @@ import cn.com.tzy.springbootfeignbean.api.bean.UserServiceFeign;
 import cn.com.tzy.springbootfeignsso.api.oauth.OAuthUserServiceFeign;
 import cn.com.tzy.springbootstarterautopoi.utils.PoiUtils;
 import cn.com.tzy.springbootstarterredis.utils.RedisUtils;
-import cn.com.tzy.srpingbootstartersecurityoauthbasic.common.TypeEnum;
+import cn.com.tzy.srpingbootstartersecurityoauthbasic.common.LoginTypeEnum;
 import cn.hutool.captcha.AbstractCaptcha;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.UUID;
@@ -33,15 +30,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletResponse;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
-import java.util.Map;
 
 @Log4j2
 @Service
@@ -66,6 +57,8 @@ public class UserService {
     public RestResult<?> login(LoginParam param){
         if(param.grantType == null){
             return RestResult.result(RespCode.CODE_2.getValue(),"未获取登录类型");
+        }if(param.loginType == null){
+            return RestResult.result(RespCode.CODE_2.getValue(),"未获取登录方式");
         }
         switch (param.grantType) {
             case authorization_code:
@@ -76,7 +69,7 @@ public class UserService {
                 if(StringUtils.isEmpty(authorizationCode.redirectUri)){
                     return RestResult.result(RespCode.CODE_2.getValue(),"未获取跳转地址");
                 }
-                return oAuthUserServiceFeign.tokenAuthorizationCode(clientId,clientSecret,TypeEnum.WEB_ACCOUNT.getType(), "authorization_code",authorizationCode.code,authorizationCode.redirectUri);
+                return oAuthUserServiceFeign.tokenAuthorizationCode(clientId,clientSecret, param.loginType.getType(), "authorization_code",authorizationCode.code,authorizationCode.redirectUri);
             case code:
                 LoginParam.Code code = param.code;
                 String VERIFY_CODE = Constant.VERIFY_CODE_PREFIX + code.key;
@@ -88,7 +81,7 @@ public class UserService {
                 }
                 String username = EncryptUtil.aesDecrypt(code.username, Constant.SECRET_KEY,Constant.SECRET_IV);
                 String password = EncryptUtil.aesDecrypt(code.password, Constant.SECRET_KEY,Constant.SECRET_IV);
-                return oAuthUserServiceFeign.tokenCode(clientId,clientSecret,TypeEnum.WEB_ACCOUNT.getType(),"code",VERIFY_CODE,code.verificationCode,username,password);
+                return oAuthUserServiceFeign.tokenCode(clientId,clientSecret, param.loginType.getType(),"code",VERIFY_CODE,code.verificationCode,username,password);
             case sms:
                 LoginParam.Sms sms = param.sms;
                 if(StringUtils.isEmpty(sms.phone)){
@@ -97,13 +90,13 @@ public class UserService {
                 if(StringUtils.isEmpty(sms.SmsCodeCode)){
                     return RestResult.result(RespCode.CODE_2.getValue(),"请输入验证码");
                 }
-                return oAuthUserServiceFeign.tokenSms(clientId,clientSecret,TypeEnum.WEB_MOBILE.getType(),"sms",sms.SmsCodeCode,sms.phone);
+                return oAuthUserServiceFeign.tokenSms(clientId,clientSecret, param.loginType.getType(),"sms",sms.SmsCodeCode,sms.phone);
             case refresh_token:
                 LoginParam.RefreshToken refreshToken = param.refreshToken;
                 if(StringUtils.isEmpty(refreshToken.refreshToken)){
                     return RestResult.result(RespCode.CODE_2.getValue(),"未获取到刷新token");
                 }
-                RestResult<?> result = oAuthUserServiceFeign.refreshToken(clientId, clientSecret, TypeEnum.WEB_ACCOUNT.getType(), "refresh_token", refreshToken.refreshToken);
+                RestResult<?> result = oAuthUserServiceFeign.refreshToken(clientId, clientSecret, param.loginType.getType(), "refresh_token", refreshToken.refreshToken);
                 if(result.getCode() != RespCode.CODE_0.getValue()){
                     result.setCode(RespCode.CODE_315.getValue());
                 }
@@ -117,8 +110,11 @@ public class UserService {
         return userServiceFeign.findLoginInfo();
     }
 
-    public RestResult<?> logout(){
-        RestResult<?> result = oAuthUserServiceFeign.logout(TypeEnum.WEB_ACCOUNT.getType());
+    public RestResult<?> logout(LoginTypeEnum loginType){
+        if(loginType == null){
+            return RestResult.result(RespCode.CODE_2.getValue(),"未获取登录方式");
+        }
+        RestResult<?> result = oAuthUserServiceFeign.logout(loginType.getType());
         if(result.getCode() != RespCode.CODE_0.getValue()){
             result.setCode(RespCode.CODE_315.getValue());
         }
@@ -200,12 +196,6 @@ public class UserService {
      */
     public RestResult<?> saveUserConnectPosition(UserConnectPositionParam param){
         return userServiceFeign.saveUserConnectPosition(param);
-    }
-    /**
-     * 保存用户部门信息
-     */
-    public RestResult<?> openId(String openId){
-        return userServiceFeign.openId(openId);
     }
 
     /**

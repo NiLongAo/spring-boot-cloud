@@ -8,6 +8,7 @@ import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootcomm.constant.NotNullMap;
 import cn.com.tzy.springbootcomm.excption.ParamException;
 import cn.com.tzy.springbootcomm.utils.AppUtils;
+import cn.com.tzy.springbootcomm.utils.JwtUtils;
 import cn.com.tzy.springbootentity.dome.sms.PublicNotice;
 import cn.com.tzy.springbootentity.dome.sms.ReadNoticeUser;
 import cn.com.tzy.springbootentity.param.sms.PublicNoticeParam;
@@ -19,6 +20,9 @@ import cn.com.tzy.springbootsms.mapper.PublicNoticeMapper;
 import cn.com.tzy.springbootsms.mapper.ReadNoticeUserMapper;
 import cn.com.tzy.springbootsms.service.PublicNoticeService;
 import cn.com.tzy.springbootstartercloud.utils.MockMultipartFile;
+import cn.com.tzy.springbootcomm.common.jwt.JwtCommon;
+import cn.com.tzy.srpingbootstartersecurityoauthbasic.common.LoginTypeEnum;
+import cn.hutool.core.map.MapUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FileUtils;
@@ -159,7 +163,10 @@ public class PublicNoticeServiceImpl extends ServiceImpl<PublicNoticeMapper, Pub
     }
 
     @Override
-    public RestResult<?> userReadNoticeDetail(Long userId,Long publicNoticeId) {
+    public RestResult<?> userReadNoticeDetail(Long publicNoticeId) {
+        Map<String, String> jwtUserMap = JwtUtils.getJwtUserMap();
+        Long userId = MapUtil.getLong(jwtUserMap, JwtCommon.JWT_USER_ID);
+        String loginType = MapUtil.getStr(jwtUserMap, JwtCommon.JWT_LOGIN_TYPE);
         PublicNotice obj = baseMapper.selectById(publicNoticeId);
         if(obj == null){
             return RestResult.result(RespCode.CODE_2.getValue(),"未获取平台通知公告");
@@ -175,7 +182,7 @@ public class PublicNoticeServiceImpl extends ServiceImpl<PublicNoticeMapper, Pub
         }
         int userIdNoticeIdCount = readNoticeUserMapper.findUserIdNoticeIdCount(userId, publicNoticeId);
         if(userIdNoticeIdCount <= 0){
-            readNoticeUserMapper.insert(ReadNoticeUser.builder().userId(userId).noticeId(publicNoticeId).build());
+            readNoticeUserMapper.insert(ReadNoticeUser.builder().userId(userId).noticeId(publicNoticeId).userType(LoginTypeEnum.getClientType(loginType).getUserType()).build());
         }
         NotNullMap map = new NotNullMap();
         map.putLong("id", obj.getId());

@@ -30,7 +30,7 @@ public class MyLogoutHandler implements LogoutSuccessHandler {
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         RestResult<?> result = new RestResult();
         try{
-            String authorization = JwtUtils.getAuthorization();
+            String authorization = JwtUtils.getAuthorization(false);
             if(StringUtils.isEmpty(authorization)){
                 result =RestResult.result(RespCode.CODE_2.getValue(),"未获取认证信息");
             }else {
