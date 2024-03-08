@@ -54,7 +54,7 @@ public class ResourceServerManager implements ReactiveAuthorizationManager<Autho
         // Restful接口权限设计 @link https://www.cnblogs.com/haoxianrui/p/14961707.html
         //String restfulPath = method + ":" + path;
         String restfulPath =  path;
-        Map<String, String> jwtUserMap = JwtUtils.builder(JwtCommon.JWT_AUTHORIZATION_KEY, restfulPath.contains("/socket.io/"), request).builderJwtUser(JwtCommon.AUTHORIZATION_PREFIX, null);
+        Map<String, String> jwtUserMap = JwtUtils.builder(JwtCommon.JWT_AUTHORIZATION_KEY, restfulPath.contains("/socket.io/"), request).setPrefix(JwtCommon.AUTHORIZATION_PREFIX).builderJwtUser( null);;
         if(jwtUserMap.isEmpty() && restfulPath.contains("/socket.io/")){
             return Mono.just(new AuthorizationDecision(true));
         }else if(jwtUserMap.isEmpty()){

@@ -41,7 +41,7 @@ public class PublicMemberNamespace implements NamespaceListener {
         if(strings.isEmpty()){
             log.info("客户端:" + client.getSessionId() + "未获取到 PublicMemberNamespace 连接");
         }
-        Map<String, String> map = JwtUtils.builder(JwtCommon.JWT_AUTHORIZATION_KEY, strings.get(0)).builderJwtUser(JwtCommon.AUTHORIZATION_PREFIX, null);
+        Map<String, String> map = JwtUtils.builder(JwtCommon.JWT_AUTHORIZATION_KEY, strings.get(0)).setPrefix(JwtCommon.AUTHORIZATION_PREFIX).builderJwtUser( null);;
         Long userId = MapUtil.getLong(map, JwtCommon.JWT_USER_ID);
         String loginType = MapUtil.getStr(map, JwtCommon.JWT_LOGIN_TYPE);
         //建立用户房间
@@ -60,7 +60,7 @@ public class PublicMemberNamespace implements NamespaceListener {
         if(strings.isEmpty()){
             log.info("客户端:" + client.getSessionId() + "未获取到 PublicMemberNamespace 连接");
         }
-        Map<String, String> map = JwtUtils.builder(JwtCommon.JWT_AUTHORIZATION_KEY, strings.get(0)).builderJwtUser(JwtCommon.AUTHORIZATION_PREFIX, null);
+        Map<String, String> map = JwtUtils.builder(JwtCommon.JWT_AUTHORIZATION_KEY, strings.get(0)).setPrefix(JwtCommon.AUTHORIZATION_PREFIX).builderJwtUser( null);;
         Long userId = MapUtil.getLong(map, JwtCommon.JWT_USER_ID);
         String loginType = MapUtil.getStr(map, JwtCommon.JWT_LOGIN_TYPE);
         //用户房间移除当前用户

@@ -37,7 +37,7 @@ public class SecurityGlobalFilter implements GlobalFilter, Ordered {
         ServerHttpRequest request = exchange.getRequest();
         ServerHttpResponse response = exchange.getResponse();
         // 非JWT或者JWT为空不作处理
-        Map<String, String> jwtUserMap = JwtUtils.builder(JwtCommon.JWT_AUTHORIZATION_KEY, request.getURI().getPath().contains("/socket.io/"), request).builderJwtUser(JwtCommon.AUTHORIZATION_PREFIX, null);
+        Map<String, String> jwtUserMap = JwtUtils.builder(JwtCommon.JWT_AUTHORIZATION_KEY, request.getURI().getPath().contains("/socket.io/"), request).setPrefix(JwtCommon.AUTHORIZATION_PREFIX).builderJwtUser( null);;
         if(jwtUserMap.isEmpty() ||  request.getURI().getPath().contains("/socket.io/")){
             return chain.filter(exchange);
         }

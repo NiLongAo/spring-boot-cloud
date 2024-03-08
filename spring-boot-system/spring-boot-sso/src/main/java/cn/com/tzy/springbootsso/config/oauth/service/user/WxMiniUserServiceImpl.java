@@ -1,7 +1,6 @@
 package cn.com.tzy.springbootsso.config.oauth.service.user;
 
 import cn.com.tzy.springbootcomm.common.enumcom.ConstEnum;
-import cn.com.tzy.springbootcomm.common.mq.MqConstant;
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootcomm.utils.AppUtils;
@@ -9,7 +8,6 @@ import cn.com.tzy.springbootentity.common.info.SecurityBaseUser;
 import cn.com.tzy.springbootentity.dome.bean.Mini;
 import cn.com.tzy.springbootfeignbean.api.bean.MiniServiceFeign;
 import cn.com.tzy.springbootfeignbean.api.bean.UserServiceFeign;
-import cn.com.tzy.springbootstarterstreamrabbitmq.config.MqClient;
 import cn.com.tzy.srpingbootstartersecurityoauthbasic.common.LoginTypeEnum;
 import cn.com.tzy.srpingbootstartersecurityoauthbasic.dome.OAuthUserDetails;
 import cn.com.tzy.srpingbootstartersecurityoauthbasic.dome.WxMaUserInfoVo;
@@ -27,11 +25,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 @Order(2)
 @Log4j2
@@ -42,8 +37,6 @@ public class WxMiniUserServiceImpl implements UserDetailsService, UserDetailsTyp
     private MiniServiceFeign miniServiceFeign;
     @Autowired
     private UserServiceFeign userServiceFeign;
-    @Resource
-    private MqClient mqClient;
 
     @Override
     public LoginTypeEnum getTypeEnum() {
@@ -67,14 +60,6 @@ public class WxMiniUserServiceImpl implements UserDetailsService, UserDetailsTyp
         RestResult<?> result = miniServiceFeign.save(build);
         if(result.getCode() != RespCode.CODE_0.getValue()){
             throw new UsernameNotFoundException(result.getMessage());
-        }
-        //用于web扫码 登陆或绑定web用户
-        if(StrUtil.isNotEmpty(wxMaUserInfo.getScene())){
-            Map<String,Object> data = new HashMap<>();
-            data.put("scene",wxMaUserInfo.getScene());
-            data.put("openId",wxMaUserInfo.getOpenId());
-            //发送mq消息
-            mqClient.send(MqConstant.QR_EXCHANGE,MqConstant.QR_ROUTING_KEY,data);
         }
         RestResult<?> result1 = userServiceFeign.findLoginTypeByUserInfo(getTypeEnum(), build.getOpenId());
         SecurityBaseUser sysUser = null;

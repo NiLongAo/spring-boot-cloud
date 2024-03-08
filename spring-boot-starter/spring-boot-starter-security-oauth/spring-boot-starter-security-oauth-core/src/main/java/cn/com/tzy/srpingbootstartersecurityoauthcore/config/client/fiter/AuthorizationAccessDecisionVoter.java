@@ -36,7 +36,7 @@ public class AuthorizationAccessDecisionVoter implements AccessDecisionVoter<Fil
         
         String restfulPath = object.getRequestUrl();
         String method = object.getRequest().getMethod();
-        Map<String, String> jwtUserMap = JwtUtils.builder(JwtCommon.JWT_AUTHORIZATION_KEY, false, object.getRequest()).builderJwtUser(JwtCommon.AUTHORIZATION_PREFIX, null);
+        Map<String, String> jwtUserMap = JwtUtils.builder(JwtCommon.JWT_AUTHORIZATION_KEY, false, object.getRequest()).setPrefix(JwtCommon.AUTHORIZATION_PREFIX).builderJwtUser( null);;
         if(jwtUserMap.isEmpty()){
             return ACCESS_DENIED;
         }

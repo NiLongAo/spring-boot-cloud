@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 @Log4j2
@@ -100,7 +101,7 @@ public class WxMiniQrEvent implements EventListener<QRData> {
     /**
      * 发送登陆消息
      */
-    public void sendLogin(QRData.Code code,String scene,  String openId){
+    public void sendLogin(QRData.Code code,String openId,String scene){
         if(code == QRData.Code.OVERDUE){
             QRData build = QRData.builder()
                     .code(code.getValue())
@@ -150,8 +151,12 @@ public class WxMiniQrEvent implements EventListener<QRData> {
 
         Long userId = null;
         for (SocketIOClient client : qrNamespace.getNamespace().getRoomOperations(scene).getClients()) {
-            String authorization = client.getHandshakeData().getHttpHeaders().get(JwtCommon.JWT_AUTHORIZATION_KEY);
-            Map<String, String> map = JwtUtils.builder(JwtCommon.JWT_AUTHORIZATION_KEY, authorization).builderJwtUser(JwtCommon.AUTHORIZATION_PREFIX, null);
+            Map<String, List<String>> urlParams = client.getHandshakeData().getUrlParams();
+            List<String> strings = urlParams.get(JwtCommon.JWT_AUTHORIZATION_KEY);
+            if(strings.isEmpty()){
+                log.info("客户端:" + client.getSessionId() + "未获取到 WxMiniQrEvent 连接");
+            }
+            Map<String, String> map = JwtUtils.builder(JwtCommon.JWT_AUTHORIZATION_KEY, strings.get(0)).setPrefix(JwtCommon.AUTHORIZATION_PREFIX).builderJwtUser( null);;
             userId = MapUtil.getLong(map, JwtCommon.JWT_USER_ID);
             break;
         }

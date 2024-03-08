@@ -61,8 +61,7 @@ public class JWTAuthenticationFilter extends BasicAuthenticationFilter {
             chain.doFilter(request, response);
             return;
         }
-        Map<String, String> jwtUserMap = JwtUtils.builder(JwtCommon.JWT_AUTHORIZATION_KEY, restfulPath.contains("/socket.io/"), request).builderJwtUser(JwtCommon.AUTHORIZATION_PREFIX, null);
-
+        Map<String, String> jwtUserMap = JwtUtils.builder(JwtCommon.JWT_AUTHORIZATION_KEY, restfulPath.contains("/socket.io/"), request).setPrefix(JwtCommon.AUTHORIZATION_PREFIX).builderJwtUser( null);;
         if (jwtUserMap.isEmpty()) {
             ResponseUtils.writeErrorInfo(response, RespCode.CODE_314);
             return ;

@@ -32,21 +32,26 @@ public class JwtUtils {
      */
     public static Map<String, String> getJwtUserMap(){
         return   builder(JwtCommon.JWT_AUTHORIZATION_KEY, false)
-                .builderJwtUser(JwtCommon.AUTHORIZATION_PREFIX, null);
+                .setPrefix(JwtCommon.AUTHORIZATION_PREFIX)
+                .builderJwtUser( null);
     }
     public static Long getUserId(){
-        Map<String, String> map = builder(JwtCommon.JWT_AUTHORIZATION_KEY, false)
-                .builderJwtUser(JwtCommon.AUTHORIZATION_PREFIX, null);
-        return MapUtil.getLong(map,JwtCommon.JWT_USER_ID);
+        String userId = builder(JwtCommon.JWT_AUTHORIZATION_KEY, false)
+                .setPrefix(JwtCommon.AUTHORIZATION_PREFIX)
+                .buildNameValue(JwtCommon.JWT_USER_ID, false);
+        if(StringUtils.isEmpty(userId)){
+            return null;
+        }
+        return Long.parseLong(userId);
     }
 
     /**
      * 获取登录账户
      */
     public static String getUserName(){
-        Map<String, String> map = builder(JwtCommon.JWT_AUTHORIZATION_KEY, false)
-                .builderJwtUser(JwtCommon.AUTHORIZATION_PREFIX, null);
-        return MapUtil.getStr(map,JwtCommon.JWT_USER_NAME);
+        return builder(JwtCommon.JWT_AUTHORIZATION_KEY, false)
+                .setPrefix(JwtCommon.AUTHORIZATION_PREFIX)
+                .buildNameValue( JwtCommon.JWT_USER_NAME,false);
     }
     /**
      * 获取HttpServletRequest 中的  schemasTenantId
@@ -65,19 +70,23 @@ public class JwtUtils {
      * @return
      */
     public static Long getTenantId() {
-        Map<String, String> map = builder(JwtCommon.JWT_AUTHORIZATION_KEY, false)
-                .builderJwtUser(JwtCommon.AUTHORIZATION_PREFIX, null);
-        return MapUtil.getLong(map, JwtCommon.JWT_TENANT_ID);
+        String tenantId = builder(JwtCommon.JWT_AUTHORIZATION_KEY, false)
+                .setPrefix(JwtCommon.AUTHORIZATION_PREFIX)
+                .buildNameValue(JwtCommon.JWT_TENANT_ID, false);
+        if(StringUtils.isEmpty(tenantId)){
+            return null;
+        }
+        return Long.parseLong(tenantId);
     }
 
     public static String getAuthorization(boolean isPrefix) {
         if(isPrefix){
+            // 从请求路径中获取
             return builder().buildNameValue(JwtCommon.JWT_AUTHORIZATION_KEY,true);
         }else {
-            Map<String, String> map = builder(JwtCommon.JWT_AUTHORIZATION_KEY, false)
-                    .builderJwtUser(JwtCommon.AUTHORIZATION_PREFIX, null);
-            // 从请求路径中获取
-            return MapUtil.getStr(map,JwtCommon.JWT_AUTHORIZATION_KEY,null);
+            return builder(JwtCommon.JWT_AUTHORIZATION_KEY, false)
+                    .setPrefix(JwtCommon.AUTHORIZATION_PREFIX)
+                    .buildNameValue(JwtCommon.JWT_AUTHORIZATION_KEY,false);
         }
     }
     /**
@@ -87,7 +96,8 @@ public class JwtUtils {
      */
     public static boolean getAdministrator() {
         Map<String, String> map = builder(JwtCommon.JWT_AUTHORIZATION_KEY, false)
-                .builderJwtUser(JwtCommon.AUTHORIZATION_PREFIX, null);
+                .setPrefix(JwtCommon.AUTHORIZATION_PREFIX)
+                .builderJwtUser( JwtCommon.JWT_ADMIN);
         if(!MapUtil.getBool(map,JwtCommon.JWT_ADMIN,false)){
             return false;
         }
@@ -105,9 +115,9 @@ public class JwtUtils {
     public static String getOAuthClientId() {
         String clientId = builder().buildNameValue(JwtCommon.JWT_CLIENT_ID,false);
         if (StringUtils.isBlank(clientId)) {
-            Map<String, String> map = builder(JwtCommon.JWT_AUTHORIZATION_KEY, false)
-                    .builderJwtUser(JwtCommon.AUTHORIZATION_PREFIX, null);
-            clientId = MapUtil.getStr(map,JwtCommon.JWT_CLIENT_ID);
+            clientId = builder(JwtCommon.JWT_AUTHORIZATION_KEY)
+                    .setPrefix(JwtCommon.AUTHORIZATION_PREFIX)
+                    .buildNameValue( JwtCommon.JWT_CLIENT_ID,false);
         }
         return clientId;
     }
@@ -117,9 +127,9 @@ public class JwtUtils {
         // 从请求路径中获取
         String loginType = builder().buildNameValue(JwtCommon.JWT_LOGIN_TYPE,false);
         if(StringUtils.isEmpty(loginType)){
-            Map<String, String> map = builder(JwtCommon.JWT_AUTHORIZATION_KEY, false)
-                    .builderJwtUser(JwtCommon.AUTHORIZATION_PREFIX, null);
-            loginType = MapUtil.getStr(map,JwtCommon.JWT_LOGIN_TYPE);
+            loginType = builder(JwtCommon.JWT_AUTHORIZATION_KEY)
+                    .setPrefix(JwtCommon.AUTHORIZATION_PREFIX)
+                    .buildNameValue(JwtCommon.JWT_LOGIN_TYPE,false);
         }
         // 从请求路径中获取
         return loginType;
@@ -160,6 +170,7 @@ public class JwtUtils {
     public static class Builder{
         private final String jwtAuthorizationKey;
         private  String authorization;
+        private  String prefix;
         private final boolean isParameter;
         private final HttpServletRequest requestHttp;
         private final ServerHttpRequest requestServer;
@@ -181,14 +192,44 @@ public class JwtUtils {
             this.requestServer = requestServer;
         }
 
-        public Map<String, String> builderJwtUser(String prefix, String payloadName){
+        public Builder setPrefix(String prefix){
+            this.prefix = prefix;
+            return this;
+        }
+
+
+        public Map<String, String> builderJwtUser(String payloadName){
             if(StringUtils.isEmpty(authorization) && (requestHttp != null || requestServer != null)){
-                authorization = findAuthorization();
+                findAuthorization();
             }
             if(StringUtils.isEmpty(authorization)){
                 log.warn("未从 HttpServletRequest 没有认证参数 Authorization");
                 return new HashMap<>();
             }
+            return buildJWSObject(payloadName);
+        }
+        public String buildNameValue(String name,boolean isHeader){
+            String val = null;
+            findAuthorization();
+            if(authorization != null){
+                Map<String, String> authorization = buildJWSObject(null);
+                val = MapUtil.getStr(authorization, name);
+            }else if(requestHttp != null){
+                if(isHeader){
+                    val = requestHttp.getHeader(name);
+                }else {
+                    val =   requestHttp.getParameter(name);
+                }
+            }else if(requestServer != null){
+                if(isHeader){
+                    val = requestServer.getHeaders().getFirst(name);
+                }else {
+                    val =   requestServer.getQueryParams().getFirst(name);
+                }
+            }
+            return val;
+        }
+        private Map<String, String> buildJWSObject(String payloadName){
             if(StringUtils.isNotEmpty(prefix)){
                 if(!prefix.startsWith(JwtCommon.AUTHORIZATION_PREFIX)){
                     log.error("token缺少前缀：{}",JwtCommon.AUTHORIZATION_PREFIX);
@@ -221,38 +262,20 @@ public class JwtUtils {
             }
             return map;
         }
-        public String buildNameValue(String name,boolean isHeader){
-            String val = null;
-            if(requestHttp != null){
-                if(isHeader){
-                    val = requestHttp.getHeader(name);
-                }else {
-                    val =   requestHttp.getParameter(name);
-                }
-            }else if(requestServer != null){
-                if(isHeader){
-                    val = requestServer.getHeaders().getFirst(name);
-                }else {
-                    val =   requestServer.getQueryParams().getFirst(name);
-                }
-            }
-            return val;
-        }
-
-        private String findAuthorization(){
-            String authorization = null;
-            if(requestHttp != null){
-                authorization = requestHttp.getHeader(jwtAuthorizationKey);
-                if(StringUtils.isEmpty(authorization) && isParameter){
-                    authorization =   requestHttp.getParameter(jwtAuthorizationKey);
-                }
-            }else if(requestServer != null){
-                authorization = requestServer.getHeaders().getFirst(jwtAuthorizationKey);
-                if(StringUtils.isEmpty(authorization) && isParameter){
-                    authorization =   requestServer.getQueryParams().getFirst(jwtAuthorizationKey);
+        private void findAuthorization(){
+            if(StringUtils.isNotEmpty(jwtAuthorizationKey)){
+                if(requestHttp != null){
+                    authorization = requestHttp.getHeader(jwtAuthorizationKey);
+                    if(StringUtils.isEmpty(authorization) && isParameter){
+                        authorization =   requestHttp.getParameter(jwtAuthorizationKey);
+                    }
+                }else if(requestServer != null){
+                    authorization = requestServer.getHeaders().getFirst(jwtAuthorizationKey);
+                    if(StringUtils.isEmpty(authorization) && isParameter){
+                        authorization =   requestServer.getQueryParams().getFirst(jwtAuthorizationKey);
+                    }
                 }
             }
-            return authorization;
         }
     }
 }

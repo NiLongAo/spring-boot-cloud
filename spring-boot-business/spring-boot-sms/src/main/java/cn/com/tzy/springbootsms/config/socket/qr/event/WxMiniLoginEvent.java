@@ -1,8 +1,11 @@
 package cn.com.tzy.springbootsms.config.socket.qr.event;
 
+import cn.com.tzy.springbootcomm.common.jwt.JwtCommon;
+import cn.com.tzy.springbootcomm.common.mq.MqConstant;
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
-import cn.com.tzy.springbootcomm.constant.NotNullMap;
+import cn.com.tzy.springbootcomm.utils.JwtUtils;
+import cn.com.tzy.springbootentity.mq.QrRoutingModel;
 import cn.com.tzy.springbootfeignsso.api.oauth.OAuthUserServiceFeign;
 import cn.com.tzy.springbootsms.config.socket.qr.common.QRData;
 import cn.com.tzy.springbootsms.config.socket.qr.common.QRSendEvent;
@@ -11,8 +14,11 @@ import cn.com.tzy.springbootsms.config.socket.qr.namespace.QRNamespace;
 import cn.com.tzy.springbootstarterredis.utils.RedisUtils;
 import cn.com.tzy.springbootstartersocketio.pool.EventListener;
 import cn.com.tzy.springbootstartersocketio.pool.NamespaceListener;
+import cn.com.tzy.springbootstarterstreamrabbitmq.config.MqClient;
 import cn.com.tzy.srpingbootstartersecurityoauthbasic.common.LoginTypeEnum;
 import cn.com.tzy.srpingbootstartersecurityoauthbasic.constant.WxMiniConstant;
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.map.MapUtil;
 import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.SocketIOClient;
 import lombok.extern.log4j.Log4j2;
@@ -22,6 +28,8 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Log4j2
 @Component
@@ -34,6 +42,8 @@ public class WxMiniLoginEvent implements EventListener<WxMiniLoginData> {
     private  String appClientSecret;
     @Resource
     private OAuthUserServiceFeign oAuthUserServiceFeign;
+    @Resource
+    private MqClient mqClient;
 
     public WxMiniLoginEvent(QRNamespace qrNamespace) {
         this.qrNamespace = qrNamespace;
@@ -89,13 +99,19 @@ public class WxMiniLoginEvent implements EventListener<WxMiniLoginData> {
                 .build();
 
         if(StringUtils.isNotEmpty(mini.getScene())){
+            //缓存登录成功信息
             String uuid = client.getSessionId().toString().replaceAll("-", "");
-            NotNullMap data = new NotNullMap();
-            data.putString("mini_scene",uuid);
-            data.put("data",build);
             //登录成功后存储
             String key = String.format("%s%s", WxMiniConstant.WX_MINI_LOGIN_SCENE, mini.getScene());
-            RedisUtils.set(key,data,60*3);
+            RedisUtils.set(key,new HashMap<String,Object>(){{
+                put("mini_scene",uuid);
+                put("data",build);
+            }},60*3);
+            //发送Mq通知
+            Map<String, Object> map = BeanUtil.beanToMap(result.getData());
+            String openId = JwtUtils.builder(JwtCommon.JWT_AUTHORIZATION_KEY, MapUtil.getStr(map, "access_token")).buildNameValue(JwtCommon.JWT_USER_NAME, false);
+            //发送mq消息
+            mqClient.send(MqConstant.QR_EXCHANGE,MqConstant.QR_ROUTING_KEY, QrRoutingModel.builder().scene(mini.getScene()).openId(openId).build());
         }else {
             client.sendEvent(QRSendEvent.OUT_LOGIN_EVENT,build);
         }
