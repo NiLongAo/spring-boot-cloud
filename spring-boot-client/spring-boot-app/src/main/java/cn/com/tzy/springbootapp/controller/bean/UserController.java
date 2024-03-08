@@ -2,7 +2,9 @@ package cn.com.tzy.springbootapp.controller.bean;
 
 import cn.com.tzy.springbootapp.service.bean.UserService;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
-import cn.com.tzy.springbootentity.param.bean.*;
+import cn.com.tzy.springbootcomm.utils.JwtUtils;
+import cn.com.tzy.springbootentity.param.bean.LoginParam;
+import cn.com.tzy.springbootentity.param.bean.UserParam;
 import cn.com.tzy.springbootstartercloud.api.ApiController;
 import cn.com.tzy.srpingbootstartersecurityoauthbasic.common.LoginTypeEnum;
 import io.swagger.annotations.Api;
@@ -29,7 +31,7 @@ public class UserController extends ApiController {
 
     @ApiOperation(value = "生成验证码", notes = "生成验证码")
     @PostMapping("/getcode")
-    public RestResult<?> getCode() throws Exception {
+    public RestResult<?> getCode(){
         // 获取到session
         return userService.getCode();
     }
@@ -46,6 +48,18 @@ public class UserController extends ApiController {
     @ResponseBody
     public RestResult<?> logout(@RequestParam("loginType")LoginTypeEnum loginType){
         return userService.logout(loginType);
+    }
+
+    @ApiOperation(value = "修改用户", notes = "修改用户")
+    @PostMapping("update")
+    @ResponseBody
+    public RestResult<?> update(@RequestBody UserParam param){
+        UserParam build = UserParam.builder()
+                .id(JwtUtils.getUserId())
+                .nickName(param.getNickName())
+                .phone(param.getPhone())
+                .build();
+        return userService.update(build);
     }
 
 

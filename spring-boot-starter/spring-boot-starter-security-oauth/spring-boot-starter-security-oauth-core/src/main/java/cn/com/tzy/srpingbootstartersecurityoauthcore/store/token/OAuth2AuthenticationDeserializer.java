@@ -56,10 +56,9 @@ public class OAuth2AuthenticationDeserializer extends JsonDeserializer<OAuth2Aut
         object.remove("authorities");
 
         UserDetails principal = mapper.readValue(object.traverse(mapper), new TypeReference<UserDetails>() {});
-        Object credentials =
-            mapper.readValue(jsonNode.get("credentials").traverse(mapper), new TypeReference<Object>() {});
-        Set<SimpleGrantedAuthority> grantedAuthorities =
-            parseSimpleGrantedAuthorities(mapper, jsonNode.get("authorities"));
+        Object credentials =mapper.readValue(jsonNode.get("credentials").traverse(mapper), new TypeReference<Object>() {});
+        JsonNode authorities = jsonNode.get("authorities");
+        Set<SimpleGrantedAuthority> grantedAuthorities = parseSimpleGrantedAuthorities(mapper, authorities);
 
         Class<? extends Object> requestClass = principal.getClass();
         Field officeCodeListField = null;
@@ -77,9 +76,8 @@ public class OAuth2AuthenticationDeserializer extends JsonDeserializer<OAuth2Aut
     }
 
     private Set<SimpleGrantedAuthority> parseSimpleGrantedAuthorities(ObjectMapper mapper, JsonNode jsonNode)
-        throws JsonParseException, JsonMappingException, IOException {
-        List<JsonNode> authorities =
-            mapper.readValue(jsonNode.traverse(mapper), new TypeReference<List<JsonNode>>() {});
+        throws  IOException {
+        List<JsonNode> authorities = mapper.readValue(jsonNode.traverse(mapper), new TypeReference<List<JsonNode>>() {});
         Set<SimpleGrantedAuthority> grantedAuthorities = new HashSet<>(0);
         if (authorities != null && !authorities.isEmpty()) {
             authorities.forEach(s -> {

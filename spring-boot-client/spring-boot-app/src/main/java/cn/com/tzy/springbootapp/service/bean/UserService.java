@@ -110,4 +110,8 @@ public class UserService {
         }
         return result;
     }
+
+    public RestResult<?> update(UserParam param) {
+        return userServiceFeign.update(param);
+    }
 }

@@ -59,7 +59,7 @@ public class WxMiniAuthenticationToken extends AbstractAuthenticationToken {
 
     @Override
     public Object getCredentials() {
-       return this.user;
+       return user.getPassword();
     }
 
     @Override
