@@ -53,7 +53,7 @@ public class JwtUtils {
      * @return
      */
     public static Long getSchemasTenantId(){
-        String schemasTenantId = builder().buildHeaderValue(Constant.SCHEMAS_TENANT_ID);
+        String schemasTenantId = builder().buildNameValue(Constant.SCHEMAS_TENANT_ID,true);
         if(StringUtils.isEmpty(schemasTenantId)){
             return null;
         }
@@ -72,7 +72,7 @@ public class JwtUtils {
 
     public static String getAuthorization(boolean isPrefix) {
         if(isPrefix){
-            return builder().buildHeaderValue(JwtCommon.JWT_AUTHORIZATION_KEY);
+            return builder().buildNameValue(JwtCommon.JWT_AUTHORIZATION_KEY,true);
         }else {
             Map<String, String> map = builder(JwtCommon.JWT_AUTHORIZATION_KEY, false)
                     .builderJwtUser(JwtCommon.AUTHORIZATION_PREFIX, null);
@@ -103,7 +103,7 @@ public class JwtUtils {
      * @return
      */
     public static String getOAuthClientId() {
-        String clientId = builder().buildParameterValue(JwtCommon.JWT_CLIENT_ID);
+        String clientId = builder().buildNameValue(JwtCommon.JWT_CLIENT_ID,false);
         if (StringUtils.isBlank(clientId)) {
             Map<String, String> map = builder(JwtCommon.JWT_AUTHORIZATION_KEY, false)
                     .builderJwtUser(JwtCommon.AUTHORIZATION_PREFIX, null);
@@ -115,7 +115,7 @@ public class JwtUtils {
 
     public static String getLoginType() {
         // 从请求路径中获取
-        String loginType = builder().buildParameterValue(JwtCommon.JWT_LOGIN_TYPE);
+        String loginType = builder().buildNameValue(JwtCommon.JWT_LOGIN_TYPE,false);
         if(StringUtils.isEmpty(loginType)){
             Map<String, String> map = builder(JwtCommon.JWT_AUTHORIZATION_KEY, false)
                     .builderJwtUser(JwtCommon.AUTHORIZATION_PREFIX, null);
@@ -221,19 +221,20 @@ public class JwtUtils {
             }
             return map;
         }
-
-
-        public String buildHeaderValue(String name){
-            String val = requestHttp.getHeader(name);
-            if(StringUtils.isBlank(val)){
-                return null;
-            }
-            return val;
-        }
-        public String buildParameterValue(String name){
-            String val = requestHttp.getParameter(name);
-            if(StringUtils.isBlank(val)){
-                return null;
+        public String buildNameValue(String name,boolean isHeader){
+            String val = null;
+            if(requestHttp != null){
+                if(isHeader){
+                    val = requestHttp.getHeader(name);
+                }else {
+                    val =   requestHttp.getParameter(name);
+                }
+            }else if(requestServer != null){
+                if(isHeader){
+                    val = requestServer.getHeaders().getFirst(name);
+                }else {
+                    val =   requestServer.getQueryParams().getFirst(name);
+                }
             }
             return val;
         }
