@@ -5,6 +5,7 @@ import cn.com.tzy.springbootcomm.common.mq.MqConstant;
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootcomm.utils.JwtUtils;
+import cn.com.tzy.springbootentity.mq.QRDataModel;
 import cn.com.tzy.springbootentity.mq.QrRoutingModel;
 import cn.com.tzy.springbootfeignsso.api.oauth.OAuthUserServiceFeign;
 import cn.com.tzy.springbootsms.config.socket.qr.common.QRData;
@@ -28,8 +29,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 @Log4j2
 @Component
@@ -97,20 +96,13 @@ public class WxMiniLoginEvent implements EventListener<WxMiniLoginData> {
                 .message(QRData.Code.SUCCESS.getName())
                 .data(result.getData())
                 .build();
-
         if(StringUtils.isNotEmpty(mini.getScene())){
             //缓存登录成功信息
             String uuid = client.getSessionId().toString().replaceAll("-", "");
             //登录成功后存储
-            String key = String.format("%s%s", WxMiniConstant.WX_MINI_LOGIN_SCENE, mini.getScene());
-            RedisUtils.set(key,new HashMap<String,Object>(){{
-                put("mini_scene",uuid);
-                put("data",build);
-            }},60*3);
+            RedisUtils.set(String.format("%s%s", WxMiniConstant.WX_MINI_LOGIN_SCENE, mini.getScene()), QRDataModel.builder().qrData(build).mini_scene(uuid).build(),60*3);
             //发送Mq通知
-            Map<String, Object> map = BeanUtil.beanToMap(result.getData());
-            String openId = JwtUtils.builder(JwtCommon.JWT_AUTHORIZATION_KEY, MapUtil.getStr(map, "access_token")).buildNameValue(JwtCommon.JWT_USER_NAME, false);
-            //发送mq消息
+            String openId = JwtUtils.builder(JwtCommon.JWT_AUTHORIZATION_KEY, MapUtil.getStr(BeanUtil.beanToMap(result.getData()), "access_token")).buildNameValue(JwtCommon.JWT_USER_NAME, false);
             mqClient.send(MqConstant.QR_EXCHANGE,MqConstant.QR_ROUTING_KEY, QrRoutingModel.builder().scene(mini.getScene()).openId(openId).build());
         }else {
             client.sendEvent(QRSendEvent.OUT_LOGIN_EVENT,build);

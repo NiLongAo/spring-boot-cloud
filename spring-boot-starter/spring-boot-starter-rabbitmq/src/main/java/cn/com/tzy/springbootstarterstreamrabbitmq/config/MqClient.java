@@ -2,9 +2,7 @@ package cn.com.tzy.springbootstarterstreamrabbitmq.config;
 
 import lombok.extern.log4j.Log4j2;
 import org.springframework.amqp.core.*;
-import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
-import org.springframework.amqp.support.converter.MessageConverter;
 
 import java.util.Map;
 
@@ -14,9 +12,8 @@ public class MqClient {
     private final RabbitAdmin rabbitAdmin;
 
 
-    public MqClient(ConnectionFactory connectionFactory, MessageConverter messageConverter){
-        this.rabbitAdmin =new RabbitAdmin(connectionFactory);
-        rabbitAdmin.getRabbitTemplate().setMessageConverter(messageConverter);
+    public MqClient(RabbitAdmin rabbitAdmin){
+        this.rabbitAdmin =rabbitAdmin;
     }
 
     public Binding binding(String exchangeName,String routingKey,String queueName,String type,boolean isExchange){

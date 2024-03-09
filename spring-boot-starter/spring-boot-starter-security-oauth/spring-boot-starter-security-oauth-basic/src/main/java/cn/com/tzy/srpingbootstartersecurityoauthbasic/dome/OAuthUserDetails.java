@@ -71,8 +71,8 @@ public class OAuthUserDetails implements UserDetails {
         this.setRoleIdList(user.getRoleIdList());
         this.setPositionIdList(user.getPositionIdList());
         this.setDepartmentIdList(user.getDepartmentIdList());
-        this.setIsAdmin(user.getIsAdmin() != null && user.getIsAdmin() == 1);
-        this.setEnabled(user.getIsEnabled() != null && user.getIsEnabled() == 1);
+        this.setIsAdmin(user.getIsAdmin() != null && user.getIsAdmin() == ConstEnum.Flag.YES.getValue());
+        this.setEnabled(user.getIsEnabled() != null && user.getIsEnabled() == ConstEnum.Flag.YES.getValue());
         if (user.getPrivilegeList() != null && !user.getPrivilegeList().isEmpty()) {
             authorities = new ArrayList<>();
             user.getPrivilegeList().forEach(privilege -> authorities.add(new SimpleGrantedAuthority(privilege)));

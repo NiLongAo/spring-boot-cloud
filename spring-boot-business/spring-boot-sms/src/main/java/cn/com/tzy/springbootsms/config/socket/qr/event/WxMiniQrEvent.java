@@ -1,9 +1,10 @@
 package cn.com.tzy.springbootsms.config.socket.qr.event;
 
+import cn.com.tzy.springbootcomm.common.jwt.JwtCommon;
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
-import cn.com.tzy.springbootcomm.constant.NotNullMap;
 import cn.com.tzy.springbootcomm.utils.JwtUtils;
+import cn.com.tzy.springbootentity.mq.QRDataModel;
 import cn.com.tzy.springbootentity.param.bean.MiniUserParam;
 import cn.com.tzy.springbootfeignsso.api.oauth.MiniServiceFeign;
 import cn.com.tzy.springbootfeignsso.api.oauth.OAuthUserServiceFeign;
@@ -13,7 +14,6 @@ import cn.com.tzy.springbootsms.config.socket.qr.namespace.QRNamespace;
 import cn.com.tzy.springbootstarterredis.utils.RedisUtils;
 import cn.com.tzy.springbootstartersocketio.pool.EventListener;
 import cn.com.tzy.springbootstartersocketio.pool.NamespaceListener;
-import cn.com.tzy.springbootcomm.common.jwt.JwtCommon;
 import cn.com.tzy.srpingbootstartersecurityoauthbasic.common.LoginTypeEnum;
 import cn.com.tzy.srpingbootstartersecurityoauthbasic.constant.WxMiniConstant;
 import cn.hutool.core.bean.BeanUtil;
@@ -128,9 +128,9 @@ public class WxMiniQrEvent implements EventListener<QRData> {
         //处理是否有微信小程序登录
         String key = String.format("%s%s", WxMiniConstant.WX_MINI_LOGIN_SCENE, scene);
         if(RedisUtils.hasKey(key)){
-            NotNullMap map = BeanUtil.toBean(RedisUtils.get(key), NotNullMap.class);
-            String mini_scene = MapUtil.getStr(map, "mini_scene");
-            QRData data = MapUtil.get(map, "data", QRData.class);
+            QRDataModel map = BeanUtil.toBean(RedisUtils.get(key), QRDataModel.class);
+            String mini_scene =map.getMini_scene();
+            QRData data = (QRData) map.getQrData();
             qrNamespace.getNamespace().getRoomOperations(mini_scene).sendEvent(QRSendEvent.OUT_LOGIN_EVENT,data);
             RedisUtils.del(key);
         }
@@ -183,9 +183,9 @@ public class WxMiniQrEvent implements EventListener<QRData> {
         //微信小程序需要（后面优化小程序socket）
         String key =  String.format("%s%s", WxMiniConstant.WX_MINI_LOGIN_SCENE, scene);
         if(RedisUtils.hasKey(key)){
-            NotNullMap map = BeanUtil.toBean(RedisUtils.get(key), NotNullMap.class);
-            String mini_scene = MapUtil.getStr(map, "mini_scene");
-            QRData data = MapUtil.get(map, "data", QRData.class);
+            QRDataModel map = BeanUtil.toBean(RedisUtils.get(key), QRDataModel.class);
+            String mini_scene =map.getMini_scene();
+            QRData data = (QRData) map.getQrData();
             qrNamespace.getNamespace().getRoomOperations(mini_scene).sendEvent(QRSendEvent.OUT_LOGIN_EVENT,data);
             RedisUtils.del(key);
         }
