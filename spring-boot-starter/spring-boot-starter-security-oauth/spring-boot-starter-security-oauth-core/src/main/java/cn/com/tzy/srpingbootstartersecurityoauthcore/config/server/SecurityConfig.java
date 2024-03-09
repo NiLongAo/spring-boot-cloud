@@ -12,7 +12,6 @@ import cn.com.tzy.srpingbootstartersecurityoauthcore.config.server.handler.MyLog
 import cn.com.tzy.srpingbootstartersecurityoauthcore.config.server.service.BaseUserService;
 import cn.com.tzy.srpingbootstartersecurityoauthcore.config.server.service.RedisAuthorizationCodeServices;
 import cn.com.tzy.srpingbootstartersecurityoauthcore.config.server.service.UserDetailsTypeService;
-import cn.com.tzy.srpingbootstartersecurityoauthcore.properties.WxMaProperties;
 import cn.com.tzy.srpingbootstartersecurityoauthcore.store.TokenStoreConfig;
 import cn.hutool.core.convert.Convert;
 import lombok.Setter;
@@ -43,7 +42,7 @@ import java.util.stream.Collectors;
 @Log4j2
 @Configuration
 @Setter
-@EnableConfigurationProperties({SecurityOauthProperties.class,WxMaProperties.class})
+@EnableConfigurationProperties({SecurityOauthProperties.class})
 @AutoConfigureAfter(TokenStoreConfig.class)
 @ConditionalOnClass({HttpServletRequest.class})
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
