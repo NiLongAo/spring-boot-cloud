@@ -20,6 +20,16 @@ public class WxMaProperties {
     private String secret;
 
     /**
+     * page – 必须是已经发布的小程序页面，例如 "pages/index/index" ,如果不填写这个字段，默认跳主页面
+     */
+    private String page;
+
+    /**
+     * envVersion – 默认"release" 要打开的小程序版本。正式版为 "release"，体验版为 "trial"，开发版为 "develop"
+     */
+    private String envVersion;
+
+    /**
      * 消息格式，XML或者JSON
      */
     private String msgDataFormat ="JSON";
