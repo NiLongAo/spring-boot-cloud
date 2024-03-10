@@ -47,7 +47,7 @@
         <hutool.version>5.5.8</hutool.version>
         <xxl-job-core.version>2.3.1</xxl-job-core.version>
         <nacos-service.version>2.1.0</nacos-service.version>
-        <skywalking.version>8.9.0</skywalking.version>
+        <skywalking.version>9.1.0</skywalking.version>
         <sentinel.version>1.8.3</sentinel.version>
         <nacos-console.version>2.1.0</nacos-console.version>
         <seata-server.version>1.5.0</seata-server.version>
