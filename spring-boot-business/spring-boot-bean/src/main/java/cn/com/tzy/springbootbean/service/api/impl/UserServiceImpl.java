@@ -117,7 +117,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public RestResult<?> findLoginInfo() {
-        return findLoginTypeByUserInfo(LoginTypeEnum.getClientType(JwtUtils.getLoginType()),JwtUtils.getUserName());
+        RestResult<?> result = findLoginTypeByUserInfo(LoginTypeEnum.getClientType(JwtUtils.getLoginType()), JwtUtils.getUserName());
+        if(result.getCode() != RespCode.CODE_0.getValue()){
+            return result;
+        }
+        SecurityBaseUser data = (SecurityBaseUser) result.getData();
+        data.setPassword(null);
+        data.setCredentialssalt(null);
+        return result;
     }
 
     @Override
