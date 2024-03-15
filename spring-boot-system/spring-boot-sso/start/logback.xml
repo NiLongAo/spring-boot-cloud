@@ -156,7 +156,14 @@
             <onMismatch>DENY</onMismatch>
         </filter>
     </appender>
-
+    <appender name="skywalkingFile" class="org.apache.skywalking.apm.toolkit.log.logback.v1.x.log.GRPCLogClientAppender" >
+        <!-- 对日志进行格式化 -->
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <layout class="org.apache.skywalking.apm.toolkit.log.logback.v1.x.TraceIdPatternLogbackLayout">
+                <pattern>${FILE_LOG_PATTERN}</pattern>
+            </layout>
+        </encoder>
+    </appender>
     <logger name="org.springframework" level="warn" />
     <logger name="com.apache.ibatis" level="TRACE"/>
     <logger name="java.sql.Connection" level="DEBUG"/>
@@ -165,9 +172,11 @@
 
     <!-- 生产环境下，将此级别配置为适合的级别，以免日志文件太多或影响程序性能 -->
     <root level="INFO">
-        <appender-ref ref="infoFile" />
-        <appender-ref ref="debugFile" />
-        <appender-ref ref="warnFile" />
-        <appender-ref ref="errorFile" />
+        <!--        <appender-ref ref="infoFile" />-->
+        <!--        <appender-ref ref="debugFile" />-->
+        <!--        <appender-ref ref="warnFile" />-->
+        <!--        <appender-ref ref="errorFile" />-->
+        <!--    使用gRpc将日志发送到skywalking服务端    -->
+        <appender-ref ref="skywalkingFile" />
     </root>
 </configuration>
