@@ -3,7 +3,7 @@ package cn.com.tzy.springbootentity.es.sys;
 import cn.com.tzy.springbootcomm.common.bean.Base;
 import cn.easyes.annotation.IndexId;
 import cn.easyes.annotation.IndexName;
-import cn.easyes.common.enums.IdType;
+import cn.easyes.annotation.rely.IdType;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
