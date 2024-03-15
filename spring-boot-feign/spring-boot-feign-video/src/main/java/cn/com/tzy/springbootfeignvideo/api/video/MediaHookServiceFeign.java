@@ -1,7 +1,7 @@
 package cn.com.tzy.springbootfeignvideo.api.video;
 
 import cn.com.tzy.springbootcomm.constant.NotNullMap;
-import cn.com.tzy.springbootstarterfeigncore.config.feign.FeignConfiguration;
+import cn.com.tzy.springbootstarterfeign.config.feign.FeignConfiguration;
 import cn.com.tzy.springbootstartervideobasic.common.ZLMediaKitConstant;
 import cn.com.tzy.springbootstartervideobasic.vo.media.*;
 import cn.hutool.json.JSONObject;

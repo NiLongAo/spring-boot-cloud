@@ -8,7 +8,7 @@ import cn.com.tzy.springbootentity.param.activiti.StartProcessModel;
 import cn.com.tzy.springbootentity.param.activiti.TaskCompleteModel;
 import cn.com.tzy.springbootentity.param.activiti.impl.StartProcessModelImpl;
 import cn.com.tzy.springbootentity.param.activiti.impl.TaskCompleteModelImpl;
-import cn.com.tzy.springbootstarterfeigncore.config.feign.FeignConfiguration;
+import cn.com.tzy.springbootstarterfeign.config.feign.FeignConfiguration;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;

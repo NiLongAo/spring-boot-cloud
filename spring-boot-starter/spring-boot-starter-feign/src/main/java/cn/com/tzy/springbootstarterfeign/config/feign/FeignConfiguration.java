@@ -1,4 +1,4 @@
-package cn.com.tzy.springbootstarterfeigncore.config.feign;
+package cn.com.tzy.springbootstarterfeign.config.feign;
 
 import cn.com.tzy.springbootcomm.constant.Constant;
 import cn.com.tzy.springbootcomm.utils.JwtUtils;

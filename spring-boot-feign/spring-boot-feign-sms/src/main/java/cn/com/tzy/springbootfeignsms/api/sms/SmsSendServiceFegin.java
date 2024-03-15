@@ -2,7 +2,7 @@ package cn.com.tzy.springbootfeignsms.api.sms;
 
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootentity.param.sms.SendParam;
-import cn.com.tzy.springbootstarterfeigncore.config.feign.FeignConfiguration;
+import cn.com.tzy.springbootstarterfeign.config.feign.FeignConfiguration;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;

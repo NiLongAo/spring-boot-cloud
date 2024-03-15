@@ -69,17 +69,6 @@
             </exclusions>
         </dependency>
 
-        <!--feign调用-->
-        <dependency>
-            <groupId>cn.com.tzy</groupId>
-            <artifactId>spring-boot-starter-feign-config</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>commons-io</artifactId>
-                    <groupId>commons-io</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
         <!--基础类开放feign接口-->
         <dependency>
             <groupId>cn.com.tzy</groupId>

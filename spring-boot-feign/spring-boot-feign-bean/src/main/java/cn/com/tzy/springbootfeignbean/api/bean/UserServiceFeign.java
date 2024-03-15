@@ -6,7 +6,7 @@ import cn.com.tzy.springbootentity.param.bean.UserConnectDepartmentParam;
 import cn.com.tzy.springbootentity.param.bean.UserConnectPositionParam;
 import cn.com.tzy.springbootentity.param.bean.UserConnectRoleParam;
 import cn.com.tzy.springbootentity.param.bean.UserParam;
-import cn.com.tzy.springbootstarterfeigncore.config.feign.FeignConfiguration;
+import cn.com.tzy.springbootstarterfeign.config.feign.FeignConfiguration;
 import cn.com.tzy.srpingbootstartersecurityoauthbasic.common.LoginTypeEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.validation.annotation.Validated;

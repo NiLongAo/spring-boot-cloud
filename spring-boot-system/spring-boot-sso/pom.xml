@@ -18,11 +18,6 @@
             <groupId>cn.com.tzy</groupId>
             <artifactId>spring-boot-starter-cloud</artifactId>
         </dependency>
-        <!--feign调用-->
-        <dependency>
-            <groupId>cn.com.tzy</groupId>
-            <artifactId>spring-boot-starter-feign-config</artifactId>
-        </dependency>
 
         <!--基础类开放feign接口-->
         <dependency>

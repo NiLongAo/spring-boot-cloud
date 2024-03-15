@@ -38,7 +38,7 @@
         </dependency>
         <dependency>
             <groupId>cn.com.tzy</groupId>
-            <artifactId>spring-boot-starter-feign-core</artifactId>
+            <artifactId>spring-boot-starter-feign</artifactId>
         </dependency>
     </dependencies>
 

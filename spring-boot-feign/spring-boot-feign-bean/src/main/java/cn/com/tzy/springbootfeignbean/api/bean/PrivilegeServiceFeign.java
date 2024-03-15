@@ -6,7 +6,7 @@ import cn.com.tzy.springbootentity.param.bean.PositionConnectPrivilegeParam;
 import cn.com.tzy.springbootentity.param.bean.PrivilegeParam;
 import cn.com.tzy.springbootentity.param.bean.RoleConnectPrivilegeParam;
 import cn.com.tzy.springbootentity.param.sms.TenantConnectPrivilegeParam;
-import cn.com.tzy.springbootstarterfeigncore.config.feign.FeignConfiguration;
+import cn.com.tzy.springbootstarterfeign.config.feign.FeignConfiguration;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;

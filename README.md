@@ -80,8 +80,6 @@
 │  ├─spring-boot-starter-cloud 所有运行模块公共加载配置模块 如：controller公共继承类，请求路径丶请求参数打印功能。
 │  ├─spring-boot-starter-elasticsearch 引擎搜索elasticsearch加载配置模块 使用 easy-es-boot-starter 包
 │  ├─spring-boot-starter-feign feign相关加载配置模块
-│  │  ├─spring-boot-starter-feign-config 服务feign调用异常拦截
-│  │  └─spring-boot-starter-feign-core  feign的调用拦截器 主要在请求前存放相关认证 header
 │  ├─spring-boot-starter-logs 日志封装相关加载配置模块
 │  │  ├─spring-boot-starter-logs-basic 日志注解 及 枚举
 │  │  └─spring-boot-starter-logs-core  日志核心实现逻辑，使用AOP切面

@@ -200,12 +200,7 @@
                 </dependency>
                 <dependency>
                     <groupId>cn.com.tzy</groupId>
-                    <artifactId>spring-boot-starter-feign-config</artifactId>
-                    <version>${project.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>cn.com.tzy</groupId>
-                    <artifactId>spring-boot-starter-feign-core</artifactId>
+                    <artifactId>spring-boot-starter-feign</artifactId>
                     <version>${project.version}</version>
                 </dependency>
                 <dependency>
