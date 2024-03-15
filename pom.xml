@@ -59,7 +59,7 @@
         <mapstruct.version>1.4.1.Final</mapstruct.version>
         <wx.binarywang.version>4.5.5.B</wx.binarywang.version>
         <spring.boot.version>2.3.2.RELEASE</spring.boot.version>
-        <easy-es.version>1.0.3</easy-es.version>
+        <easy-es.version>1.1.1</easy-es.version>
         <elasticsearch.version>7.14.0</elasticsearch.version>
         <geoip2.version>2.16.1</geoip2.version>
         <sip.version>1.3.0-91</sip.version>

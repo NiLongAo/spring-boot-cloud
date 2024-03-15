@@ -7,13 +7,13 @@ import cn.com.tzy.springbootactiviti.model.impl.WorkflowContextImpl;
 import cn.com.tzy.springbootactiviti.oa.OaInterface;
 import cn.com.tzy.springbootactiviti.service.ActivitiService;
 import cn.com.tzy.springbootactiviti.utils.OAEnum;
+import cn.com.tzy.springbootcomm.common.model.PageModel;
 import cn.com.tzy.springbootcomm.common.vo.PageResult;
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootcomm.constant.NotNullMap;
 import cn.com.tzy.springbootcomm.utils.AppUtils;
 import cn.com.tzy.springbootcomm.utils.JwtUtils;
-import cn.com.tzy.springbootcomm.common.model.PageModel;
 import cn.com.tzy.springbootentity.dome.bean.User;
 import cn.com.tzy.springbootentity.param.activiti.impl.CommentEntity;
 import cn.com.tzy.springbootfeignbean.api.bean.UserServiceFeign;
@@ -44,7 +44,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.el.ExpressionFactory;
 import javax.el.ValueExpression;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -433,7 +432,7 @@ public class ActivitiServcieImpl extends BaseWorkflowService implements Activiti
         List<HistoricTaskInstance> list = getProcessEngine().getHistoryService().createHistoricTaskInstanceQuery()
                 .processInstanceId(instanceId)
                 .orderByHistoricTaskInstanceStartTime().desc()
-                .list();
+                .listPage(0,1);
         return list.get(0);
     }
 
