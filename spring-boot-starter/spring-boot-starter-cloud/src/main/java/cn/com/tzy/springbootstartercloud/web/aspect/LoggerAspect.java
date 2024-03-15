@@ -20,15 +20,15 @@ public class LoggerAspect {
      * 使用@Pointcut声明切入点表达式
      * 后面的通知直接使用方法名来引用当前的切点表达式；如果是其他类使用，加上包名即可
      */
-    @Pointcut("execution(public * cn.com.tzy.springboot*..*.*(..)) && @annotation(org.springframework.web.bind.annotation.PostMapping)")
+    @Pointcut("execution(public * cn.com.tzy.springboot*.controller..*.*(..)) && @annotation(org.springframework.web.bind.annotation.PostMapping)")
     public void postMapping(){}
-    @Pointcut("execution(public * cn.com.tzy.springboot*..*.*(..)) && @annotation(org.springframework.web.bind.annotation.GetMapping)")
+    @Pointcut("execution(public * cn.com.tzy.springboot*.controller..*.*(..)) && @annotation(org.springframework.web.bind.annotation.GetMapping)")
     public void getMapping(){}
-    @Pointcut("execution(public * cn.com.tzy.springboot*..*.*(..)) && @annotation(org.springframework.web.bind.annotation.PutMapping)")
+    @Pointcut("execution(public * cn.com.tzy.springboot*.controller..*.*(..)) && @annotation(org.springframework.web.bind.annotation.PutMapping)")
     public void putMapping(){}
-    @Pointcut("execution(public * cn.com.tzy.springboot*..*.*(..)) && @annotation(org.springframework.web.bind.annotation.DeleteMapping)")
+    @Pointcut("execution(public * cn.com.tzy.springboot*.controller..*.*(..)) && @annotation(org.springframework.web.bind.annotation.DeleteMapping)")
     public void deleteMapping(){}
-    @Pointcut("execution(public * cn.com.tzy.springboot*..*.*(..)) && @annotation(org.springframework.web.bind.annotation.RequestMapping)")
+    @Pointcut("execution(public * cn.com.tzy.springboot*.controller..*.*(..)) && @annotation(org.springframework.web.bind.annotation.RequestMapping)")
     public void requestMapping(){}
 
     @Around(value="postMapping() || getMapping() || putMapping() || deleteMapping() || requestMapping()")
