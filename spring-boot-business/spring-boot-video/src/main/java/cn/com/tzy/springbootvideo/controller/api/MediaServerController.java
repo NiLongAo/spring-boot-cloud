@@ -5,6 +5,7 @@ import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootentity.param.video.MediaServerPageParam;
 import cn.com.tzy.springbootentity.param.video.MediaServerSaveParam;
 import cn.com.tzy.springbootstartercloud.api.ApiController;
+import cn.com.tzy.springbootstartervideobasic.exception.VideoException;
 import cn.com.tzy.springbootvideo.service.MediaServerService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -42,7 +43,7 @@ public class MediaServerController extends ApiController {
      * 保存
      */
     @PostMapping("save")
-    public RestResult<?> save(@Validated @RequestBody MediaServerSaveParam param){
+    public RestResult<?> save(@Validated @RequestBody MediaServerSaveParam param) throws VideoException {
         return mediaServerService.save(param);
     }
 
