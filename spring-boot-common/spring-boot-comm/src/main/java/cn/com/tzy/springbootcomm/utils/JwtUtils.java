@@ -97,7 +97,7 @@ public class JwtUtils {
     public static boolean getAdministrator() {
         Map<String, String> map = builder(JwtCommon.JWT_AUTHORIZATION_KEY, false)
                 .setPrefix(JwtCommon.AUTHORIZATION_PREFIX)
-                .builderJwtUser( JwtCommon.JWT_ADMIN);
+                .builderJwtUser(null);
         if(!MapUtil.getBool(map,JwtCommon.JWT_ADMIN,false)){
             return false;
         }
