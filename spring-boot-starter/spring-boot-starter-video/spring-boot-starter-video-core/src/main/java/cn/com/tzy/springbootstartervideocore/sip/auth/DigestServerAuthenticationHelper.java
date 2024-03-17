@@ -134,11 +134,9 @@ public class DigestServerAuthenticationHelper  {
         }
         String realm = authHeader.getRealm().trim();
         String username = authHeader.getUsername().trim();
-
         if (StringUtils.isEmpty(username) || StringUtils.isEmpty(realm)) {
             return false;
         }
-
         String nonce = authHeader.getNonce();
         URI uri = authHeader.getURI();
         if (uri == null) {
@@ -146,7 +144,6 @@ public class DigestServerAuthenticationHelper  {
         }
         // qop 保护质量 包含auth（默认的）和auth-int（增加了报文完整性检测）两种策略
         String qop = authHeader.getQop();
-
         // 客户端随机数，这是一个不透明的字符串值，由客户端提供，并且客户端和服务器都会使用，以避免用明文文本。
         // 这使得双方都可以查验对方的身份，并对消息的完整性提供一些保护
         String cnonce = authHeader.getCNonce();
@@ -156,9 +153,7 @@ public class DigestServerAuthenticationHelper  {
         // String ncStr = new DecimalFormat("00000000").format(nc);
         // String ncStr = new DecimalFormat("00000000").format(Integer.parseInt(nc + "", 16));
         String A1 = username + ":" + realm + ":" + pass;
-
         String A2 = request.getMethod().toUpperCase() + ":" + uri.toString();
-
         byte mdbytes[] = messageDigest.digest(A1.getBytes());
         String HA1 = toHexString(mdbytes);
         log.debug("A1: " + A1);
@@ -173,7 +168,6 @@ public class DigestServerAuthenticationHelper  {
         log.debug("cnonce: " + cnonce);
         log.debug("qop: " + qop);
         String KD = HA1 + ":" + nonce;
-
         if (qop != null && qop.equalsIgnoreCase("auth") ) {
             if (nc != -1) {
                 KD += ":" + ncStr;

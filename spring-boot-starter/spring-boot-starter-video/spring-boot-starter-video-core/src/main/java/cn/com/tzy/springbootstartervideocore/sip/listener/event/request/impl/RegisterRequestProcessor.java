@@ -16,12 +16,12 @@ import cn.com.tzy.springbootstartervideocore.sip.listener.event.request.SipReque
 import cn.com.tzy.springbootstartervideocore.utils.SipUtils;
 import cn.com.tzy.springbootstartervideocore.utils.VideoSipDate;
 import gov.nist.javax.sip.RequestEventExt;
-import gov.nist.javax.sip.address.AddressImpl;
 import gov.nist.javax.sip.address.SipUri;
 import gov.nist.javax.sip.header.SIPDateHeader;
 import gov.nist.javax.sip.message.SIPRequest;
 import gov.nist.javax.sip.message.SIPResponse;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.ObjectUtils;
 
 import javax.sip.PeerUnavailableException;
@@ -60,14 +60,20 @@ public class RegisterRequestProcessor extends AbstractSipRequestEvent implements
             // 注册标志
             boolean registerFlag = request.getExpires().getExpires() > 0;
             String title = registerFlag ? "[注册请求]": "[注销请求]";
-            FromHeader fromHeader = (FromHeader) request.getHeader(FromHeader.NAME);
-            AddressImpl address = (AddressImpl) fromHeader.getAddress();
-            SipUri uri = (SipUri) address.getURI();
-            String deviceId = uri.getUser();
+            String deviceId = ((SipUri)(((FromHeader) request.getHeader(FromHeader.NAME)).getAddress()).getURI()).getUser();
             DeviceVo deviceVo = deviceVoService.findDeviceGbId(deviceId);
             Address remoteAddress = SipUtils.getRemoteAddressFromRequest(request, videoProperties.getSipUseSourceIpAsRemoteAddress());
             SipConfigProperties sipConfigProperties = sipServer.getSipConfigProperties();
+            String routeId = ((SipUri)request.getRequestLine().getUri()).getUser();
             Response response;
+            if(!StringUtils.equals(sipConfigProperties.getId(),routeId)){
+                // 注册失败
+                response = sipServer.getSipFactory().createMessageFactory().createResponse(Response.FORBIDDEN, request);
+                response.setReasonPhrase("国标Id错误");
+                log.info("[{}] SIP服务器ID错误, 回复403: {}",title, requestAddress);
+                sipMessageHandle.handleMessage(request.getLocalAddress().getHostAddress(), response);
+                return;
+            }
             log.info("[{}] 设备：{}, 开始处理: {}",title, deviceId, remoteAddress);
             if (deviceVo != null && registerFlag) {
                 SipTransactionInfo sipTransactionInfo = sipTransactionManager.findDevice(deviceVo.getDeviceId());
@@ -90,7 +96,7 @@ public class RegisterRequestProcessor extends AbstractSipRequestEvent implements
                 }
             }
             //设备密码
-            String password = (deviceVo != null && !ObjectUtils.isEmpty(deviceVo.getPassword()))? deviceVo.getPassword() : sipConfigProperties.getPassword();
+            String password = (deviceVo != null && StringUtils.isNotEmpty(sipConfigProperties.getPassword())? deviceVo.getPassword() :null);
             AuthorizationHeader authHead = (AuthorizationHeader) request.getHeader(AuthorizationHeader.NAME);
             if (authHead == null && !ObjectUtils.isEmpty(password)) {
                 log.info("[{}] 回复401: {}",title, requestAddress);

@@ -1,5 +1,5 @@
 spring:
-  #更换流媒体 redis     database 位置
+  #更换流媒体 redis     database 位置 如果部署多台 保证 redis.database 不在同一个 sip.id 保证同一个
   redis:
     database: 1
   cloud:
@@ -35,7 +35,7 @@ sip:
   # 信令区域编号 4401020051
   domain: 6101250100
   # 信令服务器国标编号 61012501005007000002
-  id: 61012501002000000002
+  id: 61012501002000000001
   # 信令服务器链接密码 默认密码 123456 密码必须有 影响mq
   password: 123456789
 video-settings:

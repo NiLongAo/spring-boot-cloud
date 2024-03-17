@@ -20,7 +20,7 @@ public class CatalogDataManager {
 
     private final String VIDEO_CATALOG_DATA_MANAGER= VideoConstant.VIDEO_CATALOG_DATA_MANAGER;
     private final Integer millis = 30;
-    private DeviceChannelVoService deviceChannelVoService;
+    private final DeviceChannelVoService deviceChannelVoService;
 
 
     public CatalogDataManager( DeviceChannelVoService deviceChannelVoService){
