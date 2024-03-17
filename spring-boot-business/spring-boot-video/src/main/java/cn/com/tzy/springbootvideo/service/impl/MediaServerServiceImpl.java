@@ -8,6 +8,7 @@ import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootentity.dome.video.MediaServer;
 import cn.com.tzy.springbootentity.param.video.MediaServerPageParam;
 import cn.com.tzy.springbootentity.param.video.MediaServerSaveParam;
+import cn.com.tzy.springbootstartervideobasic.exception.VideoException;
 import cn.com.tzy.springbootstartervideobasic.vo.media.ZLMServerConfig;
 import cn.com.tzy.springbootstartervideobasic.vo.video.MediaServerVo;
 import cn.com.tzy.springbootstartervideocore.demo.InviteInfo;
@@ -24,6 +25,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 
@@ -41,27 +44,59 @@ public class MediaServerServiceImpl extends ServiceImpl<MediaServerMapper, Media
     }
 
     @Override
-    public RestResult<?> save(MediaServerSaveParam param) {
+    @Transactional(propagation = Propagation.REQUIRED,rollbackFor = Exception.class)
+    public RestResult<?> save(MediaServerSaveParam param) throws VideoException {
         MediaServer convert = MediaServerConvert.INSTANCE.convert(param);
-        MediaServerVo vo = MediaServerConvert.INSTANCE.convert(convert);
         if(StringUtils.isEmpty(param.getId())){
-            Integer integer = baseMapper.selectCount(new LambdaQueryWrapper<MediaServer>().eq(MediaServer::getIp, convert.getIp()).eq(MediaServer::getHttpPort, convert.getHttpPort()));
+            Integer integer = baseMapper.selectCount(new LambdaQueryWrapper<MediaServer>().eq(MediaServer::getIp, convert.getIp())
+                    .and(o->o
+                            .eq(convert.getHttpPort()!=null,MediaServer::getHttpPort, convert.getHttpPort())
+                            .or()
+                            .eq(convert.getHttpSslPort()!=null,MediaServer::getHttpPort, convert.getHttpSslPort())
+                    )
+            );
             if(integer > 0){
                 return RestResult.result(RespCode.CODE_2.getValue(),"当前流媒体IP端口已存在，请更换");
             }
-            convert.setId(RandomUtil.randomString(19));
+            convert.setId(RandomUtil.randomNumbers(19));
+            convert.setStatus(ConstEnum.Flag.NO.getValue());
+            save(convert);
+        }else {
+            MediaServer mediaServer = baseMapper.selectById(param.getId());
+            if(mediaServer == null){
+                return RestResult.result(RespCode.CODE_2.getValue(),"未获取流媒体信息");
+            }
+            Integer integer = baseMapper.selectCount(new LambdaQueryWrapper<MediaServer>()
+                    .notIn(MediaServer::getId,param.getId())
+                    .eq(MediaServer::getIp, convert.getIp())
+                    .and(o->o
+                            .eq(convert.getHttpPort()!=null,MediaServer::getHttpPort, convert.getHttpPort())
+                            .or()
+                            .eq(convert.getHttpSslPort()!=null,MediaServer::getHttpPort, convert.getHttpSslPort())
+                    )
+            );
+            if(integer > 0){
+                return RestResult.result(RespCode.CODE_2.getValue(),"当前流媒体IP端口重复，请更换");
+            }
+            convert.setStatus(ConstEnum.Flag.NO.getValue());
+            updateById(convert);
         }
-        convert.setStatus(ConstEnum.Flag.NO.getValue());
-        saveOrUpdate(convert);
         if(convert.getEnable() == ConstEnum.Flag.YES.getValue()){
+            MediaServerVo vo = MediaServerConvert.INSTANCE.convert(convert);
             ZLMServerConfig zlmServerConfig = MediaClient.getZLMServerConfig(vo);
             if(zlmServerConfig == null){
-                return  RestResult.result(RespCode.CODE_2.getValue(),"流媒体服务链接失败！");
+                throw new VideoException("流媒体服务链接失败！");
+            }else if(StringUtils.isEmpty(zlmServerConfig.getGeneralMediaServerId())){
+                throw new VideoException("请设置流媒体 MediaServerId 属性");
             }
             if(!convert.getId().equals(zlmServerConfig.getGeneralMediaServerId())){
+                MediaServer mediaServer = baseMapper.selectById(zlmServerConfig.getGeneralMediaServerId());
+                if(mediaServer != null){
+                    throw new VideoException("当前流媒体MediaServerId已存在，请更换流媒体MediaServerId属性");
+                }
                 removeById(convert.getId());
                 convert.setId(zlmServerConfig.getGeneralMediaServerId());
-                saveOrUpdate(convert);
+                save(convert);
             }
             zlmServerConfig.setIp(convert.getIp());
             zlmServerConfig.setRestart(ConstEnum.Flag.YES.getValue());
@@ -71,6 +106,7 @@ public class MediaServerServiceImpl extends ServiceImpl<MediaServerMapper, Media
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED,rollbackFor = Exception.class)
     public RestResult<?> remove(String id) {
         MediaServer mediaServer = baseMapper.selectById(id);
         if(mediaServer == null){
