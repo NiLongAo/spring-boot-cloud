@@ -253,7 +253,7 @@ public class DeviceChannelVoServiceImpl implements DeviceChannelVoService {
         String ssrc = ssrcConfigManager.getPlaySsrc(mediaServerVo.getId());
         String streamId = String.format("%08x", Integer.parseInt(ssrc)).toUpperCase();
         ssrcTransactionManager.put(deviceId, channelId,null,"audio",streamId,ssrc,mediaServerVo.getId(),null,VideoStreamType.audio);
-        dynamicTask.startCron(String.format("audio_push_stream:%s_%s",deviceId,channelId),15,()->{
+        dynamicTask.startDelay(String.format("audio_push_stream:%s_%s",deviceId,channelId),15,()->{
             SsrcTransaction param = ssrcTransactionManager.getParamOne(deviceId, channelId, null, null, VideoStreamType.audio);
             if(StringUtils.isEmpty(param.getCallId())){//如何没有callId表示没有接收到Invite请求 则直接关闭
                 stopAudioPushStatus(deviceId,channelId);

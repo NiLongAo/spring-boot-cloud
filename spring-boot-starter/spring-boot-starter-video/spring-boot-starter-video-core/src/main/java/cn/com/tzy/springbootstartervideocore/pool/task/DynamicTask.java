@@ -43,7 +43,7 @@ public class DynamicTask {
     }
 
     public void startCron(String key,int cycleForCatalog, Runnable task){
-        startCron(key,1,cycleForCatalog,task);
+        startCron(key,cycleForCatalog,cycleForCatalog,task);
     }
 
 

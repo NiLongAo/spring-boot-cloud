@@ -24,7 +24,6 @@ import cn.com.tzy.springbootstartervideocore.sip.cmd.SIPCommanderForPlatform;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.cloud.nacos.NacosDiscoveryProperties;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Resource;
 import javax.sip.InvalidArgumentException;
@@ -175,7 +174,8 @@ public abstract class ParentPlatformVoService {
         if (dynamicTask.isAlive(key)) {
             return;
         }
-        dynamicTask.startCron(key, parentPlatformVo.getExpires(),()->{
+        int expires= Math.max(parentPlatformVo.getExpires(),20)-VideoConstant.DELAY_TIME;
+        dynamicTask.startCron(key, expires, expires,()->{
             log.info("[国标级联] 平台：{}注册即将到期，开始续订", parentPlatformVo.getServerGbId());
             register(parentPlatformVo,error -> {
                 log.error(String.format("[国标级联] 平台：{}注册即将到期，开始续订失败 code : %s,msg : %s",error.getStatusCode(),error.getMsg()));
