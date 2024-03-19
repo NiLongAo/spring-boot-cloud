@@ -4,8 +4,6 @@ import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootstartervideobasic.enums.InviteStreamType;
 import cn.com.tzy.springbootstartervideobasic.enums.VideoStreamType;
 import cn.com.tzy.springbootstartervideobasic.exception.SsrcTransactionNotFoundException;
-import cn.com.tzy.springbootstartervideobasic.vo.media.MediaRestResult;
-import cn.com.tzy.springbootstartervideobasic.vo.media.OnStreamChangedHookVo;
 import cn.com.tzy.springbootstartervideobasic.vo.media.OnStreamChangedResult;
 import cn.com.tzy.springbootstartervideobasic.vo.sip.SendRtp;
 import cn.com.tzy.springbootstartervideobasic.vo.video.DeviceChannelVo;
@@ -25,11 +23,8 @@ import cn.com.tzy.springbootstartervideocore.service.video.DeviceVoService;
 import cn.com.tzy.springbootstartervideocore.service.video.MediaServerVoService;
 import cn.com.tzy.springbootstartervideocore.sip.listener.event.request.AbstractSipRequestEvent;
 import cn.com.tzy.springbootstartervideocore.sip.listener.event.request.SipRequestEvent;
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.json.JSONUtil;
 import gov.nist.javax.sip.message.SIPRequest;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.ObjectUtils;
 
 import javax.sip.InvalidArgumentException;
 import javax.sip.RequestEvent;
@@ -42,8 +37,6 @@ import javax.sip.header.ToHeader;
 import javax.sip.message.Request;
 import javax.sip.message.Response;
 import java.text.ParseException;
-import java.util.List;
-import java.util.Map;
 
 @Log4j2
 public class ByeRequestProcessor  extends AbstractSipRequestEvent implements SipRequestEvent {
@@ -76,7 +69,7 @@ public class ByeRequestProcessor  extends AbstractSipRequestEvent implements Sip
         if (sendRtpItem != null){
             log.info("[收到bye] 停止向上级推流：{}", sendRtpItem.getStreamId());
             MediaServerVo mediaServerVo = mediaServerVoService.findOnLineMediaServerId(sendRtpItem.getMediaServerId());
-            sendRtpManager.deleteSendRTPServer(platformGbId, channelId, null, callIdHeader.getCallId());
+            sendRtpManager.deleteSendRTPServer(sendRtpItem.getPlatformId(), channelId, null, callIdHeader.getCallId());
             //关闭推流
             ssrcConfigManager.releaseSsrc(mediaServerVo.getId(),sendRtpItem.getSsrc());
             MediaClient.stopSendRtp(mediaServerVo,"__defaultVhost__",sendRtpItem.getApp(),sendRtpItem.getStreamId(),sendRtpItem.getSsrc());

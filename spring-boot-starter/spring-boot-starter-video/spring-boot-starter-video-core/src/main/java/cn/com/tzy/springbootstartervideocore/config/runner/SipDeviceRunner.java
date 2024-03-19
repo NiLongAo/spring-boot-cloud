@@ -1,6 +1,5 @@
 package cn.com.tzy.springbootstartervideocore.config.runner;
 
-import cn.com.tzy.springbootstartervideobasic.common.VideoConstant;
 import cn.com.tzy.springbootstartervideobasic.vo.media.MediaRestResult;
 import cn.com.tzy.springbootstartervideobasic.vo.sip.SendRtp;
 import cn.com.tzy.springbootstartervideobasic.vo.video.DeviceVo;
@@ -63,7 +62,7 @@ public class SipDeviceRunner implements CommandLineRunner {
                 ssrcConfigManager.releaseSsrc(mediaServerVo.getId(),sendRtp.getSsrc());
                 MediaRestResult result = MediaClient.stopSendRtp(mediaServerVo, "__defaultVhost__", sendRtp.getApp(), sendRtp.getStreamId(), sendRtp.getSsrc());
                 if(result.getCode() == 0){
-                    ParentPlatformVo parentPlatformVo = parentPlatformVoService.getParentPlatformByServerGbId(sendRtp.getPlatformId());
+                    ParentPlatformVo parentPlatformVo = parentPlatformVoService.getParentPlatformByServerGbId(sendRtp.getPlatform());
                     if(parentPlatformVo != null){
                         sipCommanderForPlatform.streamByeCmd(sipServer, parentPlatformVo,sendRtp,null,null);
                     }

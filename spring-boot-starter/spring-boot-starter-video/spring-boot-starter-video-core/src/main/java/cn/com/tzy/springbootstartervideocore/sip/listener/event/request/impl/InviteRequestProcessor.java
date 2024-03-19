@@ -121,7 +121,7 @@ public class InviteRequestProcessor  extends AbstractSipRequestEvent implements 
     /**
      * 处理设备的invite请求
      */
-    private void inviteDeviceHandle(SIPRequest request,CallIdHeader callIdHeader,String requesterId,DeviceVo deviceVo,String channelId){
+    private void inviteDeviceHandle(SIPRequest request,CallIdHeader callIdHeader,String requesterId,DeviceVo deviceVo,String platformId){
         log.info("收到设备" + requesterId + "的语音广播Invite请求");
         try {
             responseAck(request, Response.TRYING,null);
@@ -183,7 +183,7 @@ public class InviteRequestProcessor  extends AbstractSipRequestEvent implements 
             }
             return;
         }
-        SendRtp sendRtp = MediaClient.createSendRtp(mediaServerVo,deviceRawContent.getSessionName(), deviceRawContent.getStartTime(),deviceRawContent.getStopTime(),deviceRawContent.getAddressStr(), deviceRawContent.getPort(),deviceRawContent.getSsrc(),requesterId,deviceVo.getDeviceId(),paramOne.getChannelId(),"audio",streamId, deviceRawContent.isMediaTransmissionTCP(),deviceRawContent.isTcpActive(),videoProperties.getServerId(),callIdHeader.getCallId(),true,InviteStreamType.getInviteStreamType(deviceRawContent.getSessionName().toUpperCase()));
+        SendRtp sendRtp = MediaClient.createSendRtp(mediaServerVo,deviceRawContent.getSessionName(), deviceRawContent.getStartTime(),deviceRawContent.getStopTime(),deviceRawContent.getAddressStr(), deviceRawContent.getPort(),deviceRawContent.getSsrc(),sipServer.getSipConfigProperties().getId(),platformId,deviceVo.getDeviceId(),paramOne.getChannelId(),"audio",streamId, deviceRawContent.isMediaTransmissionTCP(),deviceRawContent.isTcpActive(),videoProperties.getServerId(),callIdHeader.getCallId(),true,InviteStreamType.getInviteStreamType(deviceRawContent.getSessionName().toUpperCase()));
         if (sendRtp == null) {
             log.warn("服务器端口资源不足");
             try {
@@ -367,7 +367,7 @@ public class InviteRequestProcessor  extends AbstractSipRequestEvent implements 
             streamTypeStr = "UDP";
         }
         log.info("[上级Invite]平台：{}， 通道：{}, 地址：{}:{}，收流方式：{}, ssrc：{}", deviceRawContent.getUsername(), channelId, deviceRawContent.getAddressStr(), deviceRawContent.getPort(),streamTypeStr, deviceRawContent.getSsrc());
-        SendRtp sendRtp = MediaClient.createSendRtp(mediaServerVo,deviceRawContent.getSessionName(), deviceRawContent.getStartTime(),deviceRawContent.getStopTime(),deviceRawContent.getAddressStr(), deviceRawContent.getPort(),deviceRawContent.getSsrc(),requesterId,deviceVo.getDeviceId(),deviceChannelVo.getChannelId(),"rtp",null, deviceRawContent.isMediaTransmissionTCP(),deviceRawContent.isTcpActive(),videoProperties.getServerId(),callIdHeader.getCallId(),ConstEnum.Flag.YES.getValue() == parentPlatformVo.getRtcp(),InviteStreamType.getInviteStreamType(deviceRawContent.getSessionName().toUpperCase()));
+        SendRtp sendRtp = MediaClient.createSendRtp(mediaServerVo,deviceRawContent.getSessionName(), deviceRawContent.getStartTime(),deviceRawContent.getStopTime(),deviceRawContent.getAddressStr(), deviceRawContent.getPort(),deviceRawContent.getSsrc(),sipServer.getSipConfigProperties().getId(),requesterId,deviceVo.getDeviceId(),deviceChannelVo.getChannelId(),"rtp",null, deviceRawContent.isMediaTransmissionTCP(),deviceRawContent.isTcpActive(),videoProperties.getServerId(),callIdHeader.getCallId(),ConstEnum.Flag.YES.getValue() == parentPlatformVo.getRtcp(),InviteStreamType.getInviteStreamType(deviceRawContent.getSessionName().toUpperCase()));
         if (sendRtp == null) {
             log.warn("服务器端口资源不足");
             try {
@@ -438,7 +438,7 @@ public class InviteRequestProcessor  extends AbstractSipRequestEvent implements 
                             hookEvent.run(code, msg, data);
                         } else if (code == InviteErrorCode.ERROR_FOR_SIGNALLING_TIMEOUT.getCode() || code == InviteErrorCode.ERROR_FOR_STREAM_TIMEOUT.getCode()) {
                             log.info("[录像下载]超时， 通道：{}", channelId);
-                            sendRtpManager.deleteSendRTPServer(parentPlatformVo.getServerGbId(), channelId, callIdHeader.getCallId(), null);
+                            sendRtpManager.deleteSendRTPServer(sendRtp.getPlatformId(), channelId, callIdHeader.getCallId(), null);
                             errorEvent.run(code, msg, data);
                         } else {
                             errorEvent.run(code, msg, data);
@@ -643,7 +643,7 @@ public class InviteRequestProcessor  extends AbstractSipRequestEvent implements 
         SendRtpManager sendRtpManager = RedisService.getSendRtpManager();
         MediaRestResult mediaList = MediaClient.getMediaList(mediaServerVo, "__defaultVhost__", null, gbStreamVo.getApp(), gbStreamVo.getStream());
         if(mediaList.getCode() == RespCode.CODE_0.getValue() && ObjectUtil.isNotEmpty(mediaList.getData())){
-            SendRtp sendRtp = MediaClient.createSendRtp(mediaServerVo,deviceRawContent.getSessionName(), deviceRawContent.getStartTime(),deviceRawContent.getStopTime(),deviceRawContent.getAddressStr(), deviceRawContent.getPort(),deviceRawContent.getSsrc(),parentPlatformVo.getServerGbId(),null,channelId,gbStreamVo.getApp(),gbStreamVo.getStream(), deviceRawContent.isMediaTransmissionTCP(),deviceRawContent.isTcpActive(),videoProperties.getServerId(),callIdHeader.getCallId(),ConstEnum.Flag.YES.getValue() == parentPlatformVo.getRtcp(),gbStreamVo.getStreamType()==StreamType.PROXY.getValue()?InviteStreamType.PROXY:InviteStreamType.PUSH);
+            SendRtp sendRtp = MediaClient.createSendRtp(mediaServerVo,deviceRawContent.getSessionName(), deviceRawContent.getStartTime(),deviceRawContent.getStopTime(),deviceRawContent.getAddressStr(), deviceRawContent.getPort(),deviceRawContent.getSsrc(),sipServer.getSipConfigProperties().getId(),parentPlatformVo.getServerGbId(),null,channelId,gbStreamVo.getApp(),gbStreamVo.getStream(), deviceRawContent.isMediaTransmissionTCP(),deviceRawContent.isTcpActive(),videoProperties.getServerId(),callIdHeader.getCallId(),ConstEnum.Flag.YES.getValue() == parentPlatformVo.getRtcp(),gbStreamVo.getStreamType()==StreamType.PROXY.getValue()?InviteStreamType.PROXY:InviteStreamType.PUSH);
             if (sendRtp == null) {
                 log.warn("服务器端口资源不足");
                 try {
@@ -687,7 +687,7 @@ public class InviteRequestProcessor  extends AbstractSipRequestEvent implements 
         String rtpmap = mediaFormat==8?"8 PCMA/8000":"96 PS/90000";
         StringBuffer content = new StringBuffer(200);
         content.append("v=0\r\n");
-        content.append(String.format("o=%s  0 0 IN IP4 %s\r\n",sendRtp.getChannelId(),mediaServerVo.getSdpIp()));
+        content.append(String.format("o=%s  0 0 IN IP4 %s\r\n",sendRtp.getPlatformId(),mediaServerVo.getSdpIp()));
         content.append(String.format("s=%s\r\n",sendRtp.getSessionName()));
         content.append(String.format("c=IN IP4 %s\r\n",mediaServerVo.getSdpIp()));
         if ("Playback".equalsIgnoreCase(sendRtp.getSessionName())) {

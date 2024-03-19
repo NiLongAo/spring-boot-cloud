@@ -55,14 +55,18 @@ public class KeepaliveNotifyMessageHandler extends SipResponseEvent implements M
         DeviceVoService deviceVoService = VideoService.getDeviceService();
         SIPRequest request = (SIPRequest) evt.getRequest();
         log.info("[收到心跳]， device: {}", deviceVo.getDeviceId());
-        if(deviceVo.expire()){
+        if(deviceVo.getOnline() == 0 || deviceVo.expire()){
+            if(deviceVo.getOnline() == 0){
+                log.info("设备离线，重新注册");
+            }else {
+                log.info("设备注册过期，重新注册");
+            }
             // 注册时间过期，需重新注册
             try {
                 responseAck(request, Response.UNAUTHORIZED,"注册过期");
             } catch (SipException | InvalidArgumentException | ParseException e) {
                 log.error("[命令发送失败] 心跳回复: {}", e.getMessage());
             }
-            log.info("设备注册过期，重新注册");
             if(deviceVo.getOnline() == ConstEnum.Flag.YES.getValue()){
                 deviceVoService.offline(deviceVo.getDeviceId());
             }

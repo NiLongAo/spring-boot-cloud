@@ -238,7 +238,7 @@ public abstract class ParentPlatformVoService {
         if (sendRtpItems != null && sendRtpItems.size() > 0) {
             for (SendRtp sendRtpItem : sendRtpItems) {
                 ssrcConfigManager.releaseSsrc(sendRtpItem.getMediaServerId(),sendRtpItem.getSsrc());
-                sendRtpManager.deleteSendRTPServer(platformId, sendRtpItem.getChannelId(), null, null);
+                sendRtpManager.deleteSendRTPServer(sendRtpItem.getPlatformId(), sendRtpItem.getChannelId(), null, null);
                 MediaServerVo mediaServerVo = mediaServerVoService.findOnLineMediaServerId(sendRtpItem.getMediaServerId());
                 MediaRestResult mediaRestResult = MediaClient.stopSendRtp(mediaServerVo, "__defaultVhost__", sendRtpItem.getApp(), sendRtpItem.getStreamId(), sendRtpItem.getSsrc());
                 if (mediaRestResult == null) {

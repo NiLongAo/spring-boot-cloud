@@ -4,14 +4,12 @@ import cn.com.tzy.springbootcomm.common.enumcom.ConstEnum;
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootstartervideobasic.common.VideoConstant;
 import cn.com.tzy.springbootstartervideobasic.enums.OriginType;
-import cn.com.tzy.springbootstartervideobasic.enums.VideoStreamType;
 import cn.com.tzy.springbootstartervideobasic.exception.SsrcTransactionNotFoundException;
 import cn.com.tzy.springbootstartervideobasic.vo.media.*;
 import cn.com.tzy.springbootstartervideobasic.vo.sip.SendRtp;
 import cn.com.tzy.springbootstartervideobasic.vo.video.*;
 import cn.com.tzy.springbootstartervideocore.demo.InviteInfo;
 import cn.com.tzy.springbootstartervideocore.demo.SsrcTransaction;
-import cn.com.tzy.springbootstartervideocore.demo.StreamInfo;
 import cn.com.tzy.springbootstartervideocore.media.hook.MediaHookServer;
 import cn.com.tzy.springbootstartervideocore.pool.task.DynamicTask;
 import cn.com.tzy.springbootstartervideocore.redis.RedisService;
@@ -24,8 +22,6 @@ import cn.com.tzy.springbootstartervideocore.service.video.*;
 import cn.com.tzy.springbootstartervideocore.sip.SipServer;
 import cn.com.tzy.springbootstartervideocore.sip.cmd.SIPCommander;
 import cn.com.tzy.springbootstartervideocore.sip.cmd.SIPCommanderForPlatform;
-import cn.hutool.core.date.DateTime;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.json.JSONUtil;
 import lombok.extern.log4j.Log4j2;
@@ -33,7 +29,6 @@ import lombok.extern.log4j.Log4j2;
 import javax.annotation.Resource;
 import javax.sip.InvalidArgumentException;
 import javax.sip.SipException;
-import java.math.RoundingMode;
 import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -274,7 +269,7 @@ public class ZlmService {
             if(!sendRtp.getMediaServerId().equals(mediaServerVo.getId())){
                 continue;
             }
-            ParentPlatformVo parentPlatformVo = parentPlatformVoService.getParentPlatformByServerGbId(sendRtp.getPlatformId());
+            ParentPlatformVo parentPlatformVo = parentPlatformVoService.getParentPlatformByServerGbId(sendRtp.getPlatform());
             try {
                 sipCommanderForPlatform.streamByeCmd(sipServer, parentPlatformVo,sendRtp,null,null);
             } catch (SipException | InvalidArgumentException | ParseException e) {

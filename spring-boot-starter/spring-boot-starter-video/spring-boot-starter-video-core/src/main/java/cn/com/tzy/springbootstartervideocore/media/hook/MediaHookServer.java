@@ -29,7 +29,6 @@ import cn.com.tzy.springbootstartervideocore.sip.SipServer;
 import cn.com.tzy.springbootstartervideocore.sip.cmd.SIPCommander;
 import cn.com.tzy.springbootstartervideocore.sip.cmd.SIPCommanderForPlatform;
 import cn.hutool.core.date.DatePattern;
-import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
@@ -46,8 +45,6 @@ import org.springframework.web.context.request.async.DeferredResult;
 import javax.annotation.Resource;
 import javax.sip.InvalidArgumentException;
 import javax.sip.SipException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.text.ParseException;
 import java.util.*;
 
@@ -288,16 +285,15 @@ public class MediaHookServer {
                     List<SendRtp> sendRtpList = sendRtpManager.querySendRTPServerByStream(hookVo.getStream());
                     for (SendRtp sendRtp : sendRtpList) {
                         // 设备编号 或 上级平台
-                        String platformId = sendRtp.getPlatformId();
-                        ParentPlatformVo parentPlatformVo = parentPlatformVoService.getParentPlatformByServerGbId(platformId);
-                        DeviceVo deviceVo = deviceVoService.findDeviceGbId(platformId);
+                        ParentPlatformVo parentPlatformVo = parentPlatformVoService.getParentPlatformByServerGbId(sendRtp.getPlatform());
+                        DeviceVo deviceVo = deviceVoService.findDeviceGbId(sendRtp.getPlatform());
                         try {
                             if(parentPlatformVo != null){
                                 sipCommanderForPlatform.streamByeCmd(sipServer, parentPlatformVo,sendRtp,null,null);
                             }else {
                                 sipCommander.streamByeCmd(sipServer, deviceVo,sendRtp.getChannelId(),sendRtp.getStreamId(),sendRtp.getCallId(),null,null,null);
                             }
-                            sendRtpManager.deleteSendRTPServer(platformId,sendRtp.getChannelId(),sendRtp.getStreamId(),sendRtp.getCallId());
+                            sendRtpManager.deleteSendRTPServer(sendRtp.getPlatformId(),sendRtp.getChannelId(),sendRtp.getStreamId(),sendRtp.getCallId());
                         }catch (Exception e){
                             log.error("[命令发送失败] 国标级联 发送BYE: {}", e.getMessage());
                         }
@@ -345,7 +341,7 @@ public class MediaHookServer {
                 if(sendRtpManager.isChannelSendingRTP(inviteInfo.getChannelId())){
                     List<SendRtp> sendRtpList = sendRtpManager.querySendRTPServerByChnnelId(inviteInfo.getChannelId());
                     for (SendRtp sendRtp : sendRtpList) {
-                        ParentPlatformVo parentPlatformVo = parentPlatformVoService.getParentPlatformByServerGbId(sendRtp.getPlatformId());
+                        ParentPlatformVo parentPlatformVo = parentPlatformVoService.getParentPlatformByServerGbId(sendRtp.getPlatform());
                         if(parentPlatformVo != null){
                             try {
                                 sipCommanderForPlatform.streamByeCmd(sipServer, parentPlatformVo,sendRtp,null,null);
@@ -507,16 +503,16 @@ public class MediaHookServer {
                 for (SendRtp sendRtp : sendRtpList) {
                     ssrcConfigManager.releaseSsrc(sendRtp.getMediaServerId(),sendRtp.getSsrc());
                     // 设备编号 或 上级平台
-                    String platformId = sendRtp.getPlatformId();
+                    String platformId = sendRtp.getPlatform();
                     ParentPlatformVo parentPlatformVo = parentPlatformVoService.getParentPlatformByServerGbId(platformId);
                     DeviceVo deviceVo = deviceVoService.findDeviceGbId(platformId);
                     try {
                         if(parentPlatformVo != null){
                             sipCommanderForPlatform.streamByeCmd(sipServer, parentPlatformVo,sendRtp,null,null);
-                            sendRtpManager.deleteSendRTPServer(parentPlatformVo.getServerGbId(),sendRtp.getChannelId(),sendRtp.getStreamId(),sendRtp.getCallId());
+                            sendRtpManager.deleteSendRTPServer(sendRtp.getPlatformId(),sendRtp.getChannelId(),sendRtp.getStreamId(),sendRtp.getCallId());
                         }else {
                             sipCommander.streamByeCmd(sipServer, deviceVo,sendRtp.getChannelId(),sendRtp.getStreamId(),sendRtp.getCallId(),null,null,null);
-                            sendRtpManager.deleteSendRTPServer(deviceVo.getDeviceId(),sendRtp.getChannelId(),sendRtp.getStreamId(),sendRtp.getCallId());
+                            sendRtpManager.deleteSendRTPServer(sendRtp.getPlatformId(),sendRtp.getChannelId(),sendRtp.getStreamId(),sendRtp.getCallId());
                         }
                     }catch (Exception e){
                         log.error("[命令发送失败] 国标级联 发送BYE: {}", e.getMessage());

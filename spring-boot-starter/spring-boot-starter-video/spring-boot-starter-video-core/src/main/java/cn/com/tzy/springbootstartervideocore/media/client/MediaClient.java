@@ -17,7 +17,6 @@ import cn.com.tzy.springbootstartervideocore.redis.impl.SsrcConfigManager;
 import cn.com.tzy.springbootstartervideocore.redis.subscribe.media.HookKeyFactory;
 import cn.com.tzy.springbootstartervideocore.redis.subscribe.media.MediaHookSubscribe;
 import cn.com.tzy.springbootstartervideocore.service.MediaService;
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.json.JSONUtil;
@@ -73,7 +72,8 @@ public class MediaClient {
             String ip,
             int port,
             String ssrc,
-            String platformId,
+            String sipGbId,
+            String platformId,//设备国标,上级平台国标,本平台国标
             String deviceId,
             String channelId,
             String app,
@@ -96,6 +96,7 @@ public class MediaClient {
                 .ip(ip)
                 .port(port)
                 .ssrc(ssrc)
+                .sipGbId(sipGbId)
                 .platformId(platformId)
                 .deviceId(deviceId)
                 .channelId(channelId)

@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 
 @Data
 @Builder
@@ -24,7 +25,11 @@ public class SendRtp {
      */
     private String ssrc;
     /**
-     * 平台id
+     * sip服务器国标编号
+     */
+    private String sipGbId;
+    /**
+     * 平台id 设备国标,上级平台国标,本平台国标
      */
     private String platformId;
      /**
@@ -116,5 +121,21 @@ public class SendRtp {
      * 播放类型
      */
     private InviteStreamType playType;
+
+
+    /**
+     * 如果 platformId 是 sip国标 则返回 deviceId 国标
+     * @return
+     */
+    public String getPlatform(){
+        if(StringUtils.isEmpty(platformId) || StringUtils.isEmpty(deviceId) || StringUtils.isEmpty(sipGbId)){
+            return this.platformId;
+        }
+        if(StringUtils.equals(platformId,sipGbId)){
+            return this.deviceId;
+        }else {
+            return this.platformId;
+        }
+    }
 
 }

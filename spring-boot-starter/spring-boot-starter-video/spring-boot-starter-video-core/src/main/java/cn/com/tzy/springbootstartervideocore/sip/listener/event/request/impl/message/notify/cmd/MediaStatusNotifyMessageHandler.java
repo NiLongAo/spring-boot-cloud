@@ -83,9 +83,9 @@ public class MediaStatusNotifyMessageHandler extends SipResponseEvent implements
                 // 如果级联播放，需要给上级发送此通知 TODO 多个上级同时观看一个下级 可能存在停错的问题，需要将点播CallId进行上下级绑定
                 SendRtp sendRtpItem =  sendRtpManager.querySendRTPServer(null, ssrcTransaction.getChannelId(), null, null);
                 if (sendRtpItem != null) {
-                    ParentPlatformVo parentPlatformVo = parentPlatformVoService.getParentPlatformByServerGbId(sendRtpItem.getPlatformId());
+                    ParentPlatformVo parentPlatformVo = parentPlatformVoService.getParentPlatformByServerGbId(sendRtpItem.getPlatform());
                     if (parentPlatformVo == null) {
-                        log.warn("[级联消息发送]：发送MediaStatus发现上级平台{}不存在", sendRtpItem.getPlatformId());
+                        log.warn("[级联消息发送]：发送MediaStatus发现上级平台{}不存在", sendRtpItem.getPlatform());
                         return;
                     }
                     try {
