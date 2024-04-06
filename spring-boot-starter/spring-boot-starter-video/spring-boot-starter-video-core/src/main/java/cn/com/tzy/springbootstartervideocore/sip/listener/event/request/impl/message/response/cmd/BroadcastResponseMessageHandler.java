@@ -1,11 +1,8 @@
 package cn.com.tzy.springbootstartervideocore.sip.listener.event.request.impl.message.response.cmd;
 
-import cn.com.tzy.springbootcomm.common.vo.RespCode;
-import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootstartervideobasic.enums.CmdType;
 import cn.com.tzy.springbootstartervideobasic.vo.video.DeviceVo;
 import cn.com.tzy.springbootstartervideobasic.vo.video.ParentPlatformVo;
-import cn.com.tzy.springbootstartervideocore.redis.subscribe.result.DeferredResultHolder;
 import cn.com.tzy.springbootstartervideocore.sip.listener.event.request.SipResponseEvent;
 import cn.com.tzy.springbootstartervideocore.sip.listener.event.request.impl.message.MessageHandler;
 import cn.com.tzy.springbootstartervideocore.sip.listener.event.request.impl.message.response.ResponseMessageHandler;
@@ -16,7 +13,6 @@ import gov.nist.javax.sip.message.SIPRequest;
 import lombok.extern.log4j.Log4j2;
 import org.w3c.dom.Element;
 
-import javax.annotation.Resource;
 import javax.sip.InvalidArgumentException;
 import javax.sip.RequestEvent;
 import javax.sip.SipException;
@@ -30,8 +26,7 @@ import java.util.Map;
 @Log4j2
 public class BroadcastResponseMessageHandler extends SipResponseEvent implements MessageHandler {
 
-    @Resource
-    private DeferredResultHolder deferredResultHolder;
+
 
     public BroadcastResponseMessageHandler(ResponseMessageHandler handler){
         handler.setMessageHandler(CmdType.BROADCAST_RESPONSE.getValue(),this);
@@ -47,8 +42,6 @@ public class BroadcastResponseMessageHandler extends SipResponseEvent implements
             // 此处是对本平台发出Broadcast指令的应答
             Map<String, Object> map = XmlUtil.xmlToMap(element);
             log.info("对本平台发出Broadcast指令的应答:"+ JSONUtil.toJsonStr(map));
-            String key = String.format("%s%s_%s", DeferredResultHolder.CALLBACK_CMD_BROADCAST,deviceVo.getDeviceId(),channelId);
-            deferredResultHolder.invokeAllResult(key, RestResult.result(RespCode.CODE_0.getValue(),null,map));
         } catch (ParseException | SipException | InvalidArgumentException e) {
             log.error("[命令发送失败] 国标级联 语音喊话: {}", e.getMessage());
         }

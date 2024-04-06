@@ -56,7 +56,10 @@ public class AudioPushController extends ApiController {
         log.debug("语音广播API调用");
         String uuid = RandomUtil.randomString(32);
         String key = String.format("%s%s_%s", DeferredResultHolder.CALLBACK_CMD_BROADCAST,deviceId,channelId);
-        VideoRestResult<RestResult> result = new VideoRestResult<>(5000L,()-> RestResult.result(RespCode.CODE_2.getValue(),"设备不支持"));
+        VideoRestResult<RestResult> result = new VideoRestResult<>(5000L,()-> {
+            VideoService.getDeviceChannelService().stopAudioPushStatus(deviceId,channelId);
+            return RestResult.result(RespCode.CODE_2.getValue(),"设备不支持");
+        });
         if (deferredResultHolder.exist(key, null)) {
             return result;
         }

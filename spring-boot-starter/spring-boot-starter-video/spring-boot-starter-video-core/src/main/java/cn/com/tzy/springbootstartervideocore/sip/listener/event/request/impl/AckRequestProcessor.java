@@ -1,6 +1,7 @@
 package cn.com.tzy.springbootstartervideocore.sip.listener.event.request.impl;
 
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
+import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootstartervideobasic.exception.SsrcTransactionNotFoundException;
 import cn.com.tzy.springbootstartervideobasic.vo.media.HookKey;
 import cn.com.tzy.springbootstartervideobasic.vo.media.MediaRestResult;
@@ -14,6 +15,7 @@ import cn.com.tzy.springbootstartervideocore.redis.RedisService;
 import cn.com.tzy.springbootstartervideocore.redis.impl.SendRtpManager;
 import cn.com.tzy.springbootstartervideocore.redis.subscribe.media.HookKeyFactory;
 import cn.com.tzy.springbootstartervideocore.redis.subscribe.media.MediaHookSubscribe;
+import cn.com.tzy.springbootstartervideocore.redis.subscribe.result.DeferredResultHolder;
 import cn.com.tzy.springbootstartervideocore.service.VideoService;
 import cn.com.tzy.springbootstartervideocore.service.video.DeviceVoService;
 import cn.com.tzy.springbootstartervideocore.service.video.MediaServerVoService;
@@ -44,6 +46,8 @@ public class AckRequestProcessor extends AbstractSipRequestEvent implements SipR
 
     @Resource
     private MediaHookSubscribe mediaHookSubscribe;
+    @Resource
+    private DeferredResultHolder deferredResultHolder;
 
     @Override
     public String getMethod() {
@@ -89,6 +93,10 @@ public class AckRequestProcessor extends AbstractSipRequestEvent implements SipR
             HookKey hookKey = HookKeyFactory.onRtpServerTimeout(sendRtpItem.getSsrc(), mediaServerVo.getId());
             // 订阅 zlm启动事件, 新的zlm也会从这里进入系统
             mediaHookSubscribe.removeSubscribe(hookKey);
+        }
+        if("audio".equals(sendRtpItem.getApp())){
+            String key = String.format("%s%s_%s", DeferredResultHolder.CALLBACK_CMD_BROADCAST,sendRtpItem.getDeviceId(),sendRtpItem.getChannelId());
+            deferredResultHolder.invokeAllResult(key, RestResult.result(RespCode.CODE_0.getValue(),"语音流加载成功。",null));
         }
         // tcp主动时，此时是级联下级平台，在回复200ok时，本地已经请求zlm开启监听，跳过下面步骤
         if (sendRtpItem.isTcpActive()) {
