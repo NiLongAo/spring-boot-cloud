@@ -230,9 +230,11 @@ public class DeviceChannelVoServiceImpl implements DeviceChannelVoService {
     public RestResult<?> findAudioPushPath(String deviceId,String channelId) {
         SsrcConfigManager ssrcConfigManager = RedisService.getSsrcConfigManager();
         SsrcTransactionManager ssrcTransactionManager = RedisService.getSsrcTransactionManager();
-        SsrcTransaction paramOne = ssrcTransactionManager.getParamOne(deviceId, null, null, null,VideoStreamType.audio);
+        SsrcTransaction paramOne = ssrcTransactionManager.getParamOne(deviceId, channelId, null, null,VideoStreamType.audio);
         if(paramOne != null){
-            if(channelId.equals(paramOne.getChannelId())){
+            if(StringUtils.isEmpty(paramOne.getCallId())){
+                return RestResult.result(RespCode.CODE_2.getValue(),"语音流正在开启中");
+            }if(channelId.equals(paramOne.getChannelId())){
                 return RestResult.result(RespCode.CODE_2.getValue(),"语音通话中,请稍后或关闭语音流");
             }else {
                 return RestResult.result(RespCode.CODE_2.getValue(),"每个设备只能一个通道语音对讲");
@@ -252,10 +254,11 @@ public class DeviceChannelVoServiceImpl implements DeviceChannelVoService {
         }
         String ssrc = ssrcConfigManager.getPlaySsrc(mediaServerVo.getId());
         String streamId = String.format("%08x", Integer.parseInt(ssrc)).toUpperCase();
+
         ssrcTransactionManager.put(deviceId, channelId,null,"audio",streamId,ssrc,mediaServerVo.getId(),null,VideoStreamType.audio);
         dynamicTask.startDelay(String.format("audio_push_stream:%s_%s",deviceId,channelId),15,()->{
             SsrcTransaction param = ssrcTransactionManager.getParamOne(deviceId, channelId, null, null, VideoStreamType.audio);
-            if(StringUtils.isEmpty(param.getCallId())){//如何没有callId表示没有接收到Invite请求 则直接关闭
+            if(StringUtils.isEmpty(param.getCallId())){// 如何没有callId表示没有接收到Invite请求 则直接关闭
                 stopAudioPushStatus(deviceId,channelId);
             }
         });
@@ -279,6 +282,10 @@ public class DeviceChannelVoServiceImpl implements DeviceChannelVoService {
         DeviceVo deviceVo = VideoService.getDeviceService().findDeviceGbId(deviceId);
         if(deviceVo == null){
             return RestResult.result(RespCode.CODE_2.getValue(),"未获取设备信息");
+        }
+        SsrcTransaction param = RedisService.getSsrcTransactionManager().getParamOne(deviceId, channelId, null, null, VideoStreamType.audio);
+        if(param!= null){
+            RedisService.getSsrcTransactionManager().remove(param.getDeviceId(),param.getChannelId(),param.getStream(),VideoStreamType.audio);
         }
         dynamicTask.stop(String.format("audio_push_stream:%s_%s",deviceId,channelId));
         try {

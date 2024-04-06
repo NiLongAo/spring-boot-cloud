@@ -47,7 +47,7 @@ public class DeviceNotifySubscribeManager {
         if (deviceVo == null || deviceVo.getSubscribeCycleForAlarm() < 0) {
             return false;
         }
-        log.info("[添加目录订阅] 设备{}", deviceVo.getDeviceId());
+        log.info("[添加报警订阅] 设备{}", deviceVo.getDeviceId());
         DeviceNotifyVo build = DeviceNotifyVo.builder().type(DeviceNotifyVo.TypeEnum.ALARM.getValue()).operate(DeviceNotifyVo.OperateEnum.ADD.getValue()).gbId(deviceVo.getDeviceId()).build();
         RedisUtils.redisTemplate.convertAndSend(VIDEO_DEVICE_NOTIFY_SUBSCRIBE,build);
         return true;
@@ -57,7 +57,7 @@ public class DeviceNotifySubscribeManager {
         if (deviceVo == null || deviceVo.getSubscribeCycleForAlarm() < 0) {
             return false;
         }
-        log.info("[移除目录订阅]: {}", deviceVo.getDeviceId());
+        log.info("[移除报警订阅]: {}", deviceVo.getDeviceId());
         DeviceNotifyVo build = DeviceNotifyVo.builder().type(DeviceNotifyVo.TypeEnum.ALARM.getValue()).operate(DeviceNotifyVo.OperateEnum.DEL.getValue()).gbId(deviceVo.getDeviceId()).build();
         RedisUtils.redisTemplate.convertAndSend(VIDEO_DEVICE_NOTIFY_SUBSCRIBE,build);
         return true;

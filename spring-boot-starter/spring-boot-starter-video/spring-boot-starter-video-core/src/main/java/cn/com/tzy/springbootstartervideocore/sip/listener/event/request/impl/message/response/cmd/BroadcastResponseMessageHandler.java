@@ -42,12 +42,12 @@ public class BroadcastResponseMessageHandler extends SipResponseEvent implements
     public void handForDevice(RequestEvent evt, DeviceVo deviceVo, Element element) {
         try {
             String channelId = XmlUtils.getText(element,"DeviceID");
-            String key = String.format("%s%s_%s", DeferredResultHolder.CALLBACK_CMD_BROADCAST,deviceVo.getDeviceId(),channelId);
             // 回复200 OK
             responseAck((SIPRequest) evt.getRequest(), Response.OK,null);
             // 此处是对本平台发出Broadcast指令的应答
             Map<String, Object> map = XmlUtil.xmlToMap(element);
             log.info("对本平台发出Broadcast指令的应答:"+ JSONUtil.toJsonStr(map));
+            String key = String.format("%s%s_%s", DeferredResultHolder.CALLBACK_CMD_BROADCAST,deviceVo.getDeviceId(),channelId);
             deferredResultHolder.invokeAllResult(key, RestResult.result(RespCode.CODE_0.getValue(),null,map));
         } catch (ParseException | SipException | InvalidArgumentException e) {
             log.error("[命令发送失败] 国标级联 语音喊话: {}", e.getMessage());

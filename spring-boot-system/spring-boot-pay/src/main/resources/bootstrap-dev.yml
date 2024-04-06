@@ -7,8 +7,6 @@ spring:
         file-extension: yaml
         group: DEFAULT_GROUP
         namespace: 7adaf457-a60e-48c7-8755-dad1e92ed760
-
-
 #个人也可申请，微信、支付宝官方直连结算。快来看看吧！https://mmbizurl.cn/s/hEludsCNs
 wx:
   pay:

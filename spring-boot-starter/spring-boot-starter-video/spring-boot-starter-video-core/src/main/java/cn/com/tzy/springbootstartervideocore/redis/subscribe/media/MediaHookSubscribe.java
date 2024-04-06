@@ -17,7 +17,6 @@ import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 流媒体服务回调事件 的事件订阅
@@ -112,7 +111,7 @@ public class MediaHookSubscribe {
 
     public void removeSubscribe(HookKey hookSubscribe) {
         Map<HookKey, HookEvent> eventMap = allSubscribes.get(hookSubscribe.getHookType());
-        if (eventMap == null) {
+        if (eventMap == null || eventMap.isEmpty()) {
             return;
         }
         List<Map.Entry<HookKey, HookEvent>> entriesToRemove = new ArrayList<>();
@@ -127,24 +126,25 @@ public class MediaHookSubscribe {
         for (Map.Entry<HookKey, HookEvent> entry : entriesToRemove) {
             String key = String.format("%s:%s:%s",MEDIA_HOOK_SUBSCRIBE_MANAGER,entry.getKey().getHookType(), JSONUtil.toJsonStr(entry.getKey().getContent()));
             AbstractMessageListener abstractMessageListener = allListenerMap.remove(key);
+            eventMap.remove(entry.getKey());
             if(abstractMessageListener != null){
                 redisMessageListenerContainer.removeMessageListener(abstractMessageListener,new PatternTopic(abstractMessageListener.getPatternTopicName()));
             }
-            eventMap.remove(entry.getKey());
         }
-        if (eventMap.size() == 0) {
+        if (eventMap.isEmpty()) {
             allSubscribes.remove(hookSubscribe.getHookType());
         }
     }
     public HookKey getHookKey(HookKey hookSubscribe){
         Map<HookKey, HookEvent> eventMap = allSubscribes.get(hookSubscribe.getHookType());
-        if (eventMap == null) {
+        if (eventMap == null || eventMap.isEmpty()) {
             return null;
         }
         HookKey hookKey = null;
         for (Map.Entry<HookKey, HookEvent> entry : eventMap.entrySet()) {
             if (isExist(entry.getKey(),hookSubscribe.getContent())){
                 hookKey =entry.getKey();
+                break;
             }
         }
         return hookKey;

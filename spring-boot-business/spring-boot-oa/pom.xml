@@ -8,7 +8,6 @@
         <version>1.0.0</version>
     </parent>
 
-    <groupId>cn.com.tzy</groupId>
     <artifactId>spring-boot-oa</artifactId>
     <name>spring-boot-oa</name>
     <description>自动化OA办公</description>

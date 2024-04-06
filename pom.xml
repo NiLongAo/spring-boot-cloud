@@ -53,7 +53,7 @@
         <seata-server.version>1.5.0</seata-server.version>
         <lombok.version>1.18.20</lombok.version>
         <weixin-popular.version>2.8.16</weixin-popular.version>
-        <yungouos-pay-sdk.version>1.1.19</yungouos-pay-sdk.version>
+        <yungouos-pay-sdk.version>2.0.9</yungouos-pay-sdk.version>
         <alipay-easysdk.version>2.1.0</alipay-easysdk.version>
         <transmittable-thread-local.version>2.12.2</transmittable-thread-local.version>
         <mapstruct.version>1.4.1.Final</mapstruct.version>
@@ -67,6 +67,7 @@
         <ip2region.version>2.6.6</ip2region.version>
         <forest.version>1.5.31</forest.version>
         <netty.version>4.1.53.Final</netty.version>
+        <freeswitch-esl.version>1.7.0</freeswitch-esl.version>
     </properties>
 
     <repositories>

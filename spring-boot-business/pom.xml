@@ -26,6 +26,7 @@
         <module>spring-boot-face</module>
         <!--s视频监控模块-->
         <module>spring-boot-video</module>
+        <module>spring-boot-fs</module>
     </modules>
 
     <dependencies>

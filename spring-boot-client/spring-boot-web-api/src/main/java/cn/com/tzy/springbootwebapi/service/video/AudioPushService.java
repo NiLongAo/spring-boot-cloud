@@ -31,4 +31,7 @@ public class AudioPushService {
         return audioPushServiceFeign.broadcast(deviceId,channelId);
     }
 
+    public RestResult<?> stopAudioPush(String deviceId, String channelId) {
+        return audioPushServiceFeign.stopAudioPush(deviceId,channelId);
+    }
 }

@@ -13,7 +13,6 @@ import cn.com.tzy.springbootstartervideocore.redis.impl.MediaServerManager;
 import cn.com.tzy.springbootstartervideocore.redis.subscribe.media.HookKeyFactory;
 import cn.com.tzy.springbootstartervideocore.redis.subscribe.media.MediaHookSubscribe;
 import cn.com.tzy.springbootstartervideocore.service.VideoService;
-import cn.com.tzy.springbootstartervideocore.service.video.MediaServerVoService;
 import cn.hutool.core.thread.ThreadUtil;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.CommandLineRunner;
@@ -60,28 +59,27 @@ public class ZLMRunner implements CommandLineRunner {
         });
         log.info("[ZML] 启动中  每5分钟定时检测......]");
         //动态检测是否有空闲流媒体 5分钟检测
-        dynamicTask.startCron("zlm-connect-5m",300,()->detection(hookKey));
+        dynamicTask.startCron("zlm-connect-5m",1,300,()->detection(hookKey));
     }
     //动态检测是否有空闲流媒体
     private void detection(HookKey hookKey){
+        List<MediaServerVo> serviceAll= VideoService.getMediaServerService().findConnectZlmList();
+        allZML = serviceAll.stream().map(MediaServerVo::getId).collect(Collectors.toList());
+        if(allZML.isEmpty()){
+            log.warn("[ZML] 没有空闲流媒体需注册");
+            return;
+        }
         dynamicTask.stop("zlm-connect-timeout");
         //30秒未检测到流媒体启动，则放弃
         dynamicTask.startDelay("zlm-connect-timeout",40,()->{
-            if (allZML != null && allZML.size() > 0) {
+            if (allZML != null && !allZML.isEmpty()) {
                 for (String id : allZML) {
                     log.error("[ {} ]]主动连接失败，不再尝试连接", id);
                 }
                 allZML = null;
             }
-            mediaHookSubscribe.removeSubscribe(hookKey);
+            //mediaHookSubscribe.removeSubscribe(hookKey);
         });
-        MediaServerVoService mediaServerVoService = VideoService.getMediaServerService();
-        List<MediaServerVo> serviceAll = mediaServerVoService.findConnectZlmList();
-        if(serviceAll.isEmpty()){
-            log.warn("[ZML] 没有空闲流媒体需注册");
-            return;
-        }
-        allZML = serviceAll.stream().map(MediaServerVo::getId).collect(Collectors.toList());
         for (MediaServerVo mediaServerVo : serviceAll) {
             ThreadUtil.execute(()->connectZlmServer(mediaServerVo));
         }

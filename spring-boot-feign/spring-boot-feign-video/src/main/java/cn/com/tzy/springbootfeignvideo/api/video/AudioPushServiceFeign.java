@@ -29,4 +29,12 @@ public interface AudioPushServiceFeign {
     @RequestMapping(value = "/broadcast",method = RequestMethod.GET)
     RestResult<?> broadcast(@RequestParam("deviceId") String deviceId, @RequestParam("channelId")String channelId);
 
+    /**
+     * 停止推流
+     * @param deviceId 设备国标编号
+     * @return
+     */
+    @RequestMapping(value = "/stop_audio_push",method = RequestMethod.GET)
+    RestResult<?> stopAudioPush(@RequestParam("deviceId") String deviceId, @RequestParam("channelId")String channelId);
+
 }

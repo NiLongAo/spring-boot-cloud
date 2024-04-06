@@ -43,4 +43,14 @@ public class AudioPushController extends ApiController {
         return audioPushService.broadcast(deviceId,channelId);
     }
 
+    @ApiOperation(value = "停止推流", notes = "停止推流")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="deviceId", value="设备国标编号", required=true, paramType="query", dataType="String", defaultValue=""),
+            @ApiImplicitParam(name="channelId", value="通道编号", required=true, paramType="query", dataType="String", defaultValue="")
+    })
+    @GetMapping("/stop_audio_push")
+    public RestResult<?> stopAudioPush(@RequestParam("deviceId") String deviceId,@RequestParam("channelId")String channelId){
+        return audioPushService.stopAudioPush(deviceId,channelId);
+    }
+
 }

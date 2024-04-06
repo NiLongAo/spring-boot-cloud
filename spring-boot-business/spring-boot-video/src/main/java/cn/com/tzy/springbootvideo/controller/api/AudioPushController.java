@@ -67,10 +67,14 @@ public class AudioPushController extends ApiController {
             return result;
         }
         try {
-            sipCommander.audioBroadcastCmd(sipServer,deviceVo,channelId,null,null);
+            sipCommander.audioBroadcastCmd(sipServer,deviceVo,channelId,null,(error)->{
+                deferredResultHolder.invokeResult(key,uuid,RestResult.result(error.getStatusCode(),error.getMsg()));
+                VideoService.getDeviceChannelService().stopAudioPushStatus(deviceId,channelId);
+            });
         } catch (InvalidArgumentException | ParseException | SipException e) {
             log.error("语音广播命令 指令错误：",e);
             deferredResultHolder.invokeResult(key,uuid,RestResult.result(RespCode.CODE_2.getValue(),"语音广播命令失败"));
+            VideoService.getDeviceChannelService().stopAudioPushStatus(deviceId,channelId);
         }
         return result;
     }

@@ -10,7 +10,6 @@ import org.springframework.cloud.netflix.ribbon.RibbonClients;
 @EnableDiscoveryClient //开启nacos服务站注册发现
 @RibbonClients(defaultConfiguration = MyRibbonConfig.class)
 public class SpringBootPayApplication {
-
   public static void main(String[] args) {
     SpringApplication.run(SpringBootPayApplication.class, args);
   }
