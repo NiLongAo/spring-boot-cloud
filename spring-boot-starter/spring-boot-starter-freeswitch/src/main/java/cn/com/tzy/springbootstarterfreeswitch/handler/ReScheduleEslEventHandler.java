@@ -1,4 +1,4 @@
-package cn.com.tzy.springbootfs.handler;
+package cn.com.tzy.springbootstarterfreeswitch.handler;
 
 import link.thingscloud.freeswitch.esl.constant.EventNames;
 import link.thingscloud.freeswitch.esl.spring.boot.starter.annotation.EslEventName;

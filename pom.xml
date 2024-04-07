@@ -68,6 +68,7 @@
         <forest.version>1.5.31</forest.version>
         <netty.version>4.1.53.Final</netty.version>
         <freeswitch-esl.version>1.7.0</freeswitch-esl.version>
+        <velocity.version>2.3</velocity.version>
     </properties>
 
     <repositories>
@@ -309,7 +310,11 @@
                 <artifactId>spring-boot-starter-netty</artifactId>
                 <version>${project.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>cn.com.tzy</groupId>
+                <artifactId>spring-boot-starter-freeswitch</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <!-- 底层程序 分包 版本-->
             <dependency>
                 <groupId>cn.com.tzy</groupId>

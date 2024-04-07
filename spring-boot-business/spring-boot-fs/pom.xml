@@ -26,11 +26,9 @@
             <artifactId>spring-boot-starter-redis</artifactId>
         </dependency>
         <dependency>
-            <groupId>link.thingscloud</groupId>
-            <artifactId>freeswitch-esl-spring-boot-starter</artifactId>
-            <version>${freeswitch-esl.version}</version>
+            <groupId>cn.com.tzy</groupId>
+            <artifactId>spring-boot-starter-freeswitch</artifactId>
         </dependency>
-
     </dependencies>
 
     <build>

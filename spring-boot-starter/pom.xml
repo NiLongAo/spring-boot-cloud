@@ -52,6 +52,8 @@
         <module>spring-boot-starter-video</module>
         <!--整合服务之间netty nio 通讯-->
         <module>spring-boot-starter-netty</module>
+        <!--整合 freeswitch 通话中心相关功能-->
+        <module>spring-boot-starter-freeswitch</module>
     </modules>
 
     <dependencies>
