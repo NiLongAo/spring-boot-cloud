@@ -5,3 +5,26 @@ spring:
     name: fs-server
   profiles:
     active: dev
+link:
+  thingscloud:
+    freeswitch:
+      esl:
+        inbound:
+          defaultPassword: ClueCon
+          servers:
+            - host: 192.168.1.26
+              port: 8021
+              timeoutSeconds: 5
+          # 开启性能监控 - 事件驱动-业务逻辑处理时间
+          performance: true
+          performanceCostTime: 200
+          # 开启事件性能监控 - fs产生事件与应用接收到事件时间差
+          eventPerformance: true
+          eventPerformanceCostTime: 200
+          events:
+            - all
+#录音存放地址
+fs:
+  record:
+    path: /usr/local/freeswitch
+    file: wav

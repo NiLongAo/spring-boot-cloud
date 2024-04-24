@@ -4,7 +4,7 @@ import cn.com.tzy.springbootstarterredis.utils.RedisUtils;
 import cn.com.tzy.springbootstartervideobasic.common.VideoConstant;
 import cn.com.tzy.springbootstartervideocore.demo.NotifySubscribeInfo;
 import cn.com.tzy.springbootstartervideocore.service.VideoService;
-import cn.com.tzy.springbootstartervideocore.pool.task.DynamicTask;
+import cn.com.tzy.springbootcomm.utils.DynamicTask;
 import cn.hutool.core.codec.Base64;
 import org.springframework.util.SerializationUtils;
 

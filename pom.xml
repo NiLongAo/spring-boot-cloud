@@ -67,7 +67,7 @@
         <ip2region.version>2.6.6</ip2region.version>
         <forest.version>1.5.31</forest.version>
         <netty.version>4.1.53.Final</netty.version>
-        <freeswitch-esl.version>1.7.0</freeswitch-esl.version>
+        <freeswitch-esl.version>1.6.7.RELEASE</freeswitch-esl.version>
         <velocity.version>2.3</velocity.version>
     </properties>
 

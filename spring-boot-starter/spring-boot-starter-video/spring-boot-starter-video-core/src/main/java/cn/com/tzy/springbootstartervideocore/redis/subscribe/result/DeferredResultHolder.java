@@ -6,7 +6,7 @@ import cn.com.tzy.springbootstarterredis.utils.RedisUtils;
 import cn.com.tzy.springbootstartervideobasic.common.VideoConstant;
 import cn.com.tzy.springbootstartervideocore.demo.DeferredResultVo;
 import cn.com.tzy.springbootstartervideocore.demo.VideoRestResult;
-import cn.com.tzy.springbootstartervideocore.pool.task.DynamicTask;
+import cn.com.tzy.springbootcomm.utils.DynamicTask;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import lombok.extern.log4j.Log4j2;

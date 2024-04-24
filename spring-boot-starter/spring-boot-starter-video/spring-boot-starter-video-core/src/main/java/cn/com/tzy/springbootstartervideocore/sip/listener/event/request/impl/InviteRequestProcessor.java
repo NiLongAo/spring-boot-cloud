@@ -18,7 +18,7 @@ import cn.com.tzy.springbootstartervideocore.demo.Gb28181Sdp;
 import cn.com.tzy.springbootstartervideocore.demo.SsrcTransaction;
 import cn.com.tzy.springbootstartervideocore.demo.StreamInfo;
 import cn.com.tzy.springbootstartervideocore.media.client.MediaClient;
-import cn.com.tzy.springbootstartervideocore.pool.task.DynamicTask;
+import cn.com.tzy.springbootcomm.utils.DynamicTask;
 import cn.com.tzy.springbootstartervideocore.redis.RedisService;
 import cn.com.tzy.springbootstartervideocore.redis.impl.SendRtpManager;
 import cn.com.tzy.springbootstartervideocore.redis.impl.SsrcConfigManager;

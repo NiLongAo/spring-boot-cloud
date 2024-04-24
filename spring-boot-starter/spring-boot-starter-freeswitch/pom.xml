@@ -14,6 +14,22 @@
     <description>freeswitch 通话中心核心配置</description>
     <dependencies>
         <dependency>
+            <groupId>cn.com.tzy</groupId>
+            <artifactId>spring-boot-comm</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>cn.com.tzy</groupId>
+            <artifactId>spring-boot-starter-redis</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!--  轻量级HTTP请求工具Forest   -->
+        <dependency>
+            <groupId>com.dtflys.forest</groupId>
+            <artifactId>forest-spring-boot-starter</artifactId>
+            <version>${forest.version}</version>
+        </dependency>
+        <dependency>
             <groupId>link.thingscloud</groupId>
             <artifactId>freeswitch-esl-spring-boot-starter</artifactId>
             <version>${freeswitch-esl.version}</version>

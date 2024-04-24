@@ -12,7 +12,7 @@ import cn.com.tzy.springbootstartervideocore.service.video.DeviceVoService;
 import cn.com.tzy.springbootstartervideocore.sip.listener.event.request.SipResponseEvent;
 import cn.com.tzy.springbootstartervideocore.sip.listener.event.request.impl.message.MessageHandler;
 import cn.com.tzy.springbootstartervideocore.sip.listener.event.request.impl.message.notify.NotifyMessageHandler;
-import cn.com.tzy.springbootstartervideocore.pool.task.DynamicTask;
+import cn.com.tzy.springbootcomm.utils.DynamicTask;
 import cn.com.tzy.springbootstartervideocore.utils.SipUtils;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUnit;

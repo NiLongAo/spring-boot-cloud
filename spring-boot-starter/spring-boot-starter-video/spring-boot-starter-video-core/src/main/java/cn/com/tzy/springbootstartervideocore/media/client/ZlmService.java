@@ -11,7 +11,7 @@ import cn.com.tzy.springbootstartervideobasic.vo.video.*;
 import cn.com.tzy.springbootstartervideocore.demo.InviteInfo;
 import cn.com.tzy.springbootstartervideocore.demo.SsrcTransaction;
 import cn.com.tzy.springbootstartervideocore.media.hook.MediaHookServer;
-import cn.com.tzy.springbootstartervideocore.pool.task.DynamicTask;
+import cn.com.tzy.springbootcomm.utils.DynamicTask;
 import cn.com.tzy.springbootstartervideocore.redis.RedisService;
 import cn.com.tzy.springbootstartervideocore.redis.impl.*;
 import cn.com.tzy.springbootstartervideocore.redis.subscribe.media.HookKeyFactory;

@@ -5,20 +5,19 @@ import java.util.Map;
 
 public enum FsTypeEnum {
     //通话记录设置
-    CDR_PG_CSV(1, "xml/odbc_cdr.conf.xml", "odbcCdr"),
+    NOT_FIND(0, "fs/not_find.xml", "notFind"),
     //对外网关中继设置
-    EXTERNAL(2,"xml/external.xml", "external"),
+    EXTERNAL(1, "fs/sip_profiles/external.xml", "gateway"),
     //网关中继IPV6设置
-    EXTERNAL_IPV6(3,"xml/external-ipv6.xml", "externalIpv6"),
+    EXTERNAL_IPV6(2, "fs/sip_profiles/external-ipv6.xml", "externalIpv6"),
     //对内网关
-    INTERNAL(4,"xml/internal.xml", "internal"),
+    INTERNAL(3, "fs/sip_profiles/internal.xml", "internal"),
     //对内网关IPV6设置
-    INTERNAL_IPV6(5,"xml/internal-ipv6.xml", "internalIpv6"),
+    INTERNAL_IPV6(4, "fs/sip_profiles/internal-ipv6.xml", "internalIpv6"),
     //主要设置控制台快捷键、数据库处理句柄、session会话、日志等级等
-    SWITCH(6, "xml/switch.xml", "config"),
+    SWITCH(5, "fs/autoload_configs/switch.conf.xml", "config"),
     //用户目录配置
-    USER(7,"xml/user.xml", "user"),
-    //服务配置信息
+    USER(6, "fs/directory/user.xml", "user"),
     ;
     private final int value;
     private final String path;

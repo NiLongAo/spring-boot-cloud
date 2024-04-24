@@ -1,21 +1,28 @@
 package cn.com.tzy.springbootstarterfreeswitch.utils;
 
-import cn.com.tzy.springbootstarterfreeswitch.model.BeanModel;
 import cn.com.tzy.springbootstarterfreeswitch.vo.FreeswitchXmlVo;
+import cn.hutool.core.lang.Snowflake;
+import cn.hutool.core.util.IdUtil;
+import lombok.extern.log4j.Log4j2;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
+import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.common.TemplateParserContext;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 /**
  * 通话中心工具类
  */
+@Log4j2
 public class FreeswitchUtils {
+
+    public static Snowflake snowflake = null;
 
     static {
         Properties p = new Properties();
@@ -27,26 +34,52 @@ public class FreeswitchUtils {
             p.setProperty(Velocity.INPUT_ENCODING, StandardCharsets.UTF_8.name());
             // 初始化Velocity引擎，指定配置Properties
             Velocity.init(p);
-        }
-        catch (Exception e)
-        {
+        }catch (Exception e){
             throw new RuntimeException(e);
         }
+        snowflake = IdUtil.createSnowflake(0, 0);
     }
 
+    /**
+     * 获取Fs xml模板相关信息
+     * @param vo
+     * @return
+     */
     public static String getXmlConfig(FreeswitchXmlVo vo){
         if(vo.getFsTypeEnum() == null){
             return null;
         }
-        VelocityContext context = new VelocityContext();
-        for (Map.Entry<String, List<BeanModel>> entry : vo.getModelMap().entrySet()) {
-            context.put(entry.getKey(),entry.getValue());
-        }
-        // 渲染模板
         StringWriter sw = new StringWriter();
-        Template tpl = Velocity.getTemplate(vo.getFsTypeEnum().getPath(), StandardCharsets.UTF_8.name());
-        tpl.merge(context, sw);
+        try {
+            VelocityContext context = new VelocityContext();
+            if(vo.getModelMap()!= null){
+                for (Map.Entry<String, Object> entry : vo.getModelMap().entrySet()) {
+                    context.put(entry.getKey(),entry.getValue());
+                }
+            }
+            // 渲染模板
+            Template tpl = Velocity.getTemplate(vo.getFsTypeEnum().getPath(), StandardCharsets.UTF_8.name());
+            tpl.merge(context, sw);
+        }catch (Exception e){
+            log.error("模板数据解析失败：",e);
+        }
         return sw.toString();
     }
 
+    /**
+     * 表达式替换
+     *
+     * @param body   #{[name]}
+     * @param params
+     */
+    public static String expression(String body, Map<String, Object> params) {
+        ExpressionParser parser = new SpelExpressionParser();
+        TemplateParserContext parserContext = new TemplateParserContext();
+        try {
+            return parser.parseExpression(body, parserContext).getValue(params, String.class);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return body;
+        }
+    }
 }

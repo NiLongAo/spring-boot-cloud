@@ -18,7 +18,7 @@ import cn.com.tzy.springbootstartervideocore.redis.impl.SsrcTransactionManager;
 import cn.com.tzy.springbootstartervideocore.service.VideoService;
 import cn.com.tzy.springbootstartervideocore.sip.SipServer;
 import cn.com.tzy.springbootstartervideocore.sip.cmd.SIPCommander;
-import cn.com.tzy.springbootstartervideocore.pool.task.DynamicTask;
+import cn.com.tzy.springbootcomm.utils.DynamicTask;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.cloud.nacos.NacosDiscoveryProperties;
 import lombok.extern.log4j.Log4j2;

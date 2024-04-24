@@ -27,6 +27,10 @@
         </dependency>
         <dependency>
             <groupId>cn.com.tzy</groupId>
+            <artifactId>spring-boot-starter-rabbitmq</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.com.tzy</groupId>
             <artifactId>spring-boot-starter-freeswitch</artifactId>
         </dependency>
     </dependencies>

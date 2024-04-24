@@ -4,7 +4,7 @@ import cn.com.tzy.springbootstarterredis.pool.AbstractMessageListener;
 import cn.com.tzy.springbootstarterredis.utils.RedisUtils;
 import cn.com.tzy.springbootstartervideobasic.common.VideoConstant;
 import cn.com.tzy.springbootstartervideobasic.vo.sip.RecordInfo;
-import cn.com.tzy.springbootstartervideocore.pool.task.DynamicTask;
+import cn.com.tzy.springbootcomm.utils.DynamicTask;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.listener.PatternTopic;

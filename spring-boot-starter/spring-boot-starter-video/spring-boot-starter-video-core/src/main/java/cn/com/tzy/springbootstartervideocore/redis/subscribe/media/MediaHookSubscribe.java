@@ -7,7 +7,7 @@ import cn.com.tzy.springbootstartervideobasic.common.VideoConstant;
 import cn.com.tzy.springbootstartervideobasic.enums.HookType;
 import cn.com.tzy.springbootstartervideobasic.vo.media.HookKey;
 import cn.com.tzy.springbootstartervideocore.demo.MediaHookVo;
-import cn.com.tzy.springbootstartervideocore.pool.task.DynamicTask;
+import cn.com.tzy.springbootcomm.utils.DynamicTask;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.json.JSONUtil;
 import lombok.extern.log4j.Log4j2;

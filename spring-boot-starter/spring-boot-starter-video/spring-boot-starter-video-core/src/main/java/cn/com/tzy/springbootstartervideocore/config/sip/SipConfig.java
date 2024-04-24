@@ -6,7 +6,7 @@ import cn.com.tzy.springbootstartervideocore.config.runner.SipServerRunner;
 import cn.com.tzy.springbootstartervideocore.config.runner.ZLMRunner;
 import cn.com.tzy.springbootstartervideocore.media.client.ZlmService;
 import cn.com.tzy.springbootstartervideocore.media.hook.MediaHookServer;
-import cn.com.tzy.springbootstartervideocore.pool.task.DynamicTask;
+import cn.com.tzy.springbootcomm.utils.DynamicTask;
 import cn.com.tzy.springbootstartervideocore.properties.SipConfigProperties;
 import cn.com.tzy.springbootstartervideocore.properties.VideoProperties;
 import cn.com.tzy.springbootstartervideocore.redis.impl.*;

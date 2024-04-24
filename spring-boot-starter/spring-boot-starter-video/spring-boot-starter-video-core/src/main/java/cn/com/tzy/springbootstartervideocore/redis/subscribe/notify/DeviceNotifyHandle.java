@@ -6,7 +6,7 @@ import cn.com.tzy.springbootstartervideobasic.common.VideoConstant;
 import cn.com.tzy.springbootstartervideobasic.vo.sip.Address;
 import cn.com.tzy.springbootstartervideobasic.vo.video.DeviceVo;
 import cn.com.tzy.springbootstartervideocore.demo.DeviceNotifyVo;
-import cn.com.tzy.springbootstartervideocore.pool.task.DynamicTask;
+import cn.com.tzy.springbootcomm.utils.DynamicTask;
 import cn.com.tzy.springbootstartervideocore.redis.RedisService;
 import cn.com.tzy.springbootstartervideocore.service.VideoService;
 import cn.com.tzy.springbootstartervideocore.sip.SipServer;

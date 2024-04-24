@@ -12,7 +12,7 @@ import cn.com.tzy.springbootstartervideocore.demo.SipTransactionInfo;
 import cn.com.tzy.springbootstartervideocore.media.client.MediaClient;
 import cn.com.tzy.springbootstartervideocore.model.EventResult;
 import cn.com.tzy.springbootstartervideocore.model.RestResultEvent;
-import cn.com.tzy.springbootstartervideocore.pool.task.DynamicTask;
+import cn.com.tzy.springbootcomm.utils.DynamicTask;
 import cn.com.tzy.springbootstartervideocore.redis.RedisService;
 import cn.com.tzy.springbootstartervideocore.redis.impl.SendRtpManager;
 import cn.com.tzy.springbootstartervideocore.redis.impl.SipTransactionManager;
