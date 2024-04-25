@@ -65,9 +65,6 @@
     <param name="tls-version" value="$${sip_tls_version}"/>
     <param name="tls-ciphers" value="$${sip_tls_ciphers}"/>
     <param name="tls-cert-dir" value="$${conf_dir}/ssl"/>
-<!--   使用默认模式 此配置不要开 如果开需要再 dialplan/default.xml 的开始处添加 <action application="set" data="proxy_media=true"/> -->
-<!--    <param name="inbound-proxy-media" value="true"/>-->
-
     <param name="inbound-late-negotiation" value="true"/>
     <param name="inbound-zrtp-passthru" value="true"/>
     <param name="nonce-ttl" value="60"/>
