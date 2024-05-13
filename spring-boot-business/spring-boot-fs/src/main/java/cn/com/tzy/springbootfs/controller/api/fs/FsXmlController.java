@@ -1,5 +1,6 @@
 package cn.com.tzy.springbootfs.controller.api.fs;
 
+import cn.com.tzy.springbootfs.service.fs.AgentService;
 import cn.com.tzy.springbootstartercloud.api.ApiController;
 import cn.com.tzy.springbootstarterfreeswitch.enums.fs.FsTypeEnum;
 import cn.com.tzy.springbootstarterfreeswitch.model.bean.ConfigModel;
@@ -13,12 +14,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * 人脸图片识别相关接口
@@ -28,6 +27,8 @@ import java.util.stream.Collectors;
 @RequestMapping(value = "/api/fs/xml")
 public class FsXmlController extends ApiController {
 
+    @Resource
+    private AgentService agentService;
 
     /**
      * 获取拨号计划的xml信息
@@ -53,14 +54,8 @@ public class FsXmlController extends ApiController {
         String key = req.getParameter("key");
         String xml = null;
         //模拟数据
-        List<UserModel> list = Arrays.asList(
-                UserModel.builder().number("1010").name("1010").password("123456").domain(domain).build(),
-                UserModel.builder().number("1011").name("1011").password("123456").domain(domain).build(),
-                UserModel.builder().number("1012").name("1012").password("123456").domain(domain).build(),
-                UserModel.builder().number("1014").name("1014").password("123456").domain(domain).build()
-        );
-        Map<String, UserModel> collect = list.stream().collect(Collectors.toMap(UserModel::getName, o -> o));
-        UserModel userModel = collect.get(user);
+        UserModel userModel = agentService.findUserModel(user);
+        userModel.setDomain(domain);
         if(userModel == null){
             xml =  FreeswitchUtils.getXmlConfig(FreeswitchXmlVo.builder()
                     .fsTypeEnum(FsTypeEnum.NOT_FIND)
@@ -78,7 +73,6 @@ public class FsXmlController extends ApiController {
                     .build()
             );
         }
-
         log.warn("请求Fs呼叫用户文件key：{} user:{} 是否配置Xml：{}，请求参数：{}",key,user, StringUtils.isNotBlank(xml),parameterMap);
         return xml;
     }

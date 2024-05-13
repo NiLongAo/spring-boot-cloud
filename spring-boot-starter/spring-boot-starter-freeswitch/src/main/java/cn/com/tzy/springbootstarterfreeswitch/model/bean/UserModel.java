@@ -29,11 +29,11 @@ public class UserModel extends BeanModel {
     /**  */
     private String password;
 
-    /** 录音（0正常 1停用） */
-    private String audio;
+    /** 录音（1正常 0停用） */
+    private Integer audio;
 
-    /** 录像（0正常 1停用） */
-    private String video;
+    /** 录像（1正常 0停用） */
+    private Integer video;
 
     /**  */
     private Integer level;

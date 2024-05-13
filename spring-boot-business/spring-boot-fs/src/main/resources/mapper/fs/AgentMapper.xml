@@ -41,4 +41,16 @@
     `status`, register_time, renew_time, keepalive_time, keep_timeout, expires, stream_mode, 
     transport, charset, create_user_id, create_time, update_user_id, update_time
   </sql>
+
+  <select id="findUserModel" resultType="cn.com.tzy.springbootstarterfreeswitch.model.bean.UserModel">
+    select
+      a.id as id,
+      a.agent_code as name,
+      a.agent_code as number,
+      a.passwd as password,
+      1 as audio,
+      1 as video,
+      1 as level
+    from fs_agent a where a.agent_code =#{agentCode}
+  </select>
 </mapper>
