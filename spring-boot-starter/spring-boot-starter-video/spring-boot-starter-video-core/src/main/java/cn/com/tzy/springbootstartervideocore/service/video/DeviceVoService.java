@@ -66,7 +66,7 @@ public abstract class DeviceVoService {
         deviceVo.setKeepaliveTime(new Date());
         DeviceVo deviceVoGb = this.findDeviceGbId(deviceVo.getDeviceId());
         //缓存设备注册服务
-        RedisService.getRegisterServerManager().putDevice(deviceVo.getDeviceId(),deviceVo.getKeepaliveIntervalTime()+VideoConstant.DELAY_TIME , Address.builder().gbId(deviceVo.getDeviceId()).ip(nacosDiscoveryProperties.getIp()).port(nacosDiscoveryProperties.getPort()).build());
+        RedisService.getRegisterServerManager().putDevice(deviceVo.getDeviceId(),deviceVo.getKeepaliveIntervalTime()+ VideoConstant.DELAY_TIME , Address.builder().gbId(deviceVo.getDeviceId()).ip(nacosDiscoveryProperties.getIp()).port(nacosDiscoveryProperties.getPort()).build());
         if(deviceVoGb == null){
             deviceVo.setOnline(ConstEnum.Flag.YES.getValue());
             deviceVo.setRegisterTime(new Date());
@@ -115,7 +115,7 @@ public abstract class DeviceVoService {
         }
         String key = String.format("%s_%s", VideoConstant.REGISTER_EXPIRE_TASK_KEY_PREFIX, deviceVo.getDeviceId());
         //设置设备过期任务
-        dynamicTask.startDelay(key, deviceVo.getKeepaliveIntervalTime()+VideoConstant.DELAY_TIME,()->offline(deviceVo.getDeviceId()));
+        dynamicTask.startDelay(key, deviceVo.getKeepaliveIntervalTime()+ VideoConstant.DELAY_TIME,()->offline(deviceVo.getDeviceId()));
     }
 
     /**

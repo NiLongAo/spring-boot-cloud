@@ -1,8 +1,8 @@
 import cn.com.tzy.springbootcomm.constant.NotNullMap;
-import cn.com.tzy.springbootstarterfreeswitch.enums.FsTypeEnum;
+import cn.com.tzy.springbootstarterfreeswitch.enums.fs.FsTypeEnum;
 import cn.com.tzy.springbootstarterfreeswitch.model.bean.ConfigModel;
 import cn.com.tzy.springbootstarterfreeswitch.utils.FreeswitchUtils;
-import cn.com.tzy.springbootstarterfreeswitch.vo.FreeswitchXmlVo;
+import cn.com.tzy.springbootstarterfreeswitch.vo.fs.FreeswitchXmlVo;
 import lombok.extern.log4j.Log4j2;
 import org.junit.Test;
 import org.junit.runner.RunWith;

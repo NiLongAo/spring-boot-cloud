@@ -3,7 +3,7 @@ package cn.com.tzy.springbootfs.service.freeswitch;
 import cn.com.tzy.springbootstarterfreeswitch.model.call.CallDetail;
 import cn.com.tzy.springbootstarterfreeswitch.model.fs.CallDeviceInfo;
 import cn.com.tzy.springbootstarterfreeswitch.model.fs.CallLogInfo;
-import cn.com.tzy.springbootstarterfreeswitch.service.CallCdrService;
+import cn.com.tzy.springbootstarterfreeswitch.service.freeswitch.CallCdrService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

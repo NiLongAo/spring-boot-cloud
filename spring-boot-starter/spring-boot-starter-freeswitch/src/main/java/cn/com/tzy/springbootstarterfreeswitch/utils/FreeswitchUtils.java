@@ -1,6 +1,6 @@
 package cn.com.tzy.springbootstarterfreeswitch.utils;
 
-import cn.com.tzy.springbootstarterfreeswitch.vo.FreeswitchXmlVo;
+import cn.com.tzy.springbootstarterfreeswitch.vo.fs.FreeswitchXmlVo;
 import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.util.IdUtil;
 import lombok.extern.log4j.Log4j2;

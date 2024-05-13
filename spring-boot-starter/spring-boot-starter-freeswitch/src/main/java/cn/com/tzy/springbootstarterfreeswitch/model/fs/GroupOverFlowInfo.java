@@ -1,6 +1,6 @@
 package cn.com.tzy.springbootstarterfreeswitch.model.fs;
 
-import cn.com.tzy.springbootstarterfreeswitch.strategy.LineupStrategy;
+import cn.com.tzy.springbootstarterfreeswitch.service.freeswitch.LineupStrategy;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

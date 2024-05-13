@@ -13,9 +13,9 @@ import lombok.extern.log4j.Log4j2;
 public class SipTransactionManager {
     private String SIP_TRANSACTION =  "SIP_TRANSACTION:";
 
-    private String DEVICE_PREFIX = String.format("%s%s",VideoConstant.DEVICE_PREFIX,SIP_TRANSACTION);
+    private String DEVICE_PREFIX = String.format("%s%s", VideoConstant.DEVICE_PREFIX,SIP_TRANSACTION);
 
-    private String PARENT_PLATFORM_PREFIX =  String.format("%s%s",VideoConstant.PARENT_PLATFORM_PREFIX,SIP_TRANSACTION);
+    private String PARENT_PLATFORM_PREFIX =  String.format("%s%s", VideoConstant.PARENT_PLATFORM_PREFIX,SIP_TRANSACTION);
 
 
     public void putDevice(String deviceId, SipTransactionInfo sipTransactionInfo){

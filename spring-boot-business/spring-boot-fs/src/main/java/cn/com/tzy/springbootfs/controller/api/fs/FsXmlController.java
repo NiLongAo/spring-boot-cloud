@@ -1,12 +1,12 @@
 package cn.com.tzy.springbootfs.controller.api.fs;
 
 import cn.com.tzy.springbootstartercloud.api.ApiController;
-import cn.com.tzy.springbootstarterfreeswitch.enums.FsTypeEnum;
+import cn.com.tzy.springbootstarterfreeswitch.enums.fs.FsTypeEnum;
 import cn.com.tzy.springbootstarterfreeswitch.model.bean.ConfigModel;
 import cn.com.tzy.springbootstarterfreeswitch.model.bean.GateWayModel;
 import cn.com.tzy.springbootstarterfreeswitch.model.bean.UserModel;
 import cn.com.tzy.springbootstarterfreeswitch.utils.FreeswitchUtils;
-import cn.com.tzy.springbootstarterfreeswitch.vo.FreeswitchXmlVo;
+import cn.com.tzy.springbootstarterfreeswitch.vo.fs.FreeswitchXmlVo;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;

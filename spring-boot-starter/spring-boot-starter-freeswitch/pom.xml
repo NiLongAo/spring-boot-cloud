@@ -30,6 +30,16 @@
             <version>${forest.version}</version>
         </dependency>
         <dependency>
+            <groupId>cn.com.tzy</groupId>
+            <artifactId>spring-boot-starter-nacos</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>link.thingscloud</groupId>
             <artifactId>freeswitch-esl-spring-boot-starter</artifactId>
             <version>${freeswitch-esl.version}</version>
@@ -39,6 +49,12 @@
             <groupId>org.apache.velocity</groupId>
             <artifactId>velocity-engine-core</artifactId>
             <version>${velocity.version}</version>
+        </dependency>
+        <!-- sip协议栈 -->
+        <dependency>
+            <groupId>javax.sip</groupId>
+            <artifactId>jain-sip-ri</artifactId>
+            <version>${sip.version}</version>
         </dependency>
     </dependencies>
 </project>

@@ -14,7 +14,7 @@ public class SipConfigProperties {
 	/**
 	 * 信令服务器名称注册naocs中用
 	 */
-	private String name = "sip-server";
+	private String name = "video-sip-server";
 	/**
 	 * 信令服务器ip //没有服务ip时取nacos 中ip
 	 */

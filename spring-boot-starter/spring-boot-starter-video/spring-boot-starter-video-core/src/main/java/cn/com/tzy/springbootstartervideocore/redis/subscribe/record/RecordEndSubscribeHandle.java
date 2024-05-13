@@ -24,7 +24,7 @@ public class RecordEndSubscribeHandle {
 
     private final RedisMessageListenerContainer redisMessageListenerContainer;
 
-    private final String VIDEO_RECORD_END_SUBSCRIBE_MANAGER =VideoConstant.VIDEO_RECORD_END_SUBSCRIBE_MANAGER;
+    private final String VIDEO_RECORD_END_SUBSCRIBE_MANAGER = VideoConstant.VIDEO_RECORD_END_SUBSCRIBE_MANAGER;
 
     private final Integer millis = 15;
     private final Map<String, Instant> handlerMapSubscribes = new ConcurrentHashMap<>();

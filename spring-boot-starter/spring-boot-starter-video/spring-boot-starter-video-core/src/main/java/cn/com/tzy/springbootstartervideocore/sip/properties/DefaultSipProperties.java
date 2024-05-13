@@ -1,9 +1,6 @@
 package cn.com.tzy.springbootstartervideocore.sip.properties;
 
-import cn.com.tzy.springbootstartervideocore.sip.listener.event.request.impl.message.notify.cmd.AlarmNotifyMessageHandler;
 import lombok.extern.log4j.Log4j2;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 
@@ -52,12 +49,11 @@ public class DefaultSipProperties {
         /**
          * sip_server_log.log 和 sip_debug_log.log ERROR, INFO, WARNING, OFF, DEBUG, TRACE
          */
-        Logger logger = LoggerFactory.getLogger(AlarmNotifyMessageHandler.class);
         if (sipLog) {
             properties.setProperty("gov.nist.javax.sip.LOG_MESSAGE_CONTENT", "false");
-            logger.info("[SIP日志]已开启");
+            log.info("[SIP日志]已开启");
         }else {
-            logger.info("[SIP日志]已关闭");
+            log.info("[SIP日志]已关闭");
         }
         return properties;
     }

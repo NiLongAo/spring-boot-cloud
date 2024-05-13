@@ -1,7 +1,7 @@
 package cn.com.tzy.springbootstarterfreeswitch.model.call;
 
-import cn.com.tzy.springbootstarterfreeswitch.enums.CallTypeEunm;
-import cn.com.tzy.springbootstarterfreeswitch.enums.DirectionEnum;
+import cn.com.tzy.springbootstarterfreeswitch.enums.fs.CallTypeEunm;
+import cn.com.tzy.springbootstarterfreeswitch.enums.fs.DirectionEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

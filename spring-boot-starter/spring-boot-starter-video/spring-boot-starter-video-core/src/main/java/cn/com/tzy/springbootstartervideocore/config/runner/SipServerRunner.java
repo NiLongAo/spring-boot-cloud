@@ -1,6 +1,5 @@
 package cn.com.tzy.springbootstartervideocore.config.runner;
 
-import cn.com.tzy.springbootstartervideocore.redis.subscribe.sip.message.SipSubscribeHandle;
 import cn.com.tzy.springbootstartervideocore.sip.SipServer;
 import cn.com.tzy.springbootstartervideocore.sip.listener.event.request.SipRequestEvent;
 import cn.com.tzy.springbootstartervideocore.sip.listener.event.response.SipResponseEvent;
@@ -23,8 +22,6 @@ public class SipServerRunner implements CommandLineRunner {
     private SipServer sipServer;
     @Resource
     private SipTimeoutEvent sipTimeoutEvent;
-    @Resource
-    private SipSubscribeHandle sipSubscribeHandle;
 
     @Override
     public void run(String... args) throws Exception {
@@ -44,7 +41,7 @@ public class SipServerRunner implements CommandLineRunner {
         ConcurrentHashMap<String, SipResponseEvent> sipResponseEventMap = sipResponseMap.values().stream().collect(Collectors.toMap(SipResponseEvent::getMethod, o -> o, (u, v) -> {
             throw new IllegalStateException(String.format("[SipConfig error] :Duplicate key %s", u));
         }, ConcurrentHashMap::new));
-        sipServer.initSipServer(sipTimeoutEvent, sipSubscribeHandle,sipRequestEventMap,sipResponseEventMap);
+        sipServer.initSipServer(sipTimeoutEvent,sipRequestEventMap,sipResponseEventMap);
     }
 
 }

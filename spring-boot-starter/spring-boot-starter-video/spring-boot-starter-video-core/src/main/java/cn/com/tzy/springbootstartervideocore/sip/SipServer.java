@@ -16,6 +16,7 @@ import gov.nist.javax.sip.SipProviderImpl;
 import gov.nist.javax.sip.SipStackImpl;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
 import javax.sip.*;
@@ -27,6 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * 信令服务器中心
  */
 @Log4j2
+@Component
 public class SipServer {
 
     private final SipConfigProperties sipConfigProperties;
@@ -65,9 +67,9 @@ public class SipServer {
     /**
      * 创建信令服务器
      */
-    public void initSipServer(SipTimeoutEvent sipTimeoutEvent, SipSubscribeHandle sipSubscribeHandle, ConcurrentHashMap<String, SipRequestEvent> sipRequestEventMap, ConcurrentHashMap<String, SipResponseEvent> sipResponseEventMap){
+    public void initSipServer(SipTimeoutEvent sipTimeoutEvent, ConcurrentHashMap<String, SipRequestEvent> sipRequestEventMap, ConcurrentHashMap<String, SipResponseEvent> sipResponseEventMap){
         //初始化 SipListener 中 SipServer
-        ((SipListenerImpl)sipListener).init(sipTimeoutEvent, sipSubscribeHandle,sipRequestEventMap,sipResponseEventMap);
+        ((SipListenerImpl)sipListener).init(sipTimeoutEvent,sipRequestEventMap,sipResponseEventMap);
         //判断 sipConfigProperties 中ip是否有值若没有则取 nacos 中ip
         if(StringUtils.isEmpty(sipConfigProperties.getIp())){
             sipConfigProperties.setIp(nacosDiscoveryProperties.getIp());

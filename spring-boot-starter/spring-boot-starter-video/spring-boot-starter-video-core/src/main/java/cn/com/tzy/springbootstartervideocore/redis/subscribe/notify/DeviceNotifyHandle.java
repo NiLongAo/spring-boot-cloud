@@ -141,7 +141,7 @@ public class DeviceNotifyHandle extends AbstractMessageListener {
                 log.error("[命令发送失败] 目录订阅: {}", e.getMessage());
             }
             if (sipRequest != null) {
-                RedisUtils.set(key, SerializationUtils.serialize(sipRequest),deviceVo.getSubscribeCycleForCatalog()+VideoConstant.DELAY_TIME);
+                RedisUtils.set(key, SerializationUtils.serialize(sipRequest),deviceVo.getSubscribeCycleForCatalog()+ VideoConstant.DELAY_TIME);
             }
 
         });
@@ -206,7 +206,7 @@ public class DeviceNotifyHandle extends AbstractMessageListener {
                 log.error("[命令发送失败] 移动位置订阅: {}", e.getMessage());
             }
             if (sipRequest != null) {
-                RedisUtils.set(key,SerializationUtils.serialize(sipRequest),deviceVo.getSubscribeCycleForMobilePosition()+VideoConstant.DELAY_TIME);
+                RedisUtils.set(key,SerializationUtils.serialize(sipRequest),deviceVo.getSubscribeCycleForMobilePosition()+ VideoConstant.DELAY_TIME);
             }
         });
     }
@@ -271,7 +271,7 @@ public class DeviceNotifyHandle extends AbstractMessageListener {
                 log.error("[命令发送失败] 报警订阅: {}", e.getMessage());
             }
             if (sipRequest != null) {
-                RedisUtils.set(key, SerializationUtils.serialize(sipRequest),deviceVo.getSubscribeCycleForCatalog()+VideoConstant.DELAY_TIME);
+                RedisUtils.set(key, SerializationUtils.serialize(sipRequest),deviceVo.getSubscribeCycleForCatalog()+ VideoConstant.DELAY_TIME);
             }
 
         });

@@ -90,30 +90,36 @@ CREATE TABLE fs_route_gateway (
     UNIQUE KEY idx_gateway_name (name) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='媒体网关表';
 
-
-
-
-
-CREATE TABLE fs_route  (
-    id                                  bigint unsigned not null auto_increment COMMENT '主键id',
-    name                                varchar(30) DEFAULT '' COMMENT '路由名称',
-    gateway_id                          int(6) unsigned DEFAULT '0' COMMENT '中继id',
-    reg                                 varchar(30) DEFAULT null COMMENT '匹配前缀',
-    type                                varchar(30) DEFAULT null COMMENT '路由类型',
-    inbound_model                       int(6) unsigned DEFAULT '0' COMMENT '呼入模式',
-    caller_pre                          int(6) unsigned DEFAULT '0' COMMENT '主叫前缀新增位数',
-    caller_pre_remove                   int(6) unsigned DEFAULT '0' COMMENT '主叫前缀删除位数',
-    callee_pre                          varchar(256) DEFAULT '' COMMENT '被叫前缀新增位数',
-    callee_pre_remove                   varchar(256) DEFAULT '' COMMENT '被叫前缀删除位数',
-    did                                 varchar(30) DEFAULT '' COMMENT 'DID',
-    callee_check                        varchar(30) DEFAULT '' COMMENT '被叫检测',
-    transform                           tinyint(4) DEFAULT 1 COMMENT '呼出主叫转换号码',
-    create_user_id                      bigint unsigned comment '创建人编号',
-    create_time                         datetime  NOT NULL COMMENT '创建时间',
-    update_user_id                      bigint unsigned comment '修改人编号',
-    update_time                         datetime  NOT NULL COMMENT '更新时间',
-    PRIMARY KEY (id)
-) ENGINE = InnoDB DEFAULT CHARSET = utf8  ROW_FORMAT = DYNAMIC COMMENT ='路由信息';
+CREATE TABLE fs_company (
+    id                              bigint unsigned not null auto_increment COMMENT '主键id',
+    name                            varchar(255)  NOT NULL DEFAULT '' COMMENT '名称',
+    id_path                         varchar(255)  NOT NULL DEFAULT '' COMMENT '父企业ID',
+    pid                             bigint unsigned NOT NULL DEFAULT '0' COMMENT '父企业',
+    company_code                    varchar(255)  NOT NULL DEFAULT '' COMMENT '简称',
+    gmt                             int unsigned NOT NULL DEFAULT '0' COMMENT '时区',
+    contact                         varchar(255)  NOT NULL DEFAULT '' COMMENT '联系人',
+    phone                           varchar(255)  NOT NULL DEFAULT '' COMMENT '电话',
+    balance                         bigint unsigned NOT NULL DEFAULT '0' COMMENT '金额',
+    bill_type                       int unsigned NOT NULL DEFAULT '0' COMMENT '1:呼出计费,2:呼入计费,3:双向计费,0:全免费',
+    pay_type                        int unsigned NOT NULL DEFAULT '0' COMMENT '0:预付费;1:后付费',
+    hidden_customer                 int unsigned NOT NULL DEFAULT '0' COMMENT '隐藏客户号码(0:不隐藏;1:隐藏)',
+    secret_type                     int unsigned NOT NULL DEFAULT '0' COMMENT '坐席密码等级',
+    secret_key                      varchar(32)  NOT NULL DEFAULT '' COMMENT '验证秘钥',
+    ivr_limit                       int unsigned NOT NULL DEFAULT '0' COMMENT 'IVR通道数',
+    agent_limit                     int unsigned NOT NULL DEFAULT '0' COMMENT '开通坐席',
+    group_limit                     int unsigned NOT NULL DEFAULT '0' COMMENT '开通技能组',
+    group_agent_limit               int unsigned NOT NULL DEFAULT '0' COMMENT '单技能组中坐席上限',
+    record_storage                  int unsigned NOT NULL DEFAULT '0' COMMENT '录音保留天数',
+    notify_url                      varchar(255)  NOT NULL DEFAULT '' COMMENT '话单回调通知',
+    status                          int unsigned NOT NULL DEFAULT '0' COMMENT '状态(0:禁用企业,1:免费企业;2:试用企业,3:付费企业)',
+    create_user_id                  bigint unsigned comment '创建人编号',
+    create_time                     datetime  NOT NULL COMMENT '创建时间',
+    update_user_id                  bigint unsigned comment '修改人编号',
+    update_time                     datetime  NOT NULL COMMENT '更新时间',
+    PRIMARY KEY (id) USING BTREE,
+    UNIQUE KEY company_name (name) USING BTREE,
+    UNIQUE KEY company_code (company_code) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='企业信息表';
 
 CREATE TABLE fs_agent (
     id                                  bigint unsigned not null auto_increment COMMENT '主键id',
@@ -131,11 +137,16 @@ CREATE TABLE fs_agent (
     display                             varchar(255)  NOT NULL DEFAULT '' COMMENT '主叫显号',
     ring_time                           int unsigned NOT NULL DEFAULT '10' COMMENT '振铃时长',
     host                                varchar(255)  NOT NULL DEFAULT '' COMMENT '登录服务器地址',
-    ext1                                varchar(255)  NOT NULL DEFAULT '' COMMENT '扩展1',
-    ext2                                varchar(255)  NOT NULL DEFAULT '' COMMENT '扩展2',
-    ext3                                varchar(255)  NOT NULL DEFAULT '' COMMENT '扩展3',
     state                               int unsigned NOT NULL DEFAULT '0' COMMENT '坐席状态(1:在线,0:不在线)',
     status                              int unsigned NOT NULL DEFAULT '1' COMMENT '状态：1 开通，0关闭',
+    register_time                       datetime  DEFAULT NULL COMMENT '注册时间',
+    renew_time                          datetime  DEFAULT NULL COMMENT '续订时间',
+    keepalive_time                      datetime  DEFAULT NULL COMMENT '心跳时间',
+    keep_timeout                        int default 30 COMMENT '心跳间隔 (最低25秒)',
+    expires                             int unsigned DEFAULT 86400 COMMENT '注册有效期（单位：秒 默认1天）',
+    stream_mode                         tinyint(4)  DEFAULT 0 COMMENT '数据流传输模式 0.UDP:udp传输 1.TCP-PASSIVE：tcp被动模式 2.TCP-ACTIVE：tcp主动模式',
+    transport                           tinyint(4)  DEFAULT NULL COMMENT '传输协议 1.UDP 2.TCP',
+    charset                             tinyint(4)  default 1 COMMENT '字符集, 1.UTF-8 2.GB2312',
     create_user_id                      bigint unsigned comment '创建人编号',
     create_time                         datetime  NOT NULL COMMENT '创建时间',
     update_user_id                      bigint unsigned comment '修改人编号',
@@ -143,6 +154,18 @@ CREATE TABLE fs_agent (
     PRIMARY KEY (id) USING BTREE,
     UNIQUE KEY idx_agent_key (agent_key,company_id) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb3 COMMENT='座席工号表';
+
+CREATE TABLE fs_user_agent (
+    id                                  bigint unsigned not null auto_increment COMMENT '主键id',
+    company_id                          bigint unsigned NOT NULL DEFAULT '0' COMMENT '企业ID',
+    agent_id                            varchar(255)  NOT NULL DEFAULT '' COMMENT '坐席工号',
+    user_id                             varchar(255)  NOT NULL DEFAULT '' COMMENT '用户编号',
+    create_user_id                      bigint unsigned comment '创建人编号',
+    create_time                         datetime  NOT NULL COMMENT '创建时间',
+    update_user_id                      bigint unsigned comment '修改人编号',
+    update_time                         datetime  NOT NULL COMMENT '更新时间',
+    PRIMARY KEY (id) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb3 COMMENT='用户座席中间表';
 
 CREATE TABLE fs_agent_group (
     id                                  bigint unsigned not null auto_increment COMMENT '主键id',
@@ -194,9 +217,6 @@ CREATE TABLE fs_agent_state_log (
     duration                          int unsigned NOT NULL DEFAULT '0' COMMENT '持续时间(秒)',
     busy_desc                         varchar(255)  NOT NULL DEFAULT '' COMMENT '忙碌类型',
     status                            tinyint(4) not null DEFAULT '1' COMMENT '状态',
-    ext1                              varchar(255)  NOT NULL DEFAULT '' COMMENT '扩展字段1',
-    ext2                              varchar(255)  NOT NULL DEFAULT '' COMMENT '扩展字段2',
-    ext3                              varchar(255)  NOT NULL DEFAULT '' COMMENT '扩展字段3',
     create_user_id                    bigint unsigned comment '创建人编号',
     create_time                       datetime  NOT NULL COMMENT '创建时间',
     update_user_id                    bigint unsigned comment '修改人编号',
@@ -216,8 +236,6 @@ CREATE TABLE fs_call_detail (
     transfer_type                     int unsigned NOT NULL DEFAULT '0' COMMENT '1:进vdn,2:进ivr,3:技能组,4:按键收号,5:外线,6:机器人,10:服务评价',
     transfer_id                       bigint unsigned NOT NULL DEFAULT '0' COMMENT '转接ID',
     reason                            varchar(50)  NOT NULL DEFAULT '' COMMENT '出队列原因:排队挂机或者转坐席',
-    ext1                              varchar(50)  NOT NULL DEFAULT '' COMMENT '扩展字段1',
-    ext2                              varchar(255)  NOT NULL DEFAULT '' COMMENT '扩展字段2',
     status                            tinyint(4) not null DEFAULT '1' COMMENT '状态',
     create_user_id                    bigint unsigned comment '创建人编号',
     create_time                       datetime  NOT NULL COMMENT '创建时间',
@@ -259,8 +277,6 @@ CREATE TABLE fs_call_device (
     hangup_cause                    varchar(50)  NOT NULL COMMENT '挂机原因',
     ring_cause                      varchar(50)  NOT NULL DEFAULT '' COMMENT '回铃音识别',
     sip_status                      varchar(50)  NOT NULL DEFAULT '' COMMENT 'sip状态',
-    ext1                            varchar(50)  NOT NULL DEFAULT '' COMMENT '扩展字段1',
-    ext2                            varchar(50)  NOT NULL DEFAULT '' COMMENT '扩展字段2',
     status                          tinyint(4) not null DEFAULT '1' COMMENT '状态',
     create_user_id                  bigint unsigned comment '创建人编号',
     create_time                     datetime  NOT NULL COMMENT '创建时间',
@@ -326,11 +342,6 @@ CREATE TABLE fs_call_log (
    queue_end_time                   bigint unsigned NOT NULL DEFAULT '0' COMMENT '出队列时间',
    month_time                       varchar(50)  NOT NULL DEFAULT '' COMMENT '月份',
    follow_data                      varchar(4096)  NOT NULL DEFAULT '' COMMENT '通话随路数据(2048)',
-   uuid1                            varchar(50)  NOT NULL DEFAULT '' COMMENT '扩展1',
-   uuid2                            varchar(50)  NOT NULL DEFAULT '' COMMENT '扩展2',
-   ext1                             varchar(50)  NOT NULL DEFAULT '' COMMENT '扩展3',
-   ext2                             varchar(50)  NOT NULL DEFAULT '' COMMENT '扩展4',
-   ext3                             varchar(255)  NOT NULL DEFAULT '' COMMENT '扩展5',
    status                           tinyint(4) not null DEFAULT '1' COMMENT '状态',
    create_user_id                   bigint unsigned comment '创建人编号',
    create_time                      datetime  NOT NULL COMMENT '创建时间',
@@ -343,37 +354,6 @@ CREATE TABLE fs_call_log (
    KEY idx_call_log_create_time (company_id,call_time) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=332 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='话单表';
 
-CREATE TABLE fs_company (
-    id                              bigint unsigned not null auto_increment COMMENT '主键id',
-    name                            varchar(255)  NOT NULL DEFAULT '' COMMENT '名称',
-    id_path                         varchar(255)  NOT NULL DEFAULT '' COMMENT '父企业ID',
-    pid                             bigint unsigned NOT NULL DEFAULT '0' COMMENT '父企业',
-    company_code                    varchar(255)  NOT NULL DEFAULT '' COMMENT '简称',
-    gmt                             int unsigned NOT NULL DEFAULT '0' COMMENT '时区',
-    contact                         varchar(255)  NOT NULL DEFAULT '' COMMENT '联系人',
-    phone                           varchar(255)  NOT NULL DEFAULT '' COMMENT '电话',
-    balance                         bigint unsigned NOT NULL DEFAULT '0' COMMENT '金额',
-    bill_type                       int unsigned NOT NULL DEFAULT '0' COMMENT '1:呼出计费,2:呼入计费,3:双向计费,0:全免费',
-    pay_type                        int unsigned NOT NULL DEFAULT '0' COMMENT '0:预付费;1:后付费',
-    hidden_customer                 int unsigned NOT NULL DEFAULT '0' COMMENT '隐藏客户号码(0:不隐藏;1:隐藏)',
-    secret_type                     int unsigned NOT NULL DEFAULT '0' COMMENT '坐席密码等级',
-    secret_key                      varchar(32)  NOT NULL DEFAULT '' COMMENT '验证秘钥',
-    ivr_limit                       int unsigned NOT NULL DEFAULT '0' COMMENT 'IVR通道数',
-    agent_limit                     int unsigned NOT NULL DEFAULT '0' COMMENT '开通坐席',
-    group_limit                     int unsigned NOT NULL DEFAULT '0' COMMENT '开通技能组',
-    group_agent_limit               int unsigned NOT NULL DEFAULT '0' COMMENT '单技能组中坐席上限',
-    record_storage                  int unsigned NOT NULL DEFAULT '0' COMMENT '录音保留天数',
-    notify_url                      varchar(255)  NOT NULL DEFAULT '' COMMENT '话单回调通知',
-    status                          int unsigned NOT NULL DEFAULT '0' COMMENT '状态(0:禁用企业,1:免费企业;2:试用企业,3:付费企业)',
-    create_user_id                  bigint unsigned comment '创建人编号',
-    create_time                     datetime  NOT NULL COMMENT '创建时间',
-    update_user_id                  bigint unsigned comment '修改人编号',
-    update_time                     datetime  NOT NULL COMMENT '更新时间',
-    PRIMARY KEY (id) USING BTREE,
-    UNIQUE KEY company_name (name) USING BTREE,
-    UNIQUE KEY company_code (company_code) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='企业信息表';
-
 CREATE TABLE fs_company_display (
     id                              bigint unsigned not null auto_increment COMMENT '主键id',
     company_id                      bigint unsigned NOT NULL DEFAULT '0' COMMENT '企业id',
@@ -384,7 +364,6 @@ CREATE TABLE fs_company_display (
     create_time                     datetime  NOT NULL COMMENT '创建时间',
     update_user_id                  bigint unsigned comment '修改人编号',
     update_time                     datetime  NOT NULL COMMENT '更新时间',
-    PRIMARY KEY (id) USING BTREE,
     PRIMARY KEY (id) USING BTREE,
     KEY idx_company_display (company_id,name) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='号码池表';

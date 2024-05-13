@@ -4,7 +4,6 @@ import cn.com.tzy.springbootstarterredis.utils.RedisUtils;
 import cn.com.tzy.springbootstartervideobasic.common.VideoConstant;
 import cn.com.tzy.springbootstartervideocore.demo.InviteInfo;
 import cn.com.tzy.springbootstartervideocore.properties.VideoProperties;
-import cn.com.tzy.springbootstartervideocore.redis.RedisService;
 import cn.hutool.json.JSONUtil;
 import lombok.extern.log4j.Log4j2;
 

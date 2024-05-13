@@ -1,7 +1,7 @@
 package cn.com.tzy.springbootfs.service.freeswitch;
 
 import cn.com.tzy.springbootstarterfreeswitch.model.fs.GroupMemoryInfo;
-import cn.com.tzy.springbootstarterfreeswitch.service.GroupMemoryInfoService;
+import cn.com.tzy.springbootstarterfreeswitch.service.freeswitch.GroupMemoryInfoService;
 import org.springframework.stereotype.Service;
 
 @Service

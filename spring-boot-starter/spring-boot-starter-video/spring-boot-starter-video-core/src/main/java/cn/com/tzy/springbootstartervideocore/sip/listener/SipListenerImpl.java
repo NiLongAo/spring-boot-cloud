@@ -1,11 +1,11 @@
 package cn.com.tzy.springbootstartervideocore.sip.listener;
 
 import cn.com.tzy.springbootstarterredis.utils.RedisUtils;
+import cn.com.tzy.springbootstartervideocore.redis.subscribe.sip.message.SipSubscribeHandle;
 import cn.com.tzy.springbootstartervideocore.sip.SipServer;
 import cn.com.tzy.springbootstartervideocore.sip.listener.event.request.SipRequestEvent;
 import cn.com.tzy.springbootstartervideocore.sip.listener.event.response.SipResponseEvent;
 import cn.com.tzy.springbootstartervideocore.sip.listener.event.timeout.SipTimeoutEvent;
-import cn.com.tzy.springbootstartervideocore.redis.subscribe.sip.message.SipSubscribeHandle;
 import cn.com.tzy.springbootstartervideocore.sip.utils.SipLogUtils;
 import cn.hutool.core.thread.ThreadUtil;
 import lombok.Data;
@@ -29,7 +29,6 @@ public class SipListenerImpl implements SipListener {
      * SIP超时事件
      */
     private SipTimeoutEvent sipTimeoutEvent;
-    private SipSubscribeHandle sipSubscribeHandle;
 
     private final SipServer sipServer;
 
@@ -39,9 +38,8 @@ public class SipListenerImpl implements SipListener {
 
 
 
-    public void init(SipTimeoutEvent sipTimeoutEvent, SipSubscribeHandle sipSubscribeHandle, ConcurrentHashMap<String, SipRequestEvent> sipRequestEventMap, ConcurrentHashMap<String, SipResponseEvent> sipResponseEventMap){
+    public void init(SipTimeoutEvent sipTimeoutEvent, ConcurrentHashMap<String, SipRequestEvent> sipRequestEventMap, ConcurrentHashMap<String, SipResponseEvent> sipResponseEventMap){
         this.sipTimeoutEvent = sipTimeoutEvent;
-        this.sipSubscribeHandle = sipSubscribeHandle;
         this.sipRequestEventMap = sipRequestEventMap;
         this.sipResponseEventMap = sipResponseEventMap;
     }

@@ -1,7 +1,7 @@
 package cn.com.tzy.springbootstarterfreeswitch.model.call;
 
 
-import cn.com.tzy.springbootstarterfreeswitch.enums.NextTypeEnum;
+import cn.com.tzy.springbootstarterfreeswitch.enums.fs.NextTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

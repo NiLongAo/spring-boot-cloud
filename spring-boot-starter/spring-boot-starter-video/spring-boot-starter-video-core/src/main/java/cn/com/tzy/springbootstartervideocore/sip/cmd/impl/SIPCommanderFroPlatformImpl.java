@@ -1,6 +1,7 @@
 package cn.com.tzy.springbootstartervideocore.sip.cmd.impl;
 
 import cn.com.tzy.springbootcomm.common.enumcom.ConstEnum;
+import cn.com.tzy.springbootcomm.utils.DynamicTask;
 import cn.com.tzy.springbootstartervideobasic.enums.CharsetType;
 import cn.com.tzy.springbootstartervideobasic.enums.GbIdConstant;
 import cn.com.tzy.springbootstartervideobasic.enums.TransportType;
@@ -11,7 +12,6 @@ import cn.com.tzy.springbootstartervideobasic.vo.sip.SendRtp;
 import cn.com.tzy.springbootstartervideobasic.vo.video.*;
 import cn.com.tzy.springbootstartervideocore.demo.NotifySubscribeInfo;
 import cn.com.tzy.springbootstartervideocore.demo.SipTransactionInfo;
-import cn.com.tzy.springbootcomm.utils.DynamicTask;
 import cn.com.tzy.springbootstartervideocore.properties.SipConfigProperties;
 import cn.com.tzy.springbootstartervideocore.redis.RedisService;
 import cn.com.tzy.springbootstartervideocore.redis.impl.PlatformRegisterManager;

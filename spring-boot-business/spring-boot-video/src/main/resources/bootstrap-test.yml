@@ -69,8 +69,6 @@ video-settings:
   stream_on_demand: true
   # 推流鉴权， 默认开启
   push_authority: true
-  # 设备上线时是否自动同步通道
-  sync_channel_on_device_online: true
   # 是否开启sip日志
   sip_log: true
   # 消息通道功能-缺少国标ID是否给所有上级发送消息

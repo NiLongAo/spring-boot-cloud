@@ -3,7 +3,6 @@ package cn.com.tzy.springbootstartervideocore.redis.impl;
 import cn.com.tzy.springbootstarterredis.utils.RedisUtils;
 import cn.com.tzy.springbootstartervideocore.properties.SipConfigProperties;
 import cn.com.tzy.springbootstartervideobasic.common.VideoConstant;
-import cn.com.tzy.springbootstartervideocore.properties.VideoProperties;
 import cn.com.tzy.springbootstartervideocore.sip.SipServer;
 
 import javax.annotation.Resource;

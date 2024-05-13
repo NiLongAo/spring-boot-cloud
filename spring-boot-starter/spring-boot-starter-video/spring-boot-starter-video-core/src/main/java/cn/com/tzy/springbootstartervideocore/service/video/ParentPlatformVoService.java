@@ -74,7 +74,7 @@ public abstract class ParentPlatformVoService {
      * 向上级平台注册
      */
     public void login(ParentPlatformVo parentPlatformVo){
-        RedisService.getRegisterServerManager().putPlatform(parentPlatformVo.getServerGbId(),parentPlatformVo.getKeepTimeout()+VideoConstant.DELAY_TIME, Address.builder().gbId(parentPlatformVo.getServerGbId()).ip(nacosDiscoveryProperties.getIp()).port(nacosDiscoveryProperties.getPort()).build());
+        RedisService.getRegisterServerManager().putPlatform(parentPlatformVo.getServerGbId(),parentPlatformVo.getKeepTimeout()+ VideoConstant.DELAY_TIME, Address.builder().gbId(parentPlatformVo.getServerGbId()).ip(nacosDiscoveryProperties.getIp()).port(nacosDiscoveryProperties.getPort()).build());
         register(parentPlatformVo,error->{
             log.info("[国标级联] {}, 发起注册，失败", parentPlatformVo.getServerGbId());
         });
@@ -142,7 +142,7 @@ public abstract class ParentPlatformVoService {
         this.registerTask(parentPlatformVo,false);
         //添加保活任务
         this.keepaliveTask(parentPlatformVo,false);
-        RedisService.getRegisterServerManager().putPlatform(parentPlatformVo.getServerGbId(),parentPlatformVo.getKeepTimeout()+VideoConstant.DELAY_TIME, Address.builder().gbId(parentPlatformVo.getServerGbId()).ip(nacosDiscoveryProperties.getIp()).port(nacosDiscoveryProperties.getPort()).build());
+        RedisService.getRegisterServerManager().putPlatform(parentPlatformVo.getServerGbId(),parentPlatformVo.getKeepTimeout()+ VideoConstant.DELAY_TIME, Address.builder().gbId(parentPlatformVo.getServerGbId()).ip(nacosDiscoveryProperties.getIp()).port(nacosDiscoveryProperties.getPort()).build());
     }
 
     public void offline(ParentPlatformVo parentPlatformVo){
@@ -174,7 +174,7 @@ public abstract class ParentPlatformVoService {
         if (dynamicTask.isAlive(key)) {
             return;
         }
-        int expires= Math.max(parentPlatformVo.getExpires(),20)-VideoConstant.DELAY_TIME;
+        int expires= Math.max(parentPlatformVo.getExpires(),20)- VideoConstant.DELAY_TIME;
         dynamicTask.startCron(key, expires, expires,()->{
             log.info("[国标级联] 平台：{}注册即将到期，开始续订", parentPlatformVo.getServerGbId());
             register(parentPlatformVo,error -> {
@@ -216,7 +216,7 @@ public abstract class ParentPlatformVoService {
                         parentPlatform.setKeepAliveReply(0);
                         RedisService.getSipTransactionManager().putParentPlatform(parentPlatformVo.getServerGbId(),parentPlatform);
                     }
-                    RedisService.getRegisterServerManager().putPlatform(parentPlatformVo.getServerGbId(),parentPlatformVo.getKeepTimeout()+VideoConstant.DELAY_TIME, Address.builder().gbId(parentPlatformVo.getServerGbId()).ip(nacosDiscoveryProperties.getIp()).port(nacosDiscoveryProperties.getPort()).build());
+                    RedisService.getRegisterServerManager().putPlatform(parentPlatformVo.getServerGbId(),parentPlatformVo.getKeepTimeout()+ VideoConstant.DELAY_TIME, Address.builder().gbId(parentPlatformVo.getServerGbId()).ip(nacosDiscoveryProperties.getIp()).port(nacosDiscoveryProperties.getPort()).build());
                 },error->{
                     register(parentPlatformVo, errorEvent -> {
                         log.info("[国标级联] {}，心跳超时后再次发起注册仍然失败，开始定时发起注册，间隔为1分钟", parentPlatformVo.getServerGbId());

@@ -1,6 +1,6 @@
 package cn.com.tzy.springbootstarterfreeswitch.model.fs;
 
-import cn.com.tzy.springbootstarterfreeswitch.enums.AgentStateEnum;
+import cn.com.tzy.springbootstarterfreeswitch.enums.fs.AgentStateEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
