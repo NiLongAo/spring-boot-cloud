@@ -62,7 +62,7 @@
           <param name="rtp-ip" value="$${local_ip_v4}"/>
           <param name="sip-ip" value="$${local_ip_v4}"/>
           #end
-          #if($config.iceStart)
+          #if($config.iceStart == 1)
           <param name="ext-rtp-ip" value="${config.stunAddress}"/>
           <param name="ext-sip-ip" value="${config.stunAddress}"/>
           #else

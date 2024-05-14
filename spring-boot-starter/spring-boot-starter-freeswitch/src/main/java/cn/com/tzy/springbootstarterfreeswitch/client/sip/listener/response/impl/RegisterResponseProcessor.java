@@ -4,8 +4,7 @@ import cn.com.tzy.springbootstarterfreeswitch.client.sip.listener.response.Abstr
 import cn.com.tzy.springbootstarterfreeswitch.model.fs.AgentVoInfo;
 import cn.com.tzy.springbootstarterfreeswitch.redis.RedisService;
 import cn.com.tzy.springbootstarterfreeswitch.redis.impl.sip.PlatformRegisterManager;
-import cn.com.tzy.springbootstarterfreeswitch.service.FsService;
-import cn.com.tzy.springbootstarterfreeswitch.service.freeswitch.AgentVoService;
+import cn.com.tzy.springbootstarterfreeswitch.service.SipService;
 import cn.com.tzy.springbootstarterfreeswitch.vo.sip.PlatformRegisterInfo;
 import cn.com.tzy.springbootstarterfreeswitch.vo.sip.SipTransactionInfo;
 import gov.nist.javax.sip.message.SIPResponse;
@@ -38,15 +37,12 @@ public class RegisterResponseProcessor extends AbstractSipResponseEvent {
         String callId = response.getCallIdHeader().getCallId();
 
         PlatformRegisterManager platformRegisterManager = RedisService.getPlatformRegisterManager();
-        AgentVoService agentVoService = FsService.getAgentService();
-
         PlatformRegisterInfo platformRegisterInfo = platformRegisterManager.queryPlatformRegisterInfo(callId);
         if (platformRegisterInfo == null) {
             log.info(String.format("[国标级联]未找到callId： %s 的注册/注销平台id", callId ));
             return;
         }
-
-        AgentVoInfo agentVoInfo = agentVoService.getAgentBySip(platformRegisterInfo.getAgentCode());
+        AgentVoInfo agentVoInfo = RedisService.getAgentInfoManager().get(platformRegisterInfo.getAgentCode());
         String action = platformRegisterInfo.isRegister() ? "注册" : "注销";
         log.info(String.format("[国标级联]%s %S响应,%s ", action, response.getStatusCode(), platformRegisterInfo.getAgentCode() ));
         if (agentVoInfo == null) {
@@ -71,9 +67,9 @@ public class RegisterResponseProcessor extends AbstractSipResponseEvent {
             if (platformRegisterInfo.isRegister()) {
                 sipTransactionInfo.sipTransactionInfo(response);
                 sipTransactionInfo.setRegisterAliveReply(0);
-                agentVoService.online(agentVoInfo, sipTransactionInfo);
+                SipService.getParentPlatformService().online(agentVoInfo,sipTransactionInfo);
             }else {
-                agentVoService.offline(agentVoInfo.getAgentCode());
+                SipService.getParentPlatformService().offline(agentVoInfo);
             }
             // 注册/注销成功移除缓存的信息
             platformRegisterManager.delPlatformRegisterInfo(callId);

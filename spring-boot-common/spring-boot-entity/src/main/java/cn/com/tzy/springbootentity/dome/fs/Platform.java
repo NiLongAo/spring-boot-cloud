@@ -12,16 +12,16 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 /**
-    * Fs系统配置信息
+    * 平台信息
     */
-@ApiModel(description="Fs系统配置信息")
+@ApiModel(description="平台信息")
 @Data
 @EqualsAndHashCode(callSuper=true)
 @SuperBuilder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-@TableName(value = "fs_config")
-public class Config extends LongIdEntity {
+@TableName(value = "fs_platform")
+public class Platform extends LongIdEntity {
     /**
      * 本机IP
      */
@@ -37,18 +37,18 @@ public class Config extends LongIdEntity {
     private String remoteIp;
 
     /**
-     * 中继端口
-     */
-    @TableField(value = "external_port")
-    @ApiModelProperty(value="中继端口")
-    private Integer externalPort;
-
-    /**
      * 注册端口
      */
     @TableField(value = "internal_port")
     @ApiModelProperty(value="注册端口")
     private Integer internalPort;
+
+    /**
+     * 中继端口
+     */
+    @TableField(value = "external_port")
+    @ApiModelProperty(value="中继端口")
+    private Integer externalPort;
 
     /**
      * 起始RTP端口
@@ -63,6 +63,20 @@ public class Config extends LongIdEntity {
     @TableField(value = "end_rtp_port")
     @ApiModelProperty(value="结束RTP端口")
     private Integer endRtpPort;
+
+    /**
+     * ws端口
+     */
+    @TableField(value = "ws_port")
+    @ApiModelProperty(value="ws端口")
+    private Integer wsPort;
+
+    /**
+     * wss端口
+     */
+    @TableField(value = "wss_port")
+    @ApiModelProperty(value="wss端口")
+    private Integer wssPort;
 
     /**
      * 音频编码
@@ -105,6 +119,27 @@ public class Config extends LongIdEntity {
     @TableField(value = "stun_address")
     @ApiModelProperty(value="stun地址")
     private String stunAddress;
+
+    /**
+     * 名称
+     */
+    @TableField(value = "`name`")
+    @ApiModelProperty(value="名称")
+    private String name;
+
+    /**
+     * 是否启用
+     */
+    @TableField(value = "`enable`")
+    @ApiModelProperty(value="是否启用")
+    private Integer enable;
+
+    /**
+     * 在线状态
+     */
+    @TableField(value = "`status`")
+    @ApiModelProperty(value="在线状态")
+    private Integer status;
 
     /**
      * 是否开启音频
@@ -154,18 +189,4 @@ public class Config extends LongIdEntity {
     @TableField(value = "freeswitch_log_path")
     @ApiModelProperty(value="交换服务日志路径")
     private String freeswitchLogPath;
-
-    /**
-     * ws端口
-     */
-    @TableField(value = "ws_port")
-    @ApiModelProperty(value="ws端口")
-    private Integer wsPort;
-
-    /**
-     * wss端口
-     */
-    @TableField(value = "wss_port")
-    @ApiModelProperty(value="wss端口")
-    private Integer wssPort;
 }

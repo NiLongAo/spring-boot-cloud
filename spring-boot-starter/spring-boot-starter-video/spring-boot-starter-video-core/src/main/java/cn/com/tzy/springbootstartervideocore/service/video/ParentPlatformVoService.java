@@ -197,7 +197,7 @@ public abstract class ParentPlatformVoService {
             return;
         }
         log.info("[国标级联]：{}, 定时上级平台心跳保活任务", parentPlatformVo.getServerGbId());
-        dynamicTask.startCron(keepaliveTaskKey, parentPlatformVo.getKeepTimeout(),()->{
+        dynamicTask.startCron(keepaliveTaskKey,1, parentPlatformVo.getKeepTimeout(),()->{
             try {
                 SipTransactionInfo parentPlatform = RedisService.getSipTransactionManager().findParentPlatform(parentPlatformVo.getServerGbId());
                 if(parentPlatform == null){

@@ -139,8 +139,6 @@ public class SIPRequestProvider {
             this.cSeqHeader = this.sipFactory.createHeaderFactory().createCSeqHeader(cseq, this.requestType);
             return this;
         }
-
-
         /**
          * 基于新提供的地址和标记值创建新的FromHeader。
          * @param sipId sip国标编号
@@ -229,7 +227,10 @@ public class SIPRequestProvider {
             headerList.add(sipFactory.createHeaderFactory().createSubjectHeader(agentParam));
             return this;
         }
-
+        public  Builder createAcceptHeader(String contentType, String contentSubType) throws PeerUnavailableException, ParseException {
+            headerList.add(this.sipFactory.createHeaderFactory().createAcceptHeader(contentType, contentSubType));
+            return this;
+        }
         public Builder createExpiresHeader(Integer expires) throws PeerUnavailableException, InvalidArgumentException {
             headerList.add(sipFactory.createHeaderFactory().createExpiresHeader(expires));
             return this;

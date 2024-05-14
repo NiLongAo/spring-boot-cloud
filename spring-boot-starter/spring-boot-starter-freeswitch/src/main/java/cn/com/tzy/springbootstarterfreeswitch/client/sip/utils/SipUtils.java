@@ -1,6 +1,7 @@
 package cn.com.tzy.springbootstarterfreeswitch.client.sip.utils;
 
 import cn.com.tzy.springbootstarterfreeswitch.vo.sip.Address;
+import cn.com.tzy.springbootstarterfreeswitch.vo.sip.Gb28181Sdp;
 import gov.nist.javax.sip.address.AddressImpl;
 import gov.nist.javax.sip.address.SipUri;
 import gov.nist.javax.sip.header.Via;
@@ -8,6 +9,9 @@ import gov.nist.javax.sip.message.SIPRequest;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.util.ObjectUtils;
 
+import javax.sdp.SdpFactory;
+import javax.sdp.SdpParseException;
+import javax.sdp.SessionDescription;
 import javax.sip.PeerUnavailableException;
 import javax.sip.SipFactory;
 import javax.sip.header.FromHeader;
@@ -41,7 +45,7 @@ public class SipUtils {
 
     public static UserAgentHeader createUserAgentHeader(SipFactory sipFactory) throws PeerUnavailableException, ParseException {
         List<String> agentParam = new ArrayList<>();
-        agentParam.add("Video-Zim");
+        agentParam.add("Fs-Sip");
         return sipFactory.createHeaderFactory().createUserAgentHeader(agentParam);
     }
 
@@ -100,5 +104,32 @@ public class SipUtils {
             }
         }
         return null;
+    }
+
+    public static Gb28181Sdp parseSDP(String sdpStr) throws SdpParseException {
+        // jainSip不支持y= f=字段， 移除以解析。
+        int ssrcIndex = sdpStr.indexOf("y=");
+        int mediaDescriptionIndex = sdpStr.indexOf("f=");
+        // 检查是否有y字段
+        SessionDescription sdp;
+        String ssrc = null;
+        String mediaDescription = null;
+        if (mediaDescriptionIndex == 0 && ssrcIndex == 0) {
+            sdp = SdpFactory.getInstance().createSessionDescription(sdpStr);
+        }else {
+            String lines[] = sdpStr.split("\\r?\\n");
+            StringBuilder sdpBuffer = new StringBuilder();
+            for (String line : lines) {
+                if (line.trim().startsWith("y=")) {
+                    ssrc = line.substring(2);
+                }else if (line.trim().startsWith("f=")) {
+                    mediaDescription = line.substring(2);
+                }else {
+                    sdpBuffer.append(line.trim()).append("\r\n");
+                }
+            }
+            sdp = SdpFactory.getInstance().createSessionDescription(sdpBuffer.toString());
+        }
+        return Gb28181Sdp.getInstance(sdp, ssrc, mediaDescription);
     }
 }

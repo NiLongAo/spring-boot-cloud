@@ -292,7 +292,7 @@ public class ChannelParkEventHandler implements EslEventHandler {
         //通过sip号码获取绑定的坐席
         String caller = event.getEventHeaders().get("variable_sip_from_user");//主叫号码
         String called = event.getEventHeaders().get("Caller-Destination-Number");//被叫号码
-        AgentVoInfo agent = FsService.getAgentService().getAgentBySip(caller);
+        AgentVoInfo agent = RedisService.getAgentInfoManager().get(caller);
         String callId = String.valueOf(FreeswitchUtils.snowflake.nextId());
         if (agent == null || agent.getGroupId() == null) {
             log.warn("sipOutbound callId:{}  sip:{} called:{}", callId, caller, called);

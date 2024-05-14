@@ -11,6 +11,9 @@ sip:
   id: fs-sip-server
   port: 5060
   domain: fs-sip-server
+video-settings:
+  # 是否开启sip日志
+  sip_log: true
 link:
   thingscloud:
     freeswitch:

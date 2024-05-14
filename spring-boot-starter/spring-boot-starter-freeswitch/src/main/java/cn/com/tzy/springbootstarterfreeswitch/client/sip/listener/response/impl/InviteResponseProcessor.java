@@ -1,7 +1,7 @@
 package cn.com.tzy.springbootstarterfreeswitch.client.sip.listener.response.impl;
 
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.listener.response.AbstractSipResponseEvent;
-import cn.com.tzy.springbootstarterfreeswitch.utils.SipUtils;
+import cn.com.tzy.springbootstarterfreeswitch.client.sip.utils.SipUtils;
 import cn.com.tzy.springbootstarterfreeswitch.vo.sip.Gb28181Sdp;
 import gov.nist.javax.sip.ResponseEventExt;
 import gov.nist.javax.sip.message.SIPResponse;

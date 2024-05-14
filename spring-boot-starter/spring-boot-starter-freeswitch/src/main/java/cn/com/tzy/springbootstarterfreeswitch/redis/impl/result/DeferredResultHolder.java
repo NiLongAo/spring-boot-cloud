@@ -4,7 +4,7 @@ import cn.com.tzy.springbootcomm.common.enumcom.ConstEnum;
 import cn.com.tzy.springbootcomm.utils.DynamicTask;
 import cn.com.tzy.springbootstarterfreeswitch.common.sip.SipConstant;
 import cn.com.tzy.springbootstarterfreeswitch.vo.result.DeferredResultVo;
-import cn.com.tzy.springbootstarterfreeswitch.vo.result.VideoRestResult;
+import cn.com.tzy.springbootstarterfreeswitch.vo.result.FsRestResult;
 import cn.com.tzy.springbootstarterredis.pool.AbstractMessageListener;
 import cn.com.tzy.springbootstarterredis.utils.RedisUtils;
 import cn.hutool.core.date.DateUtil;
@@ -32,6 +32,10 @@ public class DeferredResultHolder {
     private static final String VIDEO_DEFERRED_RESULT_HOLDER = SipConstant.VIDEO_DEFERRED_RESULT_HOLDER;
 
 
+    /**
+     * login 登陆 key
+     */
+    public static final String AGENT_LOGIN = "agent_login_";
     /**
      * 停止点播key
      */
@@ -90,7 +94,7 @@ public class DeferredResultHolder {
         RedisUtils.redisTemplate.convertAndSend(VIDEO_DEFERRED_RESULT_HOLDER,DeferredResultVo.builder().onAll(ConstEnum.Flag.YES.getValue()).key(key).id(null).data(data).build());
     }
 
-    public void put(String key, String id, VideoRestResult result) {
+    public void put(String key, String id, FsRestResult result) {
         RedisMessageListenerContainer redisMessageListenerContainer = SpringUtil.getBean(RedisMessageListenerContainer.class);
         Map<String, DeferredResult> deferredResultMap = resultMap.computeIfAbsent(key, o -> new ConcurrentHashMap<>());
         deferredResultMap.put(id, result);

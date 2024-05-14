@@ -24,11 +24,12 @@ public class RedisService {
     public static SipTransactionManager getSipTransactionManager(){return SpringUtil.getBean(SipTransactionManager.class);}
     public static PlatformRegisterManager getPlatformRegisterManager(){return SpringUtil.getBean(PlatformRegisterManager.class);}
     public static CseqManager getCseqManager(){return SpringUtil.getBean(CseqManager.class);}
-    public static PlatformNotifySubscribeManager getPlatformNotifySubscribeManager(){return SpringUtil.getBean(PlatformNotifySubscribeManager.class);}
     public static SendRtpManager getSendRtpManager(){return SpringUtil.getBean(SendRtpManager.class);}
     public static MediaServerManager getMediaServerManager(){return SpringUtil.getBean(MediaServerManager.class);}
     public static StreamChangedManager getStreamChangedManager(){return SpringUtil.getBean(StreamChangedManager.class);}
     public static RecordMp4Manager getRecordMp4Manager(){return SpringUtil.getBean(RecordMp4Manager.class);}
     public static InviteStreamManager getInviteStreamManager(){return SpringUtil.getBean(InviteStreamManager.class);}
     public static SsrcTransactionManager getSsrcTransactionManager(){return SpringUtil.getBean(SsrcTransactionManager.class);}
+    public static AgentNotifySubscribeManager getAgentNotifySubscribeManager(){return SpringUtil.getBean(AgentNotifySubscribeManager.class);}
+
 }

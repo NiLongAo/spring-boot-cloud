@@ -1,4 +1,4 @@
-package cn.com.tzy.springbootstarterfreeswitch;
+package cn.com.tzy.springbootstarterfreeswitch.config;
 
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.SipServer;
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.listener.request.SipRequestEvent;

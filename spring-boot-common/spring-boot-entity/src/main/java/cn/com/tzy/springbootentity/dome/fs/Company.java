@@ -1,19 +1,17 @@
 package cn.com.tzy.springbootentity.dome.fs;
 
 import cn.com.tzy.springbootcomm.common.bean.LongIdEntity;
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.util.Date;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+
+import java.math.BigDecimal;
 
 /**
     * 企业信息表
@@ -34,32 +32,11 @@ public class Company extends LongIdEntity {
     private String name;
 
     /**
-     * 父企业ID
-     */
-    @TableField(value = "id_path")
-    @ApiModelProperty(value="父企业ID")
-    private String idPath;
-
-    /**
-     * 父企业
-     */
-    @TableField(value = "pid")
-    @ApiModelProperty(value="父企业")
-    private Long pid;
-
-    /**
      * 简称
      */
     @TableField(value = "company_code")
     @ApiModelProperty(value="简称")
     private String companyCode;
-
-    /**
-     * 时区
-     */
-    @TableField(value = "gmt")
-    @ApiModelProperty(value="时区")
-    private Integer gmt;
 
     /**
      * 联系人
@@ -80,7 +57,7 @@ public class Company extends LongIdEntity {
      */
     @TableField(value = "balance")
     @ApiModelProperty(value="金额")
-    private Long balance;
+    private BigDecimal balance;
 
     /**
      * 1:呼出计费,2:呼入计费,3:双向计费,0:全免费

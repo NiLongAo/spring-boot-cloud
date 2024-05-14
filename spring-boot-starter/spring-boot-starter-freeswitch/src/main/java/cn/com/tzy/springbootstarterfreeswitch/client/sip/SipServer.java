@@ -15,7 +15,6 @@ import cn.com.tzy.springbootstarterfreeswitch.vo.sip.GbStringMsgParserFactory;
 import com.alibaba.cloud.nacos.NacosDiscoveryProperties;
 import gov.nist.javax.sip.SipProviderImpl;
 import gov.nist.javax.sip.SipStackImpl;
-import link.thingscloud.freeswitch.esl.InboundClient;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -35,7 +34,6 @@ public class SipServer {
     private final SipConfigProperties sipConfigProperties;
     private final VideoProperties videoProperties;
     private final NacosDiscoveryProperties nacosDiscoveryProperties;
-    private final InboundClient inboundClient;
     /**
      * 信令服务器工厂
      */
@@ -57,9 +55,8 @@ public class SipServer {
      */
     private final Map<String, SipProviderImpl> udpSipProviderMap = new ConcurrentHashMap<>();
 
-    public SipServer(SipConfigProperties sipConfigProperties,InboundClient inboundClient, SipSubscribeHandle sipSubscribeHandle, VideoProperties videoProperties, NacosDiscoveryProperties nacosDiscoveryProperties){
+    public SipServer(SipConfigProperties sipConfigProperties, SipSubscribeHandle sipSubscribeHandle, VideoProperties videoProperties, NacosDiscoveryProperties nacosDiscoveryProperties){
         this.sipListener = new SipListenerImpl(this);
-        this.inboundClient = inboundClient;
         this.sipSubscribeHandle = sipSubscribeHandle;
         this.sipConfigProperties = sipConfigProperties;
         this.videoProperties = videoProperties;
@@ -183,10 +180,6 @@ public class SipServer {
 
     public SipConfigProperties getSipConfigProperties(){
         return sipConfigProperties;
-    }
-
-    public InboundClient getInboundClient(){
-        return inboundClient;
     }
 
     public VideoProperties getVideoProperties(){return videoProperties;}

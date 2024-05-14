@@ -11,10 +11,10 @@ import java.util.function.Supplier;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class VideoRestResult<T> extends DeferredResult<T> {
+public class FsRestResult<T> extends DeferredResult<T> {
     private Long timeoutValue;
 
-    public VideoRestResult(@Nullable Long timeoutValue, Supplier<?> timeoutResult) {
+    public FsRestResult(@Nullable Long timeoutValue, Supplier<?> timeoutResult) {
         super(timeoutValue,timeoutResult);
         this.timeoutValue = timeoutValue;
     }

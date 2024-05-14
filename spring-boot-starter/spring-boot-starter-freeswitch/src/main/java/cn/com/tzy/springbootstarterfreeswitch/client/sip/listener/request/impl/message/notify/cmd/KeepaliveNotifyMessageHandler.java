@@ -41,6 +41,12 @@ public class KeepaliveNotifyMessageHandler extends SipResponseEvent implements M
             // 未注册的设备不做处理
             return;
         }
+        // 个别平台保活不回复200OK会判定离线
+        try {
+            responseAck((SIPRequest) evt.getRequest(), Response.OK,null);
+        } catch (SipException | InvalidArgumentException | ParseException e) {
+            log.error("[命令发送失败] 心跳回复: {}", e.getMessage());
+        }
 
     }
 

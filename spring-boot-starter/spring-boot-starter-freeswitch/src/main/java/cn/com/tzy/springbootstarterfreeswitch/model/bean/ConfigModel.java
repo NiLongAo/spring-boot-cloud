@@ -32,6 +32,10 @@ public class ConfigModel extends BeanModel {
     /** 结束RTP端口 */
     private String endRtpPort;
 
+    private String wsPort;
+
+    private String wssPort;
+
     /** 音频编码 */
     private String audioCode;
 
@@ -45,16 +49,16 @@ public class ConfigModel extends BeanModel {
     private Long bitRate;
 
     /** 是否启动ice */
-    private Boolean iceStart;
+    private Integer iceStart;
 
     /** stun地址 */
     private String stunAddress;
 
     /** 是否音频 */
-    private Boolean audioRecord;
+    private Integer audioRecord;
 
     /** 是否视频 */
-    private Boolean videoRecord;
+    private Integer videoRecord;
 
     /** 音频存储地址 */
     private String audioRecordPath;
@@ -71,7 +75,5 @@ public class ConfigModel extends BeanModel {
     /** 交换服务日志路径 */
     private String freeswitchLogPath;
 
-    private String wsPort;
 
-    private String wssPort;
 }

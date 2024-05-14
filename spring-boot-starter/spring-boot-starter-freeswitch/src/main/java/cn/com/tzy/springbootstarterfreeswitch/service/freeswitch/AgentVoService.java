@@ -60,8 +60,8 @@ public abstract class AgentVoService {
         agentVoInfo.setKeepaliveTime(new Date());
         AgentVoInfo agentVoGb = this.findAgentId(agentVoInfo.getAgentCode());
         //缓存设备注册服务
-        RedisService.getRegisterServerManager().putDevice(agentVoInfo.getAgentCode(), agentVoInfo.getKeepTimeout()+ SipConstant.DELAY_TIME , Address.builder().agentCode(agentVoInfo.getAgentCode()).ip(nacosDiscoveryProperties.getIp()).port(nacosDiscoveryProperties.getPort()).build());
         if(agentVoGb == null){
+            agentVoInfo.setState(ConstEnum.Flag.YES.getValue());
             agentVoInfo.setAgentOnline(ConstEnum.Flag.YES.getValue());
             agentVoInfo.setAgentState(AgentStateEnum.LOGIN);
             agentVoInfo.setRegisterTime(new Date());
@@ -71,6 +71,7 @@ public abstract class AgentVoService {
             inviteStreamManager.clearInviteInfo(agentVoInfo.getAgentCode());
             if(agentVoInfo.getAgentOnline() == ConstEnum.Flag.NO.getValue()){
                 log.info("[设备上线]: {}，查询设备信息以及通道信息", agentVoInfo.getAgentCode());
+                agentVoInfo.setState(ConstEnum.Flag.YES.getValue());
                 agentVoInfo.setAgentOnline(ConstEnum.Flag.YES.getValue());
                 agentVoInfo.setAgentState(AgentStateEnum.LOGIN);
                 agentVoInfo.setRegisterTime(new Date());
@@ -79,9 +80,14 @@ public abstract class AgentVoService {
                 this.save(agentVoInfo);
             }
         }
-        String key = String.format("%s_%s", SipConstant.REGISTER_EXPIRE_TASK_KEY_PREFIX, agentVoInfo.getAgentCode());
-        //设置设备过期任务
-        dynamicTask.startDelay(key, agentVoInfo.getKeepTimeout()+ SipConstant.DELAY_TIME,()->offline(agentVoInfo.getAgentCode()));
+
+        if(sipTransactionInfo != null){
+            //设置设备过期任务
+            String key = String.format("%s_%s", SipConstant.REGISTER_EXPIRE_TASK_KEY_PREFIX, agentVoInfo.getAgentCode());
+            dynamicTask.startDelay(key, agentVoInfo.getKeepTimeout()+ SipConstant.DELAY_TIME,()->offline(agentVoInfo.getAgentCode()));
+            RedisService.getRegisterServerManager().putDevice(agentVoInfo.getAgentCode(), agentVoInfo.getKeepTimeout()+ SipConstant.DELAY_TIME , Address.builder().agentCode(agentVoInfo.getAgentCode()).ip(nacosDiscoveryProperties.getIp()).port(nacosDiscoveryProperties.getPort()).build());
+            RedisService.getAgentInfoManager().put(agentVoInfo);
+        }
     }
 
     /**
@@ -115,6 +121,7 @@ public abstract class AgentVoService {
             }
         }
         RedisService.getRegisterServerManager().delDevice(agentCode);
+        RedisService.getAgentInfoManager().del(agentCode);
     }
 
 }

@@ -1,5 +1,6 @@
 package cn.com.tzy.springbootstarterfreeswitch.model.fs;
 
+import cn.com.tzy.springbootcomm.common.enumcom.ConstEnum;
 import cn.com.tzy.springbootstarterfreeswitch.enums.fs.AgentStateEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,42 +27,33 @@ public class AgentVoInfo implements Serializable {
      */
     private String companyId;
     /**
-     * 坐席账户
-     */
-    private String agentKey;
-    /**
-     * 座席密码
-     */
-    private String passwd;
-    /**
      * 坐席工号
      */
     private String agentId;
     /**
-     * 坐席分机号
+     * 坐席账户
      */
-    private String agentCode;
+    private String agentKey;
     /**
      * 坐席名称
      */
     private String agentName;
     /**
-     * 绑定的电话号码
+     * 坐席分机号
      */
-    private String sipPhone;
-    /**
-     * Sip电话号码
-     */
-    private List<String> sipPhoneList;
+    private String agentCode;
     /**
      * 座席类型：1:普通座席；2：班长
      */
     private Integer agentType;
     /**
-     * 1：socket登陆
-     * 2：sip登陆
+     * 座席密码
      */
-    private Integer loginType;
+    private String passwd;
+    /**
+     * 绑定的电话号码
+     */
+    private String sipPhone;
     /**
      * 是否录音 0 no 1 yes
      */
@@ -70,10 +62,6 @@ public class AgentVoInfo implements Serializable {
      * 座席主要技能组  不能为空 必填项
      */
     private String groupId;
-    /**
-     * 总机坐席
-     */
-    private Integer agentOnline;
     /**
      * 话后自动空闲间隔时长
      */
@@ -91,9 +79,59 @@ public class AgentVoInfo implements Serializable {
      */
     private String host;
     /**
+     * 坐席状态(1:在线,0:不在线)
+     */
+    private Integer state;
+    /**
      * 状态：1 启用，0关闭
      */
     private Integer status;
+    /**
+     * 注册时间
+     */
+    private Date registerTime;
+    /**
+     * 续订时间
+     */
+    private Date renewTime;
+    /**
+     * 心跳时间
+     */
+    private Date keepaliveTime;
+    /**
+     * 心跳周期(秒)
+     */
+    private Integer keepTimeout;
+    /**
+     * 注册时长
+     */
+    private int expires = 3600;
+    /**
+     * 传输协议 1.UDP 2.TCP
+     */
+    private Integer transport;
+    /**
+     * 数据流传输模式 0.UDP:udp传输 2.TCP-ACTIVE：tcp主动模式 2.TCP-PASSIVE：tcp被动模式
+     */
+    private Integer streamMode;
+    /**
+     * 字符集, 1.UTF-8 2.GB2312
+     */
+    private Integer charset= 2;
+    //-----------------以下为缓存数据---------------------------
+    /**
+     * Sip电话号码
+     */
+    private List<String> sipPhoneList;
+    /**
+     * 1：socket登陆
+     * 2：sip登陆
+     */
+    private Integer loginType;
+    /**
+     * 总机坐席
+     */
+    private Integer agentOnline;
     /**
      * 客户端地址
      */
@@ -149,10 +187,6 @@ public class AgentVoInfo implements Serializable {
      */
     private Long stateTime = 0L;
     /**
-     * 坐席状态预设
-     */
-    private AgentPreset agentPreset;
-    /**
      * 上一次状态
      */
     private AgentStateEnum beforeState;
@@ -160,14 +194,6 @@ public class AgentVoInfo implements Serializable {
      * 上一次状态时间(秒)
      */
     private Long beforeTime = 0L;
-    /**
-     * 下线时间(秒)
-     */
-    private Long logoutTime = 0L;
-    /**
-     * 坐席最近的一次服务时间,电话则是振铃时间(秒)
-     */
-    private Long serviceTime = 0L;
     /**
      * 最大空闲时长
      */
@@ -210,39 +236,6 @@ public class AgentVoInfo implements Serializable {
     private Integer hiddenCustomer;
 
     /**
-     * 注册时间
-     */
-    private Date registerTime;
-    /**
-     * 续订时间
-     */
-    private Date renewTime;
-    /**
-     * 心跳时间
-     */
-    private Date keepaliveTime;
-    /**
-     * 心跳周期(秒)
-     */
-    private Integer keepTimeout;
-    /**
-     * 注册时长
-     */
-    private int expires = 3600;
-    /**
-     * 传输协议 1.UDP 2.TCP
-     */
-    private Integer transport;
-    /**
-     * 数据流传输模式 0.UDP:udp传输 2.TCP-ACTIVE：tcp主动模式 2.TCP-PASSIVE：tcp被动模式
-     */
-    private Integer streamMode;
-    /**
-     * 字符集, 1.UTF-8 2.GB2312
-     */
-    private Integer charset= 2;
-
-    /**
      * 获取坐席被叫号码
      *
      * @return
@@ -259,5 +252,11 @@ public class AgentVoInfo implements Serializable {
         }
         return sipPhoneList.get(0);
     }
-
+    public Integer getState() {
+        if(agentState == null || agentState == AgentStateEnum.LOGOUT){
+            return ConstEnum.Flag.NO.getValue();
+        }else{
+            return ConstEnum.Flag.YES.getValue();
+        }
+    }
 }

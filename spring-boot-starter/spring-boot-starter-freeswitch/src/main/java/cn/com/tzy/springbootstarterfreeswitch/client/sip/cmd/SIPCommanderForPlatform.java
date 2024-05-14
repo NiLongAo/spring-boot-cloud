@@ -5,6 +5,7 @@ import cn.com.tzy.springbootstarterfreeswitch.client.sip.SipServer;
 import cn.com.tzy.springbootstarterfreeswitch.model.fs.AgentVoInfo;
 import cn.com.tzy.springbootstarterfreeswitch.redis.subscribe.sip.message.SipSubscribeEvent;
 import cn.com.tzy.springbootstarterfreeswitch.vo.sip.SendRtp;
+import gov.nist.javax.sip.message.SIPRequest;
 
 import javax.sip.InvalidArgumentException;
 import javax.sip.SipException;
@@ -36,4 +37,11 @@ public interface SIPCommanderForPlatform {
      * 点播时检查是否开启过
      */
     void streamByeCmd(SipServer sipServer, AgentVoInfo agentVoInfo, SendRtp sendRtpItem, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws SipException, InvalidArgumentException, ParseException;
+
+    /**
+     * presence 订阅、取消订阅信息
+     * @param deviceVo		视频设备
+     * @return				true = 命令发送成功
+     */
+    SIPRequest presenceSubscribe(SipServer sipServer, AgentVoInfo deviceVo, SIPRequest request, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws InvalidArgumentException, SipException, ParseException;
 }

@@ -32,7 +32,7 @@ import cn.com.tzy.springbootstarterfreeswitch.service.freeswitch.AgentVoService;
 import cn.com.tzy.springbootstarterfreeswitch.service.media.TokenService;
 import cn.com.tzy.springbootstarterfreeswitch.service.sip.MediaServerVoService;
 import cn.com.tzy.springbootstarterfreeswitch.vo.media.*;
-import cn.com.tzy.springbootstarterfreeswitch.vo.result.VideoRestResult;
+import cn.com.tzy.springbootstarterfreeswitch.vo.result.FsRestResult;
 import cn.com.tzy.springbootstarterfreeswitch.vo.sip.*;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
@@ -250,7 +250,7 @@ public class MediaHookServer {
                     List<SendRtp> sendRtpList = sendRtpManager.querySendRTPServerByStream(hookVo.getStream());
                     for (SendRtp sendRtp : sendRtpList) {
                         // 设备编号 或 上级平台
-                        AgentVoInfo agentVoInfo = agentVoService.getAgentBySip(sendRtp.getAgentCode());
+                        AgentVoInfo agentVoInfo = RedisService.getAgentInfoManager().get(sendRtp.getAgentCode());
                         if(agentVoInfo == null){
                             log.warn("[ZLM HOOK 未获取客服编号：{} 信息]",sendRtp.getAgentCode());
                             continue;
@@ -282,7 +282,7 @@ public class MediaHookServer {
         InviteStreamManager inviteStreamManager = RedisService.getInviteStreamManager();
         DeferredResultHolder deferredResultHolder = SpringUtil.getBean(DeferredResultHolder.class);
         AgentInfoManager agentInfoManager = RedisService.getAgentInfoManager();
-        VideoRestResult<NotNullMap> deferredResult = new VideoRestResult<>(videoProperties.getPlayTimeout()*1000L,()-> new NotNullMap(){{putInteger("code",0);putString("msg","success");}});
+        FsRestResult<NotNullMap> deferredResult = new FsRestResult<>(videoProperties.getPlayTimeout()*1000L,()-> new NotNullMap(){{putInteger("code",0);putString("msg","success");}});
         String key = String.format("%s%s",DeferredResultHolder.CALLBACK_STREAM_NONE_READER,hookVo.getStream());
         String uuid = RandomUtil.randomString(32);
         deferredResultHolder.put(key,uuid,deferredResult);
@@ -353,7 +353,7 @@ public class MediaHookServer {
     public DeferredResult<NotNullMap> onStreamNotFound(OnStreamNotFoundHookVo hookVo){
         log.info("[ZLM HOOK] 流未找到：{}->{}->{}/{}", hookVo.getMediaServerId(), hookVo.getSchema(), hookVo.getApp(), hookVo.getStream());
 
-        VideoRestResult<NotNullMap> deferredResult = new VideoRestResult<>(videoProperties.getPlayTimeout()*1000L,()->{return new NotNullMap(){{putInteger("code",404);putString("msg","资源未找到");}};});
+        FsRestResult<NotNullMap> deferredResult = new FsRestResult<>(videoProperties.getPlayTimeout()*1000L,()->{return new NotNullMap(){{putInteger("code",404);putString("msg","资源未找到");}};});
         deferredResult.setResult(new NotNullMap(){{putInteger("code",0);putString("msg","success");}});
         return deferredResult;
     }

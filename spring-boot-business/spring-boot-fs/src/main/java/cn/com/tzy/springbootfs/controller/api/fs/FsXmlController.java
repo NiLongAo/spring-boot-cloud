@@ -1,5 +1,6 @@
 package cn.com.tzy.springbootfs.controller.api.fs;
 
+import cn.com.tzy.springbootcomm.common.enumcom.ConstEnum;
 import cn.com.tzy.springbootfs.service.fs.AgentService;
 import cn.com.tzy.springbootstartercloud.api.ApiController;
 import cn.com.tzy.springbootstarterfreeswitch.enums.fs.FsTypeEnum;
@@ -92,7 +93,7 @@ public class FsXmlController extends ApiController {
                         .fsTypeEnum(FsTypeEnum.INTERNAL)
                         .modelMap(new HashMap<String, Object>(){{
                             put(FsTypeEnum.SWITCH.getName(), ConfigModel.builder()
-                                    .iceStart(true)
+                                    .iceStart(ConstEnum.Flag.YES.getValue())
                                     .stunAddress("autonat:192.168.1.26")
                                     .build());
                         }})
@@ -104,7 +105,7 @@ public class FsXmlController extends ApiController {
                         .fsTypeEnum(FsTypeEnum.EXTERNAL)
                         .modelMap(new HashMap<String, Object>(){{
                             put(FsTypeEnum.SWITCH.getName(), ConfigModel.builder()
-                                    .iceStart(true)
+                                    .iceStart(ConstEnum.Flag.YES.getValue())
                                     .stunAddress("autonat:192.168.1.26")
                                     .build());
                             put(FsTypeEnum.EXTERNAL.getName(),GateWayModel.builder().build());

@@ -6,10 +6,7 @@
     <!--@Table fs_company-->
     <id column="id" property="id" />
     <result column="name" property="name" />
-    <result column="id_path" property="idPath" />
-    <result column="pid" property="pid" />
     <result column="company_code" property="companyCode" />
-    <result column="gmt" property="gmt" />
     <result column="contact" property="contact" />
     <result column="phone" property="phone" />
     <result column="balance" property="balance" />
@@ -32,7 +29,7 @@
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    id, `name`, id_path, pid, company_code, gmt, contact, phone, balance, bill_type, 
+    id, `name`, company_code, contact, phone, balance, bill_type,
     pay_type, hidden_customer, secret_type, secret_key, ivr_limit, agent_limit, group_limit, 
     group_agent_limit, record_storage, notify_url, `status`, create_user_id, create_time, 
     update_user_id, update_time

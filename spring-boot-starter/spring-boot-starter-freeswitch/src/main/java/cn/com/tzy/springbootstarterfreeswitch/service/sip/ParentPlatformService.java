@@ -2,6 +2,7 @@ package cn.com.tzy.springbootstarterfreeswitch.service.sip;
 
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootcomm.utils.DynamicTask;
+import cn.com.tzy.springbootstarterfreeswitch.model.bean.ConfigModel;
 import cn.com.tzy.springbootstarterfreeswitch.model.fs.AgentVoInfo;
 import cn.com.tzy.springbootstarterfreeswitch.service.FsService;
 import cn.com.tzy.springbootstarterfreeswitch.vo.sip.EventResult;
@@ -40,18 +41,28 @@ public abstract class ParentPlatformService {
     @Resource
     private NacosDiscoveryProperties nacosDiscoveryProperties;
 
+    public abstract ConfigModel random();
+
     /**
      * 向上级平台注册
      */
-    public void login(AgentVoInfo agentVoInfo){
+    public void login(AgentVoInfo agentVoInfo,SipSubscribeEvent okEvent,SipSubscribeEvent errorEvent){
         RedisService.getRegisterServerManager().putPlatform(agentVoInfo.getAgentCode(), agentVoInfo.getKeepTimeout()+ SipConstant.DELAY_TIME, Address.builder().agentCode(agentVoInfo.getAgentCode()).ip(nacosDiscoveryProperties.getIp()).port(nacosDiscoveryProperties.getPort()).build());
-        register(agentVoInfo, error->{
+        RedisService.getSipTransactionManager().delParentPlatform(agentVoInfo.getAgentCode());
+        register(agentVoInfo,ok->{
+            if(okEvent != null){
+                okEvent.response(ok);
+            }
+        }, error->{
             log.info("[国标级联] {}, 发起注册，失败", agentVoInfo.getAgentCode());
+            if(errorEvent!=null){
+                errorEvent.response(error);
+            }
         });
     }
 
 
-    private void register(AgentVoInfo agentVoInfo, SipSubscribeEvent errorEvent){
+    private void register(AgentVoInfo agentVoInfo, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent){
         SipTransactionInfo sipTransactionInfo = RedisService.getSipTransactionManager().findParentPlatform(agentVoInfo.getAgentCode());
         if(sipTransactionInfo == null){
             sipTransactionInfo = new SipTransactionInfo();
@@ -70,9 +81,15 @@ public abstract class ParentPlatformService {
         sipTransactionInfo.setRegisterAliveReply(sipTransactionInfo.getRegisterAliveReply() +1);
         RedisService.getSipTransactionManager().putParentPlatform(agentVoInfo.getAgentCode(),sipTransactionInfo);
         try {
-            sipCommanderForPlatform.register(sipServer, agentVoInfo,null, true, null, error->{
+            sipCommanderForPlatform.register(sipServer, agentVoInfo,null, true, ok->{
+                if(okEvent !=null){
+                    okEvent.response(ok);
+                }
+            }, error->{
                 offline(agentVoInfo);
-                errorEvent.response(error);
+                if(errorEvent !=null){
+                    errorEvent.response(error);
+                }
             });
         } catch (InvalidArgumentException | ParseException | SipException e) {
             log.error("[命令发送失败] 国标级联注册: {}", e.getMessage());
@@ -107,17 +124,18 @@ public abstract class ParentPlatformService {
             sipTransactionManager.putParentPlatform(agentVoInfo.getAgentCode(),sipTransactionInfo);
         }
         //设置上线
-        FsService.getAgentService().updateStatus(agentVoInfo.getId(), true);
+        FsService.getAgentService().online(agentVoInfo, null);
         //添加注册任务
         this.registerTask(agentVoInfo,false);
         //添加保活任务
         this.keepaliveTask(agentVoInfo,false);
         RedisService.getRegisterServerManager().putPlatform(agentVoInfo.getAgentCode(), agentVoInfo.getKeepTimeout()+SipConstant.DELAY_TIME, Address.builder().agentCode(agentVoInfo.getAgentCode()).ip(nacosDiscoveryProperties.getIp()).port(nacosDiscoveryProperties.getPort()).build());
+        RedisService.getAgentNotifySubscribeManager().addPresenceSubscribe(agentVoInfo);
     }
 
     public void offline(AgentVoInfo agentVoInfo){
         log.info("[平台离线]：{}", agentVoInfo.getAgentCode());
-        FsService.getAgentService().updateStatus(agentVoInfo.getId(), false);
+        FsService.getAgentService().offline(agentVoInfo.getAgentCode());
         // 停止所有推流
         log.info("[平台离线] {}, 停止所有推流", agentVoInfo.getAgentCode());
         stopAllPush(agentVoInfo.getAgentCode());
@@ -127,8 +145,9 @@ public abstract class ParentPlatformService {
         this.keepaliveTask(agentVoInfo,true);
         // 停止目录订阅回复
         log.info("[平台离线] {}, 停止订阅回复", agentVoInfo.getAgentCode());
-        RedisService.getPlatformNotifySubscribeManager().removeAllSubscribe(agentVoInfo.getAgentCode());
         RedisService.getRegisterServerManager().delPlatform(agentVoInfo.getAgentCode());
+        RedisService.getAgentNotifySubscribeManager().removePresenceSubscribe(agentVoInfo);
+
     }
 
     /**
@@ -147,7 +166,7 @@ public abstract class ParentPlatformService {
         int expires= Math.max(agentVoInfo.getExpires(),20)-SipConstant.DELAY_TIME;
         dynamicTask.startCron(key, expires, expires,()->{
             log.info("[国标级联] 平台：{}注册即将到期，开始续订", agentVoInfo.getAgentCode());
-            register(agentVoInfo, error -> {
+            register(agentVoInfo, null,error -> {
                 log.error(String.format("[国标级联] 平台：{}注册即将到期，开始续订失败 code : %s,msg : %s",error.getStatusCode(),error.getMsg()));
                 dynamicTask.stop(key);
             });
@@ -157,8 +176,8 @@ public abstract class ParentPlatformService {
     /**
      * 上级平台保活任务（到保活时间后进行保活）
      */
-    private void keepaliveTask(AgentVoInfo parentPlatformVo, boolean isClose){
-        final String keepaliveTaskKey = SipConstant.PLATFORM_KEEPALIVE_PREFIX + parentPlatformVo.getAgentCode();
+    private void keepaliveTask(AgentVoInfo agentVoInfo, boolean isClose){
+        final String keepaliveTaskKey = SipConstant.PLATFORM_KEEPALIVE_PREFIX + agentVoInfo.getAgentCode();
         if(isClose){
             dynamicTask.stop(keepaliveTaskKey);
             return;
@@ -166,30 +185,30 @@ public abstract class ParentPlatformService {
         if (dynamicTask.isAlive(keepaliveTaskKey)) {
             return;
         }
-        log.info("[国标级联]：{}, 定时上级平台心跳保活任务", parentPlatformVo.getAgentCode());
-        dynamicTask.startCron(keepaliveTaskKey, parentPlatformVo.getKeepTimeout(),()->{
+        log.info("[国标级联]：{}, 定时上级平台心跳保活任务", agentVoInfo.getAgentCode());
+        dynamicTask.startCron(keepaliveTaskKey,1, agentVoInfo.getKeepTimeout(),()->{
             try {
-                SipTransactionInfo parentPlatform = RedisService.getSipTransactionManager().findParentPlatform(parentPlatformVo.getAgentCode());
+                SipTransactionInfo parentPlatform = RedisService.getSipTransactionManager().findParentPlatform(agentVoInfo.getAgentCode());
                 if(parentPlatform == null){
-                    log.error("[国标级联]：{},心跳时未发现,上级平台注册信息",parentPlatformVo.getAgentCode());
+                    log.error("[国标级联]：{},心跳时未发现,上级平台注册信息",agentVoInfo.getAgentCode());
                     return;
                 }else if(parentPlatform.getKeepAliveReply() > 3){//心跳发送三次后如果还未回应则 平台下线
-                    log.error("[国标级联]：{},心跳发送三次后如 平台还未回应,平台下线",parentPlatformVo.getAgentCode());
-                    offline(parentPlatformVo);
+                    log.error("[国标级联]：{},心跳发送三次后如 平台还未回应,平台下线",agentVoInfo.getAgentCode());
+                    offline(agentVoInfo);
                     return;
                 }
                 parentPlatform.setKeepAliveReply(parentPlatform.getKeepAliveReply()+1);
-                RedisService.getSipTransactionManager().putParentPlatform(parentPlatformVo.getAgentCode(),parentPlatform);
-                sipCommanderForPlatform.keepalive(sipServer, parentPlatformVo, ok->{
-                    log.info("[国标级联]：{}, 定时上级平台心跳保活任务成功", parentPlatformVo.getAgentCode());
+                RedisService.getSipTransactionManager().putParentPlatform(agentVoInfo.getAgentCode(),parentPlatform);
+                sipCommanderForPlatform.keepalive(sipServer, agentVoInfo, ok->{
+                    log.info("[国标级联]：{}, 定时上级平台心跳保活任务成功", agentVoInfo.getAgentCode());
                     if(parentPlatform.getKeepAliveReply() > 1){
                         parentPlatform.setKeepAliveReply(0);
-                        RedisService.getSipTransactionManager().putParentPlatform(parentPlatformVo.getAgentCode(),parentPlatform);
+                        RedisService.getSipTransactionManager().putParentPlatform(agentVoInfo.getAgentCode(),parentPlatform);
                     }
-                    RedisService.getRegisterServerManager().putPlatform(parentPlatformVo.getAgentCode(),parentPlatformVo.getKeepTimeout()+SipConstant.DELAY_TIME, Address.builder().agentCode(parentPlatformVo.getAgentCode()).ip(nacosDiscoveryProperties.getIp()).port(nacosDiscoveryProperties.getPort()).build());
+                    RedisService.getRegisterServerManager().putPlatform(agentVoInfo.getAgentCode(),agentVoInfo.getKeepTimeout()+SipConstant.DELAY_TIME, Address.builder().agentCode(agentVoInfo.getAgentCode()).ip(nacosDiscoveryProperties.getIp()).port(nacosDiscoveryProperties.getPort()).build());
                 },error->{
-                    register(parentPlatformVo, errorEvent -> {
-                        log.info("[国标级联] {}，心跳超时后再次发起注册仍然失败，开始定时发起注册，间隔为1分钟", parentPlatformVo.getAgentCode());
+                    register(agentVoInfo,null, errorEvent -> {
+                        log.info("[国标级联] {}，心跳超时后再次发起注册仍然失败，开始定时发起注册，间隔为1分钟", agentVoInfo.getAgentCode());
                         dynamicTask.stop(keepaliveTaskKey);
                     });
                 });

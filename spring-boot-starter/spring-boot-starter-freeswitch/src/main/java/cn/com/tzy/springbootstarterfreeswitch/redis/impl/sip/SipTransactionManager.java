@@ -21,22 +21,32 @@ public class SipTransactionManager {
 
 
     public void putDevice(String agentCode, SipTransactionInfo sipTransactionInfo){
-        String key = String.format("%s%s", DEVICE_PREFIX, agentCode);
-        RedisUtils.set(key,sipTransactionInfo);
+        RedisUtils.set(getKey(DEVICE_PREFIX, agentCode),sipTransactionInfo);
     }
 
     public SipTransactionInfo findDevice(String agentCode){
-        String key = String.format("%s%s", DEVICE_PREFIX, agentCode);
-        return (SipTransactionInfo) RedisUtils.get(key);
+        return (SipTransactionInfo) RedisUtils.get(getKey(DEVICE_PREFIX, agentCode));
+    }
+    public void delDevice(String agentCode){
+        RedisUtils.del(getKey(DEVICE_PREFIX,agentCode));
     }
 
     public void putParentPlatform(String agentCode, SipTransactionInfo sipTransactionInfo){
-        String key = String.format("%s%s", PARENT_PLATFORM_PREFIX, agentCode);
-        RedisUtils.set(key,sipTransactionInfo);
+        RedisUtils.set(getKey(PARENT_PLATFORM_PREFIX, agentCode),sipTransactionInfo);
     }
 
     public SipTransactionInfo findParentPlatform(String agentCode){
-        String key = String.format("%s%s", PARENT_PLATFORM_PREFIX, agentCode);
-        return (SipTransactionInfo) RedisUtils.get(key);
+        return (SipTransactionInfo) RedisUtils.get(getKey(PARENT_PLATFORM_PREFIX,agentCode));
     }
+
+    public void delParentPlatform(String agentCode){
+        RedisUtils.del(getKey(PARENT_PLATFORM_PREFIX,agentCode));
+    }
+
+    private String getKey(String prefix,String key) {
+        return String.format("%s%s", prefix, key);
+    }
+
+
+
 }

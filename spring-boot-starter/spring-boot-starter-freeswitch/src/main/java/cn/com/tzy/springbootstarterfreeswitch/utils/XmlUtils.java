@@ -1,8 +1,6 @@
 package cn.com.tzy.springbootstarterfreeswitch.utils;
 
 import cn.hutool.core.util.XmlUtil;
-import cn.hutool.json.JSONObject;
-import cn.hutool.json.JSONUtil;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
@@ -66,13 +64,9 @@ public class XmlUtils {
      * xml转json
      *
      * @param element
-     * @param json
      */
-    public static void node2Json(Element element, JSONObject json) {
-        //xml 转 map
-        Map<String, Object> map = XmlUtil.xmlToMap(element);
-        //map 转 json
-        json = JSONUtil.parseObj(map);
+    public static Map<String, Object> node2Json(Element element) {
+        return XmlUtil.xmlToMap(element);
     }
     public static  Element getRootElement(RequestEvent evt)  {
 

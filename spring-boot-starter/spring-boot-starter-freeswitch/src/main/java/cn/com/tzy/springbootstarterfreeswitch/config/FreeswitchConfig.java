@@ -1,4 +1,4 @@
-package cn.com.tzy.springbootstarterfreeswitch;
+package cn.com.tzy.springbootstarterfreeswitch.config;
 
 
 import cn.com.tzy.springbootcomm.utils.DynamicTask;
@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @RequiredArgsConstructor
 @Import({DynamicTask.class})
-@ComponentScan
+@ComponentScan("cn.com.tzy.springbootstarterfreeswitch")
 @EnableFreeswitchEslAutoConfiguration
 public class FreeswitchConfig {
 

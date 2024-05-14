@@ -5,6 +5,8 @@ import cn.com.tzy.springbootstarterfreeswitch.client.sip.listener.request.Abstra
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.listener.request.SipRequestEvent;
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.properties.SipConfigProperties;
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.utils.SipUtils;
+import cn.com.tzy.springbootstarterfreeswitch.enums.fs.AgentStateEnum;
+import cn.com.tzy.springbootstarterfreeswitch.enums.fs.LoginTypeEnum;
 import cn.com.tzy.springbootstarterfreeswitch.enums.sip.CharsetType;
 import cn.com.tzy.springbootstarterfreeswitch.enums.sip.StreamModeType;
 import cn.com.tzy.springbootstarterfreeswitch.enums.sip.TransportType;
@@ -64,7 +66,8 @@ public class RegisterRequestProcessor extends AbstractSipRequestEvent implements
             String title = registerFlag ? "[注册请求]": "[注销请求]";
             String agentCode = ((SipUri)(((FromHeader) request.getHeader(FromHeader.NAME)).getAddress()).getURI()).getUser();
             AgentVoInfo agentVoInfo = agentVoService.getAgentBySip(agentCode);
-
+            agentVoInfo.setLoginType(LoginTypeEnum.SOCKET.getType());
+            agentVoInfo.setAgentState(AgentStateEnum.LOGIN);
             Address remoteAddress = SipUtils.getRemoteAddressFromRequest(request, videoProperties.getSipUseSourceIpAsRemoteAddress());
             SipConfigProperties sipConfigProperties = sipServer.getSipConfigProperties();
             String routeId = ((SipUri)request.getRequestLine().getUri()).getUser();

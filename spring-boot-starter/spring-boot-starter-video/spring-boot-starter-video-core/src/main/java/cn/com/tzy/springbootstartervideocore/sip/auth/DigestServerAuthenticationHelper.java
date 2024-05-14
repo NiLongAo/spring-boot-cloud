@@ -1,6 +1,6 @@
 package cn.com.tzy.springbootstartervideocore.sip.auth;
 
-import cn.com.tzy.springbootstartervideobasic.common.VideoConstant;
+import cn.com.tzy.springbootstartervideobasic.common.SipConstant;
 import gov.nist.core.InternalErrorHandler;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.util.StringUtils;
@@ -31,15 +31,15 @@ public class DigestServerAuthenticationHelper  {
      * @throws NoSuchAlgorithmException
      */
     public DigestServerAuthenticationHelper() throws NoSuchAlgorithmException {
-        messageDigest = MessageDigest.getInstance(VideoConstant.DEFAULT_ALGORITHM);
+        messageDigest = MessageDigest.getInstance(SipConstant.DEFAULT_ALGORITHM);
     }
 
     public static String toHexString(byte b[]) {
         int pos = 0;
         char[] c = new char[b.length * 2];
         for (int i = 0; i < b.length; i++) {
-            c[pos++] = VideoConstant.toHex[(b[i] >> 4) & 0x0F];
-            c[pos++] = VideoConstant.toHex[b[i] & 0x0f];
+            c[pos++] = SipConstant.toHex[(b[i] >> 4) & 0x0F];
+            c[pos++] = SipConstant.toHex[b[i] & 0x0f];
         }
         return new String(c);
     }
@@ -60,11 +60,11 @@ public class DigestServerAuthenticationHelper  {
 
     public Response generateChallenge(HeaderFactory headerFactory, Response response, String realm) {
         try {
-            WWWAuthenticateHeader proxyAuthenticate = headerFactory.createWWWAuthenticateHeader(VideoConstant.DEFAULT_SCHEME);
+            WWWAuthenticateHeader proxyAuthenticate = headerFactory.createWWWAuthenticateHeader(SipConstant.DEFAULT_SCHEME);
             proxyAuthenticate.setParameter("realm", realm);
             proxyAuthenticate.setParameter("qop", "auth");
             proxyAuthenticate.setParameter("nonce", generateNonce());
-            proxyAuthenticate.setParameter("algorithm", VideoConstant.DEFAULT_ALGORITHM);
+            proxyAuthenticate.setParameter("algorithm", SipConstant.DEFAULT_ALGORITHM);
             response.setHeader(proxyAuthenticate);
         } catch (Exception ex) {
             InternalErrorHandler.handleException(ex);

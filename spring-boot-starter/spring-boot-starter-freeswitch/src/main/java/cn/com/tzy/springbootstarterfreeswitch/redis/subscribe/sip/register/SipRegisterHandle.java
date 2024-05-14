@@ -31,6 +31,6 @@ public class SipRegisterHandle extends AbstractMessageListener {
             return;
         }
         //触发服务注册
-        SipService.getParentPlatformService().login(vo);
+        SipService.getParentPlatformService().login(vo,null,null);
     }
 }

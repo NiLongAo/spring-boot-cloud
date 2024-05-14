@@ -75,14 +75,6 @@ public class SipConstant {
      */
     public static final String PLATFORM_REGISTER_TASK_CATCH_PREFIX = "FS_PLATFORM_REGISTER_TASK_PREFIX:";
     /**
-     * 上级平台目录订阅缓存key(服务器共享数据)
-     */
-    public static final String VIDEO_PLATFORM_ALARM_NOTIFY_SUBSCRIBE = "FS_PLATFORM_ALARM_NOTIFY_SUBSCRIBE:";
-    /**
-     * 上级平台目录订阅缓存key(服务器共享数据)
-     */
-    public static final String VIDEO_PLATFORM_CATALOG_NOTIFY_SUBSCRIBE = "FS_PLATFORM_CATALOG_NOTIFY_SUBSCRIBE:";
-    /**
      * 视频流推拉流缓存
      */
     public static final String PLATFORM_SEND_RTP_INFO_PREFIX = "FS_PLATFORM_SEND_RTP_INFO";

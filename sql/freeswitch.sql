@@ -1,33 +1,42 @@
-CREATE TABLE fs_config  (
-    id                                  bigint unsigned not null auto_increment COMMENT '主键id',
-    local_ip                            varchar(30) DEFAULT null COMMENT '本机IP',
-    remote_ip                           varchar(30) DEFAULT null COMMENT '外网IP',
-    external_port                       int(6) unsigned DEFAULT '0' COMMENT '中继端口',
-    internal_port                       int(6) unsigned DEFAULT '0' COMMENT '注册端口',
-    start_rtp_port                      int(6) unsigned DEFAULT '0' COMMENT '起始RTP端口',
-    end_rtp_port                        int(6) unsigned DEFAULT '0' COMMENT '结束RTP端口',
-    audio_code                          varchar(256) DEFAULT '' COMMENT '音频编码',
-    video_code                          varchar(256) DEFAULT '' COMMENT '视频编码',
-    frame_rate                          varchar(30) DEFAULT '' COMMENT '分辨率',
-    bit_rate                            varchar(30) DEFAULT '' COMMENT '码率',
-    ice_start                           tinyint(4) DEFAULT 1 COMMENT '是否启动ice',
-    stun_address                        varchar(30) DEFAULT '' COMMENT 'stun地址',
-    audio_record                        tinyint(4) DEFAULT 1 COMMENT '是否开启音频',
-    video_record                        tinyint(4) DEFAULT 1 COMMENT '是否开启视频',
-    audio_record_path                   varchar(256) DEFAULT '' COMMENT '音频存储地址',
-    video_record_path                   varchar(256) DEFAULT '' COMMENT '视频存储地址',
-    sound_rile_path                     varchar(256) DEFAULT '' COMMENT '声音文件地址',
-    freeswitch_path                     varchar(256) DEFAULT '' COMMENT '交换服务文件路径',
-    freeswitch_log_path                 varchar(256) DEFAULT '' COMMENT '交换服务日志路径',
-    ws_port                             int(6) unsigned DEFAULT '0' COMMENT 'ws端口',
-    wss_port                            int(6) unsigned DEFAULT '0' COMMENT 'wss端口',
-    create_user_id                      bigint unsigned comment '创建人编号',
-    create_time                         datetime  NOT NULL COMMENT '创建时间',
-    update_user_id                      bigint unsigned comment '修改人编号',
-    update_time                         datetime  NOT NULL COMMENT '更新时间',
-    PRIMARY KEY (id),
-    UNIQUE INDEX idx_config_no(remote_ip)
-) ENGINE = InnoDB DEFAULT CHARSET = utf8  ROW_FORMAT = DYNAMIC COMMENT ='Fs系统配置信息';
+CREATE TABLE fs_platform (
+    id                          bigint unsigned not null auto_increment COMMENT '主键id',
+    local_ip                    varchar(30) DEFAULT null COMMENT '本机IP',
+    remote_ip                   varchar(30) DEFAULT null COMMENT '外网IP',
+    internal_port               int(6) unsigned DEFAULT '0' COMMENT '注册端口',
+    external_port               int(6) unsigned DEFAULT '0' COMMENT '中继端口',
+    start_rtp_port              int(6) unsigned DEFAULT '0' COMMENT '起始RTP端口',
+    end_rtp_port                int(6) unsigned DEFAULT '0' COMMENT '结束RTP端口',
+    ws_port                     int(6) unsigned DEFAULT '0' COMMENT 'ws端口',
+    wss_port                    int(6) unsigned DEFAULT '0' COMMENT 'wss端口',
+    audio_code                  varchar(256) DEFAULT '' COMMENT '音频编码',
+    video_code                  varchar(256) DEFAULT '' COMMENT '视频编码',
+    frame_rate                  varchar(30) DEFAULT '' COMMENT '分辨率',
+    bit_rate                    varchar(30) DEFAULT '' COMMENT '码率',
+    ice_start                   tinyint(4) DEFAULT 1 COMMENT '是否启动ice',
+    stun_address                varchar(30) DEFAULT '' COMMENT 'stun地址',
+    name                        varchar(255)  DEFAULT NULL COMMENT '名称',
+    enable                      tinyint(4) default 1 COMMENT '是否启用',
+    status                      tinyint(4) default 0 COMMENT '在线状态',
+    audio_record                tinyint(4) DEFAULT 1 COMMENT '是否开启音频',
+    video_record                tinyint(4) DEFAULT 1 COMMENT '是否开启视频',
+    audio_record_path           varchar(256) DEFAULT '' COMMENT '音频存储地址',
+    video_record_path           varchar(256) DEFAULT '' COMMENT '视频存储地址',
+    sound_rile_path             varchar(256) DEFAULT '' COMMENT '声音文件地址',
+    freeswitch_path             varchar(256) DEFAULT '' COMMENT '交换服务文件路径',
+    freeswitch_log_path         varchar(256) DEFAULT '' COMMENT '交换服务日志路径',
+    create_user_id              bigint unsigned comment '创建人编号',
+    create_time                 datetime  NOT NULL COMMENT '创建时间',
+    update_user_id              bigint unsigned comment '修改人编号',
+    update_time                 datetime  NOT NULL COMMENT '更新时间',
+    PRIMARY KEY (id)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8  ROW_FORMAT = DYNAMIC COMMENT ='平台信息' ;
+
+insert into fs_platform(id,local_ip,remote_ip,internal_port,external_port,start_rtp_port,end_rtp_port,ws_port,wss_port,audio_code,video_code,
+                        frame_rate,bit_rate,ice_start,stun_address,`name`,`enable`,`status`,audio_record,video_record,audio_record_path,
+                        video_record_path,sound_rile_path,freeswitch_path,freeswitch_log_path,create_user_id,create_time,update_user_id,
+                        update_time)
+values(1,'192.168.1.26','192.168.1.26',5060,5080,16384,16484,5066,7443,null,null,null,null,1,'autonat:192.168.1.26','测试sip',1,0,1,1,'','','','','',1,now(),1,now());
+
 
 CREATE TABLE fs_gate_way  (
    id                                  bigint unsigned not null auto_increment COMMENT '主键id',
@@ -93,13 +102,10 @@ CREATE TABLE fs_route_gateway (
 CREATE TABLE fs_company (
     id                              bigint unsigned not null auto_increment COMMENT '主键id',
     name                            varchar(255)  NOT NULL DEFAULT '' COMMENT '名称',
-    id_path                         varchar(255)  NOT NULL DEFAULT '' COMMENT '父企业ID',
-    pid                             bigint unsigned NOT NULL DEFAULT '0' COMMENT '父企业',
     company_code                    varchar(255)  NOT NULL DEFAULT '' COMMENT '简称',
-    gmt                             int unsigned NOT NULL DEFAULT '0' COMMENT '时区',
     contact                         varchar(255)  NOT NULL DEFAULT '' COMMENT '联系人',
     phone                           varchar(255)  NOT NULL DEFAULT '' COMMENT '电话',
-    balance                         bigint unsigned NOT NULL DEFAULT '0' COMMENT '金额',
+    balance                         double default 0.00 COMMENT '金额',
     bill_type                       int unsigned NOT NULL DEFAULT '0' COMMENT '1:呼出计费,2:呼入计费,3:双向计费,0:全免费',
     pay_type                        int unsigned NOT NULL DEFAULT '0' COMMENT '0:预付费;1:后付费',
     hidden_customer                 int unsigned NOT NULL DEFAULT '0' COMMENT '隐藏客户号码(0:不隐藏;1:隐藏)',
@@ -110,7 +116,7 @@ CREATE TABLE fs_company (
     group_limit                     int unsigned NOT NULL DEFAULT '0' COMMENT '开通技能组',
     group_agent_limit               int unsigned NOT NULL DEFAULT '0' COMMENT '单技能组中坐席上限',
     record_storage                  int unsigned NOT NULL DEFAULT '0' COMMENT '录音保留天数',
-    notify_url                      varchar(255)  NOT NULL DEFAULT '' COMMENT '话单回调通知',
+    notify_url                      varchar(255)  DEFAULT '' COMMENT '话单回调通知',
     status                          int unsigned NOT NULL DEFAULT '0' COMMENT '状态(0:禁用企业,1:免费企业;2:试用企业,3:付费企业)',
     create_user_id                  bigint unsigned comment '创建人编号',
     create_time                     datetime  NOT NULL COMMENT '创建时间',
@@ -120,6 +126,11 @@ CREATE TABLE fs_company (
     UNIQUE KEY company_name (name) USING BTREE,
     UNIQUE KEY company_code (company_code) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='企业信息表';
+
+insert into fs_company(id,`name`,company_code,contact,phone,balance,bill_type,pay_type,hidden_customer,secret_type,secret_key,
+    ivr_limit,agent_limit,group_limit,group_agent_limit,record_storage,notify_url,`status`,create_user_id,create_time,
+    update_user_id,update_time)
+values(1,'测试企业','CSQY','admin','18789432816',100.00,1,1,0,0,12645498,10,20,20,20,7,null,3,'1',now(),'1',now());
 
 CREATE TABLE fs_agent (
     id                                  bigint unsigned not null auto_increment COMMENT '主键id',
@@ -136,7 +147,7 @@ CREATE TABLE fs_agent (
     after_interval                      int unsigned NOT NULL DEFAULT '5' COMMENT '话后自动空闲间隔时长',
     display                             varchar(255)  NOT NULL DEFAULT '' COMMENT '主叫显号',
     ring_time                           int unsigned NOT NULL DEFAULT '10' COMMENT '振铃时长',
-    host                                varchar(255)  NOT NULL DEFAULT '' COMMENT '登录服务器地址',
+    host                                varchar(255)  NOT NULL DEFAULT '0.0.0.0' COMMENT '登录服务器地址',
     state                               int unsigned NOT NULL DEFAULT '0' COMMENT '坐席状态(1:在线,0:不在线)',
     status                              int unsigned NOT NULL DEFAULT '1' COMMENT '状态：1 开通，0关闭',
     register_time                       datetime  DEFAULT NULL COMMENT '注册时间',
@@ -154,6 +165,16 @@ CREATE TABLE fs_agent (
     PRIMARY KEY (id) USING BTREE,
     UNIQUE KEY idx_agent_key (agent_key,company_id) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb3 COMMENT='座席工号表';
+
+
+insert into fs_agent(id,company_id,agent_id,agent_key,agent_name,agent_code,agent_type,passwd,sip_phone,record,group_id,after_interval,
+    display,ring_time,`host`,`state`,`status`,register_time,renew_time,keepalive_time,keep_timeout,expires,stream_mode,
+    transport,charset,create_user_id,create_time,update_user_id,update_time)
+values(1,1,1001,1001,'坐席1001','1001',1,'123456','1001',1,1,60,'1001',10,'0.0.0.0',0,1,null,null,null,30,3600,0,1,2,'1',now(),'1',now())
+     ,(2,1,1002,1002,'坐席1002','1002',1,'123456','1002',1,1,60,'1002',10,'0.0.0.0',0,1,null,null,null,30,3600,0,1,2,'1',now(),'1',now())
+     ,(3,1,1010,1010,'坐席1010','1010',1,'123456','1010',1,1,60,'1010',10,'0.0.0.0',0,1,null,null,null,30,3600,0,1,2,'1',now(),'1',now())
+     ,(4,1,1011,1011,'坐席1011','1011',1,'123456','1011',1,1,60,'1011',10,'0.0.0.0',0,1,null,null,null,30,3600,0,1,2,'1',now(),'1',now())
+;
 
 CREATE TABLE fs_user_agent (
     id                                  bigint unsigned not null auto_increment COMMENT '主键id',

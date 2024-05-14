@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
- cn.com.tzy.springbootstarterfreeswitch.FreeswitchConfig
+ cn.com.tzy.springbootstarterfreeswitch.config.FreeswitchConfig

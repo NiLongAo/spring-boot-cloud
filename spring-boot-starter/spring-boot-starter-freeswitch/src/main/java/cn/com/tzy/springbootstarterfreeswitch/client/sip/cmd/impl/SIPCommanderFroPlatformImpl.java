@@ -2,22 +2,24 @@ package cn.com.tzy.springbootstarterfreeswitch.client.sip.cmd.impl;
 
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.SipServer;
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.cmd.SIPCommanderForPlatform;
+import cn.com.tzy.springbootstarterfreeswitch.client.sip.cmd.SipSendMessage;
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.cmd.build.SIPRequestProvider;
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.properties.SipConfigProperties;
+import cn.com.tzy.springbootstarterfreeswitch.client.sip.utils.SipUtils;
 import cn.com.tzy.springbootstarterfreeswitch.enums.sip.CharsetType;
 import cn.com.tzy.springbootstarterfreeswitch.enums.sip.TransportType;
+import cn.com.tzy.springbootstarterfreeswitch.model.bean.ConfigModel;
 import cn.com.tzy.springbootstarterfreeswitch.model.fs.AgentVoInfo;
 import cn.com.tzy.springbootstarterfreeswitch.redis.RedisService;
 import cn.com.tzy.springbootstarterfreeswitch.redis.impl.sip.PlatformRegisterManager;
 import cn.com.tzy.springbootstarterfreeswitch.redis.impl.sip.SipTransactionManager;
 import cn.com.tzy.springbootstarterfreeswitch.redis.subscribe.sip.message.SipSubscribeEvent;
-import cn.com.tzy.springbootstarterfreeswitch.client.sip.cmd.SipSendMessage;
-import cn.com.tzy.springbootstarterfreeswitch.client.sip.utils.SipUtils;
+import cn.com.tzy.springbootstarterfreeswitch.service.SipService;
+import cn.com.tzy.springbootstarterfreeswitch.service.sip.ParentPlatformService;
 import cn.com.tzy.springbootstarterfreeswitch.vo.sip.PlatformRegisterInfo;
 import cn.com.tzy.springbootstarterfreeswitch.vo.sip.SendRtp;
 import cn.com.tzy.springbootstarterfreeswitch.vo.sip.SipTransactionInfo;
 import gov.nist.javax.sip.message.SIPRequest;
-import link.thingscloud.freeswitch.esl.InboundClient;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.Nullable;
@@ -41,15 +43,12 @@ public class SIPCommanderFroPlatformImpl implements SIPCommanderForPlatform {
     @Override
     public void register(SipServer sipServer, AgentVoInfo agentVoInfo, @Nullable WWWAuthenticateHeader www, boolean isRegister, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws SipException, InvalidArgumentException, ParseException {
         SipTransactionManager sipTransactionManager = RedisService.getSipTransactionManager();
+        ParentPlatformService parentPlatformService = SipService.getParentPlatformService();
         SipTransactionInfo sipTransactionInfo = sipTransactionManager.findParentPlatform(agentVoInfo.getAgentCode());
+        ConfigModel configModel = parentPlatformService.random();
         SipConfigProperties deviceSipConfig = sipServer.getSipConfigProperties();
-        InboundClient inboundClient = sipServer.getInboundClient();
-
-        String random = inboundClient.option().serverAddrOption().random();
-        String[] split = random.split(":");
-        agentVoInfo.setFsHost(random);
-        agentVoInfo.setFsPost(split[1]);
-
+        agentVoInfo.setFsHost(configModel.getRemoteIp());
+        agentVoInfo.setFsPost(configModel.getInternalPort());
         SIPRequest request;
         String callId = null;
         String fromTag = SipUtils.getNewFromTag();
@@ -87,7 +86,7 @@ public class SIPCommanderFroPlatformImpl implements SIPCommanderForPlatform {
                     .addViaHeader(deviceSipConfig.getIp(), deviceSipConfig.getPort(), TransportType.UDP.getName(), true)
                     .createCallIdHeader(deviceSipConfig.getIp(), TransportType.UDP.getName(), callId)
                     .createFromHeader(agentVoInfo.getAgentCode(), agentVoInfo.getFsHost(), fromTag)
-                    .createToHeader(agentVoInfo.getAgentCode(), agentVoInfo.getFsHost(), toTag)
+                    .createToHeader(agentVoInfo.getAgentCode(), agentVoInfo.getFsHost(), null)
                     .createCSeqHeader(RedisService.getCseqManager().getCSEQ())
                     .createUserAgentHeader()
                     .createContactHeader(agentVoInfo.getAgentCode(), String.format("%s:%s", deviceSipConfig.getIp(), deviceSipConfig.getPort()))
@@ -105,6 +104,9 @@ public class SIPCommanderFroPlatformImpl implements SIPCommanderForPlatform {
                 errorEvent.response(error);
             }
         });
+        if(isRegister){
+            RedisService.getAgentInfoManager().put(agentVoInfo);
+        }
     }
 
     @Override
@@ -161,5 +163,30 @@ public class SIPCommanderFroPlatformImpl implements SIPCommanderForPlatform {
             return;
         }
         SipSendMessage.sendMessage(sipServer, agentVoInfo,request,okEvent,errorEvent);
+    }
+
+    @Override
+    public SIPRequest presenceSubscribe(SipServer sipServer, AgentVoInfo agentVoInfo, SIPRequest requestOld, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws InvalidArgumentException, SipException, ParseException {
+
+        String localIp = sipServer.getLocalIp(agentVoInfo.getFsHost());
+        SipConfigProperties sipConfigProperties = sipServer.getSipConfigProperties();;
+
+        //构建器
+        Request request = SIPRequestProvider.builder(sipServer, null, Request.SUBSCRIBE, null)
+                .createSipURI(agentVoInfo.getAgentCode(), String.format("%s:%s", agentVoInfo.getFsHost(), agentVoInfo.getFsPost()))
+                .addViaHeader(localIp, sipConfigProperties.getPort(), TransportType.UDP.getName(), true)
+                .createFromHeader(agentVoInfo.getAgentCode(), agentVoInfo.getFsHost(), SipUtils.getNewFromTag())
+                .createToHeader(agentVoInfo.getAgentCode(), agentVoInfo.getFsHost(), null)
+                .createCallIdHeader(sipConfigProperties.getIp(), TransportType.UDP.getName(),requestOld == null?null:requestOld.getCallIdHeader().getCallId())
+                .createCSeqHeader(RedisService.getCseqManager().getCSEQ())
+                .createUserAgentHeader()
+                .createContactHeader(agentVoInfo.getAgentCode(),String.format("%s:%s",localIp, sipConfigProperties.getPort()))
+                .createExpiresHeader(600)
+                .createEventHeader(null,"presence")
+                .createAcceptHeader("application","pidf+xml")
+                .createContentTypeHeader("application", "pidf+xml")
+                .buildRequest();
+        SipSendMessage.sendMessage(sipServer,agentVoInfo, request,okEvent,errorEvent);
+        return (SIPRequest)  request;
     }
 }
