@@ -5,13 +5,7 @@ import java.util.Map;
 
 public enum InviteStreamType {
 
-    PLAY("PLAY","直播"),
-    PLAYBACK("PLAYBACK","回放"),
-    DOWNLOAD("DOWNLOAD","下载"),
-    PUSH("PUSH","推流"),
-    PROXY("PROXY","拉流"),
-    CLOUD_RECORD_PUSH("CLOUD_RECORD_PUSH","云记录推流"),
-    CLOUD_RECORD_PROXY("CLOUD_RECORD_PROXY","云记录拉流"),
+    FreeSWITCH("FreeSWITCH","FreeSWITCH软电话"),
     ;
 
     private final String value;

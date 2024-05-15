@@ -120,6 +120,10 @@ public class AgentVoInfo implements Serializable {
     private Integer charset= 2;
     //-----------------以下为缓存数据---------------------------
     /**
+     * 流媒体编号
+     */
+    private String mediaServerId;
+    /**
      * Sip电话号码
      */
     private List<String> sipPhoneList;
@@ -169,6 +173,11 @@ public class AgentVoInfo implements Serializable {
      *  被咨询设备
      */
     private String consultDeviceId;
+
+    /**
+     * 是否开启ssrc效验
+     */
+    private Integer ssrcCheck = ConstEnum.Flag.NO.getValue();
     /**
      * 登录时间(秒)
      */

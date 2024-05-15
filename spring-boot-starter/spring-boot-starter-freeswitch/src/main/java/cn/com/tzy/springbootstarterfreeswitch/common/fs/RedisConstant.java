@@ -10,12 +10,12 @@ public class RedisConstant {
     public static final String FS_DEVICE_INFO = "FS_DEVICE_INFO:";
     public static final String FS_DEVICE_CALLID = "FS_DEVICE_CALLID:";
     public static final String FS_PLAYBACK_INFO = "FS_PLAYBACK_INFO:";
+    public static final String FS_CALL_PHONE = "FS_CALL_PHONE:";
+
 
 
     //订阅Key
     public static final String AGENT_NOTIFY = "AGENT_NOTIFY:";
     public static final String AGENT_NOTIFY_PRESENCE = "AGENT_NOTIFY_PRESENCE:";
-    public static final String AGENT_NOTIFY_MESSAGE_SUMMARY = "AGENT_NOTIFY_MESSAGE_SUMMARY:";
-    public static final String AGENT_NOTIFY_REFER = "AGENT_NOTIFY_REFER:";
 
 }

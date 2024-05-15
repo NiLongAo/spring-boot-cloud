@@ -10,8 +10,6 @@ import org.springframework.stereotype.Component;
 public class VideoProperties {
     // [可选] 服务ID，不写则为000000
     private String serverId = "000000";
-    // [可选] 自动点播， 使用固定流地址进行播放时，如果未点播则自动进行点播, 需要rtp.enable=true
-    private Boolean autoApplyPlay = Boolean.TRUE;
     // [可选] 部分设备需要扩展SDP，需要打开此设置
     private Boolean seniorSdp = Boolean.FALSE;
     // 保存移动位置历史轨迹：true:保留历史数据，false:仅保留最后的位置(默认)

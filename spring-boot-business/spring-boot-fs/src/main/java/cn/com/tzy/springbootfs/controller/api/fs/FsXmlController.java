@@ -56,7 +56,6 @@ public class FsXmlController extends ApiController {
         String xml = null;
         //模拟数据
         UserModel userModel = agentService.findUserModel(user);
-        userModel.setDomain(domain);
         if(userModel == null){
             xml =  FreeswitchUtils.getXmlConfig(FreeswitchXmlVo.builder()
                     .fsTypeEnum(FsTypeEnum.NOT_FIND)
@@ -66,6 +65,7 @@ public class FsXmlController extends ApiController {
                     .build()
             );
         }else {
+            userModel.setDomain(domain);
             xml =  FreeswitchUtils.getXmlConfig(FreeswitchXmlVo.builder()
                     .fsTypeEnum(FsTypeEnum.USER)
                     .modelMap(new HashMap<String, Object>(){{

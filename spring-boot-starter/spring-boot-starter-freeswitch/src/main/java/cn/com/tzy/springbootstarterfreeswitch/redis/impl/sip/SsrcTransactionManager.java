@@ -30,10 +30,15 @@ public class SsrcTransactionManager {
      * @param response 回复
      */
     public void put(String agentCode, String callId, String app, String stream, String ssrc, String mediaServerId, SIPMessage response, VideoStreamType type){
+        put(agentCode,callId,false,false,app,stream,ssrc,mediaServerId,response,type);
+    }
+    public void put(String agentCode, String callId,boolean onPush,boolean onVideo, String app, String stream, String ssrc, String mediaServerId, SIPMessage response, VideoStreamType type){
         SsrcTransaction ssrcTransaction = new SsrcTransaction();
         ssrcTransaction.setAgentCode(agentCode);
         ssrcTransaction.setStream(app);
         ssrcTransaction.setStream(stream);
+        ssrcTransaction.setOnVideo(onVideo);
+        ssrcTransaction.setOnPush(onPush);
         ssrcTransaction.setSipTransactionInfo(ObjectUtils.isEmpty(response) ? null : new SipTransactionInfo(response));
         ssrcTransaction.setCallId(callId);
         ssrcTransaction.setSsrc(ssrc);

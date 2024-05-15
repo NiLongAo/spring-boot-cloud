@@ -33,6 +33,7 @@ import javax.sdp.SdpParseException;
 import javax.sdp.SessionDescription;
 import javax.sip.InvalidArgumentException;
 import javax.sip.SipException;
+import javax.sip.address.SipURI;
 import javax.sip.message.Request;
 import java.text.ParseException;
 
@@ -109,6 +110,23 @@ public class SIPCommanderImpl implements SIPCommander {
                 .createUserAgentHeader()
                 .buildRequest();
         log.info("[回复ack] {}-> {}:{} ", sdp.getOrigin().getUsername(), event.getRemoteIpAddress(), event.getRemotePort());
+        SipSendMessage.handleEvent(sipServer,response.getCallIdHeader().getCallId(),okEvent,errorEvent);
+        sipMessageHandle.handleMessage(response.getLocalAddress().getHostAddress(),reqAck);
+    }
+
+    @Override
+    public void sendAckMessage(SipServer sipServer, SIPResponse response, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws InvalidArgumentException, SipException, ParseException, SdpParseException {
+        Request reqAck = SIPRequestProvider.builder(sipServer, null, Request.ACK, null)
+                .createSipURI(((SipURI) response.getFromHeader().getAddress().getURI()).getUser(), response.getRemoteAddress().getHostAddress() + ":" + response.getRemotePort())
+                .addViaHeader(response.getLocalAddress().getHostAddress(), response.getTopmostViaHeader().getPort(), response.getTopmostViaHeader().getTransport(), false)
+                .createCallIdHeader(response.getCallIdHeader())
+                .createFromHeader(response.getFromHeader())
+                .createToHeader(response.getToHeader())
+                .createCSeqHeader(RedisService.getCseqManager().getCSEQ())
+                .createContactHeader(((SipURI) response.getFromHeader().getAddress().getURI()).getUser(),String.format("%s:%s",response.getLocalAddress().getHostAddress(), response.getLocalPort()))
+                .createUserAgentHeader()
+                .buildRequest();
+        log.info("[回复ack] {}-> {}:{} ", ((SipURI) response.getFromHeader().getAddress().getURI()).getUser(), response.getRemoteAddress().getHostAddress(), response.getRemotePort());
         SipSendMessage.handleEvent(sipServer,response.getCallIdHeader().getCallId(),okEvent,errorEvent);
         sipMessageHandle.handleMessage(response.getLocalAddress().getHostAddress(),reqAck);
     }

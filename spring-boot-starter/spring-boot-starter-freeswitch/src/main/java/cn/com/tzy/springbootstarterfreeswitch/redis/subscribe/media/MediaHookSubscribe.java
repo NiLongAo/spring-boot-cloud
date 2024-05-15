@@ -14,6 +14,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.listener.PatternTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
+import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
@@ -23,6 +24,7 @@ import java.util.*;
  * redis 订阅方式
  */
 @Log4j2
+@Component
 public class MediaHookSubscribe {
     private final static String MEDIA_HOOK_SUBSCRIBE_MANAGER = SipConstant.MEDIA_HOOK_SUBSCRIBE_MANAGER;
     private final static Integer millis = 20;

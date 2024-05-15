@@ -21,6 +21,11 @@
             <groupId>cn.com.tzy</groupId>
             <artifactId>spring-boot-feign-bean</artifactId>
         </dependency>
+        <!--基础类开放feign接口-->
+        <dependency>
+            <groupId>cn.com.tzy</groupId>
+            <artifactId>spring-boot-feign-sso</artifactId>
+        </dependency>
         <dependency>
             <groupId>cn.com.tzy</groupId>
             <artifactId>spring-boot-starter-redis</artifactId>

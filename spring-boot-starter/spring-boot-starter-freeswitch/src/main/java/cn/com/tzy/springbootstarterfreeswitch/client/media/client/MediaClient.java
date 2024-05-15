@@ -63,8 +63,6 @@ public class MediaClient {
     public static SendRtp createSendRtp(
             MediaServerVo mediaServerVo,
             String sessionName,
-            long startTime,
-            long stopTime,
             String ip,
             int port,
             String ssrc,
@@ -84,8 +82,6 @@ public class MediaClient {
         }
         return SendRtp.builder()
                 .sessionName(sessionName)
-                .startTime(startTime)
-                .stopTime(stopTime)
                 .ip(ip)
                 .port(port)
                 .ssrc(ssrc)
@@ -153,7 +149,7 @@ public class MediaClient {
         if(result == null || result.getCode() !=RespCode.CODE_0.getValue()){
             return null;
         }
-        return new StreamInfo(mediaServerVo,app,stream,result.getTracks(),addr,callId,null,null);
+        return new StreamInfo(mediaServerVo,app,stream,result.getTracks(),addr,callId,null);
     }
 
 

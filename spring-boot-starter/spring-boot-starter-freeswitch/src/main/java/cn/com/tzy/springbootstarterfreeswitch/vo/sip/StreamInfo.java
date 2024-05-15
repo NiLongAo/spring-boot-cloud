@@ -30,11 +30,7 @@ public class StreamInfo implements Serializable, Cloneable{
     /**
      * 设备编号
      */
-    private String deviceId;
-    /**
-     * 通道编号
-     */
-    private String channelId;
+    private String agentCode;
     /**
      * 请求前缀
      */
@@ -167,15 +163,14 @@ public class StreamInfo implements Serializable, Cloneable{
     private SipTransactionInfo transactionInfo;
 
 
-    public StreamInfo(MediaServerVo mediaServerVo, String app, String stream, List<OnStreamChangedHookVo.MediaTrack> tracks, String addr, String callId, String deviceId, String channelId){
+    public StreamInfo(MediaServerVo mediaServerVo, String app, String stream, List<OnStreamChangedHookVo.MediaTrack> tracks, String addr, String callId, String agentCode){
         this.stream = stream;
         this.app = app;
         this.sslStatus = mediaServerVo.getSslStatus();
         this.ip = StringUtils.isEmpty(addr)? mediaServerVo.getStreamIp():addr;
         this.mediaServerId = mediaServerVo.getId();
         this.tracks = ObjectUtils.isEmpty(tracks)?tracks: tracks.stream().map(BeanUtil::beanToMap).collect(Collectors.toList());//类型转换
-        this.deviceId = deviceId;
-        this.channelId = channelId;
+        this.agentCode = agentCode;
         this.prefix = mediaServerVo.getVideoPlayPrefix();
         String callIdParam = ObjectUtils.isEmpty(callId)?"":"?callId=" + callId;
         this.setRtmp(this.ip, mediaServerVo.getRtmpPort(), mediaServerVo.getRtmpSslPort(), app,  stream, callIdParam);

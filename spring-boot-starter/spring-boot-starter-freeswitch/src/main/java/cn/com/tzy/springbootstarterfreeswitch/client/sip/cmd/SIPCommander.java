@@ -25,4 +25,6 @@ public interface SIPCommander {
     void streamByeCmd(SipServer sipServer, AgentVoInfo deviceVo, String stream, String callId, VideoStreamType type, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws InvalidArgumentException, SipException, ParseException, SsrcTransactionNotFoundException;
 
     public void sendAckMessage(SipServer sipServer, SessionDescription sdp, ResponseEventExt event, SIPResponse response, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws InvalidArgumentException, SipException, ParseException, SdpParseException;
+
+    public void sendAckMessage(SipServer sipServer, SIPResponse response, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws InvalidArgumentException, SipException, ParseException, SdpParseException;
 }

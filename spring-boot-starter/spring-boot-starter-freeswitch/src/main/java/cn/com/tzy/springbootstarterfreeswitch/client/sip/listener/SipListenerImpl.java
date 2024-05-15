@@ -80,15 +80,14 @@ public class SipListenerImpl implements SipListener {
                 Response response = responseEvent.getResponse();
                 int status = response.getStatusCode();
                 // Success
-                if (((status >= Response.OK) && (status < Response.MULTIPLE_CHOICES)) || status == Response.UNAUTHORIZED) {
+                if (((status >= Response.OK) && (status < Response.MULTIPLE_CHOICES)) || status == Response.UNAUTHORIZED || status == Response.PROXY_AUTHENTICATION_REQUIRED) {
                     CSeqHeader cseqHeader = (CSeqHeader) responseEvent.getResponse().getHeader(CSeqHeader.NAME);
                     String method = cseqHeader.getMethod();
                     SipResponseEvent sipRequestProcessor = sipResponseEventMap.get(method);
                     if (sipRequestProcessor != null) {
-
                         sipRequestProcessor.process(responseEvent);
                     }
-                    if (status != Response.UNAUTHORIZED && responseEvent.getResponse() != null) {
+                    if (status != Response.UNAUTHORIZED && status != Response.PROXY_AUTHENTICATION_REQUIRED &&  responseEvent.getResponse() != null) {
                         CallIdHeader callIdHeader = (CallIdHeader)responseEvent.getResponse().getHeader(CallIdHeader.NAME);
                         if (callIdHeader != null) {
                             String key = String.format("%s%s", SipSubscribeHandle.VIDEO_SIP_OK_EVENT_SUBSCRIBE_MANAGER, callIdHeader.getCallId());

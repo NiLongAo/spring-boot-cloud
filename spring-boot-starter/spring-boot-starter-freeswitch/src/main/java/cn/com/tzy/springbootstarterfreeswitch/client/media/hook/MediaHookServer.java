@@ -10,7 +10,6 @@ import cn.com.tzy.springbootstarterfreeswitch.client.sip.cmd.SIPCommander;
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.cmd.SIPCommanderForPlatform;
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.properties.VideoProperties;
 import cn.com.tzy.springbootstarterfreeswitch.enums.media.HookType;
-import cn.com.tzy.springbootstarterfreeswitch.enums.sip.OriginType;
 import cn.com.tzy.springbootstarterfreeswitch.enums.sip.VideoStreamType;
 import cn.com.tzy.springbootstarterfreeswitch.exception.SsrcTransactionNotFoundException;
 import cn.com.tzy.springbootstarterfreeswitch.model.fs.AgentVoInfo;
@@ -44,6 +43,7 @@ import cn.hutool.json.JSONUtil;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.annotation.Resource;
@@ -57,6 +57,7 @@ import java.util.Map;
  * 流媒体服务回调事件
  */
 @Log4j2
+@Component
 public class MediaHookServer {
 
     @Resource
@@ -227,11 +228,9 @@ public class MediaHookServer {
                     streamChangedManager.remove(hookVo);
                 }
                 mediaHookSubscribe.sendNotify(MediaHookVo.builder().type(HookType.on_stream_changed).onAll(ConstEnum.Flag.NO.getValue()).mediaServerVo(mediaServerVo).hookVo(hookVo).build());
-
-                String type = OriginType.values()[hookVo.getOriginType()].getType();
                 if("rtp".equals(hookVo.getApp())){
                     InviteInfo inviteInfo = inviteStreamManager.getInviteInfoByStream(null, hookVo.getStream());
-                    if(inviteInfo != null && (inviteInfo.getType() == VideoStreamType.play || inviteInfo.getType() == VideoStreamType.playback)){
+                    if(inviteInfo != null && (inviteInfo.getType() == VideoStreamType.call_phone || inviteInfo.getType() == VideoStreamType.playback)){
                         if(hookVo.isRegist()){
                             agentVoService.startPlay(inviteInfo.getAgentCode(),inviteInfo.getStream());
                         }else {
@@ -242,6 +241,9 @@ public class MediaHookServer {
                             deferredResultHolder.invokeAllResult(key, RestResult.result(RespCode.CODE_0.getValue(),"停止点播成功"));
                         }
                     }
+                }else if("push_web_rtp".equals(hookVo.getApp())){
+                    log.info("[ZLM HOOK] 视频 | 语音推流, {}->{}->{}/{}", hookVo.getMediaServerId(), hookVo.getSchema(), hookVo.getApp(), hookVo.getStream());
+
                 }else {
                     log.error("[ZLM HOOK] 未知流，请查询接口, {}->{}->{}/{}", hookVo.getMediaServerId(), hookVo.getSchema(), hookVo.getApp(), hookVo.getStream());
                 }

@@ -37,6 +37,10 @@ public class DeferredResultHolder {
      */
     public static final String AGENT_LOGIN = "agent_login_";
     /**
+     * 请求拨打电话
+     */
+    public static final String CALL_PHONE = "call_phone_";
+    /**
      * 停止点播key
      */
     public static final String CALLBACK_CMD_STOP = "callback_stop_";

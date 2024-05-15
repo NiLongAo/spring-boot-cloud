@@ -3,6 +3,8 @@ package cn.com.tzy.springbootstarterfreeswitch.service.freeswitch;
 import cn.com.tzy.springbootcomm.common.enumcom.ConstEnum;
 import cn.com.tzy.springbootcomm.utils.DynamicTask;
 import cn.com.tzy.springbootstarterfreeswitch.client.media.client.MediaClient;
+import cn.com.tzy.springbootstarterfreeswitch.client.sip.SipServer;
+import cn.com.tzy.springbootstarterfreeswitch.client.sip.cmd.SIPCommander;
 import cn.com.tzy.springbootstarterfreeswitch.common.sip.SipConstant;
 import cn.com.tzy.springbootstarterfreeswitch.enums.fs.AgentStateEnum;
 import cn.com.tzy.springbootstarterfreeswitch.model.fs.AgentVoInfo;
@@ -27,6 +29,14 @@ import java.util.List;
 
 @Log4j2
 public abstract class AgentVoService {
+
+    @Resource
+    private DynamicTask dynamicTask;
+    @Resource
+    private SIPCommander sipCommander;
+    @Resource
+    private SipServer sipServer;
+
     public abstract AgentVoInfo getAgentBySip(String sip);
     public abstract AgentVoInfo findAgentId(String id);
     public abstract void save(AgentVoInfo entity);

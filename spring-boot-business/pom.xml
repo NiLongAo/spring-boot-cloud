@@ -24,8 +24,9 @@
         <module>spring-boot-oa</module>
         <!--人脸识别服务face-->
         <module>spring-boot-face</module>
-        <!--s视频监控模块-->
+        <!--视频监控模块-->
         <module>spring-boot-video</module>
+        <!--软电话模块-->
         <module>spring-boot-fs</module>
     </modules>
 

@@ -131,8 +131,7 @@ public class InviteStreamManager {
                         putString("id",o.toString());
                         putString("app",streamInfo.getApp());
                         putString("stream",streamInfo.getStream());
-                        putString("deviceId",streamInfo.getDeviceId());
-                        putString("channelId",streamInfo.getChannelId());
+                        putString("agentCode",streamInfo.getAgentCode());
                         putString("mediaServerId",streamInfo.getMediaServerId());
                         putString("startTime",streamInfo.getStartTime());
                         putString("endTime",streamInfo.getEndTime());
@@ -253,7 +252,7 @@ public class InviteStreamManager {
 
     public void clearInviteInfo(String agentCode) {
         removeInviteInfo(VideoStreamType.playback, agentCode, null);
-        removeInviteInfo(VideoStreamType.play, agentCode, null);
+        removeInviteInfo(VideoStreamType.call_phone, agentCode, null);
     }
 
     public String getKey(VideoStreamType type,String agentCode,String stream,String ssrc){

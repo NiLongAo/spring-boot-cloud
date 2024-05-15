@@ -95,14 +95,6 @@ public class SendRtp {
      * 播放类型
      */
     private String sessionName ;
-    /**
-     * 开始时间
-     */
-    private Long startTime;
-    /**
-     * 结束时间
-     */
-    private Long stopTime;
 
     /**
      * 播放类型

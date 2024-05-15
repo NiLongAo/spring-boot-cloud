@@ -1,6 +1,6 @@
 package cn.com.tzy.springbootstarterfreeswitch.service.sip;
 
-import cn.com.tzy.springbootstarterfreeswitch.vo.sip.DeviceVo;
+import cn.com.tzy.springbootstarterfreeswitch.model.fs.AgentVoInfo;
 import cn.com.tzy.springbootstarterfreeswitch.vo.sip.MediaServerVo;
 
 import java.util.List;
@@ -14,7 +14,7 @@ public interface MediaServerVoService {
      * 获取设备的流媒体信息或负载最低的服务
      * @return
      */
-    MediaServerVo findMediaServerForMinimumLoad(DeviceVo deviceVo);
+    MediaServerVo findMediaServerForMinimumLoad(AgentVoInfo agentVoInfo);
     /**
      * 获取流媒体负载最低的服务
      * @return
