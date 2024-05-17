@@ -11,6 +11,7 @@ public class RedisConstant {
     public static final String FS_DEVICE_CALLID = "FS_DEVICE_CALLID:";
     public static final String FS_PLAYBACK_INFO = "FS_PLAYBACK_INFO:";
     public static final String FS_CALL_PHONE = "FS_CALL_PHONE:";
+    public static final String FS_SOCKET_AGENT_CODE = "FS_SOCKET_AGENT_CODE:";
 
 
 

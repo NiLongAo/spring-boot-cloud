@@ -65,7 +65,7 @@ public class MessageRequestProcessor extends AbstractSipRequestEvent implements 
         AgentInfoManager agentInfoManager = RedisService.getAgentInfoManager();
 
         SIPRequest sipRequest = (SIPRequest)evt.getRequest();
-        String agentCode = SipUtils.getUserIdFromFromHeader(evt.getRequest());
+        String agentCode = SipUtils.getUserIdFromHeader(evt.getRequest());
         CallIdHeader callIdHeader = sipRequest.getCallIdHeader();
         // 先从会话内查找
         SsrcTransaction ssrcTransaction = ssrcTransactionManager.getParamOne(null, callIdHeader.getCallId(), null,null);

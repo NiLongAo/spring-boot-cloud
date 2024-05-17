@@ -9,6 +9,7 @@ import cn.com.tzy.springbootstarterfreeswitch.client.sip.SipServer;
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.cmd.SIPCommander;
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.cmd.SIPCommanderForPlatform;
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.properties.VideoProperties;
+import cn.com.tzy.springbootstarterfreeswitch.common.socket.AgentCommon;
 import cn.com.tzy.springbootstarterfreeswitch.enums.media.HookType;
 import cn.com.tzy.springbootstarterfreeswitch.enums.sip.VideoStreamType;
 import cn.com.tzy.springbootstarterfreeswitch.exception.SsrcTransactionNotFoundException;
@@ -206,6 +207,7 @@ public class MediaHookServer {
         InviteStreamManager inviteStreamManager = RedisService.getInviteStreamManager();
         StreamChangedManager streamChangedManager = RedisService.getStreamChangedManager();
         DeferredResultHolder deferredResultHolder = SpringUtil.getBean(DeferredResultHolder.class);
+        SsrcTransactionManager ssrcTransactionManager = RedisService.getSsrcTransactionManager();
         AgentVoService agentVoService = FsService.getAgentService();
         if(hookVo.isRegist()){
             log.info("[ZLM HOOK] 流注册, {}->{}->{}/{}", hookVo.getMediaServerId(), hookVo.getSchema(), hookVo.getApp(), hookVo.getStream());
@@ -243,7 +245,17 @@ public class MediaHookServer {
                     }
                 }else if("push_web_rtp".equals(hookVo.getApp())){
                     log.info("[ZLM HOOK] 视频 | 语音推流, {}->{}->{}/{}", hookVo.getMediaServerId(), hookVo.getSchema(), hookVo.getApp(), hookVo.getStream());
-
+                    SsrcTransaction paramOne = ssrcTransactionManager.getParamOne(hookVo.getStream(), null, null, VideoStreamType.push_web_rtp);
+                    if(hookVo.isRegist()){
+                        if(paramOne !=null){
+                            paramOne.setOnPush(true);
+                            ssrcTransactionManager.put(paramOne);
+                        }
+                        FsService.getSendAgentMessage().sendMessage(AgentCommon.SOCKET_AGENT,AgentCommon.AGENT_OUT_PUSH_PATH_OK,paramOne.getAgentCode(),RestResult.result(RespCode.CODE_0.getValue(),"推流接收成功",null));
+                    }else {
+                        ssrcTransactionManager.remove(paramOne.getAgentCode(),paramOne.getStream());
+                        FsService.getSendAgentMessage().sendMessage(AgentCommon.SOCKET_AGENT,AgentCommon.AGENT_OUT_PUSH_PATH_LOGOUT,paramOne.getAgentCode(),RestResult.result(RespCode.CODE_0.getValue(),"推流关闭成功",null));
+                    }
                 }else {
                     log.error("[ZLM HOOK] 未知流，请查询接口, {}->{}->{}/{}", hookVo.getMediaServerId(), hookVo.getSchema(), hookVo.getApp(), hookVo.getStream());
                 }

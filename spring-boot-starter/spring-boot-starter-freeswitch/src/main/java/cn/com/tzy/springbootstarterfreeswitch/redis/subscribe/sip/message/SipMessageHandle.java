@@ -4,7 +4,6 @@ package cn.com.tzy.springbootstarterfreeswitch.redis.subscribe.sip.message;
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.SipServer;
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.utils.SipLogUtils;
-import cn.com.tzy.springbootstarterfreeswitch.client.sip.utils.SipUtils;
 import cn.com.tzy.springbootstarterfreeswitch.common.sip.SipConstant;
 import cn.com.tzy.springbootstarterfreeswitch.model.fs.AgentVoInfo;
 import cn.com.tzy.springbootstarterfreeswitch.redis.RedisService;
@@ -28,12 +27,10 @@ import org.springframework.util.SerializationUtils;
 import javax.annotation.Resource;
 import javax.sip.SipException;
 import javax.sip.header.CallIdHeader;
-import javax.sip.header.UserAgentHeader;
 import javax.sip.header.ViaHeader;
 import javax.sip.message.Message;
 import javax.sip.message.Request;
 import javax.sip.message.Response;
-import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -109,14 +106,6 @@ public class SipMessageHandle extends AbstractMessageListener {
             log.warn("[消息头缺失]： ViaHeader， 使用默认的UDP方式处理数据");
         } else {
             transport = viaHeader.getTransport();
-        }
-        if (message.getHeader(UserAgentHeader.NAME) == null) {
-            try {
-                message.addHeader(SipUtils.createUserAgentHeader(sipServer.getSipFactory()));
-            } catch (ParseException e) {
-                sendErrorMsg(sipServer, message, "添加UserAgentHeader失败");
-                log.error("添加UserAgentHeader失败", e);
-            }
         }
         //打印日志
         SipLogUtils.sendMessage(sipServer,message);

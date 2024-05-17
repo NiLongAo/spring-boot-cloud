@@ -47,9 +47,7 @@ public class MediaClient {
      * @param ip 推流ip
      * @param port 推流端口
      * @param ssrc 推流唯一标识
-     * @param platformId 平台id
-     * @param deviceId 设备编号
-     * @param channelId  通道id
+     * @param agentCode 客服code
      * @param app appId
      * @param streamId streamId
      * @param tcp 是否为tcp
@@ -76,7 +74,8 @@ public class MediaClient {
             Boolean rtcp,
             InviteStreamType type
     ){
-        int localPort = keepPort(mediaServerVo,0,tcp && tcpActive?2:tcp?1:0, streamId);
+        //只是为了获取一个有效端口
+        int localPort = keepPort(mediaServerVo,0,tcpActive?2:tcp?1:0, String.format("create_send_rtp:%s",streamId));
         if (localPort == 0) {
             return null;
         }

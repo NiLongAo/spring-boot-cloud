@@ -71,6 +71,7 @@ public class AgentVoServiceImpl extends AgentVoService {
         }
         AgentVoInfo convert = AgentConvert.INSTANCE.convert(agent);
         convert.setAgentOnline(ConstEnum.Flag.NO.getValue());
+        convert.setSsrcCheck(ConstEnum.Flag.NO.getValue());
         return convert;
     }
 }

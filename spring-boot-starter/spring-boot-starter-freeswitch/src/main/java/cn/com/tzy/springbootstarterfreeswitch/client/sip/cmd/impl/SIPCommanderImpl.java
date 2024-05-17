@@ -101,13 +101,13 @@ public class SIPCommanderImpl implements SIPCommander {
         SipConfigProperties sipConfigProperties = sipServer.getSipConfigProperties();
         Request reqAck = SIPRequestProvider.builder(sipServer, null, Request.ACK, null)
                 .createSipURI(sdp.getOrigin().getUsername(), event.getRemoteIpAddress() + ":" + event.getRemotePort())
-                .addViaHeader(response.getLocalAddress().getHostAddress(), sipConfigProperties.getPort(), response.getTopmostViaHeader().getTransport(), false)
+                .addViaHeader(response.getLocalAddress().getHostAddress(), sipConfigProperties.getPort(), response.getTopmostViaHeader().getTransport(),response.getTopmostViaHeader().getBranch(), false)
                 .createCallIdHeader(response.getCallIdHeader())
                 .createFromHeader(response.getFromHeader())
                 .createToHeader(response.getToHeader())
                 .createCSeqHeader(RedisService.getCseqManager().getCSEQ())
-                .createContactHeader(sipConfigProperties.getId(),String.format("%s:%s",response.getLocalAddress().getHostAddress(), sipConfigProperties.getPort()))
-                .createUserAgentHeader()
+//                .createContactHeader(sipConfigProperties.getId(),String.format("%s:%s",response.getLocalAddress().getHostAddress(), sipConfigProperties.getPort()))
+//                .createUserAgentHeader()
                 .buildRequest();
         log.info("[回复ack] {}-> {}:{} ", sdp.getOrigin().getUsername(), event.getRemoteIpAddress(), event.getRemotePort());
         SipSendMessage.handleEvent(sipServer,response.getCallIdHeader().getCallId(),okEvent,errorEvent);
@@ -117,14 +117,14 @@ public class SIPCommanderImpl implements SIPCommander {
     @Override
     public void sendAckMessage(SipServer sipServer, SIPResponse response, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws InvalidArgumentException, SipException, ParseException, SdpParseException {
         Request reqAck = SIPRequestProvider.builder(sipServer, null, Request.ACK, null)
-                .createSipURI(((SipURI) response.getFromHeader().getAddress().getURI()).getUser(), response.getRemoteAddress().getHostAddress() + ":" + response.getRemotePort())
-                .addViaHeader(response.getLocalAddress().getHostAddress(), response.getTopmostViaHeader().getPort(), response.getTopmostViaHeader().getTransport(), false)
+                .createSipURI(((SipURI) response.getToHeader().getAddress().getURI()).getUser(), response.getRemoteAddress().getHostAddress() + ":" + response.getRemotePort())
+                .addViaHeader(response.getLocalAddress().getHostAddress(), response.getTopmostViaHeader().getPort(), response.getTopmostViaHeader().getTransport(),response.getTopmostViaHeader().getBranch(), false)
                 .createCallIdHeader(response.getCallIdHeader())
                 .createFromHeader(response.getFromHeader())
                 .createToHeader(response.getToHeader())
                 .createCSeqHeader(RedisService.getCseqManager().getCSEQ())
-                .createContactHeader(((SipURI) response.getFromHeader().getAddress().getURI()).getUser(),String.format("%s:%s",response.getLocalAddress().getHostAddress(), response.getLocalPort()))
-                .createUserAgentHeader()
+//                .createContactHeader(((SipURI) response.getFromHeader().getAddress().getURI()).getUser(),String.format("%s:%s",response.getLocalAddress().getHostAddress(), response.getLocalPort()))
+//                .createUserAgentHeader()
                 .buildRequest();
         log.info("[回复ack] {}-> {}:{} ", ((SipURI) response.getFromHeader().getAddress().getURI()).getUser(), response.getRemoteAddress().getHostAddress(), response.getRemotePort());
         SipSendMessage.handleEvent(sipServer,response.getCallIdHeader().getCallId(),okEvent,errorEvent);

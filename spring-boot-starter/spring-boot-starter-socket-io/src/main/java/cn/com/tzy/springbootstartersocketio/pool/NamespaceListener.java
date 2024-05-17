@@ -10,10 +10,7 @@ public interface NamespaceListener extends ConnectListener, DisconnectListener {
      * @return
      */
     public String getNamespaceName();
-
-
     public SocketIOServer getSocketIOServer();
-
     public void setSocketIOServer(SocketIOServer socketIOServer);
 
 }

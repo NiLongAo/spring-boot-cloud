@@ -135,7 +135,8 @@ public abstract class ParentPlatformService {
 
     public void offline(AgentVoInfo agentVoInfo){
         log.info("[平台离线]：{}", agentVoInfo.getAgentCode());
-        FsService.getAgentService().offline(agentVoInfo.getAgentCode());
+        RedisService.getAgentNotifySubscribeManager().removePresenceSubscribe(agentVoInfo);
+        RedisService.getRegisterServerManager().delPlatform(agentVoInfo.getAgentCode());
         // 停止所有推流
         log.info("[平台离线] {}, 停止所有推流", agentVoInfo.getAgentCode());
         stopAllPush(agentVoInfo.getAgentCode());
@@ -145,9 +146,7 @@ public abstract class ParentPlatformService {
         this.keepaliveTask(agentVoInfo,true);
         // 停止目录订阅回复
         log.info("[平台离线] {}, 停止订阅回复", agentVoInfo.getAgentCode());
-        RedisService.getRegisterServerManager().delPlatform(agentVoInfo.getAgentCode());
-        RedisService.getAgentNotifySubscribeManager().removePresenceSubscribe(agentVoInfo);
-
+        FsService.getAgentService().offline(agentVoInfo.getAgentCode());
     }
 
     /**

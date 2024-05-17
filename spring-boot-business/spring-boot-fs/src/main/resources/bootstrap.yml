@@ -10,7 +10,7 @@ sip:
   name: fs-sip-server
   id: fs-sip-server
   port: 5060
-  domain: fs-sip-server
+  domain: 6101251001
 video-settings:
   # 是否开启sip日志
   sip_log: true

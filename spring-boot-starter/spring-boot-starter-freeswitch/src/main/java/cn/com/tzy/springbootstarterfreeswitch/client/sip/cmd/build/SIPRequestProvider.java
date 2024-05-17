@@ -183,7 +183,19 @@ public class SIPRequestProvider {
          * @return
          */
         public  Builder addViaHeader(String ip, int port, String transport,boolean rPort) throws PeerUnavailableException, InvalidArgumentException, ParseException {
-            ViaHeader viaHeader = this.sipFactory.createHeaderFactory().createViaHeader(ip, port, transport, SipUtils.getNewViaTag());
+            addViaHeader(ip, port, transport, SipUtils.getNewViaTag(),rPort);
+            return this;
+        }
+
+        /**
+         *
+         * @param ip 设备ip
+         * @param port 设备地址
+         * @param transport TCP或UDP
+         * @return
+         */
+        public  Builder addViaHeader(String ip, int port, String transport,String branch,boolean rPort) throws PeerUnavailableException, InvalidArgumentException, ParseException {
+            ViaHeader viaHeader = this.sipFactory.createHeaderFactory().createViaHeader(ip, port, transport, branch);
             if(rPort){
                 viaHeader.setRPort();
             }
@@ -236,8 +248,16 @@ public class SIPRequestProvider {
             return this;
         }
 
-        public Builder createAuthorizationHeader(String deviceGbId,String serverGbId,String host,String password,WWWAuthenticateHeader www) throws PeerUnavailableException, ParseException {
+        public Builder createAuthorizationHeader(String deviceGbId,String serverGbId,String host,String password,WWWAuthenticateHeader www){
             AuthorizationHeader authorization = createAuthorization(sipFactory, deviceGbId, serverGbId, host, password, www);
+            if(authorization != null){
+                headerList.add(authorization);
+            }
+            return this;
+        }
+
+        public Builder createProxyAuthorizationHeader(String deviceGbId,String serverGbId,String host,String password,WWWAuthenticateHeader www){
+            ProxyAuthorizationHeader authorization = SIPRequestProvider.createProxyAuthenticateHeader(sipServer.getSipFactory(), deviceGbId, serverGbId, host, password, www);
             if(authorization != null){
                 headerList.add(authorization);
             }
@@ -388,6 +408,75 @@ public class SIPRequestProvider {
 
             String RESPONSE = DigestUtils.md5DigestAsHex(reStr.toString().getBytes());
             authorizationHeader = sipFactory.createHeaderFactory().createAuthorizationHeader(scheme);
+            authorizationHeader.setUsername(deviceGbId);
+            authorizationHeader.setRealm(realm);
+            authorizationHeader.setNonce(nonce);
+            authorizationHeader.setURI(requestURI);
+            authorizationHeader.setResponse(RESPONSE);
+            authorizationHeader.setAlgorithm("MD5");
+            if (qop != null) {
+                authorizationHeader.setQop(qop);
+                authorizationHeader.setCNonce(cNonce);
+                authorizationHeader.setNonceCount(1);
+            }
+        }catch (PeerUnavailableException | ParseException e){
+            log.error(" authorization 解密错误：",e);
+            return authorizationHeader;
+        }
+        return authorizationHeader;
+    }
+
+    public static ProxyAuthorizationHeader  createProxyAuthenticateHeader(SipFactory sipFactory,String deviceGbId,String serverGbId,String host,String password,WWWAuthenticateHeader www){
+        ProxyAuthorizationHeader authorizationHeader = null;
+        try {
+            SipURI requestURI = sipFactory.createAddressFactory().createSipURI(serverGbId,host);
+            if(www == null){
+                authorizationHeader = sipFactory.createHeaderFactory().createProxyAuthorizationHeader("Digest");
+                authorizationHeader.setUsername(deviceGbId);
+                authorizationHeader.setURI(requestURI);
+                authorizationHeader.setAlgorithm("MD5");
+                return authorizationHeader;
+            }
+            String realm = www.getRealm();
+            String nonce = www.getNonce();
+            String scheme = www.getScheme();
+            // 参考 https://blog.csdn.net/y673533511/article/details/88388138
+            // qop 保护质量 包含auth（默认的）和auth-int（增加了报文完整性检测）两种策略
+            String qop = www.getQop();
+
+            String cNonce = null;
+            String nc = "00000001";
+            if (qop != null) {
+                if ("auth".equalsIgnoreCase(qop)) {
+                    // 客户端随机数，这是一个不透明的字符串值，由客户端提供，并且客户端和服务器都会使用，以避免用明文文本。
+                    // 这使得双方都可以查验对方的身份，并对消息的完整性提供一些保护
+                    cNonce = UUID.randomUUID().toString();
+
+                }else if ("auth-int".equalsIgnoreCase(qop)){
+                    // TODO
+                }
+            }
+
+            String HA1 = DigestUtils.md5DigestAsHex((deviceGbId + ":" + realm + ":" + password).getBytes());
+            String HA2=DigestUtils.md5DigestAsHex((Request.REGISTER + ":" + requestURI.toString()).getBytes());
+
+            StringBuffer reStr = new StringBuffer(200);
+            reStr.append(HA1);
+            reStr.append(":");
+            reStr.append(nonce);
+            reStr.append(":");
+            if (qop != null) {
+                reStr.append(nc);
+                reStr.append(":");
+                reStr.append(cNonce);
+                reStr.append(":");
+                reStr.append(qop);
+                reStr.append(":");
+            }
+            reStr.append(HA2);
+
+            String RESPONSE = DigestUtils.md5DigestAsHex(reStr.toString().getBytes());
+            authorizationHeader = sipFactory.createHeaderFactory().createProxyAuthorizationHeader(scheme);
             authorizationHeader.setUsername(deviceGbId);
             authorizationHeader.setRealm(realm);
             authorizationHeader.setNonce(nonce);

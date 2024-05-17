@@ -138,8 +138,6 @@ public enum AgentStateEnum {
      * 耳语
      */
     WHISPER,
-
-
     /**
      * 保持中
      */

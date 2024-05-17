@@ -53,4 +53,14 @@
       1 as level
     from fs_agent a where a.agent_code =#{agentCode}
   </select>
+
+  <select id="findUserId" resultType="cn.com.tzy.springbootentity.dome.fs.Agent">
+    select
+      a.*
+    from fs_agent a,fs_user_agent b
+    where a.id = b.agent_id
+    and b.user_id = #{userId}
+    order by a.create_time desc
+    limit 1
+  </select>
 </mapper>

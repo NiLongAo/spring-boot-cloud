@@ -48,6 +48,11 @@ public class SsrcTransactionManager {
         RedisUtils.set(key, ssrcTransaction);
     }
 
+    public void put(SsrcTransaction ssrcTransaction){
+        String key = String.format("%s:%s:%s:%s:%s",MEDIA_TRANSACTION_USED_PREFIX,ssrcTransaction.getAgentCode(),ssrcTransaction.getStream(),ssrcTransaction.getType(),ssrcTransaction.getCallId());
+        RedisUtils.set(key, ssrcTransaction);
+    }
+
     public SsrcTransaction getParamOne(String agentCode,  String callId, String stream,VideoStreamType type){
         if (ObjectUtils.isEmpty(agentCode)) {
             agentCode ="*";

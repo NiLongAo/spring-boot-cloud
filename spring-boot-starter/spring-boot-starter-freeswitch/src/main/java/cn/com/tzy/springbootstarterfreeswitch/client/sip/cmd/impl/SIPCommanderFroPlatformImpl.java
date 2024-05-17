@@ -45,6 +45,8 @@ import javax.sip.header.CallIdHeader;
 import javax.sip.header.WWWAuthenticateHeader;
 import javax.sip.message.Request;
 import java.text.ParseException;
+import java.util.Arrays;
+
 @Log4j2
 @Component
 public class SIPCommanderFroPlatformImpl implements SIPCommanderForPlatform {
@@ -88,11 +90,11 @@ public class SIPCommanderFroPlatformImpl implements SIPCommanderForPlatform {
                     .addViaHeader(deviceSipConfig.getIp(), deviceSipConfig.getPort(), TransportType.UDP.getName(), true)
                     .createCallIdHeader(deviceSipConfig.getIp(), TransportType.UDP.getName(), callId)
                     .createFromHeader(agentVoInfo.getAgentCode(), agentVoInfo.getFsHost(), fromTag)
-                    .createToHeader(agentVoInfo.getAgentCode(), agentVoInfo.getFsHost(), toTag)
+                    .createToHeader(agentVoInfo.getAgentCode(), agentVoInfo.getFsHost(), null)
                     .createCSeqHeader(RedisService.getCseqManager().getCSEQ())
                     .createUserAgentHeader()
                     .createContactHeader(agentVoInfo.getAgentCode(), String.format("%s:%s", deviceSipConfig.getIp(), deviceSipConfig.getPort()))
-                    .createExpiresHeader(isRegister ? deviceSipConfig.getExpires() : 0)
+                    .createExpiresHeader(isRegister ? agentVoInfo.getExpires() : 0)
                     .buildRequest();
             CallIdHeader callIdHeader = request.getCallIdHeader();
             //存储注册缓存
@@ -107,7 +109,7 @@ public class SIPCommanderFroPlatformImpl implements SIPCommanderForPlatform {
                     .createCSeqHeader(RedisService.getCseqManager().getCSEQ())
                     .createUserAgentHeader()
                     .createContactHeader(agentVoInfo.getAgentCode(), String.format("%s:%s", deviceSipConfig.getIp(), deviceSipConfig.getPort()))
-                    .createExpiresHeader(isRegister ? deviceSipConfig.getExpires() : 0)
+                    .createExpiresHeader(isRegister ? agentVoInfo.getExpires() : 0)
                     .createAuthorizationHeader(agentVoInfo.getAgentCode(), agentVoInfo.getAgentCode(),String.format("%s:%s", agentVoInfo.getFsHost(), agentVoInfo.getFsPost()), agentVoInfo.getPasswd(),www)
                     .buildRequest();
         }
@@ -146,7 +148,7 @@ public class SIPCommanderFroPlatformImpl implements SIPCommanderForPlatform {
                 .createToHeader(agentVoInfo.getAgentCode(), agentVoInfo.getFsHost(), null)
                 .createCSeqHeader(RedisService.getCseqManager().getCSEQ())
                 .createUserAgentHeader()
-                .createContentTypeHeader("Application", "MANSCDP+xml")
+                .createContentTypeHeader("application", "manscdp+xml")
                 .buildRequest();
         SipSendMessage.sendMessage(sipServer, agentVoInfo, request,okEvent,errorEvent);
         CallIdHeader header = (CallIdHeader)request.getHeader(CallIdHeader.NAME);
@@ -257,38 +259,54 @@ public class SIPCommanderFroPlatformImpl implements SIPCommanderForPlatform {
     }
 
     @Override
-    public SIPRequest callPhone(SipServer sipServer, MediaServerVo mediaServerVo, SSRCInfo ssrcInfo, AgentVoInfo agentVoInfo, HookEvent hookEvent, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws InvalidArgumentException, SipException, ParseException {
+    public SIPRequest callPhone(SipServer sipServer, MediaServerVo mediaServerVo, SSRCInfo ssrcInfo, AgentVoInfo agentVoInfo, String caller,HookEvent hookEvent, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws InvalidArgumentException, SipException, ParseException {
         SsrcTransactionManager ssrcTransactionManager = RedisService.getSsrcTransactionManager();
         SsrcConfigManager ssrcConfigManager = RedisService.getSsrcConfigManager();
         String stream = ssrcInfo.getStream();
         if (agentVoInfo == null) {
             return null;
         }
+        //创建发流端口
+        boolean tcp = Arrays.asList("TCP-PASSIVE","TCP-ACTIVE").contains(StreamModeType.getName(agentVoInfo.getStreamMode()));
+        boolean tcpActive= false;
+        if(tcp){
+            tcpActive = "TCP-ACTIVE".equals(StreamModeType.getName(agentVoInfo.getStreamMode()));
+        }
+        SendRtp sendRtp = MediaClient.createSendRtp(mediaServerVo,null, null, 0,ssrcInfo.getSsrc(),agentVoInfo.getAgentCode(),"push_web_rtp",agentVoInfo.getAgentCode(), tcp,tcpActive,sipServer.getVideoProperties().getServerId(),null,true, null);
+        if (sendRtp == null) {
+            ssrcConfigManager.releaseSsrc(mediaServerVo.getId(),ssrcInfo.getSsrc());
+            errorEvent.response(new EventResult(new RestResultEvent(RespCode.CODE_2.getValue(),"[视频语音流ACK] sendRtp is null 服务器端口资源不足")));
+            return null;
+        }
         log.info("{} 分配的ZLM为: {} [{}:{}]", stream, mediaServerVo.getId(), mediaServerVo.getSdpIp(), ssrcInfo.getPort());
         String sdpIp =mediaServerVo.getSdpIp();
         StringBuffer content = new StringBuffer(200);
         content.append("v=0\r\n");
-        content.append("o=" + agentVoInfo.getAgentCode() + " 0 0 IN IP4 " + sdpIp + "\r\n");
+        content.append("o=- 0 0 IN IP4 " + sdpIp + "\r\n");
         content.append("s=pjmedia\r\n");
-        content.append("c=IN IP4 " + sdpIp + "\r\n");
+        content.append("b=AS:84\r\n");
         content.append("t=0 0\r\n");
-        if ("TCP-PASSIVE".equalsIgnoreCase(StreamModeType.getName(agentVoInfo.getStreamMode()))) {
+        content.append("a=X-nat:0\r\n");
+        if(tcpActive){
             content.append("m=audio " + ssrcInfo.getPort() + " TCP/RTP/AVP 8 0 101\r\n");
-        } else if ("TCP-ACTIVE".equalsIgnoreCase(StreamModeType.getName(agentVoInfo.getStreamMode()))) {
+        }else if(tcp){
             content.append("m=audio " + ssrcInfo.getPort() + " TCP/RTP/AVP 8 0 101\r\n");
-        } else if ("UDP".equalsIgnoreCase(StreamModeType.getName(agentVoInfo.getStreamMode()))) {
+        }else {
             content.append("m=audio " + ssrcInfo.getPort() + " RTP/AVP 8 0 101\r\n");
         }
+        content.append("c=IN IP4 " + sdpIp + "\r\n");
+        content.append("b=TIAS:64000\r\n");
+        content.append("a=rtcp:" + sendRtp.getLocalPort() + " IN IP4 " + sdpIp + "\r\n");
         content.append("a=sendrecv\r\n");//sendrecv 双向传输（发送和接收）  recvonly
         content.append("a=rtpmap:8 PCMA/8000\r\n");
         content.append("a=rtpmap:0 PCMU/8000\r\n");
         content.append("a=rtpmap:101 telephone-event/8000\r\n");
         content.append("a=fmtp:101 0-16\r\n");
-        if ("TCP-PASSIVE".equalsIgnoreCase(StreamModeType.getName(agentVoInfo.getStreamMode()))) { // tcp被动模式
-            content.append("a=setup:passive\r\n");
-            content.append("a=connection:new\r\n");
-        } else if ("TCP-ACTIVE".equalsIgnoreCase(StreamModeType.getName(agentVoInfo.getStreamMode()))) { // tcp主动模式
+        if (tcpActive) { // tcp主动模式
             content.append("a=setup:active\r\n");
+            content.append("a=connection:new\r\n");
+        }else if(tcp){
+            content.append("a=setup:passive\r\n");
             content.append("a=connection:new\r\n");
         }
         content.append("a=ssrc:"+ssrcInfo.getSsrc() + "\r\n");//ssrc
@@ -298,17 +316,18 @@ public class SIPCommanderFroPlatformImpl implements SIPCommanderForPlatform {
         SipConfigProperties sipConfigProperties = sipServer.getSipConfigProperties();;
         //构建器
         SIPRequest request = (SIPRequest)SIPRequestProvider.builder(sipServer, null, Request.INVITE, content.toString())
-                .createSipURI(agentVoInfo.getAgentCode(), String.format("%s:%s", agentVoInfo.getFsHost(), agentVoInfo.getFsPost()))
+                .createSipURI(caller, String.format("%s:%s", agentVoInfo.getFsHost(), agentVoInfo.getFsPost()))
                 .addViaHeader(localIp, sipConfigProperties.getPort(), TransportType.UDP.getName(), true)
                 .createCallIdHeader(localIp,TransportType.getName(agentVoInfo.getTransport()),null)
                 .createFromHeader(agentVoInfo.getAgentCode(), agentVoInfo.getFsHost(), SipUtils.getNewFromTag())
-                .createToHeader(agentVoInfo.getAgentCode(), agentVoInfo.getFsHost(), null)
+                .createToHeader(caller, agentVoInfo.getFsHost(), null)
                 .createCSeqHeader(RedisService.getCseqManager().getCSEQ())
-                .createContentTypeHeader("APPLICATION", "SDP")
+                .createContentTypeHeader("application", "sdp")
                 .createContactHeader(agentVoInfo.getAgentCode(),String.format("%s:%s",localIp, sipConfigProperties.getPort()))
                 .createUserAgentHeader()
                 .buildRequest();
         String callId = request.getCallId().getCallId();
+        //添加流变动回调
         if(hookEvent != null){
             HookKey hookKey = HookKeyFactory.onStreamChanged("rtp", stream, true, "rtsp", mediaServerVo.getId());
             mediaHookSubscribe.addSubscribe(hookKey,(MediaServerVo mediaServer, HookVo response)->{
@@ -317,6 +336,8 @@ public class SIPCommanderFroPlatformImpl implements SIPCommanderForPlatform {
                 mediaHookSubscribe.removeSubscribe(hookKey);
             });
         }
+        sendRtp.setCallId(callId);
+        RedisService.getSendRtpManager().put(sendRtp);
         SipSendMessage.sendMessage(sipServer,agentVoInfo, request,(ok)->{
             ResponseEvent event = (ResponseEvent) ok.getEvent();
             SIPResponse response = (SIPResponse) event.getResponse();
@@ -324,12 +345,11 @@ public class SIPCommanderFroPlatformImpl implements SIPCommanderForPlatform {
             ssrcTransactionManager.put(agentVoInfo.getAgentCode(),callId,"rtp",stream, ssrcInfo.getSsrc(), agentVoInfo.getAgentCode(),response, VideoStreamType.call_phone);
             okEvent.response(ok);
         },(error)->{
+            RedisService.getSendRtpManager().deleteSendRTPServer(agentVoInfo.getAgentCode(),agentVoInfo.getAgentCode(),callId);
             ssrcTransactionManager.remove(agentVoInfo.getAgentCode(),ssrcInfo.getStream(),callId,null);
             ssrcConfigManager.releaseSsrc(mediaServerVo.getId(),ssrcInfo.getSsrc());
             errorEvent.response(error);
         });
         return request;
     }
-
-
 }

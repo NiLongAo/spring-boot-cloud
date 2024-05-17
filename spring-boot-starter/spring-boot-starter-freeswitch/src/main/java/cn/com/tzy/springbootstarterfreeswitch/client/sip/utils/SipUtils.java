@@ -12,45 +12,44 @@ import org.springframework.util.ObjectUtils;
 import javax.sdp.SdpFactory;
 import javax.sdp.SdpParseException;
 import javax.sdp.SessionDescription;
-import javax.sip.PeerUnavailableException;
-import javax.sip.SipFactory;
 import javax.sip.header.FromHeader;
-import javax.sip.header.UserAgentHeader;
+import javax.sip.header.ToHeader;
 import javax.sip.message.Request;
 import java.net.InetAddress;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 /**
  * SIP的工具类
  */
 public class SipUtils {
 
-    public static String getUserIdFromFromHeader(Request request) {
+    public static String getUserIdFromHeader(Request request) {
         FromHeader fromHeader = (FromHeader)request.getHeader(FromHeader.NAME);
-        return getUserIdFromFromHeader(fromHeader);
+        return getUserIdFromHeader(fromHeader);
     }
 
-    public static String getUserIdFromFromHeader(FromHeader fromHeader) {
+    public static String getUserIdToHeader(Request request) {
+        ToHeader fromHeader = (ToHeader)request.getHeader(ToHeader.NAME);
+        return getUserIdFromHeader(fromHeader);
+    }
+
+    public static String getUserIdFromHeader(ToHeader toHeader) {
+        AddressImpl address = (AddressImpl)toHeader.getAddress();
+        SipUri uri = (SipUri) address.getURI();
+        return uri.getUser();
+    }
+
+    public static String getUserIdFromHeader(FromHeader fromHeader) {
         AddressImpl address = (AddressImpl)fromHeader.getAddress();
         SipUri uri = (SipUri) address.getURI();
         return uri.getUser();
     }
 
     public static  String getNewViaTag() {
-        return "hs5G2sG" + RandomStringUtils.randomNumeric(10);
-    }
-
-    public static UserAgentHeader createUserAgentHeader(SipFactory sipFactory) throws PeerUnavailableException, ParseException {
-        List<String> agentParam = new ArrayList<>();
-        agentParam.add("Fs-Sip");
-        return sipFactory.createHeaderFactory().createUserAgentHeader(agentParam);
+        return "z9hG4bKPj" + getNewFromTag();
     }
 
     public static String getNewFromTag(){
-        return UUID.randomUUID().toString().replace("-", "");
+        return RandomStringUtils.randomAlphanumeric(32);
     }
 
     public static String getNewTag(){

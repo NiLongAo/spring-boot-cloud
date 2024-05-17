@@ -69,14 +69,14 @@ public class NotifyRequestProcessor extends AbstractSipRequestEvent implements S
             log.error("处理 Presence 消息时未获取到消息体,{}", event.getRequest());
             return;
         }
-        String agentCode = SipUtils.getUserIdFromFromHeader(request);
+        String agentCode = SipUtils.getUserIdFromHeader(request);
         Map<String, Object> stringObjectMap = XmlUtils.node2Json(rootElement);
         log.warn("[PresenceNotify请求 ] agentCode:{},data:{}",agentCode,stringObjectMap);
     }
 
     private void processMessageSummary(RequestEvent event) throws UnsupportedEncodingException {
         SIPRequest request = (SIPRequest) event.getRequest();
-        String agentCode = SipUtils.getUserIdFromFromHeader(request);
+        String agentCode = SipUtils.getUserIdFromHeader(request);
         String content = request.getMessageContent();
         log.warn("[MessageSummaryNotify请求 ] agentCode:{},data:{}",agentCode,content);
     }

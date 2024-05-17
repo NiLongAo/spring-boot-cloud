@@ -11,7 +11,6 @@ import cn.com.tzy.springbootstarterfreeswitch.enums.sip.InviteStreamType;
 import cn.com.tzy.springbootstarterfreeswitch.enums.sip.VideoStreamType;
 import cn.com.tzy.springbootstarterfreeswitch.model.fs.AgentVoInfo;
 import cn.com.tzy.springbootstarterfreeswitch.redis.RedisService;
-import cn.com.tzy.springbootstarterfreeswitch.redis.impl.sip.SendRtpManager;
 import cn.com.tzy.springbootstarterfreeswitch.redis.impl.sip.SsrcConfigManager;
 import cn.com.tzy.springbootstarterfreeswitch.redis.impl.sip.SsrcTransactionManager;
 import cn.com.tzy.springbootstarterfreeswitch.service.SipService;
@@ -33,11 +32,13 @@ import javax.sdp.SessionDescription;
 import javax.sip.InvalidArgumentException;
 import javax.sip.ResponseEvent;
 import javax.sip.SipException;
-import javax.sip.header.AuthorizationHeader;
 import javax.sip.header.ProxyAuthenticateHeader;
+import javax.sip.header.ProxyAuthorizationHeader;
+import javax.sip.header.ViaHeader;
 import javax.sip.message.Request;
 import javax.sip.message.Response;
 import java.text.ParseException;
+import java.util.Collections;
 import java.util.Vector;
 
 /**
@@ -62,7 +63,7 @@ public class InviteResponseProcessor extends AbstractSipResponseEvent {
             SIPResponse response = (SIPResponse)evt.getResponse();
             int statusCode = response.getStatusCode();
             // 未授权
-            if(statusCode != Response.PROXY_AUTHENTICATION_REQUIRED){
+            if(statusCode == Response.PROXY_AUTHENTICATION_REQUIRED){
                 sipCommander.sendAckMessage(sipServer,response,null,error->{
                     log.error("[请求拨打电话回复ACK]，异常：{}",error.getMsg());
                 });
@@ -77,14 +78,20 @@ public class InviteResponseProcessor extends AbstractSipResponseEvent {
                     log.error("[请求拨打电话 错误 ]，未获取缓存请求值 callId：{}",callId);
                     return;
                 }
-                String userId = SipUtils.getUserIdFromFromHeader(sipRequest);
+                String userId = SipUtils.getUserIdFromHeader(sipRequest);
+                String userIdToHeader = SipUtils.getUserIdToHeader(sipRequest);
                 AgentVoInfo agentVoInfo = RedisService.getAgentInfoManager().get(userId);
                 if(agentVoInfo == null){
                     log.error("[请求拨打电话 错误 ]，未获取客服信息 callId：{}",callId);
                     return;
                 }
-                AuthorizationHeader authorization = SIPRequestProvider.createAuthorization(sipServer.getSipFactory(), agentVoInfo.getAgentCode(), agentVoInfo.getAgentCode(), String.format("%s:%s", agentVoInfo.getFsHost(), agentVoInfo.getFsPost()), agentVoInfo.getPasswd(), header);
-                sipRequest.addHeader(authorization);
+                sipRequest.setCSeq(sipServer.getSipFactory().createHeaderFactory().createCSeqHeader(RedisService.getCseqManager().getCSEQ(), Request.INVITE));
+                ViaHeader viaHeader = sipServer.getSipFactory().createHeaderFactory().createViaHeader(sipRequest.getTopmostViaHeader().getHost(), sipRequest.getTopmostViaHeader().getPort(), sipRequest.getTopmostViaHeader().getTransport(), SipUtils.getNewViaTag());
+                viaHeader.setRPort();
+                sipRequest.setVia(Collections.singletonList(viaHeader));
+                ProxyAuthorizationHeader proxyAuthorizationHeader = SIPRequestProvider.createProxyAuthenticateHeader(sipServer.getSipFactory(), agentVoInfo.getAgentCode(), userIdToHeader, String.format("%s:%s", agentVoInfo.getFsHost(), agentVoInfo.getFsPost()), agentVoInfo.getPasswd(), header);
+                sipRequest.addHeader(proxyAuthorizationHeader);
+
                 //添加认证参数再次请求拨打电话
                 SipSendMessage.sendMessage(sipServer,agentVoInfo,sipRequest,null,null);
                 return;
@@ -105,7 +112,6 @@ public class InviteResponseProcessor extends AbstractSipResponseEvent {
             String callId = response.getCallId().getCallId();
             SsrcTransactionManager ssrcTransactionManager = RedisService.getSsrcTransactionManager();
             MediaServerVoService mediaServerService = SipService.getMediaServerService();
-            SendRtpManager sendRtpManager = RedisService.getSendRtpManager();
             SsrcTransaction paramOne = ssrcTransactionManager.getParamOne(agentCode, null, null, VideoStreamType.push_web_rtp);
             MediaServerVo mediaServerVo = mediaServerService.findOnLineMediaServerId(paramOne.getMediaServerId());
             DeviceRawContent deviceRawContent = handleDeviceRawContent(mediaServerVo, response, paramOne.isOnVideo() ? "96" : "8");
@@ -117,8 +123,7 @@ public class InviteResponseProcessor extends AbstractSipResponseEvent {
                 ssrcTransactionManager.put(agentCode,callId,paramOne.isOnPush(),paramOne.isOnVideo(),paramOne.getApp(),paramOne.getStream(),paramOne.getSsrc(),paramOne.getMediaServerId(),response,VideoStreamType.push_web_rtp);
                 dynamicTask.stop(String.format("push_web_rtp:%s",agentCode));
             }
-
-            SendRtp sendRtp = MediaClient.createSendRtp(mediaServerVo,deviceRawContent.getSessionName(), deviceRawContent.getAddressStr(), deviceRawContent.getPort(),deviceRawContent.getSsrc(),agentCode,"push_web_rtp",agentCode, deviceRawContent.isMediaTransmissionTCP(),deviceRawContent.isTcpActive(),sipServer.getVideoProperties().getServerId(),callId,true, InviteStreamType.getInviteStreamType(deviceRawContent.getSessionName().toUpperCase()));
+            SendRtp sendRtp = RedisService.getSendRtpManager().querySendRTPServer(agentCode, agentCode, callId);
             if (sendRtp == null) {
                 log.warn("[视频语音流ACK] sendRtp is null 服务器端口资源不足");
                 sipCommander.sendAckMessage(sipServer,sdp,event,response,null,error->{
@@ -126,10 +131,18 @@ public class InviteResponseProcessor extends AbstractSipResponseEvent {
                 });
                 return;
             }
+            sendRtp.setSessionName(deviceRawContent.getSessionName());
+            sendRtp.setIp(deviceRawContent.getAddressStr());
+            sendRtp.setPort(deviceRawContent.getPort());
+            sendRtp.setSsrc(deviceRawContent.getSsrc());
+            sendRtp.setTcp(deviceRawContent.isMediaTransmissionTCP());
+            sendRtp.setTcpActive(deviceRawContent.isTcpActive());
+            sendRtp.setServerId(sipServer.getVideoProperties().getServerId());
+            sendRtp.setRtcp(true);
+            sendRtp.setPlayType(InviteStreamType.getInviteStreamType(deviceRawContent.getSessionName().toUpperCase()));
             sendRtp.setPt(paramOne.isOnVideo()?96:8);
             sendRtp.setUsePs(false);
             sendRtp.setOnlyAudio(paramOne.isOnVideo());
-
             log.info("rtp/{}开始向上级推流, 目标={}:{}，SSRC={}", sendRtp.getStreamId(), sendRtp.getIp(), sendRtp.getPort(), sendRtp.getSsrc());
             MediaRestResult restResult  = MediaClient.startSendRtp(
                     mediaServerVo,
@@ -149,7 +162,7 @@ public class InviteResponseProcessor extends AbstractSipResponseEvent {
             if(restResult != null){
                 startSendRtpStreamHand(sendRtp,agentCode, restResult);
             }
-            sendRtpManager.put(sendRtp);
+            RedisService.getSendRtpManager().put(sendRtp);
         } catch (Exception e){
             log.error("[点播回复ACK]，消息处理异常：", e );
         }

@@ -1,5 +1,6 @@
 package cn.com.tzy.springbootstarterfreeswitch.service.freeswitch;
 
+import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootstarterfreeswitch.enums.fs.AgentStateEnum;
 import cn.com.tzy.springbootstarterfreeswitch.model.fs.AgentVoInfo;
 import cn.com.tzy.springbootstarterfreeswitch.model.notice.CallMessage;
@@ -9,4 +10,6 @@ import cn.com.tzy.springbootstarterfreeswitch.model.notice.CallMessage;
  */
 public interface SendAgentMessage {
     void sendMessage(AgentStateEnum agentStateEnum, AgentVoInfo agentVoInfo, CallMessage callMessage);
+
+    void sendMessage(String namespace,String agentCommon,String agentCode, RestResult result);
 }

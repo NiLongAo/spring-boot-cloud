@@ -38,6 +38,10 @@
             <groupId>cn.com.tzy</groupId>
             <artifactId>spring-boot-starter-freeswitch</artifactId>
         </dependency>
+        <dependency>
+            <groupId>cn.com.tzy</groupId>
+            <artifactId>spring-boot-starter-socket-io</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

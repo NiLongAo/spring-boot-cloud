@@ -110,7 +110,7 @@ public abstract class AgentVoService {
         SsrcTransactionManager ssrcTransactionManager = RedisService.getSsrcTransactionManager();
         SsrcConfigManager ssrcConfigManager = RedisService.getSsrcConfigManager();
         log.info("[设备下线]， device：{}", agentCode);
-        AgentVoInfo agentVoInfo = this.findAgentId(agentCode);
+        AgentVoInfo agentVoInfo = this.getAgentBySip(agentCode);
         if (agentVoInfo == null) {
             log.warn("[设备下线]：未获取设备信息 deviceId ：{}",agentCode);
             return;

@@ -15,6 +15,7 @@ import cn.com.tzy.springbootstarterfreeswitch.client.sip.callback.InviteErrorCal
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.cmd.SIPCommander;
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.cmd.SIPCommanderForPlatform;
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.utils.SipUtils;
+import cn.com.tzy.springbootstarterfreeswitch.common.interfaces.ResultEvent;
 import cn.com.tzy.springbootstarterfreeswitch.enums.sip.InviteSessionStatus;
 import cn.com.tzy.springbootstarterfreeswitch.enums.sip.VideoStreamType;
 import cn.com.tzy.springbootstarterfreeswitch.exception.SsrcTransactionNotFoundException;
@@ -35,7 +36,6 @@ import cn.com.tzy.springbootstarterfreeswitch.vo.media.HookKey;
 import cn.com.tzy.springbootstarterfreeswitch.vo.media.HookVo;
 import cn.com.tzy.springbootstarterfreeswitch.vo.media.MediaRestResult;
 import cn.com.tzy.springbootstarterfreeswitch.vo.media.OnStreamChangedHookVo;
-import cn.com.tzy.springbootstarterfreeswitch.vo.result.FsRestResult;
 import cn.com.tzy.springbootstarterfreeswitch.vo.sip.*;
 import cn.com.tzy.springbootstartervideobasic.common.VideoConstant;
 import cn.com.tzy.springbootstartervideobasic.enums.InviteErrorCode;
@@ -49,7 +49,6 @@ import gov.nist.javax.sip.message.SIPResponse;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.annotation.Resource;
 import javax.sdp.Media;
@@ -82,34 +81,37 @@ public class AgentServiceImpl extends ServiceImpl<AgentMapper, Agent> implements
     protected SIPCommander sipCommander;
 
     @Override
+    public Agent findUserId(Long userId) {
+        return baseMapper.findUserId(userId);
+    }
+
+    @Override
     public UserModel findUserModel(String agentCode) {
         return baseMapper.findUserModel(agentCode);
     }
 
     @Override
-    public DeferredResult<RestResult<?>> login(Agent entity) {
-        String key = String.format("%s%s", DeferredResultHolder.AGENT_LOGIN,entity.getAgentCode());
-        String uuid = RandomUtil.randomString(32);
-        FsRestResult<RestResult<?>> result = new FsRestResult<>(8000L,()-> RestResult.result(RespCode.CODE_2.getValue(),"请求超时"));
-        if(deferredResultHolder.exist(key,null)){
-            return result;
-        }
-        deferredResultHolder.put(key,uuid,result);
-
-        AgentVoInfo agentVoInfo = agentVoService.getAgentBySip(entity.getAgentCode());
+    public void login(String agentCode, ResultEvent event) {
+        AgentVoInfo agentVoInfo = agentVoService.getAgentBySip(agentCode);
         if(agentVoInfo == null){
-            deferredResultHolder.invokeAllResult(key,RestResult.result(RespCode.CODE_2.getValue(),"客服账号错误"));
-            return result;
-        }else if(!ObjectUtil.equals(agentVoInfo.getPasswd(),entity.getPasswd())){
-            deferredResultHolder.invokeAllResult(key,RestResult.result(RespCode.CODE_2.getValue(),"客服密码错误"));
-            return result;
+            event.result(RestResult.result(RespCode.CODE_2.getValue(),"未获取客服信息"));
+            return;
         }
         SipService.getParentPlatformService().login(agentVoInfo,ok->{
-            deferredResultHolder.invokeAllResult(key,RestResult.result(RespCode.CODE_0.getValue(),"登陆成功"));
+            event.result(RestResult.result(RespCode.CODE_0.getValue(),"登陆成功"));
         },error->{
-            deferredResultHolder.invokeAllResult(key,RestResult.result(RespCode.CODE_2.getValue(),error.getMsg()));
+            event.result(RestResult.result(RespCode.CODE_2.getValue(),error.getMsg()));
         });
-        return result;
+    }
+
+    @Override
+    public RestResult<?> logout(String agentCode) {
+        AgentVoInfo agentVoInfo = RedisService.getAgentInfoManager().get(agentCode);
+        if(agentVoInfo == null){
+            return RestResult.result(RespCode.CODE_2.getValue(),"未获取客服信息");
+        }
+        SipService.getParentPlatformService().unregister(agentVoInfo,null,null);
+        return RestResult.result(RespCode.CODE_0.getValue(),"退出成功");
     }
 
 
@@ -161,7 +163,7 @@ public class AgentServiceImpl extends ServiceImpl<AgentMapper, Agent> implements
             ssrcTransactionManager.put(agentCode,null,true,!(status==1),"push_web_rtp", agentCode,ssrc,mediaServerVo.getId(),null,VideoStreamType.push_web_rtp);
             dynamicTask.stop(key);
         });
-        String audioPushPath = String.format("%s://%s:%s/%s/index/api/webrtc?app=%s&stream=%s&type=push",mediaServerVo.getSslStatus()== ConstEnum.Flag.NO.getValue()?"http":"https",mediaServerVo.getStreamIp(), mediaServerVo.getSslStatus()== ConstEnum.Flag.NO.getValue()?mediaServerVo.getHttpPort():mediaServerVo.getHttpSslPort(), StringUtils.isNotEmpty(mediaServerVo.getVideoHttpPrefix())?mediaServerVo.getVideoHttpPrefix():"",app, agentCode);
+        String audioPushPath = String.format("%s://%s:%s%s/index/api/webrtc?app=%s&stream=%s&type=push",mediaServerVo.getSslStatus()== ConstEnum.Flag.NO.getValue()?"http":"https",mediaServerVo.getStreamIp(), mediaServerVo.getSslStatus()== ConstEnum.Flag.NO.getValue()?mediaServerVo.getHttpPort():mediaServerVo.getHttpSslPort(), StringUtils.isNotEmpty(mediaServerVo.getVideoHttpPrefix())?String.format("/%s",mediaServerVo.getVideoHttpPrefix()):"",app, agentCode);
         return RestResult.result(RespCode.CODE_0.getValue(),null,audioPushPath);
     }
 
@@ -169,7 +171,7 @@ public class AgentServiceImpl extends ServiceImpl<AgentMapper, Agent> implements
      * 拨打电话
      */
     @Override
-    public SSRCInfo callPhone(SipServer sipServer, MediaServerVo mediaServerVo, AgentVoInfo agentBySip, String ssrc, InviteErrorCallback<Object> callback) {
+    public SSRCInfo callPhone(SipServer sipServer, MediaServerVo mediaServerVo, AgentVoInfo agentBySip,String caller, String ssrc, InviteErrorCallback<Object> callback) {
         if(mediaServerVo == null){
             throw new RespException(RespCode.CODE_2.getValue(),"未找到可用的zlm");
         }
@@ -222,14 +224,14 @@ public class AgentServiceImpl extends ServiceImpl<AgentMapper, Agent> implements
                     null);
             return null;
         }
-        callPhone(sipServer, mediaServerVo,ssrcInfo, agentBySip,callback);
+        callPhone(sipServer, mediaServerVo,ssrcInfo, agentBySip,caller,callback);
         return null;
     }
 
     /**
      * 电话实时流
      */
-    private void callPhone(SipServer sipServer, MediaServerVo mediaServerVo, SSRCInfo ssrcInfo, AgentVoInfo agentVoInfo, InviteErrorCallback<Object> callback) {
+    private void callPhone(SipServer sipServer, MediaServerVo mediaServerVo, SSRCInfo ssrcInfo, AgentVoInfo agentVoInfo, String caller,InviteErrorCallback<Object> callback) {
         SsrcConfigManager ssrcConfigManager = RedisService.getSsrcConfigManager();
         SsrcTransactionManager ssrcTransactionManager = RedisService.getSsrcTransactionManager();
         InviteStreamManager inviteStreamManager = RedisService.getInviteStreamManager();
@@ -276,7 +278,7 @@ public class AgentServiceImpl extends ServiceImpl<AgentMapper, Agent> implements
             }
         });
         try {
-            SIPRequest rtp = sipCommanderForPlatform.callPhone(sipServer, mediaServerVo, ssrcInfo, agentVoInfo, (media, response) -> {
+            SIPRequest rtp = sipCommanderForPlatform.callPhone(sipServer, mediaServerVo, ssrcInfo, agentVoInfo,caller, (media, response) -> {
                 log.info("收到订阅消息： " + JSONUtil.toJsonStr(response));
                 dynamicTask.stop(timeOutTaskKey);
                 OnStreamChangedHookVo vo = (OnStreamChangedHookVo) response;
@@ -311,7 +313,9 @@ public class AgentServiceImpl extends ServiceImpl<AgentMapper, Agent> implements
 
                 inviteStreamManager.removeInviteInfoByDeviceAndChannel(VideoStreamType.call_phone, agentVoInfo.getAgentCode());
             });
-            RedisService.getAgentInfoManager().putCallPhone(rtp.getCallId().getCallId(),rtp);
+            if(rtp != null){
+                RedisService.getAgentInfoManager().putCallPhone(rtp.getCallId().getCallId(),rtp);
+            }
         } catch (InvalidArgumentException | SipException | ParseException e) {
             //发送异常处理
             log.error("[命令发送失败] 点播消息: {}", e.getMessage());

@@ -29,6 +29,7 @@ import cn.com.tzy.springbootstarterfreeswitch.vo.media.*;
 import cn.com.tzy.springbootstarterfreeswitch.vo.sip.*;
 import cn.hutool.extra.spring.SpringUtil;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import javax.sip.InvalidArgumentException;
@@ -38,6 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Log4j2
+@Component
 public class ZlmService {
 
     private final String zlmKeepaliveKeyPrefix = "zlm-keepalive_";

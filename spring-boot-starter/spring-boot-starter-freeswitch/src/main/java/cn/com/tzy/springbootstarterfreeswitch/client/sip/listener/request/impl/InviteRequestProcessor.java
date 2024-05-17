@@ -39,7 +39,7 @@ public class InviteRequestProcessor  extends AbstractSipRequestEvent implements 
         //  Invite Request消息实现，此消息一般为级联消息，上级给下级发送请求视频指令
         SIPRequest request = (SIPRequest)evt.getRequest();
         CallIdHeader callIdHeader = (CallIdHeader) request.getHeader(CallIdHeader.NAME);
-        String userId = SipUtils.getUserIdFromFromHeader(request);
+        String userId = SipUtils.getUserIdFromHeader(request);
         if (userId == null) {
             this.sendErrorMessage(request,Response.BAD_REQUEST,"未获取坐席编号");
             return;
