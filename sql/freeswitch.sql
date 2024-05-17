@@ -32,7 +32,8 @@ CREATE TABLE fs_media_server (
     UNIQUE KEY idx_http_port (ip,http_port) USING BTREE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8  ROW_FORMAT = DYNAMIC COMMENT ='流媒体服务信息';
 
-INSERT INTO fs_media_server(`id`, `ip`, `ssl_status`, `hook_ip`, `sdp_ip`, `stream_ip`, `http_port`, `http_ssl_port`, `rtmp_port`, `rtmp_ssl_port`, `rtp_proxy_port`, `rtsp_port`, `rtsp_ssl_port`, `auto_config`, `secret`, `rtp_enable`, `status`, `rtp_port_range`, `record_assist_port`, `default_server`, `hook_alive_interval`, `create_user_id`, `create_time`, `update_user_id`, `update_time`) VALUES ('516549846516848451', '192.168.1.131', 0, '192.168.1.26:8660', '192.168.1.131', '192.168.1.131', 8080, 443, 1935, 19350, 10000, 554, 332, 1, '035c73f7-bb6b-4889-a715-d9eb2d1925cc', 1, 1, '30000-30010', 0, 1, 30, 1, '2023-05-16 14:50:54', NULL, '2023-05-19 16:30:59');
+INSERT INTO `fs_media_server` (`id`, `ip`, `ssl_status`, `hook_ip`, `sdp_ip`, `stream_ip`, `http_port`, `http_ssl_port`, `rtmp_port`, `rtmp_ssl_port`, `rtp_proxy_port`, `rtsp_port`, `rtsp_ssl_port`, `auto_config`, `secret`, `rtp_enable`, `enable`, `keepalive_time`, `status`, `rtp_port_range`, `record_assist_port`, `default_server`, `hook_alive_interval`, `video_play_prefix`, `video_http_prefix`, `create_user_id`, `create_time`, `update_user_id`, `update_time`)
+VALUES ('516549846516848450', '192.168.1.26', 0, 'http://192.168.1.5:8670', '192.168.1.26', '192.168.1.26', 8080, 8443, 1935, 19350, 10000, 553, 8332, 1, '135c73f7-bb6b-4889-a715-d9eb2d1925cc', 1, 1, '2024-05-17 19:45:30', 1, '30000-30010', 8088, 1, 30, '', '', 1, '2023-07-13 23:05:22', NULL, '2024-05-17 19:45:30');
 
 
 CREATE TABLE fs_platform (
