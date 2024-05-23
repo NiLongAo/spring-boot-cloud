@@ -39,7 +39,10 @@ public class FsXmlController extends ApiController {
     public String findDialplanXml(HttpServletRequest req){
         Map<String, String[]> parameterMap = req.getParameterMap();
         String xml = null;
-
+        xml = FreeswitchUtils.getXmlConfig(FreeswitchXmlVo.builder()
+                .fsTypeEnum(FsTypeEnum.DIALPLAN)
+                .build()
+        );
         log.warn("请求Fs拨号计划文件： 是否配置Xml：{}，请求参数：{}", StringUtils.isNotBlank(xml),parameterMap);
         return xml;
     }

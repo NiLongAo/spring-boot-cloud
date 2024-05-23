@@ -26,6 +26,7 @@ public class MediaHookVo implements Serializable {
     /**
      * 是否发送所有 1.是 0.否
      */
+    @Builder.Default
     private int onAll = 0;
     /**
      * 流媒体信息

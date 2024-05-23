@@ -2,16 +2,16 @@ package cn.com.tzy.springbootstarterfreeswitch.model.fs;
 
 import cn.com.tzy.springbootstarterfreeswitch.enums.fs.AgentStateEnum;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 import org.hibernate.validator.constraints.Range;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @Data
-@SuperBuilder(toBuilder = true)
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class AgentPreset implements Serializable {

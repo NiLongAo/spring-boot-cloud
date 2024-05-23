@@ -14,10 +14,9 @@ import cn.com.tzy.springbootstarterfreeswitch.model.call.NextCommand;
 import cn.com.tzy.springbootstarterfreeswitch.model.fs.*;
 import cn.com.tzy.springbootstarterfreeswitch.model.message.HangupCallModel;
 import cn.com.tzy.springbootstarterfreeswitch.model.message.PlayBackCallModel;
+import cn.com.tzy.springbootstarterfreeswitch.pool.AgentStrategy;
 import cn.com.tzy.springbootstarterfreeswitch.redis.RedisService;
 import cn.com.tzy.springbootstarterfreeswitch.service.FsService;
-import cn.com.tzy.springbootstarterfreeswitch.service.freeswitch.GroupMemoryInfoService;
-import cn.com.tzy.springbootstarterfreeswitch.service.freeswitch.AgentStrategy;
 import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import lombok.extern.log4j.Log4j2;
@@ -52,8 +51,6 @@ public class GroupProcessHandler {
 
     @Resource
     private TransferAgentProcessHandler transferAgentProcessHandler;
-    @Resource
-    private GroupMemoryInfoService groupMemoryInfoService;
     @Resource
     private HangupCallHandler hangupCallHandler;
     @Resource

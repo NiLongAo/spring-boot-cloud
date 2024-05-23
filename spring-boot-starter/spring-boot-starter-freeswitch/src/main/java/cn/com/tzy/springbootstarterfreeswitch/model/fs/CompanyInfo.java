@@ -1,13 +1,17 @@
 package cn.com.tzy.springbootstarterfreeswitch.model.fs;
 
+import cn.com.tzy.springbootcomm.common.enumcom.ConstEnum;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Data
 @SuperBuilder(toBuilder = true)
@@ -83,7 +87,8 @@ public class CompanyInfo implements Serializable {
     /**
      * 隐藏客户号码(0:不隐藏;1:隐藏)
      */
-    private Integer hiddenCustomer;
+    @Builder.Default
+    private Integer hiddenCustomer = 0;
 
     /**
      * 坐席密码等级(1:不限制 2:数字和字母 3:大小写字母和数字组合)
@@ -157,4 +162,34 @@ public class CompanyInfo implements Serializable {
      */
     private Integer agentSize;
 
+    public void initRouteCalls(List<RouteGroupInfo> routeGroupInfoList,List<RouteCallInfo> routeCallInfoList) {
+        if(routeCallInfoList == null || routeCallInfoList.isEmpty() || routeGroupInfoList == null || routeGroupInfoList.isEmpty()){
+            return;
+        }
+
+        Map<Long, RouteCallInfo> routeGroupIdMap = routeCallInfoList.stream().collect(Collectors.toMap(RouteCallInfo::getRouteGroupId, o -> o));
+        routeGroupMap = routeGroupInfoList.stream().filter(o -> routeGroupIdMap.containsKey(o.getId())).collect(Collectors.toMap(o->routeGroupIdMap.get(o.getId()).getRouteNum(),o->o));
+    }
+
+    public void initVdn(List<VdnCodeInfo> vdnCodeInfoList, List<VdnConfigInfo> vdnConfigInfoList,List<VdnScheduleInfo> vdnScheduleInfoList,List<VdnDtmfInfo> vdnDtmfInfoList) {
+        Map<String, List<VdnConfigInfo>> vdnConfigInfoMap = vdnConfigInfoList.stream().collect(Collectors.groupingBy(VdnConfigInfo::getVdnId));
+        Map<Long, VdnScheduleInfo> vdnScheduleInfoMap = vdnScheduleInfoList.stream().collect(Collectors.toMap(VdnScheduleInfo::getId, o -> o));
+        Map<Long, List<VdnDtmfInfo>> vdnDtmfInfoMap = vdnDtmfInfoList.stream().collect(Collectors.groupingBy(VdnDtmfInfo::getNavigateId));
+        for (VdnCodeInfo vdnCodeInfo : vdnCodeInfoList) {
+            if (vdnCodeInfo.getStatus() == ConstEnum.Flag.NO.getValue()) {
+                continue;
+            }
+            List<VdnConfigInfo> configInfoList = vdnConfigInfoMap.computeIfAbsent(String.valueOf(vdnCodeInfo.getId()), o -> new ArrayList<>());
+            for (VdnConfigInfo vdnConfigInfo : configInfoList) {
+                VdnScheduleInfo vdnScheduleInfo = vdnScheduleInfoMap.get(vdnConfigInfo.getScheduleId());
+                if(vdnScheduleInfo !=null){
+                    vdnConfigInfo.setVdnScheduleInfo(vdnScheduleInfo);
+                }
+                vdnConfigInfo.setDtmfList(vdnDtmfInfoMap.computeIfAbsent(vdnConfigInfo.getId(),v->new ArrayList<>()));
+            }
+            vdnCodeInfo.setVdnSchedulePoList(configInfoList.stream().filter(o -> o.getVdnScheduleInfo() != null).collect(Collectors.toList()));
+
+        }
+        vdnCodeMap = vdnCodeInfoList.stream().collect(Collectors.toMap(VdnCodeInfo::getId, o->o));
+    }
 }

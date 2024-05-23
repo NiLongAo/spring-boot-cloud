@@ -22,7 +22,6 @@ import cn.com.tzy.springbootstarterfreeswitch.exception.SsrcTransactionNotFoundE
 import cn.com.tzy.springbootstarterfreeswitch.model.bean.UserModel;
 import cn.com.tzy.springbootstarterfreeswitch.model.fs.AgentVoInfo;
 import cn.com.tzy.springbootstarterfreeswitch.redis.RedisService;
-import cn.com.tzy.springbootstarterfreeswitch.redis.impl.result.DeferredResultHolder;
 import cn.com.tzy.springbootstarterfreeswitch.redis.impl.sip.InviteStreamManager;
 import cn.com.tzy.springbootstarterfreeswitch.redis.impl.sip.SsrcConfigManager;
 import cn.com.tzy.springbootstarterfreeswitch.redis.impl.sip.SsrcTransactionManager;
@@ -66,9 +65,9 @@ import java.util.Vector;
 public class AgentServiceImpl extends ServiceImpl<AgentMapper, Agent> implements AgentService{
 
     @Resource
-    private DeferredResultHolder deferredResultHolder;
-    @Resource
     private AgentVoService agentVoService;
+    @Resource
+    protected SIPCommander sipCommander;
     @Resource
     private SIPCommanderForPlatform sipCommanderForPlatform;
     @Resource
@@ -77,9 +76,6 @@ public class AgentServiceImpl extends ServiceImpl<AgentMapper, Agent> implements
     private MediaHookSubscribe mediaHookSubscribe;
     @Resource
     protected SipServer sipServer;
-    @Resource
-    protected SIPCommander sipCommander;
-
     @Override
     public Agent findUserId(Long userId) {
         return baseMapper.findUserId(userId);

@@ -1,10 +1,13 @@
 package cn.com.tzy.springbootstarterfreeswitch.model.bean;
 
+import cn.com.tzy.springbootcomm.constant.Constant;
 import cn.com.tzy.springbootstarterfreeswitch.model.BeanModel;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 
@@ -39,14 +42,20 @@ public class CdrModel extends BeanModel {
     /**
      * 呼叫时间
      */
+    @DateTimeFormat(pattern = Constant.DATE_TIME_FORMAT)
+    @JsonFormat(pattern =  Constant.DATE_TIME_FORMAT)
     private Date startStamp;
     /**
      * 应答时间
      */
+    @DateTimeFormat(pattern = Constant.DATE_TIME_FORMAT)
+    @JsonFormat(pattern =  Constant.DATE_TIME_FORMAT)
     private Date answerStamp;
     /**
      * 结束时间
      */
+    @DateTimeFormat(pattern = Constant.DATE_TIME_FORMAT)
+    @JsonFormat(pattern =  Constant.DATE_TIME_FORMAT)
     private Date endStamp;
     /**
      * 呼叫时长

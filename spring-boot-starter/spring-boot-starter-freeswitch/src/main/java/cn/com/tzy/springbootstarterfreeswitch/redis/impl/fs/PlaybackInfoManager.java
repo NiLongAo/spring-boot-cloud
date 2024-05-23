@@ -32,7 +32,14 @@ public class PlaybackInfoManager {
 
 
     public void del(String id){
-        RedisUtils.del(getKey(id));
+        List<String> scan = RedisUtils.keys(getKey(id));
+        for (String key : scan) {
+            RedisUtils.del(key);
+        }
+    }
+
+    public void delAll(){
+        del("*");
     }
 
     private String getKey(String id){

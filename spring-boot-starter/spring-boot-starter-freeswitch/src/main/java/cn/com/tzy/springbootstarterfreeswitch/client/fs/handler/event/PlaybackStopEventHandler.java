@@ -26,7 +26,7 @@ public class PlaybackStopEventHandler implements EslEventHandler {
     private VdnProcessHandler vdnProcessHandler;
     @Override
     public void handle(String addr, EslEvent event) {
-        log.info("进入事件 PLAYBACK_STOP");
+        log.info("进入事件  [放音结束]  PLAYBACK_STOP");
         String uniqueId = EslEventUtil.getUniqueId(event);
         CallInfo callInfo = RedisService.getCallInfoManager().findDeviceId(uniqueId);
         if (callInfo == null) {

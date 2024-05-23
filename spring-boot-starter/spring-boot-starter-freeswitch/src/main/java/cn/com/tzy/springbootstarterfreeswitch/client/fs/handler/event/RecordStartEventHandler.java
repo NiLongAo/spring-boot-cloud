@@ -23,9 +23,9 @@ import java.util.Date;
 public class RecordStartEventHandler  implements EslEventHandler {
     @Override
     public void handle(String addr, EslEvent event) {
-        log.info("进入事件 RECORD_START");
+        log.info("进入事件 [录音开始] RECORD_START");
         String uniqueId = EslEventUtil.getUniqueId(event);
-        Date answerTime = DateUtil.date(Long.parseLong(EslEventUtil.getEventDateTimestamp(event)));//接通时间（毫秒值）
+        Date answerTime = DateUtil.date(Long.parseLong(EslEventUtil.getEventDateTimestamp(event))/1000).toSqlDate();//接通时间（毫秒值）
         CallInfo callInfo = RedisService.getCallInfoManager().findDeviceId(uniqueId);
         if (callInfo == null) {
             return;

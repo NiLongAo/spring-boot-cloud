@@ -1,4 +1,4 @@
-package cn.com.tzy.springbootstarterfreeswitch.service.freeswitch;
+package cn.com.tzy.springbootstarterfreeswitch.pool;
 
 
 import cn.com.tzy.springbootstarterfreeswitch.model.call.CallInfo;

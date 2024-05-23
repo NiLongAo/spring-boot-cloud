@@ -18,6 +18,8 @@ public enum FsTypeEnum {
     SWITCH(5, "fs/autoload_configs/switch.conf.xml", "config"),
     //用户目录配置
     USER(6, "fs/directory/user.xml", "user"),
+    //拨号计划
+    DIALPLAN(7, "fs/dialplan/dialplan.xml", "dialplan"),
     ;
     private final int value;
     private final String path;

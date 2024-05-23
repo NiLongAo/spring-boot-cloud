@@ -11,8 +11,6 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-import java.util.Date;
-
 /**
     * 日程表
     */
@@ -53,18 +51,32 @@ public class VdnSchedule extends LongIdEntity {
     private Integer type;
 
     /**
+     * 开始日期
+     */
+    @TableField(value = "start_day")
+    @ApiModelProperty(value="开始时间")
+    private String startDay;
+
+    /**
+     * 结束日期
+     */
+    @TableField(value = "end_day")
+    @ApiModelProperty(value="结束时间")
+    private String endDay;
+
+    /**
      * 开始时间
      */
     @TableField(value = "start_time")
     @ApiModelProperty(value="开始时间")
-    private Date startTime;
+    private String startTime;
 
     /**
      * 结束时间
      */
     @TableField(value = "end_time")
     @ApiModelProperty(value="结束时间")
-    private Date endTime;
+    private String endTime;
 
     /**
      * 周一

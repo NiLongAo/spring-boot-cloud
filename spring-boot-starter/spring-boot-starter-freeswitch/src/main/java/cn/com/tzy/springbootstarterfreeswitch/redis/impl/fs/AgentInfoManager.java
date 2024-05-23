@@ -34,9 +34,14 @@ public class AgentInfoManager {
             return null;
         }
     }
-
     public void del(String agentKey){
-        RedisUtils.del(getKey(agentKey));
+        List<String> scan = RedisUtils.keys(getKey(agentKey));
+        for (String key : scan) {
+            RedisUtils.del(key);
+        }
+    }
+    public void delAll(){
+        del("*");
     }
 
     public void putCallPhone(String callId, SIPRequest model){

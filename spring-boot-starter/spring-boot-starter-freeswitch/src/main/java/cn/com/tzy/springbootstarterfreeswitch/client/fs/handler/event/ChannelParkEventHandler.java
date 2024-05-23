@@ -38,46 +38,58 @@ import java.util.Date;
 @EslEventName(EventNames.CHANNEL_PARK)
 public class ChannelParkEventHandler implements EslEventHandler {
 
-
     @Resource
     private HangupCallHandler hangupCallHandler;
     @Resource
     private AnswerCallHandler answerCallHandler;
     @Override
     public void handle(String addr, EslEvent event) {
-        log.info("进入事件 CHANNEL_PARK");
+        String direction =null;
         String hangup = event.getEventHeaders().get("variable_sip_hangup_phrase");//是否挂机,OK
         if (Constant.OK.equals(hangup)) {
+            log.info("进入事件 [ 设备话机振铃 ] CHANNEL_PARK");
             return;
+        }else {
+            direction = EslEventUtil.getCallerDirection(event);
         }
+        log.info("进入事件 [ 设备话机振铃 :{} ] CHANNEL_PARK",direction);
         log.info("channel park:{}", event);
-        String uniqueId = EslEventUtil.getUniqueId(event);
-        String direction = EslEventUtil.getCallerDirection(event);
-        String sipPort = event.getEventHeaders().get("variable_sip_via_port");//硬话机发起呼叫时携带
-        String sipContactPort = event.getEventHeaders().get("variable_sip_contact_port");
+        String deviceId = EslEventUtil.getUniqueId(event);
         String sipProtocol = event.getEventHeaders().get("variable_sip_via_protocol");//sip信令协议
-        Date answerTime = DateUtil.date(Long.parseLong(EslEventUtil.getEventDateTimestamp(event)));//接通时间（毫秒值）
-
-        CallInfo callInfo = RedisService.getCallInfoManager().findDeviceId(uniqueId);
+        Date answerTime = DateUtil.date(Long.parseLong(EslEventUtil.getEventDateTimestamp(event))/1000).toSqlDate();//接通时间（毫秒值）
+        CallInfo callInfo = RedisService.getCallInfoManager().findDeviceId(deviceId);
+        DeviceInfo deviceInfo = null;
         if (callInfo == null && DirectionEnum.INBOUND.name().equals(direction.toUpperCase())) {
-            if (sipPort == null) {
-                //呼入
-                inboundCall(addr,uniqueId,event);
+//            inbound(deviceId,addr,event);
+//            return;
+            String copeDeviceId = event.getEventHeaders().get(String.format("variable_%s%s", Constant.SIP_HEADER, "V9-DEVICE-ID"));//自定义变量
+            callInfo = RedisService.getCallInfoManager().findDeviceId(copeDeviceId);
+            if(callInfo == null){
+                inbound(deviceId,addr,event);
                 return;
             }
-            if (!sipContactPort.equals(sipPort)) {
-                //硬话机外呼
-                sipOutboundCall(addr,uniqueId,event);
+            deviceInfo = callInfo.getDeviceInfoMap().get(copeDeviceId);
+            if(deviceInfo == null){
                 return;
             }
-            return;
+            deviceInfo.setDeviceId(deviceId);
+            RedisService.getDeviceInfoManager().delDeviceCallId(copeDeviceId);
+            RedisService.getDeviceInfoManager().putDeviceCallId(deviceId,callInfo.getCallId());
+            callInfo.getDeviceList().remove(copeDeviceId);
+            callInfo.getDeviceList().add(deviceId);
+            callInfo.getDeviceInfoMap().remove(copeDeviceId);
+            callInfo.getDeviceInfoMap().put(deviceId,deviceInfo);
+
+            RedisService.getCallInfoManager().put(callInfo);
         }
         if (callInfo == null || callInfo.getHangupDir() != null) {
             return;
         }
-        DeviceInfo deviceInfo = callInfo.getDeviceInfoMap().get(uniqueId);
         if (deviceInfo == null) {
-            return;
+            deviceInfo = callInfo.getDeviceInfoMap().get(deviceId);
+            if(deviceInfo == null){
+                return;
+            }
         }
         if (hangup != null) {
             return;
@@ -85,7 +97,6 @@ public class ChannelParkEventHandler implements EslEventHandler {
         if (deviceInfo.getAnswerTime() != null && deviceInfo.getState() != null) {
             return;
         }
-
         AgentVoInfo agentVoInfo = RedisService.getAgentInfoManager().get(deviceInfo.getAgentKey());
         if (agentVoInfo == null) {
             return;
@@ -124,7 +135,6 @@ public class ChannelParkEventHandler implements EslEventHandler {
         ringEntity.setDirection(callInfo.getDirection());
         if (directionEnum.equals(DirectionEnum.OUTBOUND)) {
             outboundCall(callInfo, deviceInfo, agentVoInfo, ringEntity);
-            return;
         } else if (directionEnum.equals(DirectionEnum.INBOUND)) {
             //呼入振铃
             agentVoInfo.setBeforeState(agentVoInfo.getAgentState());
@@ -138,10 +148,21 @@ public class ChannelParkEventHandler implements EslEventHandler {
             FsService.getSendAgentMessage().sendMessage(AgentStateEnum.IN_CALL_RING, agentVoInfo,ringEntity);
         }
     }
-
+    //呼入电话处理
+    private void inbound(String uniqueId,String addr, EslEvent event){
+        String sipPort = event.getEventHeaders().get("variable_sip_via_port");//硬话机发起呼叫时携带
+        String sipContactPort = event.getEventHeaders().get("variable_sip_contact_port");
+        if (sipPort == null) {
+            //呼入
+            inboundCall(addr,uniqueId,event);
+        }else if (sipContactPort.equals(sipPort)) {
+            //硬话机外呼
+            sipOutboundCall(addr,uniqueId,event);
+        }
+    }
     /**
-     * 呼入电话
-     *
+     * b-腿
+     * 呼入
      * @param event
      */
     private void inboundCall(String addr,String deviceId,EslEvent event) {
@@ -153,8 +174,8 @@ public class ChannelParkEventHandler implements EslEventHandler {
         //客户号码归属地
         String numberLocaton = "";
         log.info("inbount callId:{} park, caller:{}, called:{}, deviceId:{}, uri:{}", callId, caller, called, deviceId, contactUri);
-        VdnPhone vdnPhone = RedisService.getVdnPhoneManager().get(called);
-        if (vdnPhone == null) {
+        VdnPhoneInfo vdnPhoneInfo = RedisService.getVdnPhoneManager().get(called);
+        if (vdnPhoneInfo == null) {
             log.error("inbount callId:{} called:{} is not match for vdn", callId, called);
             CallLogInfo callLog = new CallLogInfo();
             callLog.setCallId(callId);
@@ -173,10 +194,10 @@ public class ChannelParkEventHandler implements EslEventHandler {
             callLog.setHangupCode(CauseEnums.VDN_ERROR.getHuangupCode());
             callLog.setMonthTime(DateUtil.format(callLog.getCreateTime(), DatePattern.SIMPLE_MONTH_PATTERN));
             FsService.getCallCdrService().saveOrUpdateCallLog(callLog);
-            hangupCallHandler.handler(HangupCallModel.builder().mediaAddr(addr).deviceId(deviceId).build());
+            //测试需关闭  正式需要放开
+            //hangupCallHandler.handler(HangupCallModel.builder().mediaAddr(addr).deviceId(deviceId).build());
             return;
         }
-
         CallInfo callInfo = CallInfo.builder()
                 .callId(callId)
                 .callType(CallTypeEunm.INBOUND_CALL)
@@ -185,7 +206,7 @@ public class ChannelParkEventHandler implements EslEventHandler {
                 .numberLocation(numberLocaton)
                 //接入号码
                 .callerDisplay(called)
-                .companyId(vdnPhone.getCompanyId())
+                .companyId(vdnPhoneInfo.getCompanyId())
                 .mediaHost(addr)
                 .ctiHost(localMediaIp)
                 .build();
@@ -201,18 +222,77 @@ public class ChannelParkEventHandler implements EslEventHandler {
                 .cdrType(1)
                 .build();
 
-        CompanyInfo companyInfo = RedisService.getCompanyInfoManager().get(vdnPhone.getCompanyId());
+        CompanyInfo companyInfo = RedisService.getCompanyInfoManager().get(vdnPhoneInfo.getCompanyId());
         callInfo.setHiddenCustomer(companyInfo.getHiddenCustomer());
         callInfo.setCdrNotifyUrl(companyInfo.getNotifyUrl());
         callInfo.getDeviceInfoMap().put(deviceId, deviceInfo);
         callInfo.getDeviceList().add(deviceId);
         callInfo.getNextCommands().add(new NextCommand(deviceId, NextTypeEnum.NEXT_VDN, null));
-
         RedisService.getCallInfoManager().put(callInfo);
         RedisService.getDeviceInfoManager().putDeviceCallId(deviceId, callId);
         answerCallHandler.handler(AnswerCallModel.builder().mediaAddr(addr).deviceId(deviceId).build());
     }
 
+    /**
+     * a-腿
+     * 呼出
+     * @param event
+     */
+    private void sipOutboundCall(String addr,String deviceId,EslEvent event) {
+        //通过sip号码获取绑定的坐席
+        String caller = event.getEventHeaders().get("variable_sip_from_user");//主叫号码
+        String called = event.getEventHeaders().get("Caller-Destination-Number");//被叫号码
+        String callId = String.valueOf(FreeswitchUtils.snowflake.nextId());
+        AgentVoInfo agent = RedisService.getAgentInfoManager().get(caller);
+        if (agent == null || agent.getGroupId() == null) {
+            log.warn("sipOutbound callId:{}  sip:{} called:{}", callId, caller, called);
+            hangupCallHandler.handler(HangupCallModel.builder().mediaAddr(addr).deviceId(deviceId).build());
+            return;
+        }
+        //获取显号
+        GroupInfo groupInfo = RedisService.getGroupInfoManager().get(agent.getGroupId());
+        if (groupInfo == null || CollectionUtils.isEmpty(groupInfo.getCalledDisplays())) {
+            log.warn("callId:{}, agent:{}, group is null", callId, agent.getAgentKey());
+            hangupCallHandler.handler(HangupCallModel.builder().mediaAddr(addr).deviceId(deviceId).build());
+            return;
+        }
+        log.info("sipOutbound callId:{}  sip:{} called:{}", callId, caller, called);
+        String calledDisplay = groupInfo.getCalledDisplays().get(groupInfo.getCalledDisplays().size()==1?0:RandomUtil.randomInt(0,groupInfo.getCalledDisplays().size()-1));
+        CallInfo callInfo = CallInfo.builder()
+                .callId(callId)
+                .callType(CallTypeEunm.SIP_OUTBOUND_CALL)
+                .direction(DirectionEnum.OUTBOUND)
+                .callTime(new Date())
+                .caller(caller)
+                .called(called)
+                .companyId(agent.getCompanyId())
+                .mediaHost(addr)
+                .callerDisplay(agent.getAgentId())
+                .calledDisplay(calledDisplay)
+                .groupId(groupInfo.getId())
+                .agentKey(agent.getAgentKey())
+                .build();
+        DeviceInfo deviceInfo = DeviceInfo.builder()
+                .callId(callId)
+                .deviceId(deviceId)
+                .agentKey(agent.getAgentKey())
+                .caller(caller)
+                .called(called)
+                .callTime(callInfo.getCallTime())
+                .deviceType(1)
+                .cdrType(2)
+                .build();
+        agent.setDeviceId(deviceId);
+        CompanyInfo companyInfo = RedisService.getCompanyInfoManager().get(agent.getCompanyId());
+        callInfo.setHiddenCustomer(companyInfo.getHiddenCustomer());
+        callInfo.setCdrNotifyUrl(companyInfo.getNotifyUrl());
+        callInfo.getDeviceInfoMap().put(deviceId, deviceInfo);
+        callInfo.getDeviceList().add(deviceId);
+        callInfo.getNextCommands().add(new NextCommand(deviceInfo.getDeviceId(), NextTypeEnum.NEXT_CALL_OTHER, null));
+        RedisService.getCallInfoManager().put(callInfo);
+        RedisService.getDeviceInfoManager().putDeviceCallId(deviceId, callId);
+        answerCallHandler.handler(AnswerCallModel.builder().mediaAddr(addr).deviceId(deviceId).build());
+    }
 
     /**
      * 外呼
@@ -281,73 +361,5 @@ public class ChannelParkEventHandler implements EslEventHandler {
             FsService.getSendAgentMessage().sendMessage(AgentStateEnum.OUT_CALLED_RING, agentVoInfo,ringEntity);
         }
         RedisService.getCallInfoManager().put(callInfo);
-    }
-
-    /**
-     * 硬话机外呼
-     *
-     * @param event
-     */
-    private void sipOutboundCall(String addr,String deviceId,EslEvent event) {
-        //通过sip号码获取绑定的坐席
-        String caller = event.getEventHeaders().get("variable_sip_from_user");//主叫号码
-        String called = event.getEventHeaders().get("Caller-Destination-Number");//被叫号码
-        AgentVoInfo agent = RedisService.getAgentInfoManager().get(caller);
-        String callId = String.valueOf(FreeswitchUtils.snowflake.nextId());
-        if (agent == null || agent.getGroupId() == null) {
-            log.warn("sipOutbound callId:{}  sip:{} called:{}", callId, caller, called);
-            hangupCallHandler.handler(HangupCallModel.builder().mediaAddr(addr).deviceId(deviceId).build());
-            return;
-        }
-        //获取显号
-        GroupInfo groupInfo = RedisService.getGroupInfoManager().get(agent.getGroupId());
-        if (groupInfo == null || CollectionUtils.isEmpty(groupInfo.getCalledDisplays())) {
-            log.warn("callId:{}, agent:{}, group is null", callId, agent.getAgentKey());
-            hangupCallHandler.handler(HangupCallModel.builder().mediaAddr(addr).deviceId(deviceId).build());
-            return;
-        }
-        AgentVoInfo agentVoInfo = RedisService.getAgentInfoManager().get(agent.getAgentKey());
-        if (agentVoInfo == null) {
-            RedisService.getAgentInfoManager().put(agent);
-        }
-        log.info("sipOutbound callId:{}  sip:{} called:{}", callId, caller, called);
-        String calledDisplay = groupInfo.getCalledDisplays().get(RandomUtil.randomInt(0,groupInfo.getCalledDisplays().size()-1));
-
-        CallInfo callInfo = CallInfo.builder()
-                .callId(callId)
-                .callType(CallTypeEunm.SIP_OUTBOUND_CALL)
-                .direction(DirectionEnum.OUTBOUND)
-                .callTime(new Date())
-                .caller(caller)
-                .called(called)
-                .companyId(agent.getCompanyId())
-                .mediaHost(addr)
-                .callerDisplay(agent.getAgentId())
-                .calledDisplay(calledDisplay)
-                .groupId(groupInfo.getId())
-                .agentKey(agent.getAgentKey())
-                .build();
-
-        DeviceInfo deviceInfo = DeviceInfo.builder()
-                .callId(callId)
-                .deviceId(deviceId)
-                .agentKey(agent.getAgentKey())
-                .caller(caller)
-                .called(called)
-                .callTime(callInfo.getCallTime())
-                .deviceType(1)
-                .cdrType(2)
-                .build();
-
-        CompanyInfo companyInfo = RedisService.getCompanyInfoManager().get(agent.getCompanyId());
-        callInfo.setHiddenCustomer(companyInfo.getHiddenCustomer());
-        callInfo.setCdrNotifyUrl(companyInfo.getNotifyUrl());
-        callInfo.getDeviceInfoMap().put(deviceId, deviceInfo);
-        callInfo.getDeviceList().add(deviceId);
-
-        callInfo.getNextCommands().add(new NextCommand(deviceInfo.getDeviceId(), NextTypeEnum.NEXT_CALL_OTHER, null));
-        RedisService.getCallInfoManager().put(callInfo);
-        RedisService.getDeviceInfoManager().putDeviceCallId(deviceId, callId);
-        answerCallHandler.handler(AnswerCallModel.builder().mediaAddr(addr).deviceId(deviceId).build());
     }
 }

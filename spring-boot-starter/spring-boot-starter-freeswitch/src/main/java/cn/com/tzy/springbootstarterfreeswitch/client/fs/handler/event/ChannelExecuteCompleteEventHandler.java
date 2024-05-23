@@ -32,8 +32,8 @@ public class ChannelExecuteCompleteEventHandler implements EslEventHandler {
 
     @Override
     public void handle(String addr, EslEvent event) {
-        log.info("进入事件 CHANNEL_EXECUTE_COMPLETE");
         String application = event.getEventHeaders().get("Application");
+        log.info("进入事件 [执行完成时事件 application:{}]  CHANNEL_EXECUTE_COMPLETE",application);
         if (StringUtils.isBlank(application)) {
             return;
         }

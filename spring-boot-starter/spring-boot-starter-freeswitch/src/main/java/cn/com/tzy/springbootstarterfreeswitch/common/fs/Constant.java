@@ -10,7 +10,8 @@ public class Constant {
     public static final String LINE = "-";
     public static final String JSON = ".json";
     public static final String XML = ".xml";
-    public final static String SIP_HEADER = "sip_h_";
+    //自定义通道变量（重要作用）
+    public final static String SIP_HEADER = "sip_h_X-";
     public final static String EQ = "=";
     public final static String SET = "set";
     public final static String OK = "OK";
@@ -27,6 +28,7 @@ public class Constant {
     //发起一个呼叫
     public final static String ORIGINATE = "originate";
     public final static String EXECUTE = "execute";
+    public final static String ANSWER = "answer";
     // 如果设置为true，它将在桥接返回后驻留呼叫。 在transfer_after_bridge和hangup_after_bridge之前进行检查。
     public final static String PARK_AFTER_BRIDGE = "park_after_bridge=true";
     //  控制处于桥接状态且被叫方（B）挂断时主叫方（A）发生的情况。如果true拨号计划将停止处理，并且A分支将在B分支终止时终止。如果false（默认）B腿终止后，拨号计划将继续处理。
@@ -45,5 +47,25 @@ public class Constant {
      * 指定坐席
      */
     public static final String DESIGNATE_AGENT = "desiganteAgent";
+    /**
+     * vip等级进线
+     */
+    public static final String VIP_LEVEL = "vipLevel";
+    public static final String START_TIME = "startTime";
+    public static final String QUEUE_TIME = "queueTime";
+    /**
+     * 当前空闲时间
+     */
+    public static final String LONG_READY = "longReady";
+
+    /**
+     * 空闲次数
+     */
+    public static final String READY_TIMES = "readyTimes";
+
+    /**
+     * 服务次数
+     */
+    public static final String SEREVICE_TIMES = "serviceTimes";
 
 }

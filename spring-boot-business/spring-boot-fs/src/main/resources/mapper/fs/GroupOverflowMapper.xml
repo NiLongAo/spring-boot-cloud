@@ -19,4 +19,23 @@
     id, group_id, overflow_id, level_value, `status`, create_user_id, create_time, update_user_id, 
     update_time
   </sql>
+
+  <select id="findGroupOverFlowInfo" resultType="cn.com.tzy.springbootstarterfreeswitch.model.fs.GroupOverFlowInfo">
+    select
+      a.id as id,
+      b.company_id as companyId,
+      b.name as name,
+      b.handle_type as handleType,
+      b.busy_type as busyType,
+      b.queue_timeout as queueTimeout,
+      b.busy_timeout_type as busyTimeoutType,
+      b.overflow_type as overflowType,
+      b.overflow_value as overflowValue,
+      b.lineup_expression as lineupExpression,
+      a.group_id as groupId,
+      a.overflow_id as overflowId,
+      a.level_value as levelValue
+    from fs_group_overflow a,fs_overflow_config b
+    where a.overflow_id = b.id
+  </select>
 </mapper>

@@ -1,6 +1,5 @@
 package cn.com.tzy.springbootstarterfreeswitch.model.fs;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,37 +7,35 @@ import lombok.experimental.SuperBuilder;
 
 import java.io.Serializable;
 
-
 /**
- * 技能
+ * 路由号码表
  */
 @Data
 @SuperBuilder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class SkillInfo implements Serializable {
-    /**
-     * PK
-     */
-    private Long id;
+public class VdnPhoneInfo implements Serializable {
 
-    /**
-     * 名称
-     */
-    private String name;
+    private Long id;
 
     /**
      * 企业ID
      */
-    private Long companyId;
+    private String companyId;
 
     /**
-     * 备注
+     * 路由码
      */
-    private String remark;
+    private Long vdnId;
+
+    /**
+     * 特服号
+     */
+    private String phone;
 
     /**
      * 状态
      */
     private Integer status;
+
 }

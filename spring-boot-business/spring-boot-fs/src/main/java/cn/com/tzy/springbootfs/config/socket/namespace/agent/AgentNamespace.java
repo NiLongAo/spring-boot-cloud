@@ -27,6 +27,7 @@ public class AgentNamespace implements NamespaceListener {
      */
 
     private SocketIOServer socketIOServer;
+
     @Resource
     private AgentService agentService;
     @Override

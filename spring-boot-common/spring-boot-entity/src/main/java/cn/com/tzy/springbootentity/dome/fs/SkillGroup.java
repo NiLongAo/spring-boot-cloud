@@ -30,7 +30,7 @@ public class SkillGroup extends LongIdEntity {
     private Long companyId;
 
     @TableField(value = "level_value")
-    @ApiModelProperty(value="")
+    @ApiModelProperty(value="技能组优先级")
     private Integer levelValue;
 
     /**

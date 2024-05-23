@@ -15,6 +15,8 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 public class AnswerCallModel implements MessageModel {
 
-    private String mediaAddr;//fs通话设备地址
+    private boolean isActive;// 是否主动应答
+    private String mediaAddr;//fs通话设备地址 主动
     private String deviceId;//设备
+
 }

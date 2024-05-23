@@ -29,9 +29,9 @@ public class ChannelAnswerEventHandler implements EslEventHandler {
     private NextCommandHandler nextCommandHandler;
     @Override
     public void handle(String addr, EslEvent event) {
-        log.info("进入事件 CHANNEL_ANSWER");
+        log.info("进入事件 [设备应答处理类] CHANNEL_ANSWER");
         String uniqueId = EslEventUtil.getUniqueId(event);
-        Date answerTime = DateUtil.date(Long.parseLong(EslEventUtil.getEventDateTimestamp(event)));//接通时间（毫秒值）
+        Date answerTime = DateUtil.date(Long.parseLong(EslEventUtil.getEventDateTimestamp(event))/1000).toSqlDate();//接通时间（毫秒值）
         CallInfo callInfo = RedisService.getCallInfoManager().findDeviceId(uniqueId);
         if(callInfo == null){
             log.warn("未获取应答消息");

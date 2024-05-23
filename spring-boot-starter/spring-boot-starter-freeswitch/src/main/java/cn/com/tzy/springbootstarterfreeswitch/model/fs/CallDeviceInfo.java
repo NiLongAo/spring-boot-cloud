@@ -1,9 +1,12 @@
 package cn.com.tzy.springbootstarterfreeswitch.model.fs;
 
+import cn.com.tzy.springbootcomm.constant.Constant;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -115,6 +118,8 @@ public class CallDeviceInfo implements Serializable {
     /**
      * 结束时间
      */
+    @DateTimeFormat(pattern = Constant.DATE_TIME_FORMAT)
+    @JsonFormat(pattern =  Constant.DATE_TIME_FORMAT)
     private Date endTime;
 
     /**
@@ -181,8 +186,10 @@ public class CallDeviceInfo implements Serializable {
      *
      */
     private String month;
-
+    @DateTimeFormat(pattern = Constant.DATE_TIME_FORMAT)
+    @JsonFormat(pattern =  Constant.DATE_TIME_FORMAT)
     private Date createTime;
-
+    @DateTimeFormat(pattern = Constant.DATE_TIME_FORMAT)
+    @JsonFormat(pattern =  Constant.DATE_TIME_FORMAT)
     private Date updateTime;
 }

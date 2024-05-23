@@ -99,15 +99,15 @@ public class NextCommandHandler {
     private void matchVdnCode(EslEvent event, CallInfo callInfo, DeviceInfo deviceInfo) {
         String caller = EslEventUtil.getCallerCallerIdNumber(event);//主叫号码
         String called = EslEventUtil.getCallerDestinationNumber(event);//被叫号码
-        VdnPhone vdnPhone = RedisService.getVdnPhoneManager().get(callInfo.getCallerDisplay());
-        log.info("inbount caller:{} called:{} for vdnId:{}", caller, called, vdnPhone.getVdnId());
-        CompanyInfo companyInfo = RedisService.getCompanyInfoManager().get(vdnPhone.getCompanyId());
+        VdnPhoneInfo vdnPhoneInfo = RedisService.getVdnPhoneManager().get(callInfo.getCallerDisplay());
+        log.info("inbount caller:{} called:{} for vdnId:{}", caller, called, vdnPhoneInfo.getVdnId());
+        CompanyInfo companyInfo = RedisService.getCompanyInfoManager().get(vdnPhoneInfo.getCompanyId());
         if (companyInfo == null || companyInfo.getStatus() == 0) {
             log.info("vdnPhone is not match:{}  {} ", caller, called);
             hangupCallHandler.handler(HangupCallModel.builder().mediaAddr(callInfo.getMediaHost()).deviceId(deviceInfo.getDeviceId()).build());
             return;
         }
-        vdnProcessHandler.hanlder(callInfo, deviceInfo, vdnPhone.getVdnId());
+        vdnProcessHandler.hanlder(callInfo, deviceInfo, vdnPhoneInfo.getVdnId());
         return;
     }
 
@@ -131,11 +131,9 @@ public class NextCommandHandler {
             deviceInfo.setRecordStartTime(deviceInfo.getAnswerTime());
             callInfo.getDeviceInfoMap().put(deviceInfo.getDeviceId(), deviceInfo);
         }
-        String deviceId = RandomUtil.randomString(16);
+        String deviceId = RandomUtil.randomString(32);
         log.info("呼另外一侧电话: callId:{}  display:{}  called:{}  deviceId:{} ", callInfo.getCallId(), callInfo.getCalledDisplay(), callInfo.getCalled(), deviceId);
-        callInfo.getDeviceList().add(deviceId);//存储被叫uuid
         String called = callInfo.getCalled();//被叫号码
-
         //坐席内呼
         if (callInfo.getCallType() == CallTypeEunm.INNER_CALL) {
             AgentVoInfo agentVoInfo = RedisService.getAgentInfoManager().get(called);
@@ -149,6 +147,7 @@ public class NextCommandHandler {
             hangupCallHandler.handler(HangupCallModel.builder().mediaAddr(callInfo.getMediaHost()).deviceId(deviceInfo.getDeviceId()).build());
             return;
         }
+        callInfo.getDeviceList().add(deviceId);//存储被叫uuid
         DeviceInfo deviceInfo1 = new DeviceInfo();
         //1:坐席,2:客户,3:外线
         deviceInfo1.setDeviceType(callInfo.getCallType() == CallTypeEunm.INNER_CALL ? 1 : 2);
@@ -208,7 +207,7 @@ public class NextCommandHandler {
         log.info("开始桥接电话: callId:{} caller:{} called:{} device1:{}, device2:{}", callInfo.getCallId(), callInfo.getCaller(), callInfo.getCalled(), nextCommand.getDeviceId(), nextCommand.getNextValue());
         DeviceInfo deviceInfo1 = callInfo.getDeviceInfoMap().get(nextCommand.getDeviceId());
         DeviceInfo deviceInfo2 = callInfo.getDeviceInfoMap().get(nextCommand.getNextValue());
-        Date answerTime = DateUtil.date(Long.parseLong(EslEventUtil.getEventDateTimestamp(event)));//接通时间（毫秒值）
+        Date answerTime = DateUtil.date(Long.parseLong(EslEventUtil.getEventDateTimestamp(event))/1000).toSqlDate();//接通时间（毫秒值）
         if (deviceInfo1.getBridgeTime() == null) {
             deviceInfo1.setBridgeTime(answerTime);
         }

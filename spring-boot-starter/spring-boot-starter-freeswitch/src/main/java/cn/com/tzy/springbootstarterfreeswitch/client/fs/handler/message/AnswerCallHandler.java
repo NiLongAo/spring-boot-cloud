@@ -7,6 +7,7 @@ import cn.com.tzy.springbootstarterfreeswitch.exception.BusinessException;
 import cn.com.tzy.springbootstarterfreeswitch.model.MessageModel;
 import cn.com.tzy.springbootstarterfreeswitch.model.message.AnswerCallModel;
 import link.thingscloud.freeswitch.esl.InboundClient;
+import link.thingscloud.freeswitch.esl.transport.SendMsg;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -34,6 +35,10 @@ public class AnswerCallHandler implements FsMessageHandle {
             throw new BusinessException(RespCode.CODE_2.getValue(),"未获取通话设备");
         }
         //发送应答事件
-        inboundClient.sendSyncApiCommand(answerCallModel.getMediaAddr(), Constant.UUID_PHONE_EVENT,String.format("%s talk",answerCallModel.getDeviceId()));
+        if(answerCallModel.isActive()){
+            inboundClient.sendSyncApiCommand(answerCallModel.getMediaAddr(), Constant.UUID_PHONE_EVENT,String.format("%s talk",answerCallModel.getDeviceId()));
+        }else {
+            inboundClient.sendMessage(answerCallModel.getMediaAddr(), new SendMsg(answerCallModel.getDeviceId()).addCallCommand(Constant.EXECUTE).addExecuteAppName(Constant.ANSWER));
+        }
     }
 }

@@ -2,6 +2,7 @@ package cn.com.tzy.springbootstarterfreeswitch.redis.impl.fs;
 
 import cn.com.tzy.springbootstarterfreeswitch.common.fs.RedisConstant;
 import cn.com.tzy.springbootstarterfreeswitch.model.call.CallInfo;
+import cn.com.tzy.springbootstarterfreeswitch.model.call.DeviceInfo;
 import cn.com.tzy.springbootstarterfreeswitch.redis.RedisService;
 import cn.com.tzy.springbootstarterredis.utils.RedisUtils;
 import lombok.extern.log4j.Log4j2;
@@ -9,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 @Log4j2
 @Component
@@ -44,6 +46,15 @@ public class CallInfoManager {
 
 
     public void del(String callId){
+        CallInfo callInfo = get(callId);
+        if(callInfo != null){
+            Map<String, DeviceInfo> deviceInfoMap = callInfo.getDeviceInfoMap();
+            if(deviceInfoMap!= null && !deviceInfoMap.isEmpty()){
+                for (String deviceId : deviceInfoMap.keySet()) {
+                    RedisService.getDeviceInfoManager().delDeviceInfo(deviceId);
+                }
+            }
+        }
         RedisUtils.del(getKey(callId));
     }
 

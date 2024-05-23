@@ -2,14 +2,17 @@ package cn.com.tzy.springbootstartervideobasic.vo.video;
 
 import cn.com.tzy.springbootcomm.common.bean.LongIdEntity;
 import cn.com.tzy.springbootcomm.common.enumcom.ConstEnum;
+import cn.com.tzy.springbootcomm.constant.Constant;
 import cn.com.tzy.springbootstartervideobasic.enums.GbIdConstant;
 import cn.com.tzy.springbootstartervideobasic.utils.Coordtransform;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 
@@ -105,6 +108,8 @@ public class DeviceChannelVo extends LongIdEntity {
     /**
      * 证书终止有效期
      */
+    @DateTimeFormat(pattern = Constant.DATE_TIME_FORMAT)
+    @JsonFormat(pattern =  Constant.DATE_TIME_FORMAT)
     private Date endTime;
 
     /**
@@ -204,6 +209,8 @@ public class DeviceChannelVo extends LongIdEntity {
     /**
      * GPS的更新时间
      */
+    @DateTimeFormat(pattern = Constant.DATE_TIME_FORMAT)
+    @JsonFormat(pattern =  Constant.DATE_TIME_FORMAT)
     private Date gpsTime;
 
 

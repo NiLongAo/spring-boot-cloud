@@ -2,9 +2,12 @@ package cn.com.tzy.springbootstartervideobasic.vo.video;
 
 import cn.com.tzy.springbootcomm.common.bean.LongIdEntity;
 import cn.com.tzy.springbootcomm.common.enumcom.ConstEnum;
+import cn.com.tzy.springbootcomm.constant.Constant;
 import cn.com.tzy.springbootstartervideobasic.vo.media.OnStreamChangedHookVo;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 
@@ -61,6 +64,8 @@ public class StreamPushVo extends LongIdEntity {
     /**
      * 推流时间
      */
+    @DateTimeFormat(pattern = Constant.DATE_TIME_FORMAT)
+    @JsonFormat(pattern =  Constant.DATE_TIME_FORMAT)
     private Date pushTime;
 
     /**

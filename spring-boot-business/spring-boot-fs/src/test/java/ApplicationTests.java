@@ -10,6 +10,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+
 @Log4j2
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {FreeswitchUtils.class})
@@ -31,8 +36,18 @@ public class ApplicationTests {
         System.out.println(xmlConfig);
     }
 
+    public static void main(String[] args) {
+        List<String> stringList = Arrays.asList("ban",  "bana","date","banana",  "ba");
+        String target = "bananaberry";
 
+        Optional<String> longestMatch = findLongestContainingString(stringList, target);
+        longestMatch.ifPresent(System.out::println);
+    }
 
-
+    public static Optional<String> findLongestContainingString(List<String> stringList, String target) {
+        return stringList.stream()
+                .filter(target::contains)
+                .max(Comparator.comparingInt(String::length));
+    }
 
 }

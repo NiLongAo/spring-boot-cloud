@@ -3,8 +3,6 @@ package cn.com.tzy.springbootstarterfreeswitch.service.freeswitch;
 import cn.com.tzy.springbootcomm.common.enumcom.ConstEnum;
 import cn.com.tzy.springbootcomm.utils.DynamicTask;
 import cn.com.tzy.springbootstarterfreeswitch.client.media.client.MediaClient;
-import cn.com.tzy.springbootstarterfreeswitch.client.sip.SipServer;
-import cn.com.tzy.springbootstarterfreeswitch.client.sip.cmd.SIPCommander;
 import cn.com.tzy.springbootstarterfreeswitch.common.sip.SipConstant;
 import cn.com.tzy.springbootstarterfreeswitch.enums.fs.AgentStateEnum;
 import cn.com.tzy.springbootstarterfreeswitch.model.fs.AgentVoInfo;
@@ -29,13 +27,6 @@ import java.util.List;
 
 @Log4j2
 public abstract class AgentVoService {
-
-    @Resource
-    private DynamicTask dynamicTask;
-    @Resource
-    private SIPCommander sipCommander;
-    @Resource
-    private SipServer sipServer;
 
     public abstract AgentVoInfo getAgentBySip(String sip);
     public abstract AgentVoInfo findAgentId(String id);
@@ -90,14 +81,13 @@ public abstract class AgentVoService {
                 this.save(agentVoInfo);
             }
         }
-
         if(sipTransactionInfo != null){
             //设置设备过期任务
             String key = String.format("%s_%s", SipConstant.REGISTER_EXPIRE_TASK_KEY_PREFIX, agentVoInfo.getAgentCode());
             dynamicTask.startDelay(key, agentVoInfo.getKeepTimeout()+ SipConstant.DELAY_TIME,()->offline(agentVoInfo.getAgentCode()));
             RedisService.getRegisterServerManager().putDevice(agentVoInfo.getAgentCode(), agentVoInfo.getKeepTimeout()+ SipConstant.DELAY_TIME , Address.builder().agentCode(agentVoInfo.getAgentCode()).ip(nacosDiscoveryProperties.getIp()).port(nacosDiscoveryProperties.getPort()).build());
-            RedisService.getAgentInfoManager().put(agentVoInfo);
         }
+        RedisService.getAgentInfoManager().put(agentVoInfo);
     }
 
     /**

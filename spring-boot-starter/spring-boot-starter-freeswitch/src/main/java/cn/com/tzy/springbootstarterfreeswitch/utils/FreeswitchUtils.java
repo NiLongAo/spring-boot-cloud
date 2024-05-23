@@ -74,12 +74,13 @@ public class FreeswitchUtils {
      */
     public static String expression(String body, Map<String, Object> params) {
         ExpressionParser parser = new SpelExpressionParser();
-        TemplateParserContext parserContext = new TemplateParserContext();
+        TemplateParserContext parserContext = new TemplateParserContext("${","}");
+        String content = null;
         try {
-            return parser.parseExpression(body, parserContext).getValue(params, String.class);
+            content = parser.parseExpression(body, parserContext).getValue(params, String.class);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return body;
         }
+        return content;
     }
 }

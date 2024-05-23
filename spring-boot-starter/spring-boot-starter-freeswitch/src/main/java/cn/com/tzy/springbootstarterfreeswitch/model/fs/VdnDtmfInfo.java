@@ -14,7 +14,7 @@ import java.io.Serializable;
 @SuperBuilder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class VdnDtmf implements Serializable {
+public class VdnDtmfInfo implements Serializable {
     /**
      * PK
      */

@@ -1,17 +1,20 @@
 package cn.com.tzy.springbootstarterfreeswitch.model.call;
 
+import cn.com.tzy.springbootcomm.constant.Constant;
 import cn.com.tzy.springbootstarterfreeswitch.enums.fs.CallTypeEunm;
 import cn.com.tzy.springbootstarterfreeswitch.enums.fs.DirectionEnum;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
 import java.util.*;
 
 @Data
-@SuperBuilder(toBuilder = true)
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class CallInfo implements Serializable {
@@ -101,11 +104,15 @@ public class CallInfo implements Serializable {
     /**
      * 录音开始时间
      */
+    @DateTimeFormat(pattern = Constant.DATE_TIME_FORMAT)
+    @JsonFormat(pattern =  Constant.DATE_TIME_FORMAT)
     private Date recordTime;
 
     /**
      * 呼叫开始时间
      */
+    @DateTimeFormat(pattern = Constant.DATE_TIME_FORMAT)
+    @JsonFormat(pattern =  Constant.DATE_TIME_FORMAT)
     private Date callTime;
 
     /**
@@ -147,11 +154,15 @@ public class CallInfo implements Serializable {
     /**
      * 接听时间，被叫 CHANNEL_ANSWER，转接不算
      */
+    @DateTimeFormat(pattern = Constant.DATE_TIME_FORMAT)
+    @JsonFormat(pattern =  Constant.DATE_TIME_FORMAT)
     private Date answerTime;
 
     /**
      * 最后一侧电话挂机时间
      */
+    @DateTimeFormat(pattern = Constant.DATE_TIME_FORMAT)
+    @JsonFormat(pattern =  Constant.DATE_TIME_FORMAT)
     private Date endTime;
 
     /**
@@ -162,16 +173,22 @@ public class CallInfo implements Serializable {
     /**
      * 第一次进队列时间
      */
+    @DateTimeFormat(pattern = Constant.DATE_TIME_FORMAT)
+    @JsonFormat(pattern =  Constant.DATE_TIME_FORMAT)
     private Date fristQueueTime;
 
     /**
      * 进入技能组时间
      */
+    @DateTimeFormat(pattern = Constant.DATE_TIME_FORMAT)
+    @JsonFormat(pattern =  Constant.DATE_TIME_FORMAT)
     private Date queueStartTime;
 
     /**
      * 出技能组时间
      */
+    @DateTimeFormat(pattern = Constant.DATE_TIME_FORMAT)
+    @JsonFormat(pattern =  Constant.DATE_TIME_FORMAT)
     private Date queueEndTime;
 
     /**
@@ -203,29 +220,35 @@ public class CallInfo implements Serializable {
     /**
      * 当前通话的设备
      */
+    @Builder.Default
     private List<String> deviceList = new LinkedList<>();
 
     /**
      * K-V
      */
+    @Builder.Default
     private Map<String, DeviceInfo> deviceInfoMap = new HashMap<>();
 
     /**
      * 呼叫随路数据(作为落单数据)
      */
+    @Builder.Default
     private Map<String, Object> followData = new HashMap<>();
 
     /**
      * 模块流程间数据
      */
+    @Builder.Default
     private Map<String, Object> processData = new HashMap<>();
     /**
      * 执行下一步命令
      */
+    @Builder.Default
     private List<NextCommand> nextCommands = new LinkedList<>();
 
     /**
      * 电话流程
      */
+    @Builder.Default
     private List<CallDetail> callDetails = new ArrayList<>();
 }

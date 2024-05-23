@@ -1,9 +1,12 @@
 package cn.com.tzy.springbootstarterfreeswitch.model.fs;
 
+import cn.com.tzy.springbootcomm.constant.Constant;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 
@@ -16,7 +19,8 @@ public class CallQueue implements Comparable<CallQueue>{
     private Long priority;
 
     private String callId;
-
+    @DateTimeFormat(pattern = Constant.DATE_TIME_FORMAT)
+    @JsonFormat(pattern =  Constant.DATE_TIME_FORMAT)
     private Date startTime;
 
     private String groupId;

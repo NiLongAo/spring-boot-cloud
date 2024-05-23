@@ -37,7 +37,7 @@ public class DeviceInfoManager {
     //**********************************************
 
     public void putDeviceCallId(String deviceId,String callId){
-        RedisUtils.set(getKeyDeviceInfo(deviceId),callId,-1L);
+        RedisUtils.set(getKeyCallId(deviceId),callId,-1L);
     }
     public String getDeviceCallId(String key) {
         List<String> scan = RedisUtils.keys(getKeyCallId(key));
@@ -48,7 +48,7 @@ public class DeviceInfoManager {
         }
     }
     public void delDeviceCallId(String key){
-        RedisUtils.del(getKeyDeviceInfo(key));
+        RedisUtils.del(getKeyCallId(key));
     }
     private String getKeyCallId(String key){
         return String.format("%s%s",FS_DEVICE_CALLID,key);

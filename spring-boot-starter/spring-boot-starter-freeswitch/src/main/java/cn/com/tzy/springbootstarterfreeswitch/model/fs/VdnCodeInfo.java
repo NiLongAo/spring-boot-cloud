@@ -37,19 +37,19 @@ public class VdnCodeInfo implements Serializable {
     /**
      * 每个vdn有多个日程-字码
      */
-    private List<VdnScheduleInfo> vdnSchedulePoList;
+    private List<VdnConfigInfo> vdnSchedulePoList;
 
     /**
      * 获取有效日程
      *
      * @return
      */
-    public VdnScheduleInfo getEffectiveSchedule() {
+    public VdnConfigInfo getEffectiveSchedule() {
         if (this.vdnSchedulePoList.size() == 0) {
             return null;
         }
         // vdnSchedulePoList已经按照日程的优先级排序了
-        for (VdnScheduleInfo vdnSchedulePo : vdnSchedulePoList) {
+        for (VdnConfigInfo vdnSchedulePo : vdnSchedulePoList) {
             if (vdnSchedulePo.isEffectiveSchedule()) {
                 return vdnSchedulePo;
             }

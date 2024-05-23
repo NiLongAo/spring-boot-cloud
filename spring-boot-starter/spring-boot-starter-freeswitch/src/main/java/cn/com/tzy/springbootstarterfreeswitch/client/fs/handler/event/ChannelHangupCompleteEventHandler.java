@@ -44,7 +44,7 @@ public class ChannelHangupCompleteEventHandler implements EslEventHandler {
     private HangupCallHandler hangupCallHandler;
     @Override
     public void handle(String addr, EslEvent event) {
-        log.info("进入事件 CHANNEL_HANGUP_COMPLETE");
+        log.info("进入事件 [挂机事件] CHANNEL_HANGUP_COMPLETE");
         String uniqueId = EslEventUtil.getUniqueId(event);
         String hangupCause = event.getEventHeaders().get("Hangup-Cause");//挂机原因
         String sipProtocol = event.getEventHeaders().get("variable_sip_via_protocol");//sip信令协议
@@ -54,7 +54,7 @@ public class ChannelHangupCompleteEventHandler implements EslEventHandler {
         String eventDateTimestamp = EslEventUtil.getEventDateTimestamp(event);//接通时间（毫秒值）
         Date answerTime = new Date();
         if(eventDateTimestamp != null){
-            answerTime = DateUtil.date(Long.parseLong(eventDateTimestamp));
+            answerTime = DateUtil.date(Long.parseLong(eventDateTimestamp)/1000).toSqlDate();
         }
         CallInfo callInfo = RedisService.getCallInfoManager().findDeviceId(uniqueId);
         if (callInfo == null) {
@@ -131,7 +131,7 @@ public class ChannelHangupCompleteEventHandler implements EslEventHandler {
             callDeviceList.add(callDevice);
 
         });
-
+        callInfo.setEndTime(new Date());
         CallLogInfo callLog = new CallLogInfo();
         BeanUtils.copyProperties(callInfo, callLog);
         callLog.setCreateTime(callInfo.getCallTime());
@@ -154,7 +154,6 @@ public class ChannelHangupCompleteEventHandler implements EslEventHandler {
         FsService.getCallCdrService().saveOrUpdateCallLog(callLog);
 
         CompanyInfo companyInfo = RedisService.getCompanyInfoManager().get(callInfo.getCompanyId());
-
         //清空电话信息
         RedisService.getCallInfoManager().del(callInfo.getCallId());
         String notifyUrl = companyInfo.getNotifyUrl();

@@ -1,4 +1,4 @@
-package cn.com.tzy.springbootstarterfreeswitch.config;
+package cn.com.tzy.springbootstarterfreeswitch.config.zlm;
 
 import cn.com.tzy.springbootcomm.common.enumcom.ConstEnum;
 import cn.com.tzy.springbootcomm.utils.DynamicTask;

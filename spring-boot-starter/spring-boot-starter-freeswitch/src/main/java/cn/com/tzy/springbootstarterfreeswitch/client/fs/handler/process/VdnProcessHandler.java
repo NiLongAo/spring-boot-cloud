@@ -49,8 +49,8 @@ public class VdnProcessHandler {
             return;
         }
         //查询有效日程
-        VdnScheduleInfo vdnScheduleInfo = vdnCodeInfo.getEffectiveSchedule();
-        if (vdnScheduleInfo == null) {
+        VdnConfigInfo vdnConfigInfo = vdnCodeInfo.getEffectiveSchedule();
+        if (vdnConfigInfo == null) {
             log.warn("callId:{} not match schedule, vdn:{}", callInfo.getCallId(), vdnCodeInfo.getName());
             hangupCallHandler.handler(HangupCallModel.builder().mediaAddr(callInfo.getMediaHost()).deviceId(deviceId).build());
             return;
@@ -61,21 +61,21 @@ public class VdnProcessHandler {
         callDetail.setStartTime(new Date());
         callDetail.setDetailIndex(callInfo.getCallDetails().size() + 1);
         callDetail.setTransferType(1);
-        callDetail.setTransferId(vdnScheduleInfo.getVdnId());
+        callDetail.setTransferId(vdnConfigInfo.getVdnId());
         callInfo.getCallDetails().add(callDetail);
-        log.info("vdnSchedule:{} routeType:{} routeValue:{}", vdnScheduleInfo.getName(), vdnScheduleInfo.getRouteType(), vdnScheduleInfo.getRouteValue());
+        log.info("vdnSchedule:{} routeType:{} routeValue:{}", vdnConfigInfo.getName(), vdnConfigInfo.getRouteType(), vdnConfigInfo.getRouteValue());
         /**
          * 1:技能组,2:放音,3:ivr,4:坐席,5:外呼 流程
          */
-        switch (vdnScheduleInfo.getRouteType()) {
+        switch (vdnConfigInfo.getRouteType()) {
             case 1:
-                GroupInfo groupInfo = RedisService.getGroupInfoManager().get(vdnScheduleInfo.getRouteValue());
+                GroupInfo groupInfo = RedisService.getGroupInfoManager().get(vdnConfigInfo.getRouteValue());
                 if (groupInfo == null) {
                     log.warn("callId:{} join group is null", callInfo.getCallId());
                     hangupCallHandler.handler(HangupCallModel.builder().mediaAddr(callInfo.getMediaHost()).deviceId(deviceId).build());
                     return;
                 }
-                log.debug("callId:{} join groupId:{}, groupName:{}", callInfo.getCallId(), vdnScheduleInfo.getRouteValue(), groupInfo.getName());
+                log.debug("callId:{} join groupId:{}, groupName:{}", callInfo.getCallId(), vdnConfigInfo.getRouteValue(), groupInfo.getName());
                 callInfo.setGroupId(groupInfo.getId());
                 groupProcessHandler.handler(callInfo, groupInfo, deviceId);
                 break;
@@ -83,28 +83,28 @@ public class VdnProcessHandler {
                 /**
                  * 普通放音或者按键导航音 1:按键导航,2:技能组,3:ivr,4:路由字码,5:挂机
                  */
-                PlaybackInfo playbackInfo = RedisService.getPlaybackInfoManager().get(vdnScheduleInfo.getRouteValue());
+                PlaybackInfo playbackInfo = RedisService.getPlaybackInfoManager().get(vdnConfigInfo.getRouteValue());
                 if (playbackInfo == null) {
                     log.warn("playback is null, callId:{} , device:{}", callInfo.getCallId(), deviceId);
                     hangupCallHandler.handler(HangupCallModel.builder().mediaAddr(callInfo.getMediaHost()).deviceId(deviceId).build());
                     return;
                 }
                 //放音类型(1:按键导航,2:技能组,3:ivr,4:路由字码,5:挂机)
-                log.info("playback tyep:{}, value:{}", vdnScheduleInfo.getPlayType(), vdnScheduleInfo.getPlayValue());
-                if (vdnScheduleInfo.getPlayType() != 1) {
+                log.info("playback tyep:{}, value:{}", vdnConfigInfo.getPlayType(), vdnConfigInfo.getPlayValue());
+                if (vdnConfigInfo.getPlayType() != 1) {
                     NextCommand nextCommand = null;
-                    switch (vdnScheduleInfo.getPlayType()) {
+                    switch (vdnConfigInfo.getPlayType()) {
                         case 2:
-                            nextCommand = new NextCommand(deviceId, NextTypeEnum.NEXT_GROUP, vdnScheduleInfo.getPlayValue());
+                            nextCommand = new NextCommand(deviceId, NextTypeEnum.NEXT_GROUP, vdnConfigInfo.getPlayValue());
                             break;
                         case 3:
-                            nextCommand = new NextCommand(deviceId, NextTypeEnum.NEXT_IVR, vdnScheduleInfo.getPlayValue());
+                            nextCommand = new NextCommand(deviceId, NextTypeEnum.NEXT_IVR, vdnConfigInfo.getPlayValue());
                             break;
                         case 4:
-                            nextCommand = new NextCommand(deviceId, NextTypeEnum.NEXT_VDN, vdnScheduleInfo.getPlayValue());
+                            nextCommand = new NextCommand(deviceId, NextTypeEnum.NEXT_VDN, vdnConfigInfo.getPlayValue());
                             break;
                         case 5:
-                            nextCommand = new NextCommand(deviceId, NextTypeEnum.NEXT_HANGUP, vdnScheduleInfo.getPlayValue());
+                            nextCommand = new NextCommand(deviceId, NextTypeEnum.NEXT_HANGUP, vdnConfigInfo.getPlayValue());
                             break;
                         default:
                             break;
@@ -123,14 +123,14 @@ public class VdnProcessHandler {
                 /**
                  * 转IVR
                  */
-                transferIvrProcessHandler.handler(callInfo, deviceInfo, vdnScheduleInfo.getRouteValue());
+                transferIvrProcessHandler.handler(callInfo, deviceInfo, vdnConfigInfo.getRouteValue());
                 return;
 
             case 4:
                 /**
                  * 转坐席
                  */
-                AgentVoInfo agentVoInfo = RedisService.getAgentInfoManager().get(vdnScheduleInfo.getRouteValue());
+                AgentVoInfo agentVoInfo = RedisService.getAgentInfoManager().get(vdnConfigInfo.getRouteValue());
                 if (agentVoInfo == null || agentVoInfo.getAgentState() != AgentStateEnum.READY) {
                     hangupCallHandler.handler(HangupCallModel.builder().mediaAddr(callInfo.getMediaHost()).deviceId(deviceId).build());
                     return;
@@ -141,10 +141,10 @@ public class VdnProcessHandler {
                 /**
                  * 转外呼
                  */
-                transferCallProcessHandler.hanlder(callInfo, vdnScheduleInfo.getRouteValue(), deviceId);
+                transferCallProcessHandler.hanlder(callInfo, vdnConfigInfo.getRouteValue(), deviceId);
                 return;
             default:
-                log.warn("vdnCode not match callId:{} , case:{}", callInfo.getCallId(), vdnScheduleInfo.getRouteType());
+                log.warn("vdnCode not match callId:{} , case:{}", callInfo.getCallId(), vdnConfigInfo.getRouteType());
                 break;
         }
     }

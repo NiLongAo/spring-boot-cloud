@@ -9,6 +9,8 @@
     <result column="name" property="name" />
     <result column="level_value" property="levelValue" />
     <result column="type" property="type" />
+    <result column="start_day" property="startDay" />
+    <result column="end_day" property="endDay" />
     <result column="start_time" property="startTime" />
     <result column="end_time" property="endTime" />
     <result column="mon" property="mon" />
@@ -26,7 +28,7 @@
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    id, company_id, `name`, level_value, `type`, start_time, end_time, mon, tue, wed, 
+    id, company_id, `name`, level_value, `type`, start_day,end_day,start_time, end_time, mon, tue, wed,
     thu, fri, sat, sun, `status`, create_user_id, create_time, update_user_id, update_time
   </sql>
 </mapper>

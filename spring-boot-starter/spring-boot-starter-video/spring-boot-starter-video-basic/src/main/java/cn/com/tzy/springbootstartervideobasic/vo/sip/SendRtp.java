@@ -55,6 +55,7 @@ public class SendRtp {
      * 2 推流中
      * 3.推流失败
      */
+    @Builder.Default
     private int status = 0;
     /**
      * 是否为tcp
@@ -91,18 +92,22 @@ public class SendRtp {
     /**
      * 发送时，rtp的pt（uint8_t）,不传时默认为96
      */
+    @Builder.Default
     private int pt = 96;
     /**
      * 发送时，rtp的负载类型。为true时，负载为ps；为false时，为es；
      */
+    @Builder.Default
     private boolean usePs = true;
     /**
      * 当usePs 为false时，有效。为1时，发送音频；为0时，发送视频；不传时默认为0
      */
+    @Builder.Default
     private boolean onlyAudio = false;
     /**
      * 是否开启rtcp保活
      */
+    @Builder.Default
     private boolean rtcp = false;
     /**
      * 播放类型

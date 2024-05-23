@@ -60,6 +60,7 @@ public class SecurityBaseUser implements BaseUser,Serializable {
     /**
      * 是否小程序认证
      */
+    @Builder.Default
     private Boolean isMaAuthentication = true;
     /**
      * 租户编号

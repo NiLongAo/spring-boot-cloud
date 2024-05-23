@@ -1,4 +1,4 @@
-package cn.com.tzy.springbootstarterfreeswitch.config;
+package cn.com.tzy.springbootstarterfreeswitch.config.fs;
 
 
 import cn.com.tzy.springbootcomm.utils.DynamicTask;

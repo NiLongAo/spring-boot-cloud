@@ -1,8 +1,11 @@
 package cn.com.tzy.springbootstartervideobasic.vo.video;
 
 import cn.com.tzy.springbootcomm.common.bean.LongIdEntity;
+import cn.com.tzy.springbootcomm.constant.Constant;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 
@@ -38,6 +41,8 @@ public class DeviceAlarmVo extends LongIdEntity {
     /**
      * 报警时间
      */
+    @DateTimeFormat(pattern = Constant.DATE_TIME_FORMAT)
+    @JsonFormat(pattern =  Constant.DATE_TIME_FORMAT)
     private Date alarmTime;
 
     /**

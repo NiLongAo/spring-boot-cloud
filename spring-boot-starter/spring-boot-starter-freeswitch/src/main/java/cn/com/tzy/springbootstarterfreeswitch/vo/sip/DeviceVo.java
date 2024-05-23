@@ -1,14 +1,17 @@
 package cn.com.tzy.springbootstarterfreeswitch.vo.sip;
 
 import cn.com.tzy.springbootcomm.common.bean.LongIdEntity;
+import cn.com.tzy.springbootcomm.constant.Constant;
 import cn.com.tzy.springbootstarterfreeswitch.common.sip.SipConstant;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 
@@ -79,14 +82,20 @@ public class DeviceVo extends LongIdEntity {
     /**
      * 注册时间
      */
+    @DateTimeFormat(pattern = Constant.DATE_TIME_FORMAT)
+    @JsonFormat(pattern =  Constant.DATE_TIME_FORMAT)
     private Date registerTime;
     /**
      * 续订时间
      */
+    @DateTimeFormat(pattern = Constant.DATE_TIME_FORMAT)
+    @JsonFormat(pattern =  Constant.DATE_TIME_FORMAT)
     private Date renewTime;
     /**
      * 心跳时间
      */
+    @DateTimeFormat(pattern = Constant.DATE_TIME_FORMAT)
+    @JsonFormat(pattern =  Constant.DATE_TIME_FORMAT)
     private Date keepaliveTime;
 
     /**

@@ -46,10 +46,10 @@ public class ChannelBridgeEventHandler implements EslEventHandler {
     private RecordCallHandler recordCallHandler;
     @Override
     public void handle(String addr, EslEvent event) {
-        log.info("进入事件 CHANNEL_BRIDGE");
+        log.info("进入事件 [桥接事件] CHANNEL_BRIDGE");
         String uniqueId = EslEventUtil.getUniqueId(event);
         String otherUniqueId = event.getEventHeaders().get("Other-Leg-Unique-ID");
-        Date answerTime = DateUtil.date(Long.parseLong(EslEventUtil.getEventDateTimestamp(event)));//接通时间（毫秒值）
+        Date answerTime = DateUtil.date(Long.parseLong(EslEventUtil.getEventDateTimestamp(event))/1000).toSqlDate();//接通时间（毫秒值）
         CallInfo callInfo = RedisService.getCallInfoManager().findDeviceId(uniqueId);
         if(callInfo == null){
             return;

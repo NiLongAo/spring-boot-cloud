@@ -1,16 +1,14 @@
 package cn.com.tzy.springbootstarterfreeswitch.client.fs.handler.message;
 
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
-import cn.com.tzy.springbootcomm.utils.AppUtils;
+import cn.com.tzy.springbootstarterfreeswitch.client.fs.handler.FsMessageHandle;
 import cn.com.tzy.springbootstarterfreeswitch.common.fs.Constant;
 import cn.com.tzy.springbootstarterfreeswitch.exception.BusinessException;
-import cn.com.tzy.springbootstarterfreeswitch.client.fs.handler.FsMessageHandle;
 import cn.com.tzy.springbootstarterfreeswitch.model.MessageModel;
 import cn.com.tzy.springbootstarterfreeswitch.model.message.MakeCallModel;
 import cn.com.tzy.springbootstarterfreeswitch.model.message.RouteGatewayModel;
 import cn.com.tzy.springbootstarterfreeswitch.utils.FreeswitchUtils;
 import link.thingscloud.freeswitch.esl.InboundClient;
-import link.thingscloud.freeswitch.esl.transport.message.EslMessage;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -32,7 +30,8 @@ public class MakeCallHandler implements FsMessageHandle {
     @Resource
     private InboundClient inboundClient;
 
-    private final static String codecs = "^^:G729:PCMU:PCMA";
+    //private final static String codecs = "^^:OPUS:G722:PCMU:PCMA:H264";//视频通话
+    private final static String codecs = "^^:OPUS:G722:PCMU:PCMA";//音频通话
 
     @Override
     public void handler(MessageModel model) {
@@ -89,14 +88,13 @@ public class MakeCallHandler implements FsMessageHandle {
             fsParams.putAll(collect);
         }
         StringBuffer builder = new StringBuffer();
-        builder.append(AppUtils.encodeJson2(fsParams));
+        builder.append(fsParams.toString().replaceAll(" ", ""));
         builder.append(Constant.SOFIA + Constant.SK).append(gatewayModel.getProfile()).append(Constant.SK);
         builder.append(called);
         builder.append(Constant.PARK);
         //随机获取一个Fs链接地址
         String addr = inboundClient.option().serverAddrOption().random();
         log.info("外呼消息处理 发送参数: addr：{}，command：{}，arg：{}",addr,Constant.ORIGINATE,builder.toString());
-        EslMessage eslMessage = inboundClient.sendSyncApiCommand(addr, Constant.ORIGINATE, builder.toString());
-        log.info("外呼消息处理 响应:{}",eslMessage.toString());
+        inboundClient.sendAsyncApiCommand(addr, Constant.ORIGINATE, builder.toString());
     }
 }

@@ -1,9 +1,12 @@
 package cn.com.tzy.springbootstarterfreeswitch.model.fs;
 
+import cn.com.tzy.springbootcomm.constant.Constant;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -14,7 +17,7 @@ import java.util.List;
  * 技能组
  */
 @Data
-@SuperBuilder(toBuilder = true)
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class GroupInfo implements Serializable {
@@ -119,12 +122,13 @@ public class GroupInfo implements Serializable {
     /**
      * 当前在线坐席
      */
+    @Builder.Default
     private List<String> onlineAgents = new ArrayList<>();
 
     /**
      * 所有技能
      */
-    private List<SkillInfo> skills;
+    private List<SkillGroupInfo> skills;
 
     /**
      * 技能组中坐席分配策略
@@ -154,25 +158,31 @@ public class GroupInfo implements Serializable {
     /**
      * 最大空闲时长
      */
+    @Builder.Default
     private Integer maxWaitTime = 0;
 
     /**
      * 最大空闲时长
      */
+    @Builder.Default
     private Integer maxReadyTime = 0;
 
     /**
      * 呼入总数
      */
+    @Builder.Default
     private Integer callInTotal = 0;
 
     /**
      * 呼入应答数
      */
+    @Builder.Default
     private Integer callInAnswer = 0;
 
     /**
      * 呼入最后的分配时间
      */
+    @DateTimeFormat(pattern = Constant.DATE_TIME_FORMAT)
+    @JsonFormat(pattern =  Constant.DATE_TIME_FORMAT)
     private Date lastServiceTime;
 }

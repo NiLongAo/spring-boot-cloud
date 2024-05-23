@@ -1,9 +1,12 @@
 package cn.com.tzy.springbootstartervideobasic.vo.media;
 
+import cn.com.tzy.springbootcomm.constant.Constant;
 import cn.com.tzy.springbootstartervideobasic.enums.HookType;
 import cn.hutool.core.date.DateUtil;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 import java.util.Map;
@@ -25,6 +28,8 @@ public class HookKey {
     /**
      * 过期时间
      */
+    @DateTimeFormat(pattern = Constant.DATE_TIME_FORMAT)
+    @JsonFormat(pattern =  Constant.DATE_TIME_FORMAT)
     private Date expires;
 
     public HookKey (HookType hookType,Map<String,Object> content){
