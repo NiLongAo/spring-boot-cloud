@@ -47,14 +47,14 @@ public abstract class ParentPlatformService {
      * 向上级平台注册
      */
     public void login(AgentVoInfo agentVoInfo,SipSubscribeEvent okEvent,SipSubscribeEvent errorEvent){
-        RedisService.getRegisterServerManager().putPlatform(agentVoInfo.getAgentCode(), agentVoInfo.getKeepTimeout()+ SipConstant.DELAY_TIME, Address.builder().agentCode(agentVoInfo.getAgentCode()).ip(nacosDiscoveryProperties.getIp()).port(nacosDiscoveryProperties.getPort()).build());
-        RedisService.getSipTransactionManager().delParentPlatform(agentVoInfo.getAgentCode());
+        RedisService.getRegisterServerManager().putPlatform(agentVoInfo.getAgentKey(), agentVoInfo.getKeepTimeout()+ SipConstant.DELAY_TIME, Address.builder().agentKey(agentVoInfo.getAgentKey()).ip(nacosDiscoveryProperties.getIp()).port(nacosDiscoveryProperties.getPort()).build());
+        RedisService.getSipTransactionManager().delParentPlatform(agentVoInfo.getAgentKey());
         register(agentVoInfo,ok->{
             if(okEvent != null){
                 okEvent.response(ok);
             }
         }, error->{
-            log.info("[国标级联] {}, 发起注册，失败", agentVoInfo.getAgentCode());
+            log.info("[国标级联] {}, 发起注册，失败", agentVoInfo.getAgentKey());
             if(errorEvent!=null){
                 errorEvent.response(error);
             }
@@ -63,23 +63,23 @@ public abstract class ParentPlatformService {
 
 
     private void register(AgentVoInfo agentVoInfo, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent){
-        SipTransactionInfo sipTransactionInfo = RedisService.getSipTransactionManager().findParentPlatform(agentVoInfo.getAgentCode());
+        SipTransactionInfo sipTransactionInfo = RedisService.getSipTransactionManager().findParentPlatform(agentVoInfo.getAgentKey());
         if(sipTransactionInfo == null){
             sipTransactionInfo = new SipTransactionInfo();
-            RedisService.getSipTransactionManager().putParentPlatform(agentVoInfo.getAgentCode(),sipTransactionInfo);
+            RedisService.getSipTransactionManager().putParentPlatform(agentVoInfo.getAgentKey(),sipTransactionInfo);
         }
         //如果注册三次后还未注册成功则取消注册
         if(sipTransactionInfo.getRegisterAliveReply() > 3){
             sipTransactionInfo.setRegisterAliveReply(0);
             sipTransactionInfo.setKeepAliveReply(0);
-            RedisService.getSipTransactionManager().putParentPlatform(agentVoInfo.getAgentCode(),sipTransactionInfo);
-            errorEvent.response(new EventResult<RestResultEvent>(new RestResultEvent(RespCode.CODE_2.getValue(),String.format("[国标级联]：%s, 平台注册三次尚未成功则放弃", agentVoInfo.getAgentCode()))));
+            RedisService.getSipTransactionManager().putParentPlatform(agentVoInfo.getAgentKey(),sipTransactionInfo);
+            errorEvent.response(new EventResult<RestResultEvent>(new RestResultEvent(RespCode.CODE_2.getValue(),String.format("[国标级联]：%s, 平台注册三次尚未成功则放弃", agentVoInfo.getAgentKey()))));
             offline(agentVoInfo);
             return;
         }
         sipTransactionInfo.setKeepAliveReply(0);
         sipTransactionInfo.setRegisterAliveReply(sipTransactionInfo.getRegisterAliveReply() +1);
-        RedisService.getSipTransactionManager().putParentPlatform(agentVoInfo.getAgentCode(),sipTransactionInfo);
+        RedisService.getSipTransactionManager().putParentPlatform(agentVoInfo.getAgentKey(),sipTransactionInfo);
         try {
             sipCommanderForPlatform.register(sipServer, agentVoInfo,null, true, ok->{
                 if(okEvent !=null){
@@ -106,7 +106,7 @@ public abstract class ParentPlatformService {
                     okEvent.response(ok);
                 }
             }), (eventResult)->{
-                log.info("[国标级联] {}, 发起注销，失败", parentPlatformVo.getAgentCode());
+                log.info("[国标级联] {}, 发起注销，失败", parentPlatformVo.getAgentKey());
                 if(errorEvent != null){
                     errorEvent.response(eventResult);
                 }
@@ -118,10 +118,10 @@ public abstract class ParentPlatformService {
     }
 
     public void online(AgentVoInfo agentVoInfo, SipTransactionInfo sipTransactionInfo){
-        log.info("[国标级联]：{}, 平台上线", agentVoInfo.getAgentCode());
+        log.info("[国标级联]：{}, 平台上线", agentVoInfo.getAgentKey());
         if(sipTransactionInfo != null){
             SipTransactionManager sipTransactionManager = RedisService.getSipTransactionManager();
-            sipTransactionManager.putParentPlatform(agentVoInfo.getAgentCode(),sipTransactionInfo);
+            sipTransactionManager.putParentPlatform(agentVoInfo.getAgentKey(),sipTransactionInfo);
         }
         //设置上线
         FsService.getAgentService().online(agentVoInfo, null);
@@ -129,24 +129,24 @@ public abstract class ParentPlatformService {
         this.registerTask(agentVoInfo,false);
         //添加保活任务
         this.keepaliveTask(agentVoInfo,false);
-        RedisService.getRegisterServerManager().putPlatform(agentVoInfo.getAgentCode(), agentVoInfo.getKeepTimeout()+SipConstant.DELAY_TIME, Address.builder().agentCode(agentVoInfo.getAgentCode()).ip(nacosDiscoveryProperties.getIp()).port(nacosDiscoveryProperties.getPort()).build());
+        RedisService.getRegisterServerManager().putPlatform(agentVoInfo.getAgentKey(), agentVoInfo.getKeepTimeout()+SipConstant.DELAY_TIME, Address.builder().agentKey(agentVoInfo.getAgentKey()).ip(nacosDiscoveryProperties.getIp()).port(nacosDiscoveryProperties.getPort()).build());
         RedisService.getAgentNotifySubscribeManager().addPresenceSubscribe(agentVoInfo);
     }
 
     public void offline(AgentVoInfo agentVoInfo){
-        log.info("[平台离线]：{}", agentVoInfo.getAgentCode());
+        log.info("[平台离线]：{}", agentVoInfo.getAgentKey());
         RedisService.getAgentNotifySubscribeManager().removePresenceSubscribe(agentVoInfo);
-        RedisService.getRegisterServerManager().delPlatform(agentVoInfo.getAgentCode());
+        RedisService.getRegisterServerManager().delPlatform(agentVoInfo.getAgentKey());
         // 停止所有推流
-        log.info("[平台离线] {}, 停止所有推流", agentVoInfo.getAgentCode());
-        stopAllPush(agentVoInfo.getAgentCode());
+        log.info("[平台离线] {}, 停止所有推流", agentVoInfo.getAgentKey());
+        stopAllPush(agentVoInfo.getAgentKey());
         //清除注册定时
         this.registerTask(agentVoInfo,true);
         //agentInfo
         this.keepaliveTask(agentVoInfo,true);
         // 停止目录订阅回复
-        log.info("[平台离线] {}, 停止订阅回复", agentVoInfo.getAgentCode());
-        FsService.getAgentService().offline(agentVoInfo.getAgentCode());
+        log.info("[平台离线] {}, 停止订阅回复", agentVoInfo.getAgentKey());
+        FsService.getAgentService().offline(agentVoInfo.getAgentKey());
     }
 
     /**
@@ -154,7 +154,7 @@ public abstract class ParentPlatformService {
      */
     private void registerTask(AgentVoInfo agentVoInfo, boolean isClose){
         // 设置超时重发， 后续从底层支持消息重发
-        String key = SipConstant.PLATFORM_REGISTER_TASK_CATCH_PREFIX + agentVoInfo.getAgentCode();
+        String key = SipConstant.PLATFORM_REGISTER_TASK_CATCH_PREFIX + agentVoInfo.getAgentKey();
         if(isClose){
             dynamicTask.stop(key);
             return;
@@ -164,7 +164,7 @@ public abstract class ParentPlatformService {
         }
         int expires= Math.max(agentVoInfo.getExpires(),20)-SipConstant.DELAY_TIME;
         dynamicTask.startCron(key, expires, expires,()->{
-            log.info("[国标级联] 平台：{}注册即将到期，开始续订", agentVoInfo.getAgentCode());
+            log.info("[国标级联] 平台：{}注册即将到期，开始续订", agentVoInfo.getAgentKey());
             register(agentVoInfo, null,error -> {
                 log.error(String.format("[国标级联] 平台：{}注册即将到期，开始续订失败 code : %s,msg : %s",error.getStatusCode(),error.getMsg()));
                 dynamicTask.stop(key);
@@ -176,7 +176,7 @@ public abstract class ParentPlatformService {
      * 上级平台保活任务（到保活时间后进行保活）
      */
     private void keepaliveTask(AgentVoInfo agentVoInfo, boolean isClose){
-        final String keepaliveTaskKey = SipConstant.PLATFORM_KEEPALIVE_PREFIX + agentVoInfo.getAgentCode();
+        final String keepaliveTaskKey = SipConstant.PLATFORM_KEEPALIVE_PREFIX + agentVoInfo.getAgentKey();
         if(isClose){
             dynamicTask.stop(keepaliveTaskKey);
             return;
@@ -184,30 +184,30 @@ public abstract class ParentPlatformService {
         if (dynamicTask.isAlive(keepaliveTaskKey)) {
             return;
         }
-        log.info("[国标级联]：{}, 定时上级平台心跳保活任务", agentVoInfo.getAgentCode());
+        log.info("[国标级联]：{}, 定时上级平台心跳保活任务", agentVoInfo.getAgentKey());
         dynamicTask.startCron(keepaliveTaskKey,1, agentVoInfo.getKeepTimeout(),()->{
             try {
-                SipTransactionInfo parentPlatform = RedisService.getSipTransactionManager().findParentPlatform(agentVoInfo.getAgentCode());
+                SipTransactionInfo parentPlatform = RedisService.getSipTransactionManager().findParentPlatform(agentVoInfo.getAgentKey());
                 if(parentPlatform == null){
-                    log.error("[国标级联]：{},心跳时未发现,上级平台注册信息",agentVoInfo.getAgentCode());
+                    log.error("[国标级联]：{},心跳时未发现,上级平台注册信息",agentVoInfo.getAgentKey());
                     return;
                 }else if(parentPlatform.getKeepAliveReply() > 3){//心跳发送三次后如果还未回应则 平台下线
-                    log.error("[国标级联]：{},心跳发送三次后如 平台还未回应,平台下线",agentVoInfo.getAgentCode());
+                    log.error("[国标级联]：{},心跳发送三次后如 平台还未回应,平台下线",agentVoInfo.getAgentKey());
                     offline(agentVoInfo);
                     return;
                 }
                 parentPlatform.setKeepAliveReply(parentPlatform.getKeepAliveReply()+1);
-                RedisService.getSipTransactionManager().putParentPlatform(agentVoInfo.getAgentCode(),parentPlatform);
+                RedisService.getSipTransactionManager().putParentPlatform(agentVoInfo.getAgentKey(),parentPlatform);
                 sipCommanderForPlatform.keepalive(sipServer, agentVoInfo, ok->{
-                    log.info("[国标级联]：{}, 定时上级平台心跳保活任务成功", agentVoInfo.getAgentCode());
+                    log.info("[国标级联]：{}, 定时上级平台心跳保活任务成功", agentVoInfo.getAgentKey());
                     if(parentPlatform.getKeepAliveReply() > 1){
                         parentPlatform.setKeepAliveReply(0);
-                        RedisService.getSipTransactionManager().putParentPlatform(agentVoInfo.getAgentCode(),parentPlatform);
+                        RedisService.getSipTransactionManager().putParentPlatform(agentVoInfo.getAgentKey(),parentPlatform);
                     }
-                    RedisService.getRegisterServerManager().putPlatform(agentVoInfo.getAgentCode(),agentVoInfo.getKeepTimeout()+SipConstant.DELAY_TIME, Address.builder().agentCode(agentVoInfo.getAgentCode()).ip(nacosDiscoveryProperties.getIp()).port(nacosDiscoveryProperties.getPort()).build());
+                    RedisService.getRegisterServerManager().putPlatform(agentVoInfo.getAgentKey(),agentVoInfo.getKeepTimeout()+SipConstant.DELAY_TIME, Address.builder().agentKey(agentVoInfo.getAgentKey()).ip(nacosDiscoveryProperties.getIp()).port(nacosDiscoveryProperties.getPort()).build());
                 },error->{
                     register(agentVoInfo,null, errorEvent -> {
-                        log.info("[国标级联] {}，心跳超时后再次发起注册仍然失败，开始定时发起注册，间隔为1分钟", agentVoInfo.getAgentCode());
+                        log.info("[国标级联] {}，心跳超时后再次发起注册仍然失败，开始定时发起注册，间隔为1分钟", agentVoInfo.getAgentKey());
                         dynamicTask.stop(keepaliveTaskKey);
                     });
                 });
@@ -226,7 +226,7 @@ public abstract class ParentPlatformService {
         if (sendRtpItems != null && !sendRtpItems.isEmpty()) {
             for (SendRtp sendRtpItem : sendRtpItems) {
                 ssrcConfigManager.releaseSsrc(sendRtpItem.getMediaServerId(),sendRtpItem.getSsrc());
-                sendRtpManager.deleteSendRTPServer(sendRtpItem.getAgentCode(), null, null);
+                sendRtpManager.deleteSendRTPServer(sendRtpItem.getAgentKey(), null, null);
                 MediaServerVo mediaServerVo = mediaServerVoService.findOnLineMediaServerId(sendRtpItem.getMediaServerId());
                 MediaRestResult mediaRestResult = MediaClient.stopSendRtp(mediaServerVo, "__defaultVhost__", sendRtpItem.getApp(), sendRtpItem.getStreamId(), sendRtpItem.getSsrc());
                 if (mediaRestResult == null) {

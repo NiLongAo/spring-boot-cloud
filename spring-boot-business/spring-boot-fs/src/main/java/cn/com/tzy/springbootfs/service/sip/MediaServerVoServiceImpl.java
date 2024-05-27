@@ -79,7 +79,7 @@ public class MediaServerVoServiceImpl implements MediaServerVoService {
             if (videoProperties.getUseClientOnLineZlm() && ObjectUtils.isEmpty(mediaServerItem)) {
                 mediaServerItem = findMediaServerForMinimumLoad();
                 agentVoInfo.setMediaServerId(mediaServerItem.getId());
-                AgentVoInfo manager = RedisService.getAgentInfoManager().get(agentVoInfo.getAgentCode());
+                AgentVoInfo manager = RedisService.getAgentInfoManager().get(agentVoInfo.getAgentKey());
                 if(manager != null){
                     manager.setMediaServerId(mediaServerItem.getId());
                     RedisService.getAgentInfoManager().put(manager);

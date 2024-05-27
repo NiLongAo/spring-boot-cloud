@@ -67,14 +67,14 @@ public class AgentInfoManager {
         RedisUtils.del(getCallPhoneKey(callId));
     }
 
-    public void putAgentCode(String uuid,String agentCode){
-        if(uuid == null || agentCode == null){
+    public void putAgentKey(String uuid, String agentKey){
+        if(uuid == null || agentKey == null){
             return;
         }
-        RedisUtils.set(getAgentCodeKey(uuid),agentCode,-1L);
+        RedisUtils.set(getAgentKeyKey(uuid),agentKey,-1L);
     }
-    public String getAgentCode(String uuid) {
-        List<String> scan = RedisUtils.keys(getAgentCodeKey(uuid));
+    public String getAgentKey(String uuid) {
+        List<String> scan = RedisUtils.keys(getAgentKeyKey(uuid));
         if (!scan.isEmpty()) {
             return (String) RedisUtils.get(scan.get(0));
         }else {
@@ -82,11 +82,11 @@ public class AgentInfoManager {
         }
     }
 
-    public void delAgentCode(String uuid){
+    public void delAgentKey(String uuid){
         if(StringUtils.isEmpty(uuid)){
             uuid = "*";
         }
-        for (String key : RedisUtils.keys(getAgentCodeKey(uuid))) {
+        for (String key : RedisUtils.keys(getAgentKeyKey(uuid))) {
             RedisUtils.del(key);
         }
     }
@@ -99,7 +99,7 @@ public class AgentInfoManager {
         return String.format("%s%s",FS_CALL_PHONE,agentKey);
     }
 
-    private String getAgentCodeKey(String uuid){
+    private String getAgentKeyKey(String uuid){
         return String.format("%s%s",FS_SOCKET_AGENT_CODE,uuid);
     }
 }

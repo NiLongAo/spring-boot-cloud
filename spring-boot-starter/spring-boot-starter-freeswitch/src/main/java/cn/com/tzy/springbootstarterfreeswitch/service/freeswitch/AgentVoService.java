@@ -29,6 +29,10 @@ import java.util.List;
 public abstract class AgentVoService {
 
     public abstract AgentVoInfo getAgentBySip(String sip);
+
+    public abstract AgentVoInfo getAgentByKey(String agentKey);
+
+    public abstract AgentVoInfo getAgentByCompanyCode(String company,String agentCode);
     public abstract AgentVoInfo findAgentId(String id);
     public abstract void save(AgentVoInfo entity);
     public abstract void updateStatus(Long id, boolean b);
@@ -50,28 +54,28 @@ public abstract class AgentVoService {
         SipTransactionManager sipTransactionManager = RedisService.getSipTransactionManager();
         InviteStreamManager inviteStreamManager = RedisService.getInviteStreamManager();
 
-        log.info("[设备上线] agentInfo：{}->{}", agentVoInfo.getAgentCode(), agentVoInfo.getRemoteAddress());
+        log.info("[设备上线] agentInfo：{}->{}", agentVoInfo.getAgentKey(), agentVoInfo.getRemoteAddress());
         if ( null  == agentVoInfo.getKeepTimeout() || 0 == agentVoInfo.getKeepTimeout()) {
             // 默认心跳间隔60
             agentVoInfo.setKeepTimeout(60);
         }
         if (sipTransactionInfo != null) {
-            sipTransactionManager.putDevice(agentVoInfo.getAgentCode(),sipTransactionInfo);
+            sipTransactionManager.putDevice(agentVoInfo.getAgentKey(),sipTransactionInfo);
         }
         agentVoInfo.setKeepaliveTime(new Date());
-        AgentVoInfo agentVoGb = this.findAgentId(agentVoInfo.getAgentCode());
+        AgentVoInfo agentVoGb = this.findAgentId(String.valueOf(agentVoInfo.getId()));
         //缓存设备注册服务
         if(agentVoGb == null){
             agentVoInfo.setState(ConstEnum.Flag.YES.getValue());
             agentVoInfo.setAgentOnline(ConstEnum.Flag.YES.getValue());
             agentVoInfo.setAgentState(AgentStateEnum.LOGIN);
             agentVoInfo.setRegisterTime(new Date());
-            log.info("[设备上线,首次注册]: {}，查询设备信息以及通道信息", agentVoInfo.getAgentCode());
+            log.info("[设备上线,首次注册]: {}，查询设备信息以及通道信息", agentVoInfo.getAgentKey());
             this.save(agentVoInfo);
         }else {
-            inviteStreamManager.clearInviteInfo(agentVoInfo.getAgentCode());
+            inviteStreamManager.clearInviteInfo(agentVoInfo.getAgentKey());
             if(agentVoInfo.getAgentOnline() == ConstEnum.Flag.NO.getValue()){
-                log.info("[设备上线]: {}，查询设备信息以及通道信息", agentVoInfo.getAgentCode());
+                log.info("[设备上线]: {}，查询设备信息以及通道信息", agentVoInfo.getAgentKey());
                 agentVoInfo.setState(ConstEnum.Flag.YES.getValue());
                 agentVoInfo.setAgentOnline(ConstEnum.Flag.YES.getValue());
                 agentVoInfo.setAgentState(AgentStateEnum.LOGIN);
@@ -83,45 +87,45 @@ public abstract class AgentVoService {
         }
         if(sipTransactionInfo != null){
             //设置设备过期任务
-            String key = String.format("%s_%s", SipConstant.REGISTER_EXPIRE_TASK_KEY_PREFIX, agentVoInfo.getAgentCode());
-            dynamicTask.startDelay(key, agentVoInfo.getKeepTimeout()+ SipConstant.DELAY_TIME,()->offline(agentVoInfo.getAgentCode()));
-            RedisService.getRegisterServerManager().putDevice(agentVoInfo.getAgentCode(), agentVoInfo.getKeepTimeout()+ SipConstant.DELAY_TIME , Address.builder().agentCode(agentVoInfo.getAgentCode()).ip(nacosDiscoveryProperties.getIp()).port(nacosDiscoveryProperties.getPort()).build());
+            String key = String.format("%s_%s", SipConstant.REGISTER_EXPIRE_TASK_KEY_PREFIX, agentVoInfo.getAgentKey());
+            dynamicTask.startDelay(key, agentVoInfo.getKeepTimeout()+ SipConstant.DELAY_TIME,()->offline(agentVoInfo.getAgentKey()));
+            RedisService.getRegisterServerManager().putDevice(agentVoInfo.getAgentKey(), agentVoInfo.getKeepTimeout()+ SipConstant.DELAY_TIME , Address.builder().agentKey(agentVoInfo.getAgentKey()).ip(nacosDiscoveryProperties.getIp()).port(nacosDiscoveryProperties.getPort()).build());
         }
         RedisService.getAgentInfoManager().put(agentVoInfo);
     }
 
     /**
      * 设备下线
-     * @param agentCode
+     * @param agentKey
      */
-    public void offline(String agentCode) {
+    public void offline(String agentKey) {
         DynamicTask dynamicTask = SpringUtil.getBean(DynamicTask.class);
         MediaServerVoService mediaServerVoService = SipService.getMediaServerService();
         SsrcTransactionManager ssrcTransactionManager = RedisService.getSsrcTransactionManager();
         SsrcConfigManager ssrcConfigManager = RedisService.getSsrcConfigManager();
-        log.info("[设备下线]， device：{}", agentCode);
-        AgentVoInfo agentVoInfo = this.getAgentBySip(agentCode);
+        log.info("[设备下线]， device：{}", agentKey);
+        AgentVoInfo agentVoInfo = this.getAgentByKey(agentKey);
         if (agentVoInfo == null) {
-            log.warn("[设备下线]：未获取设备信息 deviceId ：{}",agentCode);
+            log.warn("[设备下线]：未获取设备信息 deviceId ：{}",agentKey);
             return;
         }
-        String key = String.format("%s_%s", SipConstant.REGISTER_EXPIRE_TASK_KEY_PREFIX, agentVoInfo.getAgentCode());
+        String key = String.format("%s_%s", SipConstant.REGISTER_EXPIRE_TASK_KEY_PREFIX, agentVoInfo.getAgentKey());
         dynamicTask.stop(key);
         this.updateStatus(agentVoInfo.getId(),false);
         // 离线释放所有ssrc
-        List<SsrcTransaction> ssrcTransactions = ssrcTransactionManager.getParamAll(agentCode, null, null, null);
+        List<SsrcTransaction> ssrcTransactions = ssrcTransactionManager.getParamAll(agentKey, null, null, null);
         if (ssrcTransactions != null && ssrcTransactions.size() > 0) {
             for (SsrcTransaction ssrcTransaction : ssrcTransactions) {
                 MediaServerVo mediaServerVo = mediaServerVoService.findOnLineMediaServerId(ssrcTransaction.getMediaServerId());
                 if(mediaServerVo != null){
                     ssrcConfigManager.releaseSsrc(ssrcTransaction.getMediaServerId(), ssrcTransaction.getSsrc());
                     MediaClient.closeRtpServer(mediaServerVo, ssrcTransaction.getStream());
-                    ssrcTransactionManager.remove(agentCode, ssrcTransaction.getStream());
+                    ssrcTransactionManager.remove(agentKey, ssrcTransaction.getStream());
                 }
             }
         }
-        RedisService.getRegisterServerManager().delDevice(agentCode);
-        RedisService.getAgentInfoManager().del(agentCode);
+        RedisService.getRegisterServerManager().delDevice(agentKey);
+        RedisService.getAgentInfoManager().del(agentKey);
     }
 
 }

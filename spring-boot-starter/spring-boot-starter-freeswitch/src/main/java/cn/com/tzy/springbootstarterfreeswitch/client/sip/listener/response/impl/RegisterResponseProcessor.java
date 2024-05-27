@@ -42,22 +42,22 @@ public class RegisterResponseProcessor extends AbstractSipResponseEvent {
             log.info(String.format("[国标级联]未找到callId： %s 的注册/注销平台id", callId ));
             return;
         }
-        AgentVoInfo agentVoInfo = RedisService.getAgentInfoManager().get(platformRegisterInfo.getAgentCode());
+        AgentVoInfo agentVoInfo = RedisService.getAgentInfoManager().get(platformRegisterInfo.getAgentKey());
         String action = platformRegisterInfo.isRegister() ? "注册" : "注销";
-        log.info(String.format("[国标级联]%s %S响应,%s ", action, response.getStatusCode(), platformRegisterInfo.getAgentCode() ));
+        log.info(String.format("[国标级联]%s %S响应,%s ", action, response.getStatusCode(), platformRegisterInfo.getAgentKey() ));
         if (agentVoInfo == null) {
-            log.warn(String.format("[国标级联]收到 %s %s的%S请求, 但是平台信息未查询到 !!!", platformRegisterInfo.getAgentCode(), action, response.getStatusCode()));
+            log.warn(String.format("[国标级联]收到 %s %s的%S请求, 但是平台信息未查询到 !!!", platformRegisterInfo.getAgentKey(), action, response.getStatusCode()));
             return;
         }
-        SipTransactionInfo sipTransactionInfo = RedisService.getSipTransactionManager().findParentPlatform(agentVoInfo.getAgentCode());
+        SipTransactionInfo sipTransactionInfo = RedisService.getSipTransactionManager().findParentPlatform(agentVoInfo.getAgentKey());
         if(sipTransactionInfo == null){
-            log.warn(String.format("[国标级联]收到 %s %s的%S请求, 但未获取平台注册信息 等待重新注册!!!", agentVoInfo.getAgentCode(), action, response.getStatusCode()));
+            log.warn(String.format("[国标级联]收到 %s %s的%S请求, 但未获取平台注册信息 等待重新注册!!!", agentVoInfo.getAgentKey(), action, response.getStatusCode()));
             return;
         }
         if (response.getStatusCode() == Response.UNAUTHORIZED) {
             WWWAuthenticateHeader www = (WWWAuthenticateHeader)response.getHeader(WWWAuthenticateHeader.NAME);
             sipTransactionInfo.sipTransactionInfo(response);
-            RedisService.getSipTransactionManager().putParentPlatform(agentVoInfo.getAgentCode(),sipTransactionInfo);
+            RedisService.getSipTransactionManager().putParentPlatform(agentVoInfo.getAgentKey(),sipTransactionInfo);
             try {
                 sipCommanderForPlatform.register(sipServer, agentVoInfo, www,  platformRegisterInfo.isRegister(),null,null);
             } catch (SipException | InvalidArgumentException | ParseException e) {

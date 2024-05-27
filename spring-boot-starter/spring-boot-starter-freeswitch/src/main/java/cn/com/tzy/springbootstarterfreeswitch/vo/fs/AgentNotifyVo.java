@@ -29,7 +29,7 @@ public class AgentNotifyVo implements Serializable {
     /**
      * 设备国标编号
      */
-    private String agentCode;
+    private String agentKey;
 
     public enum TypeEnum {
         PRESENCE(1, "presence"),

@@ -47,7 +47,7 @@ public class MediaClient {
      * @param ip 推流ip
      * @param port 推流端口
      * @param ssrc 推流唯一标识
-     * @param agentCode 客服code
+     * @param agentKey 客服key
      * @param app appId
      * @param streamId streamId
      * @param tcp 是否为tcp
@@ -64,7 +64,7 @@ public class MediaClient {
             String ip,
             int port,
             String ssrc,
-            String agentCode,
+            String agentKey,
             String app,
             String streamId,
             Boolean tcp,
@@ -84,7 +84,7 @@ public class MediaClient {
                 .ip(ip)
                 .port(port)
                 .ssrc(ssrc)
-                .agentCode(agentCode)
+                .agentKey(agentKey)
                 .app(app)
                 .streamId(streamId)
                 .status(0)

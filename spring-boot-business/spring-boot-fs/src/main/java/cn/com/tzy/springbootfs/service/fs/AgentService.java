@@ -16,7 +16,7 @@ public interface AgentService extends IService<Agent>{
     Agent findUserId(Long userId);
     UserModel findUserModel(String agentCode);
     RestResult<?> pushPath(String agentCode, Integer status);
-    void login(String agentCode,ResultEvent event);
+    void login(String agentKey,ResultEvent event);
     RestResult<?> logout(String agentCode);
     public SSRCInfo callPhone(SipServer sipServer, MediaServerVo mediaServerVo, AgentVoInfo agentBySip,String caller, String ssrc, InviteErrorCallback<Object> callback);
 

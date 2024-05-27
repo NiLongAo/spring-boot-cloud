@@ -23,18 +23,18 @@ public class SsrcTransactionManager {
     /**
      * 添加一个点播/回放的事务信息
      * 后续可以通过流Id/callID
-     * @param agentCode 设备ID
+     * @param agentKey 设备ID
      * @param callId 一次请求的CallID
      * @param stream 流名称
      * @param mediaServerId 所使用的流媒体ID
      * @param response 回复
      */
-    public void put(String agentCode, String callId, String app, String stream, String ssrc, String mediaServerId, SIPMessage response, VideoStreamType type){
-        put(agentCode,callId,false,false,app,stream,ssrc,mediaServerId,response,type);
+    public void put(String agentKey, String callId, String app, String stream, String ssrc, String mediaServerId, SIPMessage response, VideoStreamType type){
+        put(agentKey,callId,false,false,app,stream,ssrc,mediaServerId,response,type);
     }
-    public void put(String agentCode, String callId,boolean onPush,boolean onVideo, String app, String stream, String ssrc, String mediaServerId, SIPMessage response, VideoStreamType type){
+    public void put(String agentKey, String callId,boolean onPush,boolean onVideo, String app, String stream, String ssrc, String mediaServerId, SIPMessage response, VideoStreamType type){
         SsrcTransaction ssrcTransaction = new SsrcTransaction();
-        ssrcTransaction.setAgentCode(agentCode);
+        ssrcTransaction.setAgentKey(agentKey);
         ssrcTransaction.setStream(app);
         ssrcTransaction.setStream(stream);
         ssrcTransaction.setOnVideo(onVideo);
@@ -44,18 +44,18 @@ public class SsrcTransactionManager {
         ssrcTransaction.setSsrc(ssrc);
         ssrcTransaction.setMediaServerId(mediaServerId);
         ssrcTransaction.setType(type);
-        String key = String.format("%s:%s:%s:%s:%s",MEDIA_TRANSACTION_USED_PREFIX,agentCode,stream,type.ordinal(),callId);
+        String key = String.format("%s:%s:%s:%s:%s",MEDIA_TRANSACTION_USED_PREFIX,agentKey,stream,type.ordinal(),callId);
         RedisUtils.set(key, ssrcTransaction);
     }
 
     public void put(SsrcTransaction ssrcTransaction){
-        String key = String.format("%s:%s:%s:%s:%s",MEDIA_TRANSACTION_USED_PREFIX,ssrcTransaction.getAgentCode(),ssrcTransaction.getStream(),ssrcTransaction.getType(),ssrcTransaction.getCallId());
+        String key = String.format("%s:%s:%s:%s:%s",MEDIA_TRANSACTION_USED_PREFIX,ssrcTransaction.getAgentKey(),ssrcTransaction.getStream(),ssrcTransaction.getType(),ssrcTransaction.getCallId());
         RedisUtils.set(key, ssrcTransaction);
     }
 
-    public SsrcTransaction getParamOne(String agentCode,  String callId, String stream,VideoStreamType type){
-        if (ObjectUtils.isEmpty(agentCode)) {
-            agentCode ="*";
+    public SsrcTransaction getParamOne(String agentKey,  String callId, String stream,VideoStreamType type){
+        if (ObjectUtils.isEmpty(agentKey)) {
+            agentKey ="*";
         }
 
         if (ObjectUtils.isEmpty(callId)) {
@@ -65,7 +65,7 @@ public class SsrcTransactionManager {
             stream ="*";
         }
         String typeStr = (type != null?String.valueOf(type.ordinal()):"*");
-        String key = String.format("%s:%s:%s:%s:%s",MEDIA_TRANSACTION_USED_PREFIX,agentCode,stream,typeStr,callId);
+        String key = String.format("%s:%s:%s:%s:%s",MEDIA_TRANSACTION_USED_PREFIX,agentKey,stream,typeStr,callId);
         List<String> scanResult = RedisUtils.keys(key);
         if (scanResult.size() == 0) {
             return null;
@@ -73,9 +73,9 @@ public class SsrcTransactionManager {
         return (SsrcTransaction)RedisUtils.get(scanResult.get(0));
     }
 
-    public List<SsrcTransaction> getParamAll(String agentCode,  String callId, String stream,VideoStreamType type){
-        if (ObjectUtils.isEmpty(agentCode)) {
-            agentCode ="*";
+    public List<SsrcTransaction> getParamAll(String agentKey,  String callId, String stream,VideoStreamType type){
+        if (ObjectUtils.isEmpty(agentKey)) {
+            agentKey ="*";
         }
         if (ObjectUtils.isEmpty(callId)) {
             callId ="*";
@@ -84,7 +84,7 @@ public class SsrcTransactionManager {
             stream ="*";
         }
         String typeStr = (type != null?String.valueOf(type.ordinal()):"*");
-        String key = String.format("%s:%s:%s:%s:%s",MEDIA_TRANSACTION_USED_PREFIX,agentCode,stream,typeStr,callId);
+        String key = String.format("%s:%s:%s:%s:%s",MEDIA_TRANSACTION_USED_PREFIX,agentKey,stream,typeStr,callId);
         List<String> scanResult = RedisUtils.keys(key);
         if (scanResult.size() == 0) {
             return null;
@@ -95,15 +95,15 @@ public class SsrcTransactionManager {
         }
         return result;
     }
-    public void remove(String agentCode, String stream) {
-        this.remove(agentCode,stream,null,null);
+    public void remove(String agentKey, String stream) {
+        this.remove(agentKey,stream,null,null);
     }
 
-    public void remove(String agentCode, String stream,VideoStreamType type) {
-        this.remove(agentCode,stream,null,type);
+    public void remove(String agentKey, String stream,VideoStreamType type) {
+        this.remove(agentKey,stream,null,type);
     }
 
-    public void remove(String agentCode, String stream,String callId,VideoStreamType type) {
+    public void remove(String agentKey, String stream,String callId,VideoStreamType type) {
         if (ObjectUtils.isEmpty(stream)) {
             stream ="*";
         }
@@ -111,7 +111,7 @@ public class SsrcTransactionManager {
             callId ="*";
         }
         String typeStr = (type != null?String.valueOf(type.ordinal()):"*");
-        String key = String.format("%s:%s:%s:%s:%s",MEDIA_TRANSACTION_USED_PREFIX,agentCode,stream,typeStr,callId);
+        String key = String.format("%s:%s:%s:%s:%s",MEDIA_TRANSACTION_USED_PREFIX,agentKey,stream,typeStr,callId);
         List<String> scan = RedisUtils.keys(key);
         if (scan.size() > 0) {
             for (String keyStr : scan) {

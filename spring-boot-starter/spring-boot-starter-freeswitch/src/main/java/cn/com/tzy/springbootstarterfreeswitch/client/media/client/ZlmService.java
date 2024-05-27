@@ -196,7 +196,7 @@ public class ZlmService {
                 continue;
             }
 
-            AgentVoInfo agentVoInfo = agentInfoManager.get(sendRtp.getAgentCode());
+            AgentVoInfo agentVoInfo = agentInfoManager.get(sendRtp.getAgentKey());
             try {
                 sipCommanderForPlatform.streamByeCmd(sipServer, agentVoInfo,sendRtp,null,null);
             } catch (SipException | InvalidArgumentException | ParseException e) {
@@ -208,7 +208,7 @@ public class ZlmService {
             if(!ssrcTransaction.getMediaServerId().equals(mediaServerVo.getId())){
                 continue;
             }
-            AgentVoInfo agentVoInfo = agentInfoManager.get(ssrcTransaction.getAgentCode());
+            AgentVoInfo agentVoInfo = agentInfoManager.get(ssrcTransaction.getAgentKey());
             if(agentVoInfo == null){
                 continue;
             }
@@ -263,7 +263,7 @@ public class ZlmService {
                 if(delAll){
                     InviteInfo inviteInfo = inviteStreamManager.getInviteInfoByStream(null, vo.getStream());
                     if(inviteInfo != null){
-                        agentVoService.stopPlay(inviteInfo.getAgentCode());
+                        agentVoService.stopPlay(inviteInfo.getAgentKey());
                         inviteStreamManager.removeInviteInfo(inviteInfo);
                     }
                 }

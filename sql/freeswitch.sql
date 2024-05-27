@@ -182,6 +182,7 @@ CREATE TABLE fs_company (
     ivr_limit                       int unsigned NOT NULL DEFAULT '0' COMMENT 'IVR通道数',
     agent_limit                     int unsigned NOT NULL DEFAULT '0' COMMENT '开通坐席',
     group_limit                     int unsigned NOT NULL DEFAULT '0' COMMENT '开通技能组',
+    conference_limit                int unsigned NOT NULL DEFAULT '0' COMMENT '开通会议室上限',
     group_agent_limit               int unsigned NOT NULL DEFAULT '0' COMMENT '单技能组中坐席上限',
     record_storage                  int unsigned NOT NULL DEFAULT '0' COMMENT '录音保留天数',
     notify_url                      varchar(255)  DEFAULT '' COMMENT '话单回调通知',
@@ -196,9 +197,29 @@ CREATE TABLE fs_company (
 ) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='企业信息表';
 
 insert into fs_company(id,`name`,company_code,contact,phone,balance,bill_type,pay_type,hidden_customer,secret_type,secret_key,
-    ivr_limit,agent_limit,group_limit,group_agent_limit,record_storage,notify_url,`status`,create_user_id,create_time,
+    ivr_limit,agent_limit,group_limit,conference_limit,group_agent_limit,record_storage,notify_url,`status`,create_user_id,create_time,
     update_user_id,update_time)
-values(1,'测试企业','CSQY','admin','18789432816',100.00,1,1,0,0,12645498,10,20,20,20,7,null,3,'1',now(),'1',now());
+values(1,'测试企业','CSQY','admin','18789432816',100.00,1,1,0,0,12645498,10,20,20,20,20,7,null,3,'1',now(),'1',now());
+
+CREATE TABLE fs_company_conference (
+    id                              bigint unsigned not null auto_increment COMMENT '主键id',
+    company_id                      bigint unsigned NOT NULL DEFAULT '0' COMMENT '企业id',
+    name                            varchar(255)  NOT NULL DEFAULT '' COMMENT '会议室名',
+    code                            varchar(255)  NOT NULL DEFAULT '' COMMENT '会议室号码',
+    password                        varchar(255)  NOT NULL DEFAULT '' COMMENT '会议室密码',
+    status                          int unsigned NOT NULL DEFAULT '0' COMMENT '使用状态(1.未使用 1.使用中)',
+    enable                          int unsigned NOT NULL DEFAULT '0' COMMENT '启用状态(0.禁用 1.启用)',
+    create_user_id                  bigint unsigned comment '创建人编号',
+    create_time                     datetime  NOT NULL COMMENT '创建时间',
+    update_user_id                  bigint unsigned comment '修改人编号',
+    update_time                     datetime  NOT NULL COMMENT '更新时间',
+    PRIMARY KEY (id) USING BTREE,
+    UNIQUE KEY company_name (name) USING BTREE,
+    UNIQUE KEY company_code (code) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='企业会议室表';
+
+insert into fs_company_conference(id,company_id,name,`code`,password,status,enable,create_user_id,create_time,update_user_id,update_time)
+values(1,1,'测试会议室','3001','123456',1,1,'1',now(),'1',now());
 
 CREATE TABLE fs_company_display (
     id                              bigint unsigned not null auto_increment COMMENT '主键id',
@@ -253,8 +274,8 @@ CREATE TABLE fs_company_phone (
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='企业号码';
 insert into fs_company_phone(id,company_id,phone,`type`,`status`,create_user_id,create_time,update_user_id,update_time)
 values (1,1,'18789432816',1,1,1,now(),1,now())
-     ,(2,1,'18789432816',2,1,1,now(),1,now())
-     ,(3,1,'18789432816',3,1,1,now(),1,now())
+     ,(2,1,'18789432826',2,1,1,now(),1,now())
+     ,(3,1,'18789432836',3,1,1,now(),1,now())
 ;
 
 CREATE TABLE fs_group (
@@ -430,7 +451,6 @@ CREATE TABLE fs_agent (
     agent_code                          varchar(20)  NOT NULL DEFAULT '' COMMENT '坐席分机号',
     agent_type                          int unsigned NOT NULL DEFAULT '2' COMMENT '座席类型：1:普通座席；2：班长',
     passwd                              varchar(255)  NOT NULL DEFAULT '' COMMENT '座席密码',
-    sip_phone                           varchar(255)  NOT NULL DEFAULT '' COMMENT '绑定的电话号码',
     record                              int unsigned NOT NULL DEFAULT '0' COMMENT '是否录音 0 no 1 yes',
     group_id                            bigint unsigned NOT NULL DEFAULT '0' COMMENT '座席主要技能组  不能为空 必填项',
     after_interval                      int unsigned NOT NULL DEFAULT '5' COMMENT '话后自动空闲间隔时长',
@@ -452,22 +472,17 @@ CREATE TABLE fs_agent (
     update_user_id                      bigint unsigned comment '修改人编号',
     update_time                         datetime  NOT NULL COMMENT '更新时间',
     PRIMARY KEY (id) USING BTREE,
-    UNIQUE KEY idx_agent_key (agent_key,company_id) USING BTREE
+    UNIQUE KEY idx_agent_key (agent_key) USING BTREE,
+    UNIQUE KEY idx_agent_code_company (agent_code,company_id) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb3 COMMENT='座席工号表';
 
 
-insert into fs_agent(id,company_id,agent_id,agent_key,agent_name,agent_code,agent_type,passwd,sip_phone,record,group_id,after_interval,
-    display,ring_time,`host`,`state`,`status`,register_time,renew_time,keepalive_time,keep_timeout,expires,stream_mode,
+insert into fs_agent(id,company_id,agent_id,agent_key,agent_name,agent_code,agent_type,passwd,record,group_id,after_interval,
+    ring_time,`host`,`state`,`status`,register_time,renew_time,keepalive_time,keep_timeout,expires,stream_mode,
     transport,charset,create_user_id,create_time,update_user_id,update_time)
-values(1,1,1001,1001,'坐席1001','1001',1,'123456','1001',1,1,60,'1001',10,'0.0.0.0',0,1,null,null,null,30,3600,0,1,2,'1',now(),'1',now())
-     ,(2,1,1002,1002,'坐席1002','1002',1,'123456','1002',1,1,60,'1002',10,'0.0.0.0',0,1,null,null,null,30,3600,0,1,2,'1',now(),'1',now())
-     ,(3,1,1010,1010,'坐席1010','1010',1,'123456','1010',1,1,60,'1010',10,'0.0.0.0',0,1,null,null,null,30,3600,0,1,2,'1',now(),'1',now())
-     ,(4,1,1011,1011,'坐席1011','1011',1,'123456','1011',1,1,60,'1011',10,'0.0.0.0',0,1,null,null,null,30,3600,0,1,2,'1',now(),'1',now())
-     ,(5,1,1012,1012,'坐席1012','1012',1,'123456','1012',1,1,60,'1012',10,'0.0.0.0',0,1,null,null,null,30,3600,0,1,2,'1',now(),'1',now())
-     ,(6,1,6001,6001,'坐席6001','6001',1,'123456','6001',1,1,60,'6001',10,'0.0.0.0',0,1,null,null,null,30,3600,0,1,2,'1',now(),'1',now())
-     ,(7,1,6002,6002,'坐席6002','6002',1,'123456','6002',1,1,60,'6002',10,'0.0.0.0',0,1,null,null,null,30,3600,0,1,2,'1',now(),'1',now())
-     ,(8,1,10001,10001,'坐席10001','10001',1,'123456','10001',1,1,60,'10001',10,'0.0.0.0',0,1,null,null,null,30,3600,0,1,2,'1',now(),'1',now())
-     ,(9,1,10002,10002,'坐席10002','10002',1,'123456','10002',1,1,60,'10002',10,'0.0.0.0',0,1,null,null,null,30,3600,0,1,2,'1',now(),'1',now())
+values(1,1,'1001','1001_CSQY','坐席1001','1001',1,'123456',1,1,60,10,'0.0.0.0',0,1,null,null,null,30,3600,0,1,2,'1',now(),'1',now())
+     ,(2,1,'1002','1002_CSQY','坐席1002','1002',1,'123456',1,1,60,10,'0.0.0.0',0,1,null,null,null,30,3600,0,1,2,'1',now(),'1',now())
+     ,(3,1,'1010','1010_CSQY','坐席1010','1010',1,'123456',1,1,60,10,'0.0.0.0',0,1,null,null,null,30,3600,0,1,2,'1',now(),'1',now())
 ;
 CREATE TABLE fs_user_agent (
     id                                  bigint unsigned not null auto_increment COMMENT '主键id',
@@ -499,17 +514,10 @@ CREATE TABLE fs_agent_group (
     UNIQUE KEY idx_agent_group_agent_group (group_id,agent_id) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='坐席技能组表';
 insert into fs_agent_group(id,company_id,agent_id,agent_key,agent_type,group_id,`status`,create_user_id,create_time,update_user_id,update_time)
-VALUES(1,1,1,'1001',1,1,1,1, '2024-05-16 16:55:53', 1, '2024-05-16 16:55:56')
-,(2,1,2,'1002',1,1,1,1, '2024-05-16 16:55:53', 1, '2024-05-16 16:55:56')
-,(3,1,3,'1010',1,1,1,1, '2024-05-16 16:55:53', 1, '2024-05-16 16:55:56')
-,(4,1,4,'1011',1,1,1,1, '2024-05-16 16:55:53', 1, '2024-05-16 16:55:56')
-,(5,1,5,'1012',1,1,1,1, '2024-05-16 16:55:53', 1, '2024-05-16 16:55:56')
-,(6,1,6,'6001',1,1,1,1, '2024-05-16 16:55:53', 1, '2024-05-16 16:55:56')
-,(7,1,7,'6002',1,1,1,1, '2024-05-16 16:55:53', 1, '2024-05-16 16:55:56')
-,(8,1,8,'10001',1,1,1,1, '2024-05-16 16:55:53', 1, '2024-05-16 16:55:56')
-,(9,1,9,'10002',1,1,1,1, '2024-05-16 16:55:53', 1, '2024-05-16 16:55:56')
+VALUES(1,1,1,'1001_CSQY',1,1,1,1, '2024-05-16 16:55:53', 1, '2024-05-16 16:55:56')
+,(2,1,2,'1002_CSQY',1,1,1,1, '2024-05-16 16:55:53', 1, '2024-05-16 16:55:56')
+,(3,1,3,'1010_CSQY',1,1,1,1, '2024-05-16 16:55:53', 1, '2024-05-16 16:55:56')
 ;
-
 
 CREATE TABLE fs_agent_sip (
     id                                  bigint unsigned not null auto_increment COMMENT '主键id',
@@ -523,8 +531,15 @@ CREATE TABLE fs_agent_sip (
     update_user_id                      bigint unsigned comment '修改人编号',
     update_time                         datetime  NOT NULL COMMENT '更新时间',
     PRIMARY KEY (id) USING BTREE,
-    KEY idx_agent_sip_agent (agent_id) USING BTREE
+    KEY idx_agent_sip_agent (agent_id) USING BTREE,
+    UNIQUE KEY idx_sip (sip) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='sip表';
+
+insert into fs_agent_sip(id,company_id,agent_id,sip,sip_pwd,`status`,create_user_id,create_time,update_user_id,update_time)
+VALUES(1,1,1,'011001','123456',1,1, now(), 1, now())
+,(2,1,2,'011002','123456',1,1, now(), 1, now())
+,(3,1,3,'011010','123456',1,1, now(), 1, now())
+;
 
 CREATE TABLE fs_agent_state_log (
     id                                bigint unsigned not null auto_increment COMMENT '主键id',

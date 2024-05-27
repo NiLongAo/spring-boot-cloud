@@ -51,8 +51,8 @@ public class AgentInCallPhoneEvent implements EventListener<AgentInCallPhoneData
     @Override
     public void onData(SocketIOClient client, AgentInCallPhoneData data, AckRequest request){
         //主叫
-        String agentCode = RedisService.getAgentInfoManager().getAgentCode(client.getSessionId().toString());
-        AgentVoInfo agentVoInfo = RedisService.getAgentInfoManager().get(agentCode);
+        String agentKey = RedisService.getAgentInfoManager().getAgentKey(client.getSessionId().toString());
+        AgentVoInfo agentVoInfo = RedisService.getAgentInfoManager().get(agentKey);
         MediaServerVo mediaServerVo = SipService.getMediaServerService().findMediaServerForMinimumLoad(agentVoInfo);
         if (mediaServerVo == null) {
             client.sendEvent(AgentCommon.AGENT_OUT_CALL_PHONE,RestResult.result(RespCode.CODE_0.getValue(),"未获取到可用流媒体"));

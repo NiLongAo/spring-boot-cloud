@@ -1,6 +1,6 @@
 package cn.com.tzy.springbootstarterfreeswitch.client.fs.handler.event;
 
-import cn.com.tzy.springbootstarterfreeswitch.client.fs.handler.NextCommandHandler;
+import cn.com.tzy.springbootstarterfreeswitch.client.fs.handler.EventNextHandler;
 import cn.com.tzy.springbootstarterfreeswitch.model.call.CallInfo;
 import cn.com.tzy.springbootstarterfreeswitch.model.call.DeviceInfo;
 import cn.com.tzy.springbootstarterfreeswitch.redis.RedisService;
@@ -26,7 +26,7 @@ import java.util.Date;
 public class ChannelAnswerEventHandler implements EslEventHandler {
 
     @Resource
-    private NextCommandHandler nextCommandHandler;
+    private EventNextHandler eventNextHandler;
     @Override
     public void handle(String addr, EslEvent event) {
         log.info("进入事件 [设备应答处理类] CHANNEL_ANSWER");
@@ -51,7 +51,7 @@ public class ChannelAnswerEventHandler implements EslEventHandler {
             callInfo.setMediaHost(addr);
         }
         //下一波执行命令
-        nextCommandHandler.next(callInfo,event);
+        eventNextHandler.next(callInfo,event);
         RedisService.getCallInfoManager().put(callInfo);
     }
 }

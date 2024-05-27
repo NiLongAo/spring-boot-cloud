@@ -52,7 +52,7 @@ public class SIPCommanderImpl implements SIPCommander {
     public void streamByeCmd(SipServer sipServer, AgentVoInfo agentVoInfo, String stream, String callId, VideoStreamType type, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws InvalidArgumentException, SipException, ParseException, SsrcTransactionNotFoundException {
         SsrcTransactionManager ssrcTransactionManager = RedisService.getSsrcTransactionManager();
         MediaServerVoService mediaServerService = SipService.getMediaServerService();
-        SsrcTransaction ssrcTransaction = ssrcTransactionManager.getParamOne(agentVoInfo.getAgentCode(), callId, stream,type);
+        SsrcTransaction ssrcTransaction = ssrcTransactionManager.getParamOne(agentVoInfo.getAgentKey(), callId, stream,type);
         if(ssrcTransaction == null){
             log.info("[视频流停止]未找到视频流信息，设备：{}, 流ID: {}", agentVoInfo.getDeviceId(), stream);
             if(errorEvent != null){
@@ -63,16 +63,16 @@ public class SIPCommanderImpl implements SIPCommander {
         MediaServerVo mediaServerVo = mediaServerService.findOnLineMediaServerId(ssrcTransaction.getMediaServerId());
         SsrcConfigManager ssrcConfigManager = RedisService.getSsrcConfigManager();
         ssrcConfigManager.releaseSsrc(ssrcTransaction.getMediaServerId(),ssrcTransaction.getSsrc());
-        ssrcTransactionManager.remove(agentVoInfo.getAgentCode(),ssrcTransaction.getStream());
+        ssrcTransactionManager.remove(agentVoInfo.getAgentKey(),ssrcTransaction.getStream());
         SipTransactionInfo sipTransactionInfo = ssrcTransaction.getSipTransactionInfo();
         String localIp = sipServer.getLocalIp(agentVoInfo.getFsHost());
         SipConfigProperties sipConfigProperties = sipServer.getSipConfigProperties();
         //构建器
         Request request = SIPRequestProvider.builder(sipServer, null, Request.BYE,null)
-                .createSipURI(ssrcTransaction.getAgentCode(), agentVoInfo.getRemoteAddress())
+                .createSipURI(ssrcTransaction.getAgentKey(), agentVoInfo.getRemoteAddress())
                 .addViaHeader(localIp, sipConfigProperties.getPort(),TransportType.UDP.getName(), false)
-                .createFromHeader(agentVoInfo.getAgentCode(), sipConfigProperties.getIp(), sipTransactionInfo.getFromTag())
-                .createToHeader(agentVoInfo.getAgentCode(), agentVoInfo.getRemoteAddress(), sipTransactionInfo.getToTag())
+                .createFromHeader(agentVoInfo.getAgentKey(), sipConfigProperties.getIp(), sipTransactionInfo.getFromTag())
+                .createToHeader(agentVoInfo.getAgentKey(), agentVoInfo.getRemoteAddress(), sipTransactionInfo.getToTag())
                 .createCSeqHeader(RedisService.getCseqManager().getCSEQ())
                 .createCallIdHeader(null,null,sipTransactionInfo.getCallId())
                 .createUserAgentHeader()

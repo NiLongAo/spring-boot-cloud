@@ -27,7 +27,7 @@ public class SendRtpManager {
                 PLATFORM_SEND_RTP_INFO_PREFIX,
                 videoProperties.getServerId(),
                 sendRtpItem.getMediaServerId(),
-                sendRtpItem.getAgentCode(),
+                sendRtpItem.getAgentKey(),
                 sendRtpItem.getStreamId(),
                 sendRtpItem.getCallId()
         );

@@ -12,6 +12,7 @@ public class RedisService {
     public static CallInfoManager getCallInfoManager(){return SpringUtil.getBean(CallInfoManager.class);}
     public static VdnPhoneManager getVdnPhoneManager(){return SpringUtil.getBean(VdnPhoneManager.class);}
     public static CompanyInfoManager getCompanyInfoManager(){return SpringUtil.getBean(CompanyInfoManager.class);}
+    public static CompanyConferenceInfoManager getCompanyConferenceInfoManager(){return SpringUtil.getBean(CompanyConferenceInfoManager.class);}
     public static GroupInfoManager getGroupInfoManager(){return SpringUtil.getBean(GroupInfoManager.class);}
     public static AgentInfoManager getAgentInfoManager(){return SpringUtil.getBean(AgentInfoManager.class);}
     public static DeviceInfoManager getDeviceInfoManager(){return SpringUtil.getBean(DeviceInfoManager.class);}

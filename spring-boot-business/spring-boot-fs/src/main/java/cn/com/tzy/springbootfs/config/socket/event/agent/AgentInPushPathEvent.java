@@ -44,9 +44,9 @@ public class AgentInPushPathEvent implements EventListener<AgentInPushPathData> 
     @Override
     public void onData(SocketIOClient client, AgentInPushPathData data, AckRequest request) throws IOException {
         //主叫
-        String agentCode = RedisService.getAgentInfoManager().getAgentCode(client.getSessionId().toString());
+        String agentKey = RedisService.getAgentInfoManager().getAgentKey(client.getSessionId().toString());
         //获取推流地址
-        RestResult<?> result = agentService.pushPath(agentCode, data.getType());
+        RestResult<?> result = agentService.pushPath(agentKey, data.getType());
         client.sendEvent(AgentCommon.AGENT_OUT_PUSH_PATH,result);
     }
 }

@@ -17,7 +17,7 @@ public class InviteInfo {
      */
     private Long userId;
 
-    private String agentCode;
+    private String agentKey;
 
     private String stream;
 
@@ -37,9 +37,9 @@ public class InviteInfo {
 
     private StreamInfo streamInfo;
 
-    public InviteInfo(Long userId, String agentCode, String stream, SSRCInfo ssrcInfo, String receiveIp, Integer receivePort, Integer streamMode, VideoStreamType type, InviteSessionStatus status){
+    public InviteInfo(Long userId, String agentKey, String stream, SSRCInfo ssrcInfo, String receiveIp, Integer receivePort, Integer streamMode, VideoStreamType type, InviteSessionStatus status){
         this.userId = userId;
-        this.agentCode = agentCode;
+        this.agentKey = agentKey;
         this.stream = stream;
         this.ssrcInfo = ssrcInfo;
         this.receiveIp = receiveIp;

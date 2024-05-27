@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SsrcTransaction {
 
-    private String agentCode;
+    private String agentKey;
     private String callId;
     private boolean onPush;
     private boolean onVideo;

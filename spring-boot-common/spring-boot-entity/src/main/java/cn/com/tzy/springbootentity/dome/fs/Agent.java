@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import java.util.Date;
+import java.util.List;
 
 /**
     * 座席工号表
@@ -74,13 +75,6 @@ public class Agent extends LongIdEntity {
     private String passwd;
 
     /**
-     * 绑定的电话号码
-     */
-    @TableField(value = "sip_phone")
-    @ApiModelProperty(value="绑定的电话号码")
-    private String sipPhone;
-
-    /**
      * 是否录音 0 no 1 yes
      */
     @TableField(value = "record")
@@ -100,13 +94,6 @@ public class Agent extends LongIdEntity {
     @TableField(value = "after_interval")
     @ApiModelProperty(value="话后自动空闲间隔时长")
     private Integer afterInterval;
-
-    /**
-     * 主叫显号
-     */
-    @TableField(value = "display")
-    @ApiModelProperty(value="主叫显号")
-    private String display;
 
     /**
      * 振铃时长
@@ -191,4 +178,10 @@ public class Agent extends LongIdEntity {
     @TableField(value = "charset")
     @ApiModelProperty(value="字符集, 1.UTF-8 2.GB2312")
     private Integer charset;
+
+    /**
+     * 绑定的电话号码
+     */
+    @TableField(exist = false)
+    private List<String> sipPhoneList;
 }

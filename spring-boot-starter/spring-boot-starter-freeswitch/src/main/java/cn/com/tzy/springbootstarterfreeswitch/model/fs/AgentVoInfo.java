@@ -9,7 +9,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
@@ -55,10 +54,6 @@ public class AgentVoInfo implements Serializable {
      */
     private String passwd;
     /**
-     * 绑定的电话号码
-     */
-    private String sipPhone;
-    /**
      * 是否录音 0 no 1 yes
      */
     private Integer record;
@@ -70,10 +65,6 @@ public class AgentVoInfo implements Serializable {
      * 话后自动空闲间隔时长
      */
     private Integer afterInterval;
-    /**
-     * 主叫显号
-     */
-    private String display;
     /**
      * 振铃时长
      */
@@ -131,14 +122,15 @@ public class AgentVoInfo implements Serializable {
     @Builder.Default
     private Integer charset= 2;
     //-----------------以下为缓存数据---------------------------
+
+    /**
+     * 绑定的电话号码
+     */
+    private List<String> sipPhoneList;
     /**
      * 流媒体编号
      */
     private String mediaServerId;
-    /**
-     * Sip电话号码
-     */
-    private List<String> sipPhoneList;
     /**
      * 1：socket登陆
      * 2：sip登陆
@@ -283,10 +275,7 @@ public class AgentVoInfo implements Serializable {
         if (loginType == null) {
             return null;
         }
-        if(StringUtils.isNotEmpty(this.sipPhone)){
-            return this.sipPhone;
-        }
-        if(sipPhoneList == null || sipPhoneList.isEmpty()){
+        if(sipPhoneList==null || sipPhoneList.isEmpty()){
             return null;
         }
         return sipPhoneList.get(0);

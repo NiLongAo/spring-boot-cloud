@@ -19,7 +19,7 @@ public class PlatformRegisterInfo implements Serializable {
     /**
      * 平台Id
      */
-    private String agentCode;
+    private String agentKey;
 
     /**
      * 是否时注册，false为注销

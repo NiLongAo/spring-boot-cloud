@@ -8,7 +8,10 @@ import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface AgentMapper extends BaseMapper<Agent> {
-    UserModel findUserModel(@Param("agentCode") String agentCode);
 
     Agent findUserId(@Param("userId") Long userId);
+
+    UserModel findUserModel(@Param("sip") String sip);
+
+    Agent getAgentBySip(@Param("sip") String sip);
 }

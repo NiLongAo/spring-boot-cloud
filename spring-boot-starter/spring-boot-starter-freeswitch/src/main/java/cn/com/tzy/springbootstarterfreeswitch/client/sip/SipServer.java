@@ -122,7 +122,7 @@ public class SipServer {
                     , monitorIp, port);
         }
         //注册成功后加入缓存备用
-        RedisService.getRegisterServerManager().putSip(gbId, Address.builder().agentCode(gbId).ip(monitorIp).port(port).build());
+        RedisService.getRegisterServerManager().putSip(gbId, Address.builder().agentKey(gbId).ip(monitorIp).port(port).build());
     }
 
     @PreDestroy

@@ -25,6 +25,8 @@ public class UserModel extends BeanModel {
 
     /**  */
     private String domain;
+    /**  */
+    private String sip;
 
     /**  */
     private String password;

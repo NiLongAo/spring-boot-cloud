@@ -7,13 +7,14 @@ import cn.com.tzy.springbootentity.dome.fs.VdnSchedule;
 import cn.com.tzy.springbootfs.convert.fs.*;
 import cn.com.tzy.springbootfs.service.fs.*;
 import cn.com.tzy.springbootstarterfreeswitch.model.fs.*;
-import cn.com.tzy.springbootstarterfreeswitch.pool.AgentStrategy;
-import cn.com.tzy.springbootstarterfreeswitch.pool.assign.*;
-import cn.com.tzy.springbootstarterfreeswitch.pool.lineup.CustomLineupStrategy;
-import cn.com.tzy.springbootstarterfreeswitch.pool.lineup.DefaultLineupStrategy;
-import cn.com.tzy.springbootstarterfreeswitch.pool.lineup.VipLineupStrategy;
+import cn.com.tzy.springbootstarterfreeswitch.client.fs.AgentStrategy;
+import cn.com.tzy.springbootstarterfreeswitch.client.fs.assign.*;
+import cn.com.tzy.springbootstarterfreeswitch.client.fs.lineup.CustomLineupStrategy;
+import cn.com.tzy.springbootstarterfreeswitch.client.fs.lineup.DefaultLineupStrategy;
+import cn.com.tzy.springbootstarterfreeswitch.client.fs.lineup.VipLineupStrategy;
 import cn.com.tzy.springbootstarterfreeswitch.redis.RedisService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
@@ -73,6 +74,8 @@ public class CompanyRunner implements CommandLineRunner {
     private VdnPhoneService vdnPhoneService;
     @Resource
     private PlaybackService playbackService;
+    @Resource
+    private CompanyConferenceService companyConferenceService;
 
     @Override
     public void run(String... args) throws Exception {
@@ -81,6 +84,7 @@ public class CompanyRunner implements CommandLineRunner {
         RedisService.getCompanyInfoManager().delAll();
         RedisService.getVdnPhoneManager().delAll();
         RedisService.getPlaybackInfoManager().delAll();
+        RedisService.getCompanyConferenceInfoManager().delAll();
         initCompany();
     }
 
@@ -93,6 +97,8 @@ public class CompanyRunner implements CommandLineRunner {
         List<CompanyInfo> companyInfoList = CompanyConvert.INSTANCE.convertCompanyInfoList(companyList);
         Map<Long, CompanyInfo> companyIdMap = companyInfoList.stream().collect(Collectors.toMap(o->Long.parseLong(o.getId()), Function.identity()));
         //查询所需要缓存数据
+        //查询会议
+        List<CompanyConference> companyConferenceList = companyConferenceService.list(Wrappers.<CompanyConference>lambdaQuery().in(CompanyConference::getCompanyId, companyIdMap.keySet()));
         //查询网关路由相关
         List<RouteGroup> routeGroupList = routeGroupService.list();
         List<RouteGroupInfo> routeGroupInfoList = RouteGroupConvert.INSTANCE.convertRouteGroupInfoList(routeGroupList);
@@ -133,6 +139,8 @@ public class CompanyRunner implements CommandLineRunner {
         //查询企业录音回放
         List<Playback> playbackList = playbackService.list(new LambdaQueryWrapper<Playback>().in(Playback::getCompanyId, companyIdMap.keySet()));
         List<PlaybackInfo> playbackInfoList = PlaybackConvert.INSTANCE.convertPlaybackInfoList(playbackList);
+        //初始化会议
+        initCompanyConferenceInfo(companyConferenceList);
         //初始化路由网关
         initRouteGroupInfo(routeGroupInfoList);
         //初始化-缓存-技能组
@@ -160,6 +168,18 @@ public class CompanyRunner implements CommandLineRunner {
             RedisService.getPlaybackInfoManager().put(o);
         });
     }
+
+    //初始化会议
+    private void initCompanyConferenceInfo(List<CompanyConference> companyConferenceList) {
+        List<CompanyConferenceInfo> companyConferenceInfoList = CompanyConferenceConvert.INSTANCE.convertCompanyConferenceInfoList(companyConferenceList);
+        if(companyConferenceInfoList.isEmpty()){
+            return;
+        }
+        companyConferenceInfoList.forEach(o->{
+            RedisService.getCompanyConferenceInfoManager().put(o);
+        });
+    }
+
     //初始化路由网关
     private void initRouteGroupInfo(List<RouteGroupInfo> routeGroupInfoList){
         List<RouteGatewayGroup> routeGatewayGroupList = routeGatewayGroupService.list();

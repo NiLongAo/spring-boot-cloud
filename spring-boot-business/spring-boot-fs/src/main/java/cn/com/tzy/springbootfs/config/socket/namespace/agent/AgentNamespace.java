@@ -55,8 +55,8 @@ public class AgentNamespace implements NamespaceListener {
         }
         //建立客服房间
         client.joinRoom(getSocketAgentKey(agent.getAgentCode()));
-        RedisService.getAgentInfoManager().putAgentCode(client.getSessionId().toString(),agent.getAgentCode());
-        agentService.login(agent.getAgentCode(),(data)->{
+        RedisService.getAgentInfoManager().putAgentKey(client.getSessionId().toString(),agent.getAgentKey());
+        agentService.login(agent.getAgentKey(),(data)->{
             client.sendEvent(AgentCommon.AGENT_OUT_LOGIN, RestResult.result(data.getCode(),data.getMessage(),data.getData()));
         });
     }
@@ -83,9 +83,9 @@ public class AgentNamespace implements NamespaceListener {
             return;
         }
         //移除
-        client.leaveRoom(getSocketAgentKey(agent.getAgentCode()));
-        RedisService.getAgentInfoManager().delAgentCode(client.getSessionId().toString());
-        agentService.logout(agent.getAgentCode());
+        client.leaveRoom(getSocketAgentKey(agent.getAgentKey()));
+        RedisService.getAgentInfoManager().delAgentKey(client.getSessionId().toString());
+        agentService.logout(agent.getAgentKey());
     }
 
     @Override

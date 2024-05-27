@@ -24,8 +24,8 @@ public class AgentNotifySubscribeManager {
         if (agentNotifyVo == null) {
             return false;
         }
-        log.info("[添加Presence订阅] 设备{}", agentNotifyVo.getAgentCode());
-        AgentNotifyVo build = AgentNotifyVo.builder().type(AgentNotifyVo.TypeEnum.PRESENCE.getValue()).operate(AgentNotifyVo.OperateEnum.ADD.getValue()).agentCode(agentNotifyVo.getAgentCode()).build();
+        log.info("[添加Presence订阅] 设备{}", agentNotifyVo.getAgentKey());
+        AgentNotifyVo build = AgentNotifyVo.builder().type(AgentNotifyVo.TypeEnum.PRESENCE.getValue()).operate(AgentNotifyVo.OperateEnum.ADD.getValue()).agentKey(agentNotifyVo.getAgentKey()).build();
         RedisUtils.redisTemplate.convertAndSend(AGENT_NOTIFY,build);
         return true;
     }
@@ -34,8 +34,8 @@ public class AgentNotifySubscribeManager {
         if (agentNotifyVo == null) {
             return false;
         }
-        log.info("[移除Presence订阅]: {}",  agentNotifyVo.getAgentCode());
-        AgentNotifyVo build = AgentNotifyVo.builder().type(AgentNotifyVo.TypeEnum.PRESENCE.getValue()).operate(AgentNotifyVo.OperateEnum.DEL.getValue()).agentCode(agentNotifyVo.getAgentCode()).build();
+        log.info("[移除Presence订阅]: {}",  agentNotifyVo.getAgentKey());
+        AgentNotifyVo build = AgentNotifyVo.builder().type(AgentNotifyVo.TypeEnum.PRESENCE.getValue()).operate(AgentNotifyVo.OperateEnum.DEL.getValue()).agentKey(agentNotifyVo.getAgentKey()).build();
         RedisUtils.redisTemplate.convertAndSend(AGENT_NOTIFY,build);
         return true;
     }

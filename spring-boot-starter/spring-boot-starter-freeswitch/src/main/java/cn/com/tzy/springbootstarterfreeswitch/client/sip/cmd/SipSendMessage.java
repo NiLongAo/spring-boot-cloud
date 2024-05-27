@@ -28,7 +28,7 @@ public class SipSendMessage {
         CallIdHeader callIdHeader = (CallIdHeader) message.getHeader(CallIdHeader.NAME);
         handleEvent(sipServer,callIdHeader.getCallId(),okEvent,errorEvent);
         LoginTypeEnum loginType = LoginTypeEnum.getLoginType(vo.getLoginType());
-        RedisUtils.redisTemplate.convertAndSend(SipConstant.VIDEO_SEND_SIP_MESSAGE, Objects.requireNonNull(SerializationUtils.serialize(MessageTypeVo.builder().type(loginType == LoginTypeEnum.SIP?MessageTypeVo.TypeEnum.SIP.getValue():MessageTypeVo.TypeEnum.SOCKET.getValue()).agentCode(vo.getAgentCode()).message(message).build())));
+        RedisUtils.redisTemplate.convertAndSend(SipConstant.VIDEO_SEND_SIP_MESSAGE, Objects.requireNonNull(SerializationUtils.serialize(MessageTypeVo.builder().type(loginType == LoginTypeEnum.SIP?MessageTypeVo.TypeEnum.SIP.getValue():MessageTypeVo.TypeEnum.SOCKET.getValue()).agentKey(vo.getAgentKey()).message(message).build())));
     }
 
     public static void handleEvent(SipServer sipServer,String callId,SipSubscribeEvent okEvent,SipSubscribeEvent errorEvent){

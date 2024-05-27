@@ -18,7 +18,7 @@ public class MessageTypeVo implements Serializable {
     //1.设备 2.上级平台
     private Integer type;
     //国标编号
-    private String agentCode;
+    private String agentKey;
     //消息体
     private Message message;
 

@@ -12,11 +12,9 @@
     <result column="agent_code" property="agentCode" />
     <result column="agent_type" property="agentType" />
     <result column="passwd" property="passwd" />
-    <result column="sip_phone" property="sipPhone" />
     <result column="record" property="record" />
     <result column="group_id" property="groupId" />
     <result column="after_interval" property="afterInterval" />
-    <result column="display" property="display" />
     <result column="ring_time" property="ringTime" />
     <result column="host" property="host" />
     <result column="state" property="state" />
@@ -37,7 +35,7 @@
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
     id, company_id, agent_id, agent_key, agent_name, agent_code, agent_type, passwd, 
-    sip_phone, record, group_id, after_interval, display, ring_time, `host`, `state`, 
+    record, group_id, after_interval, ring_time, `host`, `state`,
     `status`, register_time, renew_time, keepalive_time, keep_timeout, expires, stream_mode, 
     transport, charset, create_user_id, create_time, update_user_id, update_time
   </sql>
@@ -47,11 +45,14 @@
       a.id as id,
       a.agent_code as name,
       a.agent_code as number,
+      b.sip as sip,
       a.passwd as password,
       1 as audio,
       1 as video,
       1 as level
-    from fs_agent a where a.agent_code =#{agentCode}
+    from fs_agent a ,fs_agent_sip b
+    where a.id=b.agent_id
+    and b.sip = #{sip}
   </select>
 
   <select id="findUserId" resultType="cn.com.tzy.springbootentity.dome.fs.Agent">
@@ -62,5 +63,13 @@
     and b.user_id = #{userId}
     order by a.create_time desc
     limit 1
+  </select>
+
+  <select id="getAgentBySip" resultType="cn.com.tzy.springbootentity.dome.fs.Agent">
+    select
+        a.*
+    from fs_agent a ,fs_agent_sip b
+    where a.id=b.agent_id
+    and b.sip = #{sip}
   </select>
 </mapper>

@@ -50,16 +50,16 @@ public class AgentNotifyHandle extends AbstractMessageListener {
             log.error("[订阅消息]：消息接收异常！");
             return;
         }
-        Address device = RedisService.getRegisterServerManager().getPlatform(event.getAgentCode());
+        Address device = RedisService.getRegisterServerManager().getPlatform(event.getAgentKey());
         if(device == null){
-            log.warn("[订阅消息]：当前设备：{}，未注册在此服务",event.getAgentCode());
+            log.warn("[订阅消息]：当前设备：{}，未注册在此服务",event.getAgentKey());
             return;
         }
         if(event.getType().equals(AgentNotifyVo.TypeEnum.PRESENCE.getValue())){
             if(event.getOperate().equals(AgentNotifyVo.OperateEnum.ADD.getValue())){
-                addPresenceSubscribe(event.getAgentCode());
+                addPresenceSubscribe(event.getAgentKey());
             }else if(event.getOperate().equals(AgentNotifyVo.OperateEnum.DEL.getValue())){
-                delPresenceSubscribe(event.getAgentCode());
+                delPresenceSubscribe(event.getAgentKey());
             }else {
                 log.error("[订阅消息]：消息操作类型错误！");
             }
@@ -68,14 +68,14 @@ public class AgentNotifyHandle extends AbstractMessageListener {
         }
     }
 
-    private void addPresenceSubscribe(String agentCode){
+    private void addPresenceSubscribe(String agentKey){
         SipServer sipServer = SpringUtil.getBean(SipServer.class);
         SIPCommanderForPlatform sipCommanderForPlatform = SpringUtil.getBean(SIPCommanderForPlatform.class);
-        AgentVoInfo agentVoInfo = RedisService.getAgentInfoManager().get(agentCode);
+        AgentVoInfo agentVoInfo = RedisService.getAgentInfoManager().get(agentKey);
         if(agentVoInfo == null){
             return;
         }
-        String key = String.format("%s%s",AGENT_NOTIFY_PRESENCE, agentVoInfo.getAgentCode());
+        String key = String.format("%s%s",AGENT_NOTIFY_PRESENCE, agentVoInfo.getAgentKey());
         if(dynamicTask.contains(key)){
             return;
         }
@@ -91,7 +91,7 @@ public class AgentNotifyHandle extends AbstractMessageListener {
                 sipRequest = sipCommanderForPlatform.presenceSubscribe(sipServer, agentVoInfo, request, eventResult -> {
                     ResponseEvent event = (ResponseEvent) eventResult.getEvent();
                     // 成功
-                    log.info("[Presence订阅]成功： {}", agentVoInfo.getAgentCode());
+                    log.info("[Presence订阅]成功： {}", agentVoInfo.getAgentKey());
                     ToHeader toHeader = (ToHeader)event.getResponse().getHeader(ToHeader.NAME);
                     Object o = RedisUtils.get(key);
                     if(ObjectUtils.isEmpty(o)){
@@ -111,7 +111,7 @@ public class AgentNotifyHandle extends AbstractMessageListener {
                 },eventResult -> {
                     RedisUtils.del(key);
                     // 失败
-                    log.warn("[Presence订阅]失败，信令发送失败： {}-{} ", agentVoInfo.getAgentCode(), eventResult.getMsg());
+                    log.warn("[Presence订阅]失败，信令发送失败： {}-{} ", agentVoInfo.getAgentKey(), eventResult.getMsg());
                 });
             } catch (InvalidArgumentException | SipException | ParseException e) {
                 log.error("[Presence发送失败] 目录订阅: {}", e.getMessage());
@@ -123,13 +123,13 @@ public class AgentNotifyHandle extends AbstractMessageListener {
         });
     }
 
-    private void delPresenceSubscribe(String agentCode){
-        AgentVoInfo agentVoInfo = RedisService.getAgentInfoManager().get(agentCode);
+    private void delPresenceSubscribe(String agentKey){
+        AgentVoInfo agentVoInfo = RedisService.getAgentInfoManager().get(agentKey);
         if(agentVoInfo == null){
             return;
         }
-        log.info("[移除目录订阅]: {}", agentVoInfo.getAgentCode());
-        String key = String.format("%s%s",AGENT_NOTIFY_PRESENCE, agentVoInfo.getAgentCode());
+        log.info("[移除目录订阅]: {}", agentVoInfo.getAgentKey());
+        String key = String.format("%s%s",AGENT_NOTIFY_PRESENCE, agentVoInfo.getAgentKey());
         dynamicTask.stop(key);
         RedisUtils.del(key);
     }

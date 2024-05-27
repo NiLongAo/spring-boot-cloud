@@ -29,42 +29,40 @@ public class ChannelCustomeventHandler implements EslEventHandler {
     public void handle(String addr, EslEvent event) {
         String userName = event.getEventHeaders().get("user_name");//主叫号码
         String eventSubclass = event.getEventHeaders().get("Event-Subclass");//相关事件
-        if("sofia::register".equals(eventSubclass)){
+        if ("sofia::register".equals(eventSubclass)) {
             log.info("进入事件 [ 用户注册 ] CUSTOM");
             String networkIp = event.getEventHeaders().get("network-ip");
             String networkPort = event.getEventHeaders().get("network-port");
             //注册
-            AgentVoInfo agentVoInfo = RedisService.getAgentInfoManager().get(userName);
-            if(agentVoInfo == null){
-                AgentVoInfo agentBySip = FsService.getAgentService().getAgentBySip(userName);
-                if(agentBySip != null){
-                    FsService.getAgentService().online(agentBySip,null);
-                    CompanyInfo companyInfo = RedisService.getCompanyInfoManager().get(agentBySip.getCompanyId());
-                    if(companyInfo != null){
-                        RouteGroupInfo routeGroupInfo = companyInfo.getRouteGroupMap().computeIfAbsent(agentBySip.getAgentCode(), k -> new RouteGroupInfo());
-                        routeGroupInfo.setRouteGateWayInfoList(Collections.singletonList(RouteGateWayInfo.builder()
-                                        .name(String.format("坐席Code：%s",agentBySip.getAgentCode()))
-                                        .mediaHost(networkIp)
-                                        .profile("internal")
-                                        .mediaPort(Integer.valueOf(networkPort))
-                                .build()));
-                        RedisService.getCompanyInfoManager().put(companyInfo);
-                    }
-                }
-            }
-
-        }else if("sofia::unregister".equals(eventSubclass)){
-            log.info("进入事件 [ 用户注销 ] CUSTOM");
-            //注销
-            AgentVoInfo agentVoInfo = RedisService.getAgentInfoManager().get(userName);
-            if(agentVoInfo != null){
+            AgentVoInfo agentVoInfo = FsService.getAgentService().getAgentBySip(userName);
+            if (agentVoInfo != null) {
+                RedisService.getAgentInfoManager().put(agentVoInfo);
+                FsService.getAgentService().online(agentVoInfo, null);
                 CompanyInfo companyInfo = RedisService.getCompanyInfoManager().get(agentVoInfo.getCompanyId());
-                if(companyInfo != null){
-                    companyInfo.getRouteGroupMap().remove(agentVoInfo.getAgentCode());
+                if (companyInfo != null) {
+                    RouteGroupInfo routeGroupInfo = companyInfo.getRouteGroupMap().computeIfAbsent(agentVoInfo.getAgentCode(), k -> new RouteGroupInfo());
+                    routeGroupInfo.setRouteGateWayInfoList(Collections.singletonList(RouteGateWayInfo.builder()
+                            .name(String.format("坐席AgentCode：%s", agentVoInfo.getAgentCode()))
+                            .mediaHost(networkIp)
+                            .profile("internal")
+                            .mediaPort(Integer.valueOf(networkPort))
+                            .build()));
                     RedisService.getCompanyInfoManager().put(companyInfo);
                 }
+
             }
-            FsService.getAgentService().offline(userName);
+        }else if ("sofia::unregister".equals(eventSubclass)) {
+            log.info("进入事件 [ 用户注销 ] CUSTOM");
+            //注销
+            AgentVoInfo agentBySip = FsService.getAgentService().getAgentBySip(userName);
+            if (agentBySip != null) {
+                CompanyInfo companyInfo = RedisService.getCompanyInfoManager().get(agentBySip.getCompanyId());
+                if (companyInfo != null) {
+                    companyInfo.getRouteGroupMap().remove(agentBySip.getAgentCode());
+                    RedisService.getCompanyInfoManager().put(companyInfo);
+                }
+                FsService.getAgentService().offline(agentBySip.getAgentKey());
+            }
         }
     }
 }

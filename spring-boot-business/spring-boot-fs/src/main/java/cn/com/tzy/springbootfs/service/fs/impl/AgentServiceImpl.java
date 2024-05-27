@@ -82,13 +82,13 @@ public class AgentServiceImpl extends ServiceImpl<AgentMapper, Agent> implements
     }
 
     @Override
-    public UserModel findUserModel(String agentCode) {
-        return baseMapper.findUserModel(agentCode);
+    public UserModel findUserModel(String sip) {
+        return baseMapper.findUserModel(sip);
     }
 
     @Override
-    public void login(String agentCode, ResultEvent event) {
-        AgentVoInfo agentVoInfo = agentVoService.getAgentBySip(agentCode);
+    public void login(String agentKey, ResultEvent event) {
+        AgentVoInfo agentVoInfo = agentVoService.getAgentByKey(agentKey);
         if(agentVoInfo == null){
             event.result(RestResult.result(RespCode.CODE_2.getValue(),"未获取客服信息"));
             return;
@@ -101,8 +101,8 @@ public class AgentServiceImpl extends ServiceImpl<AgentMapper, Agent> implements
     }
 
     @Override
-    public RestResult<?> logout(String agentCode) {
-        AgentVoInfo agentVoInfo = RedisService.getAgentInfoManager().get(agentCode);
+    public RestResult<?> logout(String agentKey) {
+        AgentVoInfo agentVoInfo = RedisService.getAgentInfoManager().get(agentKey);
         if(agentVoInfo == null){
             return RestResult.result(RespCode.CODE_2.getValue(),"未获取客服信息");
         }
@@ -117,24 +117,24 @@ public class AgentServiceImpl extends ServiceImpl<AgentMapper, Agent> implements
      * @param status 1.音频 2.视频
      */
     @Override
-    public RestResult<?> pushPath(String agentCode, Integer status) {
+    public RestResult<?> pushPath(String agentKey, Integer status) {
         if(status != 2){
             return RestResult.result(RespCode.CODE_2.getValue(),"暂不支持此类型");
         }
         SsrcConfigManager ssrcConfigManager = RedisService.getSsrcConfigManager();
         SsrcTransactionManager ssrcTransactionManager = RedisService.getSsrcTransactionManager();
         MediaHookSubscribe mediaHookSubscribe = MediaService.getMediaHookSubscribe();
-        SsrcTransaction paramOne = ssrcTransactionManager.getParamOne(agentCode, null, null, VideoStreamType.push_web_rtp);
+        SsrcTransaction paramOne = ssrcTransactionManager.getParamOne(agentKey, null, null, VideoStreamType.push_web_rtp);
         if(paramOne != null){
             if(StringUtils.isEmpty(paramOne.getCallId())){
                 return RestResult.result(RespCode.CODE_2.getValue(),"语音流正在开启中");
-            }if(agentCode.equals(paramOne.getAgentCode())){
+            }if(agentKey.equals(paramOne.getAgentKey())){
                 return RestResult.result(RespCode.CODE_2.getValue(),"语音通话中,请稍后");
             }else {
                 return RestResult.result(RespCode.CODE_2.getValue(),"每个设备只能一个通道语音对讲");
             }
         }
-        AgentVoInfo agentVoInfo = RedisService.getAgentInfoManager().get(agentCode);
+        AgentVoInfo agentVoInfo = RedisService.getAgentInfoManager().get(agentKey);
         if(agentVoInfo == null){
             return RestResult.result(RespCode.CODE_2.getValue(),"未获取客服信息");
         }
@@ -143,23 +143,23 @@ public class AgentServiceImpl extends ServiceImpl<AgentMapper, Agent> implements
             return RestResult.result(RespCode.CODE_2.getValue(),"未获取流媒体信息");
         }
         String ssrc = ssrcConfigManager.getPlaySsrc(mediaServerVo.getId());
-        ssrcTransactionManager.put(agentCode,null,false,!(status==1),"push_web_rtp", agentCode,ssrc,mediaServerVo.getId(),null,VideoStreamType.push_web_rtp);
-        String key = String.format("push_web_rtp:%s", agentCode);
+        ssrcTransactionManager.put(agentKey,null,false,!(status==1),"push_web_rtp", agentKey,ssrc,mediaServerVo.getId(),null,VideoStreamType.push_web_rtp);
+        String key = String.format("push_web_rtp:%s", agentKey);
         dynamicTask.startDelay(key,15,()->{
-            SsrcTransaction param = ssrcTransactionManager.getParamOne(agentCode, null, null, VideoStreamType.push_web_rtp);
+            SsrcTransaction param = ssrcTransactionManager.getParamOne(agentKey, null, null, VideoStreamType.push_web_rtp);
             if(StringUtils.isEmpty(param.getCallId())){// 如何没有callId表示没有接收到Invite请求 则直接关闭
                 this.stopAudioPushStatus(agentVoInfo);
             }
         });
         String app = "push_web_rtp";
         //开始拨打电话
-        HookKey hookKey = HookKeyFactory.onStreamChanged("push_web_rtp", agentCode, true, "rtsp", mediaServerVo.getId());
+        HookKey hookKey = HookKeyFactory.onStreamChanged("push_web_rtp", agentKey, true, "rtsp", mediaServerVo.getId());
         mediaHookSubscribe.addSubscribe(hookKey,(MediaServerVo mediaServer, HookVo response)->{
             mediaHookSubscribe.removeSubscribe(hookKey);
-            ssrcTransactionManager.put(agentCode,null,true,!(status==1),"push_web_rtp", agentCode,ssrc,mediaServerVo.getId(),null,VideoStreamType.push_web_rtp);
+            ssrcTransactionManager.put(agentKey,null,true,!(status==1),"push_web_rtp", agentKey,ssrc,mediaServerVo.getId(),null,VideoStreamType.push_web_rtp);
             dynamicTask.stop(key);
         });
-        String audioPushPath = String.format("%s://%s:%s%s/index/api/webrtc?app=%s&stream=%s&type=push",mediaServerVo.getSslStatus()== ConstEnum.Flag.NO.getValue()?"http":"https",mediaServerVo.getStreamIp(), mediaServerVo.getSslStatus()== ConstEnum.Flag.NO.getValue()?mediaServerVo.getHttpPort():mediaServerVo.getHttpSslPort(), StringUtils.isNotEmpty(mediaServerVo.getVideoHttpPrefix())?String.format("/%s",mediaServerVo.getVideoHttpPrefix()):"",app, agentCode);
+        String audioPushPath = String.format("%s://%s:%s%s/index/api/webrtc?app=%s&stream=%s&type=push",mediaServerVo.getSslStatus()== ConstEnum.Flag.NO.getValue()?"http":"https",mediaServerVo.getStreamIp(), mediaServerVo.getSslStatus()== ConstEnum.Flag.NO.getValue()?mediaServerVo.getHttpPort():mediaServerVo.getHttpSslPort(), StringUtils.isNotEmpty(mediaServerVo.getVideoHttpPrefix())?String.format("/%s",mediaServerVo.getVideoHttpPrefix()):"",app, agentKey);
         return RestResult.result(RespCode.CODE_0.getValue(),null,audioPushPath);
     }
 
@@ -173,19 +173,19 @@ public class AgentServiceImpl extends ServiceImpl<AgentMapper, Agent> implements
         }
         InviteStreamManager inviteStreamManager = RedisService.getInviteStreamManager();
         //获取播放流
-        InviteInfo inviteInfo = inviteStreamManager.getInviteInfoByDeviceAndChannel(VideoStreamType.call_phone,agentBySip.getAgentCode());
+        InviteInfo inviteInfo = inviteStreamManager.getInviteInfoByDeviceAndChannel(VideoStreamType.call_phone,agentBySip.getAgentKey());
         if(inviteInfo != null){
             if (inviteInfo.getStreamInfo() == null) {
                 log.info("inviteInfo 已存在， StreamInfo 不存在，添加回调等待");
                 // 点播发起了但是尚未成功, 仅注册回调等待结果即可
-                inviteStreamManager.once(VideoStreamType.call_phone, agentBySip.getAgentCode(), null, callback);
+                inviteStreamManager.once(VideoStreamType.call_phone, agentBySip.getAgentKey(), null, callback);
                 return inviteInfo.getSsrcInfo();
             }else {
                 StreamInfo streamInfo = inviteInfo.getStreamInfo();
                 String streamId = streamInfo.getStream();
                 if (streamId == null) {
                     callback.run(InviteErrorCode.ERROR_FOR_CATCH_DATA.getCode(), "拨打电话失败， redis缓存streamId等于null", null);
-                    inviteStreamManager.call(VideoStreamType.call_phone, agentBySip.getAgentCode(), null,
+                    inviteStreamManager.call(VideoStreamType.call_phone, agentBySip.getAgentKey(), null,
                             InviteErrorCode.ERROR_FOR_CATCH_DATA.getCode(),
                             "拨打电话失败， redis缓存streamId等于null",
                             null);
@@ -195,26 +195,26 @@ public class AgentServiceImpl extends ServiceImpl<AgentMapper, Agent> implements
                 MediaRestResult mediaList = MediaClient.getMediaList(vo, "__defaultVhost__", null, "rtp", streamId);
                 if(mediaList != null && mediaList.getCode() == RespCode.CODE_0.getValue() && ObjectUtil.isNotEmpty(mediaList.getData())){
                     callback.run(InviteErrorCode.SUCCESS.getCode(), InviteErrorCode.SUCCESS.getMsg(), streamInfo);
-                    inviteStreamManager.call(VideoStreamType.call_phone, agentBySip.getAgentCode(), null,
+                    inviteStreamManager.call(VideoStreamType.call_phone, agentBySip.getAgentKey(), null,
                             InviteErrorCode.SUCCESS.getCode(),
                             InviteErrorCode.SUCCESS.getMsg(),
                             streamInfo);
                     return inviteInfo.getSsrcInfo();
                 }else {
                     // 点播发起了但是尚未成功, 仅注册回调等待结果即可
-                    inviteStreamManager.once(VideoStreamType.call_phone, agentBySip.getAgentCode(), null, callback);
-                    FsService.getAgentService().stopPlay(agentBySip.getAgentCode());
-                    inviteStreamManager.removeInviteInfoByDeviceAndChannel(VideoStreamType.call_phone, agentBySip.getAgentCode());
+                    inviteStreamManager.once(VideoStreamType.call_phone, agentBySip.getAgentKey(), null, callback);
+                    FsService.getAgentService().stopPlay(agentBySip.getAgentKey());
+                    inviteStreamManager.removeInviteInfoByDeviceAndChannel(VideoStreamType.call_phone, agentBySip.getAgentKey());
                 }
             }
         }
         // 拨打电话开始
-        String streamId = agentBySip.getAgentCode();
+        String streamId = agentBySip.getAgentKey();
         //开启播放相关信息
         SSRCInfo ssrcInfo = MediaClient.openRTPServer(mediaServerVo, streamId, ssrc, agentBySip.getSsrcCheck() == ConstEnum.Flag.YES.getValue(), false, 0,false,agentBySip.getStreamMode());
         if(ssrcInfo == null){
             callback.run(InviteErrorCode.ERROR_FOR_RESOURCE_EXHAUSTION.getCode(), InviteErrorCode.ERROR_FOR_RESOURCE_EXHAUSTION.getMsg(), null);
-            inviteStreamManager.call(VideoStreamType.call_phone, agentBySip.getAgentCode(), null,
+            inviteStreamManager.call(VideoStreamType.call_phone, agentBySip.getAgentKey(), null,
                     InviteErrorCode.ERROR_FOR_RESOURCE_EXHAUSTION.getCode(),
                     InviteErrorCode.ERROR_FOR_RESOURCE_EXHAUSTION.getMsg(),
                     null);
@@ -231,20 +231,20 @@ public class AgentServiceImpl extends ServiceImpl<AgentMapper, Agent> implements
         SsrcConfigManager ssrcConfigManager = RedisService.getSsrcConfigManager();
         SsrcTransactionManager ssrcTransactionManager = RedisService.getSsrcTransactionManager();
         InviteStreamManager inviteStreamManager = RedisService.getInviteStreamManager();
-        log.info("[拨打电话开始] agentCode: {}, 收流端口：{}, 收流模式：{}, SSRC: {}, SSRC校验：{}", agentVoInfo.getAgentCode(), ssrcInfo.getPort(), agentVoInfo.getStreamMode(), ssrcInfo.getSsrc(), agentVoInfo.getSsrcCheck());
+        log.info("[拨打电话开始] agentCode: {}, 收流端口：{}, 收流模式：{}, SSRC: {}, SSRC校验：{}", agentVoInfo.getAgentKey(), ssrcInfo.getPort(), agentVoInfo.getStreamMode(), ssrcInfo.getSsrc(), agentVoInfo.getSsrcCheck());
         if(ssrcInfo.getPort() <= 0){
-            log.error("[点播端口分配异常]，agentCode={},ssrcInfo={}", agentVoInfo.getAgentCode(), ssrcInfo);
+            log.error("[点播端口分配异常]，agentCode={},ssrcInfo={}", agentVoInfo.getAgentKey(), ssrcInfo);
             //释放 ssrc
             ssrcConfigManager.releaseSsrc(mediaServerVo.getId(),ssrcInfo.getSsrc());
-            ssrcTransactionManager.remove(agentVoInfo.getAgentCode(),ssrcInfo.getStream());
+            ssrcTransactionManager.remove(agentVoInfo.getAgentKey(),ssrcInfo.getStream());
 
             callback.run(InviteErrorCode.ERROR_FOR_RESOURCE_EXHAUSTION.getCode(), "点播端口分配异常", null);
-            inviteStreamManager.call(VideoStreamType.call_phone, agentVoInfo.getAgentCode(), null,
+            inviteStreamManager.call(VideoStreamType.call_phone, agentVoInfo.getAgentKey(), null,
                     InviteErrorCode.ERROR_FOR_RESOURCE_EXHAUSTION.getCode(), "点播端口分配异常", null);
             return;
         }
         // 初始化redis中的invite消息状态
-        InviteInfo inviteInfo = new InviteInfo(ObjectUtil.defaultIfNull(JwtUtils.getUserId(), VideoConstant.DEFAULT_DOWNLOAD_USER),agentVoInfo.getAgentCode(), ssrcInfo.getStream(), ssrcInfo,
+        InviteInfo inviteInfo = new InviteInfo(ObjectUtil.defaultIfNull(JwtUtils.getUserId(), VideoConstant.DEFAULT_DOWNLOAD_USER),agentVoInfo.getAgentKey(), ssrcInfo.getStream(), ssrcInfo,
                 mediaServerVo.getSdpIp(), ssrcInfo.getPort(), agentVoInfo.getStreamMode(), VideoStreamType.call_phone,
                 InviteSessionStatus.ready);
         inviteStreamManager.updateInviteInfo(inviteInfo);
@@ -252,20 +252,20 @@ public class AgentServiceImpl extends ServiceImpl<AgentMapper, Agent> implements
         String timeOutTaskKey = RandomUtil.randomString(32);
         dynamicTask.startDelay(timeOutTaskKey,sipServer.getVideoProperties().getPlayTimeout(),()->{
             // 执行超时任务时查询是否已经成功，成功了则不执行超时任务，防止超时任务取消失败的情况
-            InviteInfo inviteInfoForTimeOut = inviteStreamManager.getInviteInfoByDeviceAndChannel(VideoStreamType.call_phone, agentVoInfo.getAgentCode());
+            InviteInfo inviteInfoForTimeOut = inviteStreamManager.getInviteInfoByDeviceAndChannel(VideoStreamType.call_phone, agentVoInfo.getAgentKey());
             if(inviteInfoForTimeOut == null || inviteInfoForTimeOut.getStreamInfo() == null){
-                log.info("[点播超时] 收流超时 agentCode: {},，端口：{}, SSRC: {}", agentVoInfo.getAgentCode(), ssrcInfo.getPort(), ssrcInfo.getSsrc());
+                log.info("[点播超时] 收流超时 agentCode: {},，端口：{}, SSRC: {}", agentVoInfo.getAgentKey(), ssrcInfo.getPort(), ssrcInfo.getSsrc());
                 // 点播超时回复BYE 同时释放ssrc以及此次点播的资源
                 callback.run(InviteErrorCode.ERROR_FOR_STREAM_TIMEOUT.getCode(), InviteErrorCode.ERROR_FOR_STREAM_TIMEOUT.getMsg(), null);
-                inviteStreamManager.call(VideoStreamType.call_phone,  agentVoInfo.getAgentCode(), null, InviteErrorCode.ERROR_FOR_STREAM_TIMEOUT.getCode(), InviteErrorCode.ERROR_FOR_STREAM_TIMEOUT.getMsg(), null);
-                inviteStreamManager.removeInviteInfoByDeviceAndChannel(VideoStreamType.call_phone, agentVoInfo.getAgentCode());
+                inviteStreamManager.call(VideoStreamType.call_phone,  agentVoInfo.getAgentKey(), null, InviteErrorCode.ERROR_FOR_STREAM_TIMEOUT.getCode(), InviteErrorCode.ERROR_FOR_STREAM_TIMEOUT.getMsg(), null);
+                inviteStreamManager.removeInviteInfoByDeviceAndChannel(VideoStreamType.call_phone, agentVoInfo.getAgentKey());
                 try {
                     sipCommanderForPlatform.streamByeCmd(sipServer, agentVoInfo,ssrcInfo.getStream(),null,null,null,null);
                 } catch (InvalidArgumentException | SipException | ParseException e) {
                     log.error("[点播超时]， 发送BYE失败 {}", e.getMessage());
                 }finally {
                     ssrcConfigManager.releaseSsrc(mediaServerVo.getId(),ssrcInfo.getSsrc());
-                    ssrcTransactionManager.remove(agentVoInfo.getAgentCode(),ssrcInfo.getStream());
+                    ssrcTransactionManager.remove(agentVoInfo.getAgentKey(),ssrcInfo.getStream());
                     MediaClient.closeRtpServer(mediaServerVo,ssrcInfo.getStream());
                     // 取消订阅消息监听
                     HookKey hookKey = HookKeyFactory.onStreamChanged("rtp", ssrcInfo.getStream(), true, "rtsp", mediaServerVo.getId());
@@ -278,15 +278,15 @@ public class AgentServiceImpl extends ServiceImpl<AgentMapper, Agent> implements
                 log.info("收到订阅消息： " + JSONUtil.toJsonStr(response));
                 dynamicTask.stop(timeOutTaskKey);
                 OnStreamChangedHookVo vo = (OnStreamChangedHookVo) response;
-                StreamInfo streamInfo = new StreamInfo(mediaServerVo, "rtp", vo.getStream(), vo.getTracks(), null, null, agentVoInfo.getAgentCode());
-                InviteInfo invite = inviteStreamManager.getInviteInfoByDeviceAndChannel(VideoStreamType.call_phone, agentVoInfo.getAgentCode());
+                StreamInfo streamInfo = new StreamInfo(mediaServerVo, "rtp", vo.getStream(), vo.getTracks(), null, null, agentVoInfo.getAgentKey());
+                InviteInfo invite = inviteStreamManager.getInviteInfoByDeviceAndChannel(VideoStreamType.call_phone, agentVoInfo.getAgentKey());
                 if (invite != null) {
                     invite.setStatus(InviteSessionStatus.ok);
                     invite.setStreamInfo(streamInfo);
                     inviteStreamManager.updateInviteInfo(invite);
                 }
                 callback.run(InviteErrorCode.SUCCESS.getCode(), InviteErrorCode.SUCCESS.getMsg(), streamInfo);
-                inviteStreamManager.call(VideoStreamType.call_phone, agentVoInfo.getAgentCode(), null,
+                inviteStreamManager.call(VideoStreamType.call_phone, agentVoInfo.getAgentKey(), null,
                         InviteErrorCode.SUCCESS.getCode(),
                         InviteErrorCode.SUCCESS.getMsg(),
                         streamInfo);
@@ -299,15 +299,15 @@ public class AgentServiceImpl extends ServiceImpl<AgentMapper, Agent> implements
                 //发送错误后处理
                 dynamicTask.stop(timeOutTaskKey);
                 ssrcConfigManager.releaseSsrc(mediaServerVo.getId(), ssrcInfo.getSsrc());
-                ssrcTransactionManager.remove(agentVoInfo.getAgentCode(), ssrcInfo.getStream());
+                ssrcTransactionManager.remove(agentVoInfo.getAgentKey(), ssrcInfo.getStream());
                 MediaClient.closeRtpServer(mediaServerVo, ssrcInfo.getStream());
                 callback.run(InviteErrorCode.ERROR_FOR_SIGNALLING_ERROR.getCode(),
                         String.format("点播失败， 错误码： %s, %s", errEvent.getStatusCode(), errEvent.getMsg()), null);
-                inviteStreamManager.call(VideoStreamType.call_phone, agentVoInfo.getAgentCode(), null,
+                inviteStreamManager.call(VideoStreamType.call_phone, agentVoInfo.getAgentKey(), null,
                         InviteErrorCode.ERROR_FOR_RESET_SSRC.getCode(),
                         String.format("点播失败， 错误码： %s, %s", errEvent.getStatusCode(), errEvent.getMsg()), null);
 
-                inviteStreamManager.removeInviteInfoByDeviceAndChannel(VideoStreamType.call_phone, agentVoInfo.getAgentCode());
+                inviteStreamManager.removeInviteInfoByDeviceAndChannel(VideoStreamType.call_phone, agentVoInfo.getAgentKey());
             });
             if(rtp != null){
                 RedisService.getAgentInfoManager().putCallPhone(rtp.getCallId().getCallId(),rtp);
@@ -317,13 +317,13 @@ public class AgentServiceImpl extends ServiceImpl<AgentMapper, Agent> implements
             log.error("[命令发送失败] 点播消息: {}", e.getMessage());
             dynamicTask.stop(timeOutTaskKey);
             ssrcConfigManager.releaseSsrc(mediaServerVo.getId(),ssrcInfo.getSsrc());
-            ssrcTransactionManager.remove(agentVoInfo.getAgentCode(),ssrcInfo.getStream());
+            ssrcTransactionManager.remove(agentVoInfo.getAgentKey(),ssrcInfo.getStream());
             MediaClient.closeRtpServer(mediaServerVo,ssrcInfo.getStream());
             callback.run(InviteErrorCode.ERROR_FOR_SIP_SENDING_FAILED.getCode(), InviteErrorCode.ERROR_FOR_SIP_SENDING_FAILED.getMsg(), null);
-            inviteStreamManager.call(VideoStreamType.call_phone, agentVoInfo.getAgentCode(), null,
+            inviteStreamManager.call(VideoStreamType.call_phone, agentVoInfo.getAgentKey(), null,
                     InviteErrorCode.ERROR_FOR_SIP_SENDING_FAILED.getCode(),
                     InviteErrorCode.ERROR_FOR_SIP_SENDING_FAILED.getMsg(), null);
-            inviteStreamManager.removeInviteInfoByDeviceAndChannel(VideoStreamType.call_phone, agentVoInfo.getAgentCode());
+            inviteStreamManager.removeInviteInfoByDeviceAndChannel(VideoStreamType.call_phone, agentVoInfo.getAgentKey());
         }
     }
 
@@ -352,10 +352,10 @@ public class AgentServiceImpl extends ServiceImpl<AgentMapper, Agent> implements
             log.info("[invite 200] 收到, 发现下级自定义了ssrc: {}", ssrcInResponse);
             //单端口模式streamId也有变化，需要重新设置监听
             if(mediaServerVo.getRtpEnable() == ConstEnum.Flag.NO.getValue()){
-                SsrcTransaction paramOne = ssrcTransactionManager.getParamOne(agentVoInfo.getAgentCode(), null, inviteInfo.getStream(),null);
-                ssrcTransactionManager.remove(agentVoInfo.getAgentCode(),inviteInfo.getStream());
+                SsrcTransaction paramOne = ssrcTransactionManager.getParamOne(agentVoInfo.getAgentKey(), null, inviteInfo.getStream(),null);
+                ssrcTransactionManager.remove(agentVoInfo.getAgentKey(),inviteInfo.getStream());
                 inviteStreamManager.updateInviteInfoForSSRC(inviteInfo,ssrcInResponse);
-                ssrcTransactionManager.put(agentVoInfo.getAgentCode(),paramOne.getCallId(),"rtp",inviteInfo.getStream(),ssrcInResponse,mediaServerVo.getId(),(SIPResponse) responseEvent.getResponse(),paramOne.getType());
+                ssrcTransactionManager.put(agentVoInfo.getAgentKey(),paramOne.getCallId(),"rtp",inviteInfo.getStream(),ssrcInResponse,mediaServerVo.getId(),(SIPResponse) responseEvent.getResponse(),paramOne.getType());
                 return;
             }
             //当前服务已使用相同的 下级 ssrc 时
@@ -365,16 +365,16 @@ public class AgentServiceImpl extends ServiceImpl<AgentMapper, Agent> implements
             MediaRestResult result = MediaClient.updateRtpServerSsrc(mediaServerVo, ssrcInfo.getStream(), ssrcInResponse);
             if(result == null || result.getCode() != RespCode.CODE_0.getValue()){
                 try {
-                    log.warn("[Invite 200OK] 更新ssrc失败，停止点播 {}", agentVoInfo.getAgentCode());
+                    log.warn("[Invite 200OK] 更新ssrc失败，停止点播 {}", agentVoInfo.getAgentKey());
                     sipCommanderForPlatform.streamByeCmd(sipServer,agentVoInfo, ssrcInfo.getStream(), null,null,null,null);
                 } catch (InvalidArgumentException | SipException | ParseException e) {
                     log.error("[命令发送失败] 停止点播， 发送BYE: {}", e.getMessage());
                 }
                 dynamicTask.stop(timeOutTaskKey);
-                ssrcTransactionManager.remove(agentVoInfo.getAgentCode(),ssrcInfo.getStream());
+                ssrcTransactionManager.remove(agentVoInfo.getAgentKey(),ssrcInfo.getStream());
                 callback.run(InviteErrorCode.ERROR_FOR_RESET_SSRC.getCode(),
                         "下级自定义了ssrc,重新设置收流信息失败", null);
-                inviteStreamManager.call(VideoStreamType.call_phone, agentVoInfo.getAgentCode(), null,
+                inviteStreamManager.call(VideoStreamType.call_phone, agentVoInfo.getAgentKey(), null,
                         InviteErrorCode.ERROR_FOR_RESET_SSRC.getCode(),
                         "下级自定义了ssrc,重新设置收流信息失败", null);
                 return;
@@ -410,30 +410,30 @@ public class AgentServiceImpl extends ServiceImpl<AgentMapper, Agent> implements
                     break;
                 }
             }
-            log.info("[TCP主动连接对方] deviceId: {},  连接对方的地址：{}:{}, 收流模式：{}, SSRC: {}, SSRC校验：{}",agentVoInfo.getAgentCode(), sdp.getConnection().getAddress(), port, agentVoInfo.getStreamMode(), ssrcInfo.getSsrc(), agentVoInfo.getSsrcCheck());
+            log.info("[TCP主动连接对方] deviceId: {},  连接对方的地址：{}:{}, 收流模式：{}, SSRC: {}, SSRC校验：{}",agentVoInfo.getAgentKey(), sdp.getConnection().getAddress(), port, agentVoInfo.getStreamMode(), ssrcInfo.getSsrc(), agentVoInfo.getSsrcCheck());
             MediaRestResult result = MediaClient.connectRtpServer(mediaServerVo, sdp.getConnection().getAddress(), port, ssrcInfo.getStream());
             log.info("[TCP主动连接对方] 结果： {}", result);
         } catch (SdpException e) {
-            log.error("[TCP主动连接对方] AgentCode: {},, 解析200OK的SDP信息失败", agentVoInfo.getAgentCode(), e);
+            log.error("[TCP主动连接对方] AgentCode: {},, 解析200OK的SDP信息失败", agentVoInfo.getAgentKey(), e);
             dynamicTask.stop(timeOutTaskKey);
             MediaClient.closeRtpServer(mediaServerVo,ssrcInfo.getStream());
             // 释放ssrc
             ssrcConfigManager.releaseSsrc(mediaServerVo.getId(), ssrcInfo.getSsrc());
-            ssrcTransactionManager.remove(agentVoInfo.getAgentCode(), ssrcInfo.getStream());
+            ssrcTransactionManager.remove(agentVoInfo.getAgentKey(), ssrcInfo.getStream());
             callback.run(InviteErrorCode.ERROR_FOR_SDP_PARSING_EXCEPTIONS.getCode(),
                     InviteErrorCode.ERROR_FOR_SDP_PARSING_EXCEPTIONS.getMsg(), null);
-            inviteStreamManager.call(VideoStreamType.call_phone, agentVoInfo.getAgentCode(), null,
+            inviteStreamManager.call(VideoStreamType.call_phone, agentVoInfo.getAgentKey(), null,
                     InviteErrorCode.ERROR_FOR_SDP_PARSING_EXCEPTIONS.getCode(),
                     InviteErrorCode.ERROR_FOR_SDP_PARSING_EXCEPTIONS.getMsg(), null);
         }
     }
 
     private RestResult<?> stopAudioPushStatus(AgentVoInfo agentVoInfo) {
-        SsrcTransaction param = RedisService.getSsrcTransactionManager().getParamOne(agentVoInfo.getAgentCode(), null, null, VideoStreamType.push_web_rtp);
+        SsrcTransaction param = RedisService.getSsrcTransactionManager().getParamOne(agentVoInfo.getAgentKey(), null, null, VideoStreamType.push_web_rtp);
         if(param!= null){
-            RedisService.getSsrcTransactionManager().remove(agentVoInfo.getAgentCode(),param.getStream(),VideoStreamType.push_web_rtp);
+            RedisService.getSsrcTransactionManager().remove(agentVoInfo.getAgentKey(),param.getStream(),VideoStreamType.push_web_rtp);
         }
-        dynamicTask.stop(String.format("push_web_rtp:%s",agentVoInfo.getAgentCode()));
+        dynamicTask.stop(String.format("push_web_rtp:%s",agentVoInfo.getAgentKey()));
         try {
             sipCommander.streamByeCmd(sipServer, agentVoInfo,null,null,VideoStreamType.push_web_rtp,null,null);
         } catch (SipException | InvalidArgumentException | ParseException | SsrcTransactionNotFoundException e) {

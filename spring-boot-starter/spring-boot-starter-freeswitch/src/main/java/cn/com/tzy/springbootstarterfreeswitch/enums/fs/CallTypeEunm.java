@@ -38,12 +38,15 @@ public enum CallTypeEunm {
      * 硬话机外呼
      */
     SIP_OUTBOUND_CALL(6),
-
     /**
      * 内呼
      */
-    INNER_CALL(6);
-
+    INNER_CALL(7),
+    /**
+     * 会议内呼
+     */
+    CONFERENCE_CALL(8),
+    ;
 
 
     private Integer code;

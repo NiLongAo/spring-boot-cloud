@@ -1,9 +1,10 @@
 package cn.com.tzy.springbootstarterfreeswitch.client.fs.handler.event;
 
+import cn.com.tzy.springbootstarterfreeswitch.client.fs.handler.EventNextHandler;
+import cn.com.tzy.springbootstarterfreeswitch.client.fs.handler.StrategyHandler;
+import cn.com.tzy.springbootstarterfreeswitch.client.fs.handler.strategy.CallStrategyHandler;
 import cn.com.tzy.springbootstarterfreeswitch.common.fs.Constant;
 import cn.com.tzy.springbootstarterfreeswitch.enums.fs.*;
-import cn.com.tzy.springbootstarterfreeswitch.client.fs.handler.message.AnswerCallHandler;
-import cn.com.tzy.springbootstarterfreeswitch.client.fs.handler.message.HangupCallHandler;
 import cn.com.tzy.springbootstarterfreeswitch.model.call.CallInfo;
 import cn.com.tzy.springbootstarterfreeswitch.model.call.DeviceInfo;
 import cn.com.tzy.springbootstarterfreeswitch.model.call.NextCommand;
@@ -17,6 +18,7 @@ import cn.com.tzy.springbootstarterfreeswitch.utils.FreeswitchUtils;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.RandomUtil;
+import link.thingscloud.freeswitch.esl.InboundClient;
 import link.thingscloud.freeswitch.esl.constant.EventNames;
 import link.thingscloud.freeswitch.esl.spring.boot.starter.annotation.EslEventName;
 import link.thingscloud.freeswitch.esl.spring.boot.starter.handler.EslEventHandler;
@@ -39,9 +41,12 @@ import java.util.Date;
 public class ChannelParkEventHandler implements EslEventHandler {
 
     @Resource
-    private HangupCallHandler hangupCallHandler;
-    @Resource
-    private AnswerCallHandler answerCallHandler;
+    private EventNextHandler eventNextHandler;
+
+    private final StrategyHandler strategyHandler;
+    public ChannelParkEventHandler(InboundClient inboundClient){
+        strategyHandler = new CallStrategyHandler(inboundClient);
+    }
     @Override
     public void handle(String addr, EslEvent event) {
         String direction =null;
@@ -60,27 +65,8 @@ public class ChannelParkEventHandler implements EslEventHandler {
         CallInfo callInfo = RedisService.getCallInfoManager().findDeviceId(deviceId);
         DeviceInfo deviceInfo = null;
         if (callInfo == null && DirectionEnum.INBOUND.name().equals(direction.toUpperCase())) {
-//            inbound(deviceId,addr,event);
-//            return;
-            String copeDeviceId = event.getEventHeaders().get(String.format("variable_%s%s", Constant.SIP_HEADER, "V9-DEVICE-ID"));//自定义变量
-            callInfo = RedisService.getCallInfoManager().findDeviceId(copeDeviceId);
-            if(callInfo == null){
-                inbound(deviceId,addr,event);
-                return;
-            }
-            deviceInfo = callInfo.getDeviceInfoMap().get(copeDeviceId);
-            if(deviceInfo == null){
-                return;
-            }
-            deviceInfo.setDeviceId(deviceId);
-            RedisService.getDeviceInfoManager().delDeviceCallId(copeDeviceId);
-            RedisService.getDeviceInfoManager().putDeviceCallId(deviceId,callInfo.getCallId());
-            callInfo.getDeviceList().remove(copeDeviceId);
-            callInfo.getDeviceList().add(deviceId);
-            callInfo.getDeviceInfoMap().remove(copeDeviceId);
-            callInfo.getDeviceInfoMap().put(deviceId,deviceInfo);
-
-            RedisService.getCallInfoManager().put(callInfo);
+            inbound(deviceId,addr,event);
+            return;
         }
         if (callInfo == null || callInfo.getHangupDir() != null) {
             return;
@@ -161,8 +147,7 @@ public class ChannelParkEventHandler implements EslEventHandler {
         }
     }
     /**
-     * b-腿
-     * 呼入
+     * b-腿 呼入
      * @param event
      */
     private void inboundCall(String addr,String deviceId,EslEvent event) {
@@ -194,8 +179,7 @@ public class ChannelParkEventHandler implements EslEventHandler {
             callLog.setHangupCode(CauseEnums.VDN_ERROR.getHuangupCode());
             callLog.setMonthTime(DateUtil.format(callLog.getCreateTime(), DatePattern.SIMPLE_MONTH_PATTERN));
             FsService.getCallCdrService().saveOrUpdateCallLog(callLog);
-            //测试需关闭  正式需要放开
-            //hangupCallHandler.handler(HangupCallModel.builder().mediaAddr(addr).deviceId(deviceId).build());
+            strategyHandler.handler(HangupCallModel.builder().mediaAddr(addr).deviceId(deviceId).build());
             return;
         }
         CallInfo callInfo = CallInfo.builder()
@@ -230,37 +214,58 @@ public class ChannelParkEventHandler implements EslEventHandler {
         callInfo.getNextCommands().add(new NextCommand(deviceId, NextTypeEnum.NEXT_VDN, null));
         RedisService.getCallInfoManager().put(callInfo);
         RedisService.getDeviceInfoManager().putDeviceCallId(deviceId, callId);
-        answerCallHandler.handler(AnswerCallModel.builder().mediaAddr(addr).deviceId(deviceId).build());
+        strategyHandler.handler(AnswerCallModel.builder().isActive(true).mediaAddr(addr).deviceId(deviceId).build());
     }
 
     /**
-     * a-腿
-     * 呼出
+     * a-腿 呼出
      * @param event
      */
     private void sipOutboundCall(String addr,String deviceId,EslEvent event) {
-        //通过sip号码获取绑定的坐席
         String caller = event.getEventHeaders().get("variable_sip_from_user");//主叫号码
         String called = event.getEventHeaders().get("Caller-Destination-Number");//被叫号码
         String callId = String.valueOf(FreeswitchUtils.snowflake.nextId());
-        AgentVoInfo agent = RedisService.getAgentInfoManager().get(caller);
+        AgentVoInfo agent = FsService.getAgentService().getAgentBySip(caller);
         if (agent == null || agent.getGroupId() == null) {
             log.warn("sipOutbound callId:{}  sip:{} called:{}", callId, caller, called);
-            hangupCallHandler.handler(HangupCallModel.builder().mediaAddr(addr).deviceId(deviceId).build());
+            strategyHandler.handler(HangupCallModel.builder().mediaAddr(addr).deviceId(deviceId).build());
             return;
         }
+        AgentVoInfo agentVoInfo = RedisService.getAgentInfoManager().get(agent.getAgentKey());
+        if(agentVoInfo == null){
+            RedisService.getAgentInfoManager().put(agent);
+        }else {
+            agent = agentVoInfo;
+        }
+        caller = agent.getAgentCode();
         //获取显号
         GroupInfo groupInfo = RedisService.getGroupInfoManager().get(agent.getGroupId());
         if (groupInfo == null || CollectionUtils.isEmpty(groupInfo.getCalledDisplays())) {
             log.warn("callId:{}, agent:{}, group is null", callId, agent.getAgentKey());
-            hangupCallHandler.handler(HangupCallModel.builder().mediaAddr(addr).deviceId(deviceId).build());
+            strategyHandler.handler(HangupCallModel.builder().mediaAddr(addr).deviceId(deviceId).build());
             return;
         }
         log.info("sipOutbound callId:{}  sip:{} called:{}", callId, caller, called);
+        //主叫显号（被叫如何是外呼则取分组，如何是内呼或会议，取当前客服code ）
         String calledDisplay = groupInfo.getCalledDisplays().get(groupInfo.getCalledDisplays().size()==1?0:RandomUtil.randomInt(0,groupInfo.getCalledDisplays().size()-1));
-        CallInfo callInfo = CallInfo.builder()
+        CallTypeEunm callTypeEunm = CallTypeEunm.SIP_OUTBOUND_CALL;
+        //判定被叫是那种呼叫
+        if(called.startsWith(Constant.AGENT_SIP_PREFIX)){//内呼坐席
+            called = called.substring(Constant.AGENT_SIP_PREFIX.length());
+            callTypeEunm = CallTypeEunm.INNER_CALL;
+            calledDisplay = agent.getAgentCode();
+        }else if(called.startsWith(Constant.CONFERENCE_ID_PREFIX)){//呼叫会议
+            called = called.substring(Constant.CONFERENCE_ID_PREFIX.length());
+            callTypeEunm = CallTypeEunm.CONFERENCE_CALL;
+            calledDisplay = called;
+            callId = called;//设置此call编号为会议编号
+        }
+        CallInfo callInfo  = RedisService.getCallInfoManager().get(callId);
+        if(callInfo == null){
+            callInfo = CallInfo.builder()
                 .callId(callId)
-                .callType(CallTypeEunm.SIP_OUTBOUND_CALL)
+                .callType(callTypeEunm)
+                .conference(callTypeEunm==CallTypeEunm.CONFERENCE_CALL?called:null)
                 .direction(DirectionEnum.OUTBOUND)
                 .callTime(new Date())
                 .caller(caller)
@@ -272,8 +277,10 @@ public class ChannelParkEventHandler implements EslEventHandler {
                 .groupId(groupInfo.getId())
                 .agentKey(agent.getAgentKey())
                 .build();
+        }
         DeviceInfo deviceInfo = DeviceInfo.builder()
                 .callId(callId)
+                .conference(callTypeEunm==CallTypeEunm.CONFERENCE_CALL?called:null)
                 .deviceId(deviceId)
                 .agentKey(agent.getAgentKey())
                 .caller(caller)
@@ -288,10 +295,18 @@ public class ChannelParkEventHandler implements EslEventHandler {
         callInfo.setCdrNotifyUrl(companyInfo.getNotifyUrl());
         callInfo.getDeviceInfoMap().put(deviceId, deviceInfo);
         callInfo.getDeviceList().add(deviceId);
-        callInfo.getNextCommands().add(new NextCommand(deviceInfo.getDeviceId(), NextTypeEnum.NEXT_CALL_OTHER, null));
+        if(callTypeEunm == CallTypeEunm.CONFERENCE_CALL){
+            //先应答拨打电话
+            callInfo.getNextCommands().add(new NextCommand(deviceInfo.getDeviceId(), NextTypeEnum.NEXT_ANSWER_CALL, deviceInfo.getDeviceId()));
+            //再桥接电话与会议
+            callInfo.getNextCommands().add(new NextCommand(deviceInfo.getDeviceId(), NextTypeEnum.NEXT_TRANSFER_CONFERENCE_CALL, called));
+        }else {
+            callInfo.getNextCommands().add(new NextCommand(deviceInfo.getDeviceId(), NextTypeEnum.NEXT_CALL_OTHER, null));
+        }
+        //直接执行下一步操作
+        eventNextHandler.next(callInfo,event);
         RedisService.getCallInfoManager().put(callInfo);
         RedisService.getDeviceInfoManager().putDeviceCallId(deviceId, callId);
-        answerCallHandler.handler(AnswerCallModel.builder().mediaAddr(addr).deviceId(deviceId).build());
     }
 
     /**

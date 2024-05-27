@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Address {
 
-    private String agentCode;
+    private String agentKey;
 
     private String ip;
 

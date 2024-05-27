@@ -5,7 +5,7 @@ import cn.com.tzy.springbootstarterfreeswitch.service.freeswitch.GroupMemoryInfo
 import org.springframework.stereotype.Service;
 
 @Service
-public class GroupMemoryInfoServiceImpl implements GroupMemoryInfoService {
+public class GroupMemoryInfoServiceImpl extends GroupMemoryInfoService {
     @Override
     public GroupMemoryInfo find(String groupId, String phone) {
         return null;

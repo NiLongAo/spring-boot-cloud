@@ -3,6 +3,7 @@ package cn.com.tzy.springbootfs.controller.api.fs;
 import cn.com.tzy.springbootcomm.common.enumcom.ConstEnum;
 import cn.com.tzy.springbootfs.service.fs.AgentService;
 import cn.com.tzy.springbootstartercloud.api.ApiController;
+import cn.com.tzy.springbootstarterfreeswitch.common.fs.Constant;
 import cn.com.tzy.springbootstarterfreeswitch.enums.fs.FsTypeEnum;
 import cn.com.tzy.springbootstarterfreeswitch.model.bean.ConfigModel;
 import cn.com.tzy.springbootstarterfreeswitch.model.bean.GateWayModel;
@@ -54,11 +55,11 @@ public class FsXmlController extends ApiController {
     public String getDirectoryXML(HttpServletRequest req){
         Map<String, String[]> parameterMap = req.getParameterMap();
         String domain = req.getParameter("domain");
-        String user = req.getParameter("user");
+        String sip = req.getParameter("user");
         String key = req.getParameter("key");
         String xml = null;
         //模拟数据
-        UserModel userModel = agentService.findUserModel(user);
+        UserModel userModel = agentService.findUserModel(sip);
         if(userModel == null){
             xml =  FreeswitchUtils.getXmlConfig(FreeswitchXmlVo.builder()
                     .fsTypeEnum(FsTypeEnum.NOT_FIND)
@@ -77,7 +78,7 @@ public class FsXmlController extends ApiController {
                     .build()
             );
         }
-        log.warn("请求Fs呼叫用户文件key：{} user:{} 是否配置Xml：{}，请求参数：{}",key,user, StringUtils.isNotBlank(xml),parameterMap);
+        log.warn("请求Fs呼叫用户文件key：{} user:{} 是否配置Xml：{}，请求参数：{}",key,sip, StringUtils.isNotBlank(xml),parameterMap);
         return xml;
     }
 
@@ -145,6 +146,16 @@ public class FsXmlController extends ApiController {
                                 .build());
                     }})
                     .build()
+                );
+                break;
+            }
+            case "conference.conf": {
+                xml = FreeswitchUtils.getXmlConfig(FreeswitchXmlVo.builder()
+                        .fsTypeEnum(FsTypeEnum.CONFERENCE)
+                        .modelMap(new HashMap<String, Object>(){{
+                            put("SOUND_PREFIX", Constant.SOUND_PREFIX );
+                        }})
+                        .build()
                 );
                 break;
             }

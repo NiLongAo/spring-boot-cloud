@@ -20,6 +20,8 @@ public enum FsTypeEnum {
     USER(6, "fs/directory/user.xml", "user"),
     //拨号计划
     DIALPLAN(7, "fs/dialplan/dialplan.xml", "dialplan"),
+    //会议
+    CONFERENCE(8, "fs/autoload_configs/conference.conf.xml", "conference"),
     ;
     private final int value;
     private final String path;

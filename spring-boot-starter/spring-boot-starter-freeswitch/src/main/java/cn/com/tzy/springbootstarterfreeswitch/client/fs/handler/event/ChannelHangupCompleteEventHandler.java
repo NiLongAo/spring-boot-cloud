@@ -3,7 +3,6 @@ package cn.com.tzy.springbootstarterfreeswitch.client.fs.handler.event;
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootcomm.utils.AppUtils;
-import cn.com.tzy.springbootstarterfreeswitch.client.fs.handler.message.HangupCallHandler;
 import cn.com.tzy.springbootstarterfreeswitch.model.call.CallInfo;
 import cn.com.tzy.springbootstarterfreeswitch.model.call.DeviceInfo;
 import cn.com.tzy.springbootstarterfreeswitch.model.fs.CallDeviceInfo;
@@ -11,12 +10,15 @@ import cn.com.tzy.springbootstarterfreeswitch.model.fs.CallLogInfo;
 import cn.com.tzy.springbootstarterfreeswitch.model.fs.CallLogPush;
 import cn.com.tzy.springbootstarterfreeswitch.model.fs.CompanyInfo;
 import cn.com.tzy.springbootstarterfreeswitch.model.message.HangupCallModel;
+import cn.com.tzy.springbootstarterfreeswitch.client.fs.handler.StrategyHandler;
+import cn.com.tzy.springbootstarterfreeswitch.client.fs.handler.strategy.CallStrategyHandler;
 import cn.com.tzy.springbootstarterfreeswitch.redis.RedisService;
 import cn.com.tzy.springbootstarterfreeswitch.service.FsService;
 import cn.com.tzy.springbootstarterfreeswitch.utils.PushUtils;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
+import link.thingscloud.freeswitch.esl.InboundClient;
 import link.thingscloud.freeswitch.esl.constant.EventNames;
 import link.thingscloud.freeswitch.esl.spring.boot.starter.annotation.EslEventName;
 import link.thingscloud.freeswitch.esl.spring.boot.starter.handler.EslEventHandler;
@@ -28,7 +30,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -40,8 +41,11 @@ import java.util.List;
 @Component
 @EslEventName(EventNames.CHANNEL_HANGUP_COMPLETE)
 public class ChannelHangupCompleteEventHandler implements EslEventHandler {
-    @Resource
-    private HangupCallHandler hangupCallHandler;
+
+    private final StrategyHandler strategyHandler;
+    public ChannelHangupCompleteEventHandler(InboundClient inboundClient){
+        strategyHandler = new CallStrategyHandler(inboundClient);
+    }
     @Override
     public void handle(String addr, EslEvent event) {
         log.info("进入事件 [挂机事件] CHANNEL_HANGUP_COMPLETE");
@@ -102,10 +106,10 @@ public class ChannelHangupCompleteEventHandler implements EslEventHandler {
         FsService.getCallCdrService().saveCallDevice(callDevice);
         callInfo.getDeviceInfoMap().put(callDevice.getDeviceId(), deviceInfo);
         // 一般情况下，挂断其他所有设备
-        if (deviceInfo.getCdrType() <= 3 && callInfo.getEndTime() == null) {
+        if (deviceInfo.getCdrType() <= 3 && callInfo.getEndTime() == null && StringUtils.isEmpty(callInfo.getConference())) {
             if (!CollectionUtils.isEmpty(callInfo.getDeviceList())) {
                 callInfo.getDeviceList().forEach(s -> {
-                    hangupCallHandler.handler(HangupCallModel.builder().mediaAddr(callInfo.getMediaHost()).deviceId(s).build());
+                    strategyHandler.handler(HangupCallModel.builder().mediaAddr(callInfo.getMediaHost()).deviceId(s).build());
                 });
             }
         }

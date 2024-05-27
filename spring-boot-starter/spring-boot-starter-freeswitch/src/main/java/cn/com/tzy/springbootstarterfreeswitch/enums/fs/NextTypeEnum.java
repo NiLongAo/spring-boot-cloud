@@ -13,19 +13,9 @@ public enum NextTypeEnum {
     NEXT_CALL_BRIDGE(),
 
     /**
-     * 咨询坐席
+     * 咨询（转接）通话
      */
-    NEXT_CONSULT_AGENT(),
-
-    /**
-     * 咨询外线
-     */
-    NEXT_CONSULT_CALLOUT(),
-
-    /**
-     * 转到坐席
-     */
-    NEXT_CALL_AGENT(),
+    NEXT_CONSULT(),
 
     /**
      * 完成转接
@@ -33,14 +23,9 @@ public enum NextTypeEnum {
     NEXT_TRANSFER_SUCCESS(),
 
     /**
-     * 转接后桥接
+     * 电话转接会议
      */
-    NEXT_TRANSFER_BRIDGE(),
-
-    /**
-     * 电话转接
-     */
-    NEXT_TRANSFER_CALL(),
+    NEXT_TRANSFER_CONFERENCE_CALL(),
 
     /**
      * 强插电话
@@ -81,7 +66,6 @@ public enum NextTypeEnum {
      * 放音queue
      */
     NEXT_QUEUE_PLAY(),
-
     /**
      * 溢出队列
      */
@@ -94,10 +78,12 @@ public enum NextTypeEnum {
      * 溢出进vdn
      */
     NEXT_QUEUE_OVERFLOW_VDN(),
-
     /**
      * 停止放音
      */
-    NEXT_QUEUE_PLAY_STOP();
-
+    NEXT_QUEUE_PLAY_STOP(),
+    /**
+     * 应答电话
+     */
+    NEXT_ANSWER_CALL();
 }

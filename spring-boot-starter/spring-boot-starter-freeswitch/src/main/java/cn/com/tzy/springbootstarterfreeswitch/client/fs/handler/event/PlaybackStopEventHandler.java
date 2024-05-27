@@ -1,6 +1,6 @@
 package cn.com.tzy.springbootstarterfreeswitch.client.fs.handler.event;
 
-import cn.com.tzy.springbootstarterfreeswitch.client.fs.handler.process.VdnProcessHandler;
+import cn.com.tzy.springbootstarterfreeswitch.client.fs.handler.process.ProcessNextHandler;
 import cn.com.tzy.springbootstarterfreeswitch.model.call.CallInfo;
 import cn.com.tzy.springbootstarterfreeswitch.model.call.DeviceInfo;
 import cn.com.tzy.springbootstarterfreeswitch.model.call.NextCommand;
@@ -23,7 +23,7 @@ import javax.annotation.Resource;
 @EslEventName(EventNames.PLAYBACK_STOP)
 public class PlaybackStopEventHandler implements EslEventHandler {
     @Resource
-    private VdnProcessHandler vdnProcessHandler;
+    private ProcessNextHandler processNextHandler;
     @Override
     public void handle(String addr, EslEvent event) {
         log.info("进入事件  [放音结束]  PLAYBACK_STOP");
@@ -40,7 +40,7 @@ public class PlaybackStopEventHandler implements EslEventHandler {
         if (nextCommand == null) {
             return;
         }
-        vdnProcessHandler.doNextCommand(callInfo, deviceInfo, nextCommand);
+        processNextHandler.doNextCommand(callInfo, deviceInfo, nextCommand);
         log.info("callId:{} playstop, nextType:{}", callInfo.getCallId(), nextCommand.getNextType());
     }
 }

@@ -63,7 +63,7 @@ public class SIPCommanderFroPlatformImpl implements SIPCommanderForPlatform {
     public void register(SipServer sipServer, AgentVoInfo agentVoInfo, @Nullable WWWAuthenticateHeader www, boolean isRegister, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws SipException, InvalidArgumentException, ParseException {
         SipTransactionManager sipTransactionManager = RedisService.getSipTransactionManager();
         ParentPlatformService parentPlatformService = SipService.getParentPlatformService();
-        SipTransactionInfo sipTransactionInfo = sipTransactionManager.findParentPlatform(agentVoInfo.getAgentCode());
+        SipTransactionInfo sipTransactionInfo = sipTransactionManager.findParentPlatform(agentVoInfo.getAgentKey());
         ConfigModel configModel = parentPlatformService.random();
         SipConfigProperties deviceSipConfig = sipServer.getSipConfigProperties();
         agentVoInfo.setFsHost(configModel.getRemoteIp());
@@ -86,35 +86,35 @@ public class SIPCommanderFroPlatformImpl implements SIPCommanderForPlatform {
         PlatformRegisterManager platformRegisterManager = RedisService.getPlatformRegisterManager();
         if (www == null) {
             request =(SIPRequest) SIPRequestProvider.builder(sipServer, null, Request.REGISTER, null)
-                    .createSipURI(agentVoInfo.getAgentCode(), String.format("%s:%s", agentVoInfo.getFsHost(), agentVoInfo.getFsPost()))
+                    .createSipURI(agentVoInfo.getAgentKey(), String.format("%s:%s", agentVoInfo.getFsHost(), agentVoInfo.getFsPost()))
                     .addViaHeader(deviceSipConfig.getIp(), deviceSipConfig.getPort(), TransportType.UDP.getName(), true)
                     .createCallIdHeader(deviceSipConfig.getIp(), TransportType.UDP.getName(), callId)
-                    .createFromHeader(agentVoInfo.getAgentCode(), agentVoInfo.getFsHost(), fromTag)
-                    .createToHeader(agentVoInfo.getAgentCode(), agentVoInfo.getFsHost(), null)
+                    .createFromHeader(agentVoInfo.getAgentKey(), agentVoInfo.getFsHost(), fromTag)
+                    .createToHeader(agentVoInfo.getAgentKey(), agentVoInfo.getFsHost(), null)
                     .createCSeqHeader(RedisService.getCseqManager().getCSEQ())
                     .createUserAgentHeader()
-                    .createContactHeader(agentVoInfo.getAgentCode(), String.format("%s:%s", deviceSipConfig.getIp(), deviceSipConfig.getPort()))
+                    .createContactHeader(agentVoInfo.getAgentKey(), String.format("%s:%s", deviceSipConfig.getIp(), deviceSipConfig.getPort()))
                     .createExpiresHeader(isRegister ? agentVoInfo.getExpires() : 0)
                     .buildRequest();
             CallIdHeader callIdHeader = request.getCallIdHeader();
             //存储注册缓存
-            platformRegisterManager.updatePlatformRegisterInfo(callIdHeader.getCallId(), PlatformRegisterInfo.builder().agentCode(agentVoInfo.getAgentCode()).register(isRegister).build());
+            platformRegisterManager.updatePlatformRegisterInfo(callIdHeader.getCallId(), PlatformRegisterInfo.builder().agentKey(agentVoInfo.getAgentKey()).register(isRegister).build());
         }else {
             request = (SIPRequest) SIPRequestProvider.builder(sipServer, null, Request.REGISTER, null)
-                    .createSipURI(agentVoInfo.getAgentCode(), String.format("%s:%s", agentVoInfo.getFsHost(), agentVoInfo.getFsPost()))
+                    .createSipURI(agentVoInfo.getAgentKey(), String.format("%s:%s", agentVoInfo.getFsHost(), agentVoInfo.getFsPost()))
                     .addViaHeader(deviceSipConfig.getIp(), deviceSipConfig.getPort(), TransportType.UDP.getName(), true)
                     .createCallIdHeader(deviceSipConfig.getIp(), TransportType.UDP.getName(), callId)
-                    .createFromHeader(agentVoInfo.getAgentCode(), agentVoInfo.getFsHost(), fromTag)
-                    .createToHeader(agentVoInfo.getAgentCode(), agentVoInfo.getFsHost(), null)
+                    .createFromHeader(agentVoInfo.getAgentKey(), agentVoInfo.getFsHost(), fromTag)
+                    .createToHeader(agentVoInfo.getAgentKey(), agentVoInfo.getFsHost(), null)
                     .createCSeqHeader(RedisService.getCseqManager().getCSEQ())
                     .createUserAgentHeader()
-                    .createContactHeader(agentVoInfo.getAgentCode(), String.format("%s:%s", deviceSipConfig.getIp(), deviceSipConfig.getPort()))
+                    .createContactHeader(agentVoInfo.getAgentKey(), String.format("%s:%s", deviceSipConfig.getIp(), deviceSipConfig.getPort()))
                     .createExpiresHeader(isRegister ? agentVoInfo.getExpires() : 0)
-                    .createAuthorizationHeader(agentVoInfo.getAgentCode(), agentVoInfo.getAgentCode(),String.format("%s:%s", agentVoInfo.getFsHost(), agentVoInfo.getFsPost()), agentVoInfo.getPasswd(),www)
+                    .createAuthorizationHeader(agentVoInfo.getAgentKey(), agentVoInfo.getAgentKey(),String.format("%s:%s", agentVoInfo.getFsHost(), agentVoInfo.getFsPost()), agentVoInfo.getPasswd(),www)
                     .buildRequest();
         }
         SipSendMessage.sendMessage(sipServer, agentVoInfo, request,okEvent, error->{
-            log.info("向上级平台 [ {} ] {}发生错误： {} ", agentVoInfo.getAgentCode(),isRegister?"注册":"注销",error.getMsg());
+            log.info("向上级平台 [ {} ] {}发生错误： {} ", agentVoInfo.getAgentKey(),isRegister?"注册":"注销",error.getMsg());
             if(isRegister){
                 CallIdHeader callIdHeader = request.getCallIdHeader();
                 platformRegisterManager.delPlatformRegisterInfo(callIdHeader.getCallId());
@@ -137,15 +137,15 @@ public class SIPCommanderFroPlatformImpl implements SIPCommanderForPlatform {
             keepaliveXml.append("<Notify>\r\n");
             keepaliveXml.append("<CmdType>Keepalive</CmdType>\r\n");
             keepaliveXml.append("<SN>" + (int)((Math.random()*9+1)*100000) + "</SN>\r\n");
-            keepaliveXml.append("<DeviceID>" + agentVoInfo.getAgentCode() + "</DeviceID>\r\n");
+            keepaliveXml.append("<DeviceID>" + agentVoInfo.getCalled() + "</DeviceID>\r\n");
             keepaliveXml.append("<Status>OK</Status>\r\n");
             keepaliveXml.append("</Notify>\r\n");
         Request request = SIPRequestProvider.builder(sipServer, null, Request.MESSAGE, keepaliveXml.toString())
-                .createSipURI(agentVoInfo.getAgentCode(), String.format("%s:%s", agentVoInfo.getFsHost(), agentVoInfo.getFsPost()))
+                .createSipURI(agentVoInfo.getAgentKey(), String.format("%s:%s", agentVoInfo.getFsHost(), agentVoInfo.getFsPost()))
                 .addViaHeader(deviceSipConfig.getIp(), deviceSipConfig.getPort(), TransportType.UDP.getName(), true)
                 .createCallIdHeader(deviceSipConfig.getIp(), TransportType.UDP.getName(), null)
-                .createFromHeader(agentVoInfo.getAgentCode(), agentVoInfo.getFsHost(), SipUtils.getNewFromTag())
-                .createToHeader(agentVoInfo.getAgentCode(), agentVoInfo.getFsHost(), null)
+                .createFromHeader(agentVoInfo.getAgentKey(), agentVoInfo.getFsHost(), SipUtils.getNewFromTag())
+                .createToHeader(agentVoInfo.getAgentKey(), agentVoInfo.getFsHost(), null)
                 .createCSeqHeader(RedisService.getCseqManager().getCSEQ())
                 .createUserAgentHeader()
                 .createContentTypeHeader("application", "manscdp+xml")
@@ -165,17 +165,17 @@ public class SIPCommanderFroPlatformImpl implements SIPCommanderForPlatform {
             log.info("[向上级发送BYE]， agentInfo 为NULL");
             return;
         }
-        log.info("[向上级发送BYE]， {}", agentVoInfo.getAgentCode());
+        log.info("[向上级发送BYE]， {}", agentVoInfo.getAgentKey());
         SipConfigProperties deviceSipConfig = sipServer.getSipConfigProperties();
         Request request = SIPRequestProvider.builder(sipServer, CharsetType.GB2312.getName(), Request.BYE, null)
-                .createSipURI(agentVoInfo.getAgentCode(), String.format("%s:%s", agentVoInfo.getFsHost(), agentVoInfo.getFsPost()))
+                .createSipURI(agentVoInfo.getAgentKey(), String.format("%s:%s", agentVoInfo.getFsHost(), agentVoInfo.getFsPost()))
                 .addViaHeader(deviceSipConfig.getIp(), deviceSipConfig.getPort(), TransportType.UDP.getName(), true)
                 .createCallIdHeader(null, null, sendRtpItem.getCallId())
-                .createFromHeader(agentVoInfo.getAgentCode(), agentVoInfo.getFsHost(), SipUtils.getNewFromTag())
-                .createToHeader(agentVoInfo.getAgentCode(), agentVoInfo.getFsHost(), null)
+                .createFromHeader(agentVoInfo.getAgentKey(), agentVoInfo.getFsHost(), SipUtils.getNewFromTag())
+                .createToHeader(agentVoInfo.getAgentKey(), agentVoInfo.getFsHost(), null)
                 .createCSeqHeader(RedisService.getCseqManager().getCSEQ())
                 .createUserAgentHeader()
-                .createContactHeader(agentVoInfo.getAgentCode(), String.format("%s:%s", deviceSipConfig.getIp(), deviceSipConfig.getPort()))
+                .createContactHeader(agentVoInfo.getAgentKey(), String.format("%s:%s", deviceSipConfig.getIp(), deviceSipConfig.getPort()))
                 .buildRequest();
         if (request == null) {
             log.warn("[向上级发送bye]：无法创建 byeRequest");
@@ -189,9 +189,9 @@ public class SIPCommanderFroPlatformImpl implements SIPCommanderForPlatform {
 
         SsrcTransactionManager ssrcTransactionManager = RedisService.getSsrcTransactionManager();
         MediaServerVoService mediaServerService = SipService.getMediaServerService();
-        SsrcTransaction ssrcTransaction = ssrcTransactionManager.getParamOne(agentVoInfo.getAgentCode(), callId, stream,type);
+        SsrcTransaction ssrcTransaction = ssrcTransactionManager.getParamOne(agentVoInfo.getAgentKey(), callId, stream,type);
         if(ssrcTransaction == null){
-            log.info("[视频流停止]未找到视频流信息，坐席：{}, 流ID: {}", agentVoInfo.getAgentCode(), stream);
+            log.info("[视频流停止]未找到视频流信息，坐席：{}, 流ID: {}", agentVoInfo.getAgentKey(), stream);
             if(errorEvent != null){
                 errorEvent.response(new EventResult(new RestResultEvent(RespCode.CODE_2.getValue(),"未找到视频流信息")));
             }
@@ -200,16 +200,16 @@ public class SIPCommanderFroPlatformImpl implements SIPCommanderForPlatform {
         MediaServerVo mediaServerVo = mediaServerService.findOnLineMediaServerId(ssrcTransaction.getMediaServerId());
         SsrcConfigManager ssrcConfigManager = RedisService.getSsrcConfigManager();
         ssrcConfigManager.releaseSsrc(ssrcTransaction.getMediaServerId(),ssrcTransaction.getSsrc());
-        ssrcTransactionManager.remove(ssrcTransaction.getAgentCode(),ssrcTransaction.getStream());
+        ssrcTransactionManager.remove(ssrcTransaction.getAgentKey(),ssrcTransaction.getStream());
         SipTransactionInfo sipTransactionInfo = ssrcTransaction.getSipTransactionInfo();
         String localIp = sipServer.getLocalIp(agentVoInfo.getFsHost());
         SipConfigProperties sipConfigProperties = sipServer.getSipConfigProperties();
         //构建器
         Request request = SIPRequestProvider.builder(sipServer, null, Request.BYE,null)
-                .createSipURI(agentVoInfo.getAgentCode(), String.format("%s:%s", agentVoInfo.getFsHost(), agentVoInfo.getFsPost()))
+                .createSipURI(agentVoInfo.getAgentKey(), String.format("%s:%s", agentVoInfo.getFsHost(), agentVoInfo.getFsPost()))
                 .addViaHeader(localIp, sipConfigProperties.getPort(), TransportType.getName(agentVoInfo.getTransport()), false)
-                .createFromHeader(agentVoInfo.getAgentCode(), agentVoInfo.getFsHost(), sipTransactionInfo.getFromTag())
-                .createToHeader(agentVoInfo.getAgentCode(), agentVoInfo.getFsHost(), sipTransactionInfo.getToTag())
+                .createFromHeader(agentVoInfo.getAgentKey(), agentVoInfo.getFsHost(), sipTransactionInfo.getFromTag())
+                .createToHeader(agentVoInfo.getAgentKey(), agentVoInfo.getFsHost(), sipTransactionInfo.getToTag())
                 .createCSeqHeader(RedisService.getCseqManager().getCSEQ())
                 .createCallIdHeader(null,null,sipTransactionInfo.getCallId())
                 .createUserAgentHeader()
@@ -241,14 +241,14 @@ public class SIPCommanderFroPlatformImpl implements SIPCommanderForPlatform {
 
         //构建器
         Request request = SIPRequestProvider.builder(sipServer, null, Request.SUBSCRIBE, null)
-                .createSipURI(agentVoInfo.getAgentCode(), String.format("%s:%s", agentVoInfo.getFsHost(), agentVoInfo.getFsPost()))
+                .createSipURI(agentVoInfo.getAgentKey(), String.format("%s:%s", agentVoInfo.getFsHost(), agentVoInfo.getFsPost()))
                 .addViaHeader(localIp, sipConfigProperties.getPort(), TransportType.UDP.getName(), true)
-                .createFromHeader(agentVoInfo.getAgentCode(), agentVoInfo.getFsHost(), SipUtils.getNewFromTag())
-                .createToHeader(agentVoInfo.getAgentCode(), agentVoInfo.getFsHost(), null)
+                .createFromHeader(agentVoInfo.getAgentKey(), agentVoInfo.getFsHost(), SipUtils.getNewFromTag())
+                .createToHeader(agentVoInfo.getAgentKey(), agentVoInfo.getFsHost(), null)
                 .createCallIdHeader(sipConfigProperties.getIp(), TransportType.UDP.getName(),requestOld == null?null:requestOld.getCallIdHeader().getCallId())
                 .createCSeqHeader(RedisService.getCseqManager().getCSEQ())
                 .createUserAgentHeader()
-                .createContactHeader(agentVoInfo.getAgentCode(),String.format("%s:%s",localIp, sipConfigProperties.getPort()))
+                .createContactHeader(agentVoInfo.getAgentKey(),String.format("%s:%s",localIp, sipConfigProperties.getPort()))
                 .createExpiresHeader(600)
                 .createEventHeader(null,"presence")
                 .createAcceptHeader("application","pidf+xml")
@@ -272,7 +272,7 @@ public class SIPCommanderFroPlatformImpl implements SIPCommanderForPlatform {
         if(tcp){
             tcpActive = "TCP-ACTIVE".equals(StreamModeType.getName(agentVoInfo.getStreamMode()));
         }
-        SendRtp sendRtp = MediaClient.createSendRtp(mediaServerVo,null, null, 0,ssrcInfo.getSsrc(),agentVoInfo.getAgentCode(),"push_web_rtp",agentVoInfo.getAgentCode(), tcp,tcpActive,sipServer.getVideoProperties().getServerId(),null,true, null);
+        SendRtp sendRtp = MediaClient.createSendRtp(mediaServerVo,null, null, 0,ssrcInfo.getSsrc(),agentVoInfo.getAgentKey(),"push_web_rtp",agentVoInfo.getAgentKey(), tcp,tcpActive,sipServer.getVideoProperties().getServerId(),null,true, null);
         if (sendRtp == null) {
             ssrcConfigManager.releaseSsrc(mediaServerVo.getId(),ssrcInfo.getSsrc());
             errorEvent.response(new EventResult(new RestResultEvent(RespCode.CODE_2.getValue(),"[视频语音流ACK] sendRtp is null 服务器端口资源不足")));
@@ -319,11 +319,11 @@ public class SIPCommanderFroPlatformImpl implements SIPCommanderForPlatform {
                 .createSipURI(caller, String.format("%s:%s", agentVoInfo.getFsHost(), agentVoInfo.getFsPost()))
                 .addViaHeader(localIp, sipConfigProperties.getPort(), TransportType.UDP.getName(), true)
                 .createCallIdHeader(localIp,TransportType.getName(agentVoInfo.getTransport()),null)
-                .createFromHeader(agentVoInfo.getAgentCode(), agentVoInfo.getFsHost(), SipUtils.getNewFromTag())
+                .createFromHeader(agentVoInfo.getAgentKey(), agentVoInfo.getFsHost(), SipUtils.getNewFromTag())
                 .createToHeader(caller, agentVoInfo.getFsHost(), null)
                 .createCSeqHeader(RedisService.getCseqManager().getCSEQ())
                 .createContentTypeHeader("application", "sdp")
-                .createContactHeader(agentVoInfo.getAgentCode(),String.format("%s:%s",localIp, sipConfigProperties.getPort()))
+                .createContactHeader(agentVoInfo.getAgentKey(),String.format("%s:%s",localIp, sipConfigProperties.getPort()))
                 .createUserAgentHeader()
                 .buildRequest();
         String callId = request.getCallId().getCallId();
@@ -342,11 +342,11 @@ public class SIPCommanderFroPlatformImpl implements SIPCommanderForPlatform {
             ResponseEvent event = (ResponseEvent) ok.getEvent();
             SIPResponse response = (SIPResponse) event.getResponse();
             // 这里为例避免一个通道的点播多次点播只有一个callID这个参数使用一个固定值
-            ssrcTransactionManager.put(agentVoInfo.getAgentCode(),callId,"rtp",stream, ssrcInfo.getSsrc(), agentVoInfo.getAgentCode(),response, VideoStreamType.call_phone);
+            ssrcTransactionManager.put(agentVoInfo.getAgentKey(),callId,"rtp",stream, ssrcInfo.getSsrc(), agentVoInfo.getAgentKey(),response, VideoStreamType.call_phone);
             okEvent.response(ok);
         },(error)->{
-            RedisService.getSendRtpManager().deleteSendRTPServer(agentVoInfo.getAgentCode(),agentVoInfo.getAgentCode(),callId);
-            ssrcTransactionManager.remove(agentVoInfo.getAgentCode(),ssrcInfo.getStream(),callId,null);
+            RedisService.getSendRtpManager().deleteSendRTPServer(agentVoInfo.getAgentKey(),agentVoInfo.getAgentKey(),callId);
+            ssrcTransactionManager.remove(agentVoInfo.getAgentKey(),ssrcInfo.getStream(),callId,null);
             ssrcConfigManager.releaseSsrc(mediaServerVo.getId(),ssrcInfo.getSsrc());
             errorEvent.response(error);
         });

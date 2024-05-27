@@ -20,27 +20,27 @@ public class SipTransactionManager {
     private String PARENT_PLATFORM_PREFIX =  String.format("%s%s",SipConstant.PARENT_PLATFORM_PREFIX,SIP_TRANSACTION);
 
 
-    public void putDevice(String agentCode, SipTransactionInfo sipTransactionInfo){
-        RedisUtils.set(getKey(DEVICE_PREFIX, agentCode),sipTransactionInfo);
+    public void putDevice(String agentKey, SipTransactionInfo sipTransactionInfo){
+        RedisUtils.set(getKey(DEVICE_PREFIX, agentKey),sipTransactionInfo);
     }
 
-    public SipTransactionInfo findDevice(String agentCode){
-        return (SipTransactionInfo) RedisUtils.get(getKey(DEVICE_PREFIX, agentCode));
+    public SipTransactionInfo findDevice(String agentKey){
+        return (SipTransactionInfo) RedisUtils.get(getKey(DEVICE_PREFIX, agentKey));
     }
-    public void delDevice(String agentCode){
-        RedisUtils.del(getKey(DEVICE_PREFIX,agentCode));
-    }
-
-    public void putParentPlatform(String agentCode, SipTransactionInfo sipTransactionInfo){
-        RedisUtils.set(getKey(PARENT_PLATFORM_PREFIX, agentCode),sipTransactionInfo);
+    public void delDevice(String agentKey){
+        RedisUtils.del(getKey(DEVICE_PREFIX,agentKey));
     }
 
-    public SipTransactionInfo findParentPlatform(String agentCode){
-        return (SipTransactionInfo) RedisUtils.get(getKey(PARENT_PLATFORM_PREFIX,agentCode));
+    public void putParentPlatform(String agentKey, SipTransactionInfo sipTransactionInfo){
+        RedisUtils.set(getKey(PARENT_PLATFORM_PREFIX, agentKey),sipTransactionInfo);
     }
 
-    public void delParentPlatform(String agentCode){
-        RedisUtils.del(getKey(PARENT_PLATFORM_PREFIX,agentCode));
+    public SipTransactionInfo findParentPlatform(String agentKey){
+        return (SipTransactionInfo) RedisUtils.get(getKey(PARENT_PLATFORM_PREFIX,agentKey));
+    }
+
+    public void delParentPlatform(String agentKey){
+        RedisUtils.del(getKey(PARENT_PLATFORM_PREFIX,agentKey));
     }
 
     private String getKey(String prefix,String key) {

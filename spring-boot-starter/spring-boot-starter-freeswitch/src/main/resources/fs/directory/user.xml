@@ -15,7 +15,7 @@
 			<groups>
 				<group name="default">
 					<users>
-						<user id="${user.number}">
+						<user id="${user.sip}">
 							<params>
 								<param name="password" value="${user.password}"/>
 								<param name="vm-password" value="${user.password}"/>

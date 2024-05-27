@@ -1,6 +1,6 @@
 package cn.com.tzy.springbootstarterfreeswitch.model.fs;
 
-import cn.com.tzy.springbootstarterfreeswitch.pool.AgentStrategy;
+import cn.com.tzy.springbootstarterfreeswitch.client.fs.AgentStrategy;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

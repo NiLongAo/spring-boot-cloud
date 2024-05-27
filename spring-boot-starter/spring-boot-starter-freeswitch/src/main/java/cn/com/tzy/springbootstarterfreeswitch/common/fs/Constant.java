@@ -1,6 +1,8 @@
 package cn.com.tzy.springbootstarterfreeswitch.common.fs;
 
 public class Constant {
+    public static final String AGENT_SIP_PREFIX = "01";//客服SIP号码前缀
+    public static final String CONFERENCE_ID_PREFIX = "02";//会议号码前缀
     public static final String AT = "@";
     public static final String CO = ":";
     public static final String UNDER_LINE = "_";
@@ -31,6 +33,8 @@ public class Constant {
     public final static String ANSWER = "answer";
     // 如果设置为true，它将在桥接返回后驻留呼叫。 在transfer_after_bridge和hangup_after_bridge之前进行检查。
     public final static String PARK_AFTER_BRIDGE = "park_after_bridge=true";
+    // 语音文件地址
+    public final static String SOUND_PREFIX = "/usr/share/freeswitch/sounds/zh/cn/link";
     //  控制处于桥接状态且被叫方（B）挂断时主叫方（A）发生的情况。如果true拨号计划将停止处理，并且A分支将在B分支终止时终止。如果false（默认）B腿终止后，拨号计划将继续处理。
     public final static String HANGUP_AFTER_BRIDGE = "hangup_after_bridge=false";
     public final static String UUID_KILL = "uuid_kill";

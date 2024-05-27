@@ -47,7 +47,7 @@ public class DeviceInfo implements Serializable {
     private Integer deviceType;
 
     /**
-     * 1:呼入,2:外呼,3:内呼,4:转接,5:咨询,6:监听,7:强插,8:耳语
+     * 1:呼入,2:外呼,3:内呼,4:转接,5:咨询,6:监听,7:强插,8:耳语 9:会议
      */
     private Integer cdrType;
 

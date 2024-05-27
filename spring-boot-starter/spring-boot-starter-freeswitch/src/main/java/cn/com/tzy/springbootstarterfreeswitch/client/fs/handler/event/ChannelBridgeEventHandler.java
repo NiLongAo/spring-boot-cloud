@@ -1,6 +1,5 @@
 package cn.com.tzy.springbootstarterfreeswitch.client.fs.handler.event;
 
-import cn.com.tzy.springbootstarterfreeswitch.client.fs.handler.message.RecordCallHandler;
 import cn.com.tzy.springbootstarterfreeswitch.enums.fs.AgentStateEnum;
 import cn.com.tzy.springbootstarterfreeswitch.enums.fs.CallTypeEunm;
 import cn.com.tzy.springbootstarterfreeswitch.enums.fs.DirectionEnum;
@@ -11,10 +10,13 @@ import cn.com.tzy.springbootstarterfreeswitch.model.fs.CallLogInfo;
 import cn.com.tzy.springbootstarterfreeswitch.model.fs.GroupInfo;
 import cn.com.tzy.springbootstarterfreeswitch.model.message.RecordCallModel;
 import cn.com.tzy.springbootstarterfreeswitch.model.notice.CallMessage;
+import cn.com.tzy.springbootstarterfreeswitch.client.fs.handler.StrategyHandler;
+import cn.com.tzy.springbootstarterfreeswitch.client.fs.handler.strategy.CallStrategyHandler;
 import cn.com.tzy.springbootstarterfreeswitch.redis.RedisService;
 import cn.com.tzy.springbootstarterfreeswitch.service.FsService;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
+import link.thingscloud.freeswitch.esl.InboundClient;
 import link.thingscloud.freeswitch.esl.constant.EventNames;
 import link.thingscloud.freeswitch.esl.spring.boot.starter.annotation.EslEventName;
 import link.thingscloud.freeswitch.esl.spring.boot.starter.handler.EslEventHandler;
@@ -26,7 +28,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.time.Instant;
 import java.util.Date;
 
@@ -42,8 +43,11 @@ public class ChannelBridgeEventHandler implements EslEventHandler {
     protected String recordPath;
     @Value("${fs.record.file:wav}")
     protected String recordFile;
-    @Resource
-    private RecordCallHandler recordCallHandler;
+    private StrategyHandler strategyHandler;
+    public ChannelBridgeEventHandler(InboundClient inboundClient){
+        strategyHandler = new CallStrategyHandler(inboundClient);
+    }
+
     @Override
     public void handle(String addr, EslEvent event) {
         log.info("进入事件 [桥接事件] CHANNEL_BRIDGE");
@@ -88,13 +92,13 @@ public class ChannelBridgeEventHandler implements EslEventHandler {
              */
             if (callInfo.getCallType() == CallTypeEunm.OUTBOUNT_CALL && groupInfo.getRecordType() == 2) {
                 String record = String.format("%s/%s/%s_%s_%s.%s",recordPath,DateUtil.format(new Date(), DatePattern.PURE_DATE_PATTERN),callInfo.getCallId(),callInfo.getDeviceList().get(0),Instant.now().getEpochSecond(),recordFile);
-                recordCallHandler.handler(RecordCallModel.builder().mediaAddr(addr).deviceId(callInfo.getDeviceList().get(0)).playPath(record).build());
+                strategyHandler.handler(RecordCallModel.builder().mediaAddr(addr).deviceId(callInfo.getDeviceList().get(0)).playPath(record).build());
                 if (deviceInfo2 != null && deviceInfo2.getBridgeTime() == null) {
                     deviceInfo2.setRecord(record);
                 }
             } else if (callInfo.getCallType() == CallTypeEunm.INBOUND_CALL) {
                 String record = String.format("%s/%s/%s_%s_%s.%s",recordPath,DateUtil.format(new Date(), DatePattern.PURE_DATE_PATTERN),callInfo.getCallId(),uniqueId,Instant.now().getEpochSecond(),recordFile);
-                recordCallHandler.handler(RecordCallModel.builder().mediaAddr(addr).deviceId(uniqueId).playPath(record).build());
+                strategyHandler.handler(RecordCallModel.builder().mediaAddr(addr).deviceId(uniqueId).playPath(record).build());
                 if (deviceInfo1 != null && deviceInfo1.getBridgeTime() == null) {
                     deviceInfo1.setRecord(record);
                 }

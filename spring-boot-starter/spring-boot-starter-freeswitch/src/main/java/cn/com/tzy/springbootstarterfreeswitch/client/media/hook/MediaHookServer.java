@@ -234,12 +234,12 @@ public class MediaHookServer {
                     InviteInfo inviteInfo = inviteStreamManager.getInviteInfoByStream(null, hookVo.getStream());
                     if(inviteInfo != null && (inviteInfo.getType() == VideoStreamType.call_phone || inviteInfo.getType() == VideoStreamType.playback)){
                         if(hookVo.isRegist()){
-                            agentVoService.startPlay(inviteInfo.getAgentCode(),inviteInfo.getStream());
+                            agentVoService.startPlay(inviteInfo.getAgentKey(),inviteInfo.getStream());
                         }else {
                             //设备播放流
-                            agentVoService.stopPlay(inviteInfo.getAgentCode());
+                            agentVoService.stopPlay(inviteInfo.getAgentKey());
                             inviteStreamManager.removeInviteInfo(inviteInfo);
-                            String key = String.format("%s%s",DeferredResultHolder.CALLBACK_CMD_STOP,inviteInfo.getAgentCode());
+                            String key = String.format("%s%s",DeferredResultHolder.CALLBACK_CMD_STOP,inviteInfo.getAgentKey());
                             deferredResultHolder.invokeAllResult(key, RestResult.result(RespCode.CODE_0.getValue(),"停止点播成功"));
                         }
                     }
@@ -251,10 +251,10 @@ public class MediaHookServer {
                             paramOne.setOnPush(true);
                             ssrcTransactionManager.put(paramOne);
                         }
-                        FsService.getSendAgentMessage().sendMessage(AgentCommon.SOCKET_AGENT,AgentCommon.AGENT_OUT_PUSH_PATH_OK,paramOne.getAgentCode(),RestResult.result(RespCode.CODE_0.getValue(),"推流接收成功",null));
+                        FsService.getSendAgentMessage().sendMessage(AgentCommon.SOCKET_AGENT,AgentCommon.AGENT_OUT_PUSH_PATH_OK,paramOne.getAgentKey(),RestResult.result(RespCode.CODE_0.getValue(),"推流接收成功",null));
                     }else {
-                        ssrcTransactionManager.remove(paramOne.getAgentCode(),paramOne.getStream());
-                        FsService.getSendAgentMessage().sendMessage(AgentCommon.SOCKET_AGENT,AgentCommon.AGENT_OUT_PUSH_PATH_LOGOUT,paramOne.getAgentCode(),RestResult.result(RespCode.CODE_0.getValue(),"推流关闭成功",null));
+                        ssrcTransactionManager.remove(paramOne.getAgentKey(),paramOne.getStream());
+                        FsService.getSendAgentMessage().sendMessage(AgentCommon.SOCKET_AGENT,AgentCommon.AGENT_OUT_PUSH_PATH_LOGOUT,paramOne.getAgentKey(),RestResult.result(RespCode.CODE_0.getValue(),"推流关闭成功",null));
                     }
                 }else {
                     log.error("[ZLM HOOK] 未知流，请查询接口, {}->{}->{}/{}", hookVo.getMediaServerId(), hookVo.getSchema(), hookVo.getApp(), hookVo.getStream());
@@ -264,9 +264,9 @@ public class MediaHookServer {
                     List<SendRtp> sendRtpList = sendRtpManager.querySendRTPServerByStream(hookVo.getStream());
                     for (SendRtp sendRtp : sendRtpList) {
                         // 设备编号 或 上级平台
-                        AgentVoInfo agentVoInfo = RedisService.getAgentInfoManager().get(sendRtp.getAgentCode());
+                        AgentVoInfo agentVoInfo = RedisService.getAgentInfoManager().get(sendRtp.getAgentKey());
                         if(agentVoInfo == null){
-                            log.warn("[ZLM HOOK 未获取客服编号：{} 信息]",sendRtp.getAgentCode());
+                            log.warn("[ZLM HOOK 未获取客服编号：{} 信息]",sendRtp.getAgentKey());
                             continue;
                         }
                         try {
@@ -275,7 +275,7 @@ public class MediaHookServer {
                             }else {
                                 sipCommander.streamByeCmd(sipServer, agentVoInfo,sendRtp.getStreamId(),sendRtp.getCallId(),null,null,null);
                             }
-                            sendRtpManager.deleteSendRTPServer(sendRtp.getAgentCode(),sendRtp.getStreamId(),sendRtp.getCallId());
+                            sendRtpManager.deleteSendRTPServer(sendRtp.getAgentKey(),sendRtp.getStreamId(),sendRtp.getCallId());
                         }catch (Exception e){
                             log.error("[命令发送失败] 国标级联 发送BYE: {}", e.getMessage());
                         }
@@ -318,10 +318,10 @@ public class MediaHookServer {
                     return deferredResult;
                 }
                 //收到无人观看说明流也没有在往上级推送
-                if(sendRtpManager.isChannelSendingRTP(inviteInfo.getAgentCode())){
-                    List<SendRtp> sendRtpList = sendRtpManager.querySendRTPServerByChnnelId(inviteInfo.getAgentCode());
+                if(sendRtpManager.isChannelSendingRTP(inviteInfo.getAgentKey())){
+                    List<SendRtp> sendRtpList = sendRtpManager.querySendRTPServerByChnnelId(inviteInfo.getAgentKey());
                     for (SendRtp sendRtp : sendRtpList) {
-                        AgentVoInfo agentVoInfo = agentInfoManager.get(sendRtp.getAgentCode());
+                        AgentVoInfo agentVoInfo = agentInfoManager.get(sendRtp.getAgentKey());
                         if(agentVoInfo != null && StringUtils.isBlank(agentVoInfo.getRemoteAddress())){
                             try {
                                 sipCommanderForPlatform.streamByeCmd(sipServer, agentVoInfo,sendRtp,null,null);
@@ -331,7 +331,7 @@ public class MediaHookServer {
                         }
                     }
                 }
-                AgentVoInfo agentVoInfo = agentInfoManager.get(inviteInfo.getAgentCode());
+                AgentVoInfo agentVoInfo = agentInfoManager.get(inviteInfo.getAgentKey());
                 if(agentVoInfo != null){
                     try {
                         sipCommander.streamByeCmd(sipServer, agentVoInfo,inviteInfo.getStream(),null,null,(ok)->{
@@ -404,7 +404,7 @@ public class MediaHookServer {
                 for (SendRtp sendRtp : sendRtpList) {
                     ssrcConfigManager.releaseSsrc(sendRtp.getMediaServerId(),sendRtp.getSsrc());
                     // 设备编号 或 上级平台
-                    String platformId = sendRtp.getAgentCode();
+                    String platformId = sendRtp.getAgentKey();
                     AgentVoInfo agentVoInfo = agentInfoManager.get(platformId);
                     if(agentVoInfo == null){
                         log.error("[命令发送失败] 国标级联 发送BYE: {}", platformId);
@@ -419,7 +419,7 @@ public class MediaHookServer {
                     }catch (Exception e){
                         log.error("[命令发送失败] 国标级联 发送BYE: {}", e.getMessage());
                     }
-                    sendRtpManager.deleteSendRTPServer(sendRtp.getAgentCode(),sendRtp.getStreamId(),sendRtp.getCallId());
+                    sendRtpManager.deleteSendRTPServer(sendRtp.getAgentKey(),sendRtp.getStreamId(),sendRtp.getCallId());
                 }
             });
         }

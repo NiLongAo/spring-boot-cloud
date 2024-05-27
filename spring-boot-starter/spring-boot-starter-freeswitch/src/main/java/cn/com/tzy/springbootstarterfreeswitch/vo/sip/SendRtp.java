@@ -26,7 +26,7 @@ public class SendRtp {
      /**
      * 对应设备id
      */
-    private String agentCode;
+    private String agentKey;
     /**
      * 直播流的应用名
      */

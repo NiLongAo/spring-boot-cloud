@@ -43,5 +43,36 @@ public class MakeCallModel implements MessageModel {
      */
     private RouteGatewayModel gatewayModel;
 
+    @Data
+    @SuperBuilder(toBuilder = true)
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class RouteGatewayModel implements MessageModel {
+        /**
+         * 媒体IP
+         */
+        private String mediaHost;
+        /**
+         * 媒体端口
+         */
+        private Integer mediaPort;
+        /**
+         * 主叫号码前缀
+         */
+        private String callerPrefix;
+        /**
+         * 被叫号码前缀
+         */
+        private String calledPrefix;
+        /**
+         * 媒体拨号计划文件
+         */
+        private String profile;
+        /**
+         * sip头
+         */
+        private List<String> sipHeaderList;
+
+    }
 
 }

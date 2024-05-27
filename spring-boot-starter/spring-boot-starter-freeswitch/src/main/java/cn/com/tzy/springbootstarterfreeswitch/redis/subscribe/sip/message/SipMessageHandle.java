@@ -54,33 +54,33 @@ public class SipMessageHandle extends AbstractMessageListener {
             Object deserialize = SerializationUtils.deserialize(Base64.decode((String) body));
             MessageTypeVo vo = (MessageTypeVo) deserialize;
             if(MessageTypeVo.TypeEnum.SIP.getValue()== vo.getType()){
-                if(!RedisService.getRegisterServerManager().isNotServerDevice(vo.getAgentCode())){
-                    log.error("[SIP接收消息] [设备] 未获取注册地址 gbId : {}",vo.getAgentCode());
-                    sendErrorMsg(sipServer, vo.getMessage(), String.format("未获取设备注册地址 国标编号 :%s",vo.getAgentCode()));
+                if(!RedisService.getRegisterServerManager().isNotServerDevice(vo.getAgentKey())){
+                    log.error("[SIP接收消息] [设备] 未获取注册地址 gbId : {}",vo.getAgentKey());
+                    sendErrorMsg(sipServer, vo.getMessage(), String.format("未获取设备注册地址 国标编号 :%s",vo.getAgentKey()));
                     return;
                 }
-                Address address = RedisService.getRegisterServerManager().getDevice(vo.getAgentCode());
+                Address address = RedisService.getRegisterServerManager().getDevice(vo.getAgentKey());
                 if(address == null){
-                    log.warn("[SIP接收消息] [设备] 在其他服务注册 gbId : {}",vo.getAgentCode());
+                    log.warn("[SIP接收消息] [设备] 在其他服务注册 gbId : {}",vo.getAgentKey());
                     return;
                 }
-                AgentVoInfo agentVoInfo = RedisService.getAgentInfoManager().get(vo.getAgentCode());
+                AgentVoInfo agentVoInfo = RedisService.getAgentInfoManager().get(vo.getAgentKey());
                 if(agentVoInfo != null &&  nacosDiscoveryProperties.getIp().equals(address.getIp()) &&  nacosDiscoveryProperties.getPort() == address.getPort()){
                     String localIp = sipServer.getLocalIp(agentVoInfo.getFsHost());
                     handleMessage(localIp,vo.getMessage());
                 }
             }else if(MessageTypeVo.TypeEnum.SOCKET.getValue()== (vo.getType())){
-                if(!RedisService.getRegisterServerManager().isNotPlatformDevice(vo.getAgentCode())){
-                    log.error("[SIP接收消息] [国标级联] 未获取注册地址 gbId : {}",vo.getAgentCode());
-                    sendErrorMsg(sipServer, vo.getMessage(), String.format("未获取国标级联注册地址 国标编号 :%s",vo.getAgentCode()));
+                if(!RedisService.getRegisterServerManager().isNotPlatformDevice(vo.getAgentKey())){
+                    log.error("[SIP接收消息] [国标级联] 未获取注册地址 gbId : {}",vo.getAgentKey());
+                    sendErrorMsg(sipServer, vo.getMessage(), String.format("未获取国标级联注册地址 国标编号 :%s",vo.getAgentKey()));
                     return;
                 }
-                Address address = RedisService.getRegisterServerManager().getPlatform(vo.getAgentCode());
+                Address address = RedisService.getRegisterServerManager().getPlatform(vo.getAgentKey());
                 if(address == null){
-                    log.warn("[SIP接收消息] [设备] 在其他服务注册 gbId : {}",vo.getAgentCode());
+                    log.warn("[SIP接收消息] [设备] 在其他服务注册 gbId : {}",vo.getAgentKey());
                     return;
                 }
-                AgentVoInfo agentVoInfo = RedisService.getAgentInfoManager().get(vo.getAgentCode());
+                AgentVoInfo agentVoInfo = RedisService.getAgentInfoManager().get(vo.getAgentKey());
                 if(agentVoInfo != null &&  nacosDiscoveryProperties.getIp().equals(address.getIp()) &&  nacosDiscoveryProperties.getPort() == address.getPort()){
                     String localIp = sipServer.getLocalIp(agentVoInfo.getFsHost());
                     handleMessage(localIp,vo.getMessage());

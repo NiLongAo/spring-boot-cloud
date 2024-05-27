@@ -65,17 +65,17 @@ public class MessageRequestProcessor extends AbstractSipRequestEvent implements 
         AgentInfoManager agentInfoManager = RedisService.getAgentInfoManager();
 
         SIPRequest sipRequest = (SIPRequest)evt.getRequest();
-        String agentCode = SipUtils.getUserIdFromHeader(evt.getRequest());
+        String agentKey = SipUtils.getUserIdFromHeader(evt.getRequest());
         CallIdHeader callIdHeader = sipRequest.getCallIdHeader();
         // 先从会话内查找
         SsrcTransaction ssrcTransaction = ssrcTransactionManager.getParamOne(null, callIdHeader.getCallId(), null,null);
         // 兼容海康 媒体通知 消息from字段不是设备ID的问题
         if (ssrcTransaction != null) {
-            agentCode = ssrcTransaction.getAgentCode();
+            agentKey = ssrcTransaction.getAgentKey();
         }
         SIPRequest request = (SIPRequest) evt.getRequest();
         // 查询设备是否存在
-        AgentVoInfo agentVoInfo = agentInfoManager.get(agentCode);
+        AgentVoInfo agentVoInfo = agentInfoManager.get(agentKey);
         if(agentVoInfo != null){
             String hostAddress = request.getRemoteAddress().getHostAddress();
             int remotePort = request.getRemotePort();
@@ -87,10 +87,10 @@ public class MessageRequestProcessor extends AbstractSipRequestEvent implements 
         try {
             if(agentVoInfo == null ){
                 // 不存在则回复404
-                responseAck(request, Response.NOT_FOUND, "device "+ agentCode +" not found");
-                log.warn("[设备未找到 ]deviceId: {}, callId: {}", agentCode, callIdHeader.getCallId());
+                responseAck(request, Response.NOT_FOUND, "device "+ agentKey +" not found");
+                log.warn("[设备未找到 ]deviceId: {}, callId: {}", agentKey, callIdHeader.getCallId());
                 String key = String.format("%s:%s", SipSubscribeHandle.VIDEO_SIP_ERROR_EVENT_SUBSCRIBE_MANAGER, callIdHeader.getCallId());
-                RedisUtils.redisTemplate.convertAndSend(key, SerializationUtils.serialize(new EventResult(new RestResultEvent(RespCode.CODE_2.getValue(),"[ 设备未找到 ]agentCode: {}",agentCode))));
+                RedisUtils.redisTemplate.convertAndSend(key, SerializationUtils.serialize(new EventResult(new RestResultEvent(RespCode.CODE_2.getValue(),"[ 设备未找到 ]agentCode: {}",agentKey))));
                 return;
             }
             Element rootElement = getRootElement(evt);

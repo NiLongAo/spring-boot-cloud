@@ -64,8 +64,8 @@ public class RegisterRequestProcessor extends AbstractSipRequestEvent implements
             // 注册标志
             boolean registerFlag = request.getExpires().getExpires() > 0;
             String title = registerFlag ? "[注册请求]": "[注销请求]";
-            String agentCode = ((SipUri)(((FromHeader) request.getHeader(FromHeader.NAME)).getAddress()).getURI()).getUser();
-            AgentVoInfo agentVoInfo = agentVoService.getAgentBySip(agentCode);
+            String agentKey = ((SipUri)(((FromHeader) request.getHeader(FromHeader.NAME)).getAddress()).getURI()).getUser();
+            AgentVoInfo agentVoInfo = agentVoService.getAgentByKey(agentKey);
             agentVoInfo.setLoginType(LoginTypeEnum.SOCKET.getType());
             agentVoInfo.setAgentState(AgentStateEnum.LOGIN);
             Address remoteAddress = SipUtils.getRemoteAddressFromRequest(request, videoProperties.getSipUseSourceIpAsRemoteAddress());
@@ -80,12 +80,12 @@ public class RegisterRequestProcessor extends AbstractSipRequestEvent implements
                 sipMessageHandle.handleMessage(request.getLocalAddress().getHostAddress(), response);
                 return;
             }
-            log.info("[{}] 设备：{}, 开始处理: {}",title, agentCode, remoteAddress);
+            log.info("[{}] 设备：{}, 开始处理: {}",title, agentKey, remoteAddress);
             if (registerFlag) {
                 //是否已注册 注册过则续订
-                SipTransactionInfo sipTransactionInfo = sipTransactionManager.findDevice(agentCode);
+                SipTransactionInfo sipTransactionInfo = sipTransactionManager.findDevice(agentKey);
                 if(sipTransactionInfo != null && request.getCallIdHeader().getCallId().equals(sipTransactionInfo.getCallId())){
-                    log.info("[{}] 注册续订: {}",title, agentCode);
+                    log.info("[{}] 注册续订: {}",title, agentKey);
                     agentVoInfo.setExpires(request.getExpires().getExpires());
                     agentVoInfo.setRemoteAddress(String.format("%s:%s",remoteAddress.getIp(),remoteAddress.getPort()));
                     agentVoInfo.setRenewTime(new Date());
@@ -138,7 +138,7 @@ public class RegisterRequestProcessor extends AbstractSipRequestEvent implements
             sipMessageHandle.handleMessage(request.getLocalAddress().getHostAddress(), response);
             // 注册成功
             if (registerFlag) {
-                log.info("[{}] deviceId: {}->{}",title,  agentCode, requestAddress);
+                log.info("[{}] deviceId: {}->{}",title,  agentKey, requestAddress);
                 // 注册成功
                 agentVoInfo.setExpires(request.getExpires().getExpires());
                 // 判断TCP还是UDP
@@ -149,8 +149,8 @@ public class RegisterRequestProcessor extends AbstractSipRequestEvent implements
                 agentVoInfo.setRenewTime(new Date());
                 agentVoService.online(agentVoInfo,new SipTransactionInfo((SIPResponse)response));
             } else {
-                log.info("[{}] deviceId: {}->{}",title ,agentCode, requestAddress);
-                agentVoService.offline(agentCode);
+                log.info("[{}] deviceId: {}->{}",title ,agentKey, requestAddress);
+                agentVoService.offline(agentKey);
             }
         }catch (NoSuchAlgorithmException | SipException | ParseException e){
             log.error(e.getMessage());
