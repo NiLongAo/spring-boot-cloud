@@ -59,6 +59,18 @@ public class SipConstant {
      */
     public static final String VIDEO_SIP_OK_EVENT_SUBSCRIBE_MANAGER = "FS_SIP_OK_EVENT_SUBSCRIBE_MANAGER:";
     /**
+     * Sip消息订阅key
+     */
+    public static final String VIDEO_AGENT_EVENT_SUBSCRIBE_MANAGER = "FS_AGENT_EVENT_SUBSCRIBE_MANAGER";
+    /**
+     * Sip错误消息订阅key
+     */
+    public static final String VIDEO_AGENT_ERROR_EVENT_SUBSCRIBE_MANAGER = "FS_AGENT_ERROR_EVENT_SUBSCRIBE_MANAGER:";
+    /**
+     * Sip正确消息订阅key
+     */
+    public static final String VIDEO_AGENT_OK_EVENT_SUBSCRIBE_MANAGER = "FS_AGENT_OK_EVENT_SUBSCRIBE_MANAGER:";
+    /**
      * 上级平台注册缓存(平台注册信息 用于二次认证找到对应平台)
      */
     public static final String PLATFORM_REGISTER_CATCH_PREFIX = "FS_PLATFORM_REGISTER_CATCH:";

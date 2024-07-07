@@ -1,6 +1,5 @@
 package cn.com.tzy.springbootfs.config.socket.common.agent;
 
-import cn.com.tzy.springbootstarterfreeswitch.enums.sip.VideoStreamType;
 import cn.com.tzy.springbootstartersocketio.message.Message;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,19 +7,20 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 /**
- * 用户拨打电话参数
+ * 更新用户状态或 获取客服最新信息
  */
 @Data
 @SuperBuilder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class AgentInCallPhoneData extends Message {
+public class AgentInAnswerPhoneData extends Message {
     /**
-     * 类型
+     * 用户来电操作
+     * 1.挂断 2.接听
      */
-    private VideoStreamType type;
+    private Integer type;
     /**
-     * 被叫号码
+     * 通话唯一标识
      */
-    private String caller;
+    private String callId;
 }

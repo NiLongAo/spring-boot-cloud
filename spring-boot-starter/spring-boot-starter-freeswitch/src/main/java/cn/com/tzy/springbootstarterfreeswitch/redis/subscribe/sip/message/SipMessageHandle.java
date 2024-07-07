@@ -128,17 +128,23 @@ public class SipMessageHandle extends AbstractMessageListener {
         }
     }
 
+    /**
+     *  sip事务实现类 SIPClientTransactionImpl
+     * 除过ACK以及BYE请求后 其他发生消息类型会开启事务sip
+     * 开启事务后 如回复状态码为 300 <= statusCode && statusCode <= 699 后会自动回复ACK消息 代码在 SIPClientTransactionImpl 的903行
+     */
     private static void sendSip(SipProviderImpl sipProvider, Message message) throws SipException {
         if (message instanceof Request) {
             List<String> methodList = Arrays.asList(Request.ACK,Request.BYE);
             if(methodList.contains(((SIPRequest)message).getMethod())){
                 sipProvider.sendRequest((Request)message);
             }else {
+                //开启sip事务
                 SIPClientTransactionImpl newClientTransaction = (SIPClientTransactionImpl)sipProvider.getNewClientTransaction((Request) message);
-                //开启超时机制 设置500 是为了取消重试机制
-                //目前机制 为 发送消息后 32秒未收到回应则触发 processTimeout 超时机制
-                newClientTransaction.setTimerT2(-500);
-                newClientTransaction.setRetransmitTimer(200);//200毫秒
+                newClientTransaction.setRetransmitTimer(1000);//重试 与 超时 时间间隔 1000毫秒
+                newClientTransaction.setTimerD(32000);//32秒未回应超时
+                newClientTransaction.disableRetransmissionTimer();//取消重试机制 //目前机制 为 发送消息后 32秒未收到回应则触发 processTimeout 超时机制
+                newClientTransaction.setTimerT2(-1000);//取消重试机制
                 newClientTransaction.sendRequest();
             }
         } else if (message instanceof Response) {
@@ -152,11 +158,15 @@ public class SipMessageHandle extends AbstractMessageListener {
             return;
         }
         CallIdHeader callIdHeader = (CallIdHeader) message.getHeader(CallIdHeader.NAME);
-        SipSubscribeHandle sipSubscribeHandle = sipServer.getSubscribeManager();
-        SipSubscribeEvent errorSubscribe = sipSubscribeHandle.getErrorSubscribe(callIdHeader.getCallId());
-        if(errorSubscribe !=null){
-            errorSubscribe.response(new EventResult<RestResultEvent>(new RestResultEvent(RespCode.CODE_2.getValue(),error)));
+        SipSubscribeHandle sipSubscribeHandle = sipServer.getSipSubscribeManager();
+        List<SipSubscribeEvent> errorSubscribe = sipSubscribeHandle.getErrorSubscribe(callIdHeader.getCallId());
+        if(errorSubscribe ==null || errorSubscribe.isEmpty()){
+            return;
         }
+        for (SipSubscribeEvent sipSubscribeEvent : errorSubscribe) {
+            sipSubscribeEvent.response(new EventResult<RestResultEvent>(new RestResultEvent(RespCode.CODE_2.getValue(),error)));
+        }
+        sipSubscribeHandle.removeAllSubscribe(callIdHeader.getCallId());
     }
 
 }

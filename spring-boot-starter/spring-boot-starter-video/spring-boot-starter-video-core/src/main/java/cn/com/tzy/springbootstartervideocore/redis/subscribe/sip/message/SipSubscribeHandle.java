@@ -13,7 +13,9 @@ import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.util.SerializationUtils;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.EventObject;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -33,13 +35,15 @@ public class SipSubscribeHandle {
     private final Map<String, AbstractMessageListener> errorMessageListener = new ConcurrentHashMap<>();
 
     private final Map<String, AbstractMessageListener> okMessageListener = new ConcurrentHashMap<>();
-    private final Map<String, SipSubscribeEvent> errorSubscribes = new ConcurrentHashMap<>();
-
-    private final Map<String, SipSubscribeEvent> okSubscribes = new ConcurrentHashMap<>();
 
     private final Map<String, Instant> okTimeSubscribes = new ConcurrentHashMap<>();
 
     private final Map<String, Instant> errorTimeSubscribes = new ConcurrentHashMap<>();
+
+    private final Map<String, List<SipSubscribeEvent>> errorSubscribes = new ConcurrentHashMap<>();
+
+    private final Map<String, List<SipSubscribeEvent>> okSubscribes = new ConcurrentHashMap<>();
+
 
 
     public SipSubscribeHandle(DynamicTask dynamicTask, RedisMessageListenerContainer redisMessageListenerContainer){
@@ -64,54 +68,67 @@ public class SipSubscribeHandle {
 
 
     public void addErrorSubscribe(String key, SipSubscribeEvent event) {
-        errorSubscribes.put(key, event);
         errorTimeSubscribes.put(key, Instant.now());
+        errorSubscribes.computeIfAbsent(key, o -> new ArrayList<SipSubscribeEvent>()).add(event);
+        String redisListenerKey = String.format("%s%s", VIDEO_SIP_ERROR_EVENT_SUBSCRIBE_MANAGER, key);
         //创建监听
-        AbstractMessageListener abstractMessageListener = new AbstractMessageListener(String.format("%s%s", VIDEO_SIP_ERROR_EVENT_SUBSCRIBE_MANAGER, key)) {
+        AbstractMessageListener abstractMessageListener = errorMessageListener.computeIfAbsent(key, o -> new AbstractMessageListener(redisListenerKey) {
             @Override
             public void onMessage(Message message, byte[] pattern) {
-                SipSubscribeEvent errprSubscribe = getErrorSubscribe(key);
-                if (errprSubscribe != null) {
-                    //发送完后移除
-                    removeOkSubscribe(key);
-                    removeErrorSubscribe(key);
-                    Object body = RedisUtils.redisTemplate.getValueSerializer().deserialize(message.getBody());
-                    Object deserialize = SerializationUtils.deserialize(Base64.decode((String) body));
-                    EventObject event = (EventObject) deserialize;
-                    errprSubscribe.response(new EventResult(event));
+                List<SipSubscribeEvent> errprSubscribe = getErrorSubscribe(key);
+                if(errprSubscribe == null || errprSubscribe.isEmpty()){
+                    //移除
+                    removeAllSubscribe(key);
+                    return;
                 }
+                Object body = RedisUtils.redisTemplate.getValueSerializer().deserialize(message.getBody());
+                Object deserialize = SerializationUtils.deserialize(Base64.decode((String) body));
+                EventObject event = (EventObject) deserialize;
+                for (SipSubscribeEvent sipSubscribeEvent : errprSubscribe) {
+                    sipSubscribeEvent.response(new EventResult(event));
+                }
+                //移除
+                removeAllSubscribe(key);
             }
-        };
+        });
         redisMessageListenerContainer.addMessageListener(abstractMessageListener,new PatternTopic(abstractMessageListener.getPatternTopicName()));
-        errorMessageListener.put(key,abstractMessageListener);
     }
 
     public void addOkSubscribe(String key, SipSubscribeEvent event) {
-        okSubscribes.put(key, event);
         okTimeSubscribes.put(key, Instant.now());
+        okSubscribes.computeIfAbsent(key, o -> new ArrayList<SipSubscribeEvent>()).add(event);
+        String redisListenerKey = String.format("%s%s", VIDEO_SIP_OK_EVENT_SUBSCRIBE_MANAGER, key);
         //创建监听
-
-        AbstractMessageListener abstractMessageListener = new AbstractMessageListener(String.format("%s%s", VIDEO_SIP_OK_EVENT_SUBSCRIBE_MANAGER, key)) {
+        AbstractMessageListener abstractMessageListener = okMessageListener.computeIfAbsent(key, o -> new AbstractMessageListener(redisListenerKey) {
             @Override
             public void onMessage(Message message, byte[] pattern) {
-                SipSubscribeEvent okSubscribe = getOkSubscribe(key);
-                if (okSubscribe != null) {
-                    //发送完后移除
-                    removeOkSubscribe(key);
-                    removeErrorSubscribe(key);
-                    Object body = RedisUtils.redisTemplate.getValueSerializer().deserialize(message.getBody());
-                    Object deserialize = SerializationUtils.deserialize(Base64.decode((String) body));
-                    EventObject event = (EventObject) deserialize;
-                    okSubscribe.response(new EventResult(event));
+
+                List<SipSubscribeEvent> okSubscribe = getOkSubscribe(key);
+                if(okSubscribe == null || okSubscribe.isEmpty()){
+                    //移除
+                    removeAllSubscribe(key);
+                    return;
                 }
+                Object body = RedisUtils.redisTemplate.getValueSerializer().deserialize(message.getBody());
+                Object deserialize = SerializationUtils.deserialize(Base64.decode((String) body));
+                EventObject event = (EventObject) deserialize;
+                for (SipSubscribeEvent sipSubscribeEvent : okSubscribe) {
+                    sipSubscribeEvent.response(new EventResult(event));
+                }
+                //移除
+                removeAllSubscribe(key);
             }
-        };
+        });
         redisMessageListenerContainer.addMessageListener(abstractMessageListener,new PatternTopic(abstractMessageListener.getPatternTopicName()));
-        okMessageListener.put(key,abstractMessageListener);
     }
 
-    public SipSubscribeEvent getErrorSubscribe(String key) {
+    public List<SipSubscribeEvent> getErrorSubscribe(String key) {
         return errorSubscribes.get(key);
+    }
+
+    public  void removeAllSubscribe(String key){
+        removeErrorSubscribe(key);
+        removeOkSubscribe(key);
     }
 
     public void removeErrorSubscribe(String key) {
@@ -126,7 +143,7 @@ public class SipSubscribeHandle {
         }
     }
 
-    public SipSubscribeEvent getOkSubscribe(String key) {
+    public List<SipSubscribeEvent> getOkSubscribe(String key) {
         return okSubscribes.get(key);
     }
 

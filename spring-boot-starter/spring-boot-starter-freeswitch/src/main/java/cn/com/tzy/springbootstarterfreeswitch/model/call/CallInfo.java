@@ -215,7 +215,10 @@ public class CallInfo implements Serializable {
      * 排队等级，默认是进队列时间
      */
     private Long queueLevel;
-
+    /**
+     * sip通话中sdp信息
+     */
+    private String sipSdp;
 
     /**
      * 当前通话的设备

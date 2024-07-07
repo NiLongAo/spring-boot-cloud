@@ -211,6 +211,7 @@ public class ProcessNextHandler {
         agentVoInfo.setDeviceId(deviceId);
         strategyHandler.handler(MakeCallModel.builder()
                 .deviceId(deviceId)
+                .sdp(callInfo.getSipSdp())
                 .callId(callInfo.getCallId())
                 .display(callInfo.getCaller())
                 .called(agentVoInfo.getCalled())
@@ -261,6 +262,7 @@ public class ProcessNextHandler {
         callInfo.getNextCommands().add(new NextCommand(thisDeviceId, NextTypeEnum.NEXT_CALL_BRIDGE, deviceId));
         strategyHandler.handler(MakeCallModel.builder()
                 .deviceId(deviceId)
+                .sdp(callInfo.getSipSdp())
                 .callId(callInfo.getCallId())
                 .display(callInfo.getCaller())
                 .called(callInfo.getCalled())

@@ -5,7 +5,6 @@ import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootcomm.constant.NotNullMap;
 import cn.com.tzy.springbootstarterfreeswitch.common.sip.ZLMediaKitConstant;
 import cn.com.tzy.springbootstarterfreeswitch.enums.media.ProxyTypeEnum;
-import cn.com.tzy.springbootstarterfreeswitch.enums.sip.InviteStreamType;
 import cn.com.tzy.springbootstarterfreeswitch.redis.RedisService;
 import cn.com.tzy.springbootstarterfreeswitch.redis.impl.sip.SsrcConfigManager;
 import cn.com.tzy.springbootstarterfreeswitch.redis.subscribe.media.HookKeyFactory;
@@ -20,9 +19,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.ObjectUtils;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -40,70 +37,6 @@ public class MediaClient {
                 }}
         );
     }
-
-    /**
-     *
-     * @param mediaServerVo 流媒体信息
-     * @param ip 推流ip
-     * @param port 推流端口
-     * @param ssrc 推流唯一标识
-     * @param agentKey 客服key
-     * @param app appId
-     * @param streamId streamId
-     * @param tcp 是否为tcp
-     * @param tcpActive 是否为tcp主动模式
-     * @param serverId 服务id
-     * @param callId 推流ip
-     * @param rtcp 是否为RTCP流保活
-     * @param type 发送rtp类型
-     * @return
-     */
-    public static SendRtp createSendRtp(
-            MediaServerVo mediaServerVo,
-            String sessionName,
-            String ip,
-            int port,
-            String ssrc,
-            String agentKey,
-            String app,
-            String streamId,
-            Boolean tcp,
-            Boolean tcpActive,
-            String serverId,
-            String callId,
-            Boolean rtcp,
-            InviteStreamType type
-    ){
-        //只是为了获取一个有效端口
-        int localPort = keepPort(mediaServerVo,0,tcpActive?2:tcp?1:0, String.format("create_send_rtp:%s",streamId));
-        if (localPort == 0) {
-            return null;
-        }
-        return SendRtp.builder()
-                .sessionName(sessionName)
-                .ip(ip)
-                .port(port)
-                .ssrc(ssrc)
-                .agentKey(agentKey)
-                .app(app)
-                .streamId(streamId)
-                .status(0)
-                .tcp(tcp)
-                .tcpActive(tcpActive)
-                .localPort(localPort)
-                .mediaServerId(mediaServerVo.getId())
-                .serverId(serverId)
-                .callId(callId)
-                .fromTag(null)
-                .toTag(null)
-                .pt(96)
-                .usePs(true)
-                .onlyAudio(false)
-                .rtcp(rtcp)
-                .playType(type)
-                .build();
-    }
-
     /**
      * 打开RTP服务
      * @param mediaServerVo 流服务信息
@@ -199,40 +132,7 @@ public class MediaClient {
     }
 
 
-    /**
-     * 开始发送rtp
-     * @param vhost 虚拟主机，例如__defaultVhost__
-     * @param app 应用名，例如 live
-     * @param stream 流id，例如 test
-     * @param ssrc rtp推流的ssrc，ssrc不同时，可以推流到多个上级服务器
-     * @param dstUrl 目标ip或域名
-     * @param dstPort 目标端口
-     * @param isUdp 是否为udp模式,否则为tcp模式
-     * @param srcPort 使用的本机端口，为0或不传时默认为随机端口
-     * @param pt 发送时，rtp的pt（uint8_t）,不传时默认为96
-     * @param usePs 发送时，rtp的负载类型。为1时，负载为ps；为0时，为es；不传时默认为1
-     * @param onlyAudio 当use_ps 为0时，有效。为1时，发送音频；为0时，发送视频；不传时默认为0
-     */
-    public static MediaRestResult startSendRtp(MediaServerVo mediaServerVo, String vhost, String app, String stream, String ssrc, String dstUrl, Integer dstPort, String isUdp, Integer srcPort, Integer pt, Integer usePs, Integer onlyAudio,Integer isRtcp){
-        NotNullMap map = new NotNullMap() {{
-            putString("vhost", vhost);
-            putString("app", app);
-            putString("stream", stream);
-            putString("ssrc", ssrc);
-            putString("dst_url", dstUrl);
-            putInteger("dst_port", dstPort);
-            putString("is_udp", isUdp);
-            putInteger("src_port", srcPort);
-            putInteger("pt", pt);
-            putInteger("use_ps", usePs);
-            putInteger("only_audio", onlyAudio);
-        }};
-        if(isRtcp != null){
-            map.putInteger("udp_rtcp_timeout", isRtcp);
-        }
 
-        return MediaUtils.request(mediaServerVo,ZLMediaKitConstant.START_SEND_RTP, map);
-    }
 
 
     /**
@@ -392,10 +292,8 @@ public class MediaClient {
      * @param tcpMode tcp模式，0时为不启用tcp监听，1时为启用tcp监听，2时为tcp主动连接模式
      * @param streamId 该端口绑定的流id
      */
-    private static int keepPort(MediaServerVo mediaServerVo, int port, int tcpMode, String streamId){
+    public static int keepPort(MediaServerVo mediaServerVo, int port, int tcpMode, String streamId){
         MediaHookSubscribe mediaHookSubscribe = MediaService.getMediaHookSubscribe();
-        int localPort = port;
-
         MediaRestResult request = MediaUtils.request(mediaServerVo, ZLMediaKitConstant.OPEN_RTP_SERVER,
                 new NotNullMap(){{
                     putInteger("port",port);
@@ -403,6 +301,7 @@ public class MediaClient {
                     putString("stream_id",streamId);
                 }}
         );
+        int localPort = port;
         if(request.getCode() == 0){
             HookKey hookKey = HookKeyFactory.onRtpServerTimeout(streamId, mediaServerVo.getId());
             localPort = request.getPort();
@@ -549,35 +448,114 @@ public class MediaClient {
         return MediaUtils.request(mediaServerVo,ZLMediaKitConstant.GET_SERVER_CONFIG);
     }
 
+    /**
+     * 开始发送rtp
+     */
+    public static MediaRestResult startSendRtp(MediaServerVo mediaServerVo,SendRtp sendRtp){
+        MediaRestResult result= null;
+        if(sendRtp.getAudioInfo()!=null){
+            log.info("电话 音频 推送开启。。。");
+            result = startSendRtp(mediaServerVo,sendRtp.getAudioInfo());
+        }
+        if(result != null && result.getCode() !=RespCode.CODE_0.getValue()){
+            return result;
+        }
+        if(sendRtp.getVideoInfo()!=null){
+            log.info("电话 视频 推送开启。。。");
+            result = startSendRtp(mediaServerVo,sendRtp.getVideoInfo());
+        }
+        return result;
+    }
 
-    public static void startSendRtpStreamForPassive(MediaServerVo mediaServerVo,SendRtp sendRtp,int localPort){
-        Map<String, Object> param = new HashMap<>(12);
-        param.put("vhost","__defaultVhost__");
-        param.put("app",sendRtp.getApp());
-        param.put("stream",sendRtp.getStreamId());
-        param.put("ssrc", sendRtp.getSsrc());
-        if (!sendRtp.isTcpActive()) {
-            param.put("dst_url",sendRtp.getIp());
-            param.put("dst_port", sendRtp.getPort());
+    private static MediaRestResult startSendRtp(MediaServerVo mediaServerVo,SendRtp.SendRtpInfo sendRtp){
+        NotNullMap map = new NotNullMap() {{
+            putString("vhost", "__defaultVhost__");
+            putString("app", sendRtp.getApp());
+            putString("stream", sendRtp.getStreamId());
+            putString("ssrc", sendRtp.getSsrc());
+            putString("is_udp", sendRtp.getTcp() ? "0" : "1");
+            putInteger("src_port", sendRtp.getLocalPort());
+            putInteger("pt", sendRtp.getPt());
+            putInteger("use_ps", sendRtp.isUsePs() ? 1 : 0);
+            putInteger("only_audio", sendRtp.isOnlyAudio() ? 1 : 0);
+        }};
+        if (!sendRtp.getTcpActive()) {
+            map.put("dst_url",sendRtp.getIp());
+            map.put("dst_port", sendRtp.getPort());
         }
-        param.put("is_udp", sendRtp.isTcp() ? "0" : "1");
-        param.put("src_port", localPort);
-        param.put("pt", sendRtp.getPt());
-        param.put("use_ps", sendRtp.isUsePs() ? "1" : "0");
-        param.put("only_audio", sendRtp.isOnlyAudio() ? "1" : "0");
-        if (!sendRtp.isTcp()) {
+        if (!sendRtp.getTcp()) {
             // 开启rtcp保活
-            param.put("udp_rtcp_timeout", sendRtp.isRtcp()? "1":"0");
+            map.put("udp_rtcp_timeout", sendRtp.isRtcp()? "1":"0");
         }
-        MediaRestResult request = MediaUtils.request(mediaServerVo, ZLMediaKitConstant.START_SEND_RTP_PASSIVE, param);
+        if(StringUtils.isNotEmpty(sendRtp.getRecvStreamId())){
+            map.putString("recv_stream_id", sendRtp.getRecvStreamId());
+        }
+        MediaRestResult request = MediaUtils.request(mediaServerVo,ZLMediaKitConstant.START_SEND_RTP, map);
         if(request == null){
-            log.error("下级TCP被动启动监听失败: 请检查ZLM服务");
+            sendRtp.setStatus(RespCode.CODE_2.getValue());
+            log.error("RTP推流失败: 请检查ZLM服务");
         }else if (request.getCode() == RespCode.CODE_0.getValue()) {
-            log.info("启动监听TCP被动推流成功[ {}/{} ]，{}->{}:{}, 结果： {}, " ,param.get("app"), param.get("stream"), request.getLocal_port(), param.get("dst_url"), param.get("dst_port"),JSONUtil.toJsonStr(request));
+            sendRtp.setStatus(RespCode.CODE_0.getValue());
+            log.info("RTP推流成功[ {}/{} ]，{}->{}:{}, 结果： {}, " ,sendRtp.getApp(), sendRtp.getStreamId(), sendRtp.getLocalPort(), sendRtp.getIp(), sendRtp.getPort(),JSONUtil.toJsonStr(request));
         } else {
-            log.error("启动监听TCP被动推流失败: {}, 参数：{}",request.getMsg(), JSONUtil.toJsonStr(param));
+            sendRtp.setStatus(RespCode.CODE_2.getValue());
+            log.error("RTP推流失败: {}, 参数：{}",request.getMsg(), JSONUtil.toJsonStr(map));
         }
+        return request;
     }
 
 
+
+    /**
+     * 被动发生udp
+     */
+    public static MediaRestResult startSendRtpStreamForPassive(MediaServerVo mediaServerVo,SendRtp sendRtp){
+        MediaRestResult result= null;
+        if(sendRtp.getAudioInfo()!=null){
+            log.info("电话 音频 推送开启。。。");
+            result = startSendRtpStreamForPassive(mediaServerVo,sendRtp.getAudioInfo());
+        }
+        if(result != null && result.getCode() !=RespCode.CODE_0.getValue()){
+            return result;
+        }
+        if(sendRtp.getVideoInfo()!=null){
+            log.info("电话 视频 推送开启。。。");
+            result = startSendRtpStreamForPassive(mediaServerVo,sendRtp.getVideoInfo());
+        }
+        return result;
+    }
+
+    public static MediaRestResult startSendRtpStreamForPassive(MediaServerVo mediaServerVo,SendRtp.SendRtpInfo sendRtp){
+        NotNullMap map = new NotNullMap() {{
+            putString("vhost", "__defaultVhost__");
+            putString("app", sendRtp.getApp());
+            putString("stream", sendRtp.getStreamId());
+            putString("ssrc", sendRtp.getSsrc());
+            putString("is_udp", sendRtp.getTcp() ? "0" : "1");
+            putInteger("src_port", sendRtp.getLocalPort());
+            putInteger("pt", sendRtp.getPt());
+            putInteger("use_ps", sendRtp.isUsePs() ? 1 : 0);
+            putInteger("only_audio", sendRtp.isOnlyAudio() ? 1 : 0);
+        }};
+        if (!sendRtp.getTcpActive()) {
+            map.put("dst_url",sendRtp.getIp());
+            map.put("dst_port", sendRtp.getPort());
+        }
+        if (!sendRtp.getTcp()) {
+            // 开启rtcp保活
+            map.put("udp_rtcp_timeout", sendRtp.isRtcp()? "1":"0");
+        }
+        if(StringUtils.isNotEmpty(sendRtp.getRecvStreamId())){
+            map.putString("recv_stream_id", sendRtp.getRecvStreamId());
+        }
+        MediaRestResult request = MediaUtils.request(mediaServerVo, ZLMediaKitConstant.START_SEND_RTP_PASSIVE, map);
+        if(request == null){
+            log.error("下级TCP被动启动监听失败: 请检查ZLM服务");
+        }else if (request.getCode() == RespCode.CODE_0.getValue()) {
+            log.info("启动监听TCP被动推流成功[ {}/{} ]，{}->{}:{}, 结果： {}, " ,map.get("app"), map.get("stream"), request.getLocal_port(), map.get("dst_url"), map.get("dst_port"),JSONUtil.toJsonStr(request));
+        } else {
+            log.error("启动监听TCP被动推流失败: {}, 参数：{}",request.getMsg(), JSONUtil.toJsonStr(map));
+        }
+        return request;
+    }
 }

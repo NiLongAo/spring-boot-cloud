@@ -99,6 +99,9 @@ insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values(
 insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.push','video.push:play','播放','/webapi/video/stream/push/get_play_url',1);
 insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.push','video.push:update','编辑','/webapi/video/stream/push/save',1);
 insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.push','video.push:delete','删除','/webapi/video/stream/push/remove',1);
+insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values(null,'fs',1,'通话中心','/fs','/fs','grommet-icons:test',1,0,5);
+insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('fs','fs.call',2,'客服通话','/fs/call','/fs/call/index','grommet-icons:test',1,0,1);
+insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('fs.call','fs.call:list','列表','',1);
 insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values(null,'system',1,'系统设置','/system','/index/system','icon-park-outline:system',1,0,100);
 insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('system','system.tenant',2,'租户管理','/system/tenant','/index/system/tenant/index','icon-park-outline:menu-fold-one',1,0,1);
 insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.tenant','system.tenant:list','列表','/webapi/bean/tenant/page',1);

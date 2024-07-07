@@ -146,11 +146,12 @@ public class SipMessageHandle extends AbstractMessageListener {
             if(methodList.contains(((SIPRequest)message).getMethod())){
                 sipProvider.sendRequest((Request)message);
             }else {
+                //开启sip事务
                 SIPClientTransactionImpl newClientTransaction = (SIPClientTransactionImpl)sipProvider.getNewClientTransaction((Request) message);
-                //开启超时机制 设置500 是为了取消重试机制
-                //目前机制 为 发送消息后 32秒未收到回应则触发 processTimeout 超时机制
-                newClientTransaction.setTimerT2(-500);
-                newClientTransaction.setRetransmitTimer(200);//200毫秒
+                newClientTransaction.setRetransmitTimer(1000);//重试 与 超时 时间间隔 1000毫秒
+                newClientTransaction.setTimerD(32000);//32秒未回应超时
+                newClientTransaction.disableRetransmissionTimer();//取消重试机制 //目前机制 为 发送消息后 32秒未收到回应则触发 processTimeout 超时机制
+                newClientTransaction.setTimerT2(-1000);//取消重试机制
                 newClientTransaction.sendRequest();
             }
         } else if (message instanceof Response) {
@@ -165,10 +166,15 @@ public class SipMessageHandle extends AbstractMessageListener {
         }
         CallIdHeader callIdHeader = (CallIdHeader) message.getHeader(CallIdHeader.NAME);
         SipSubscribeHandle sipSubscribeHandle = sipServer.getSubscribeManager();
-        SipSubscribeEvent errorSubscribe = sipSubscribeHandle.getErrorSubscribe(callIdHeader.getCallId());
-        if(errorSubscribe !=null){
-            errorSubscribe.response(new EventResult<RestResultEvent>(new RestResultEvent(RespCode.CODE_2.getValue(),error)));
+        List<SipSubscribeEvent> errorSubscribe = sipSubscribeHandle.getErrorSubscribe(callIdHeader.getCallId());
+        if(errorSubscribe ==null || errorSubscribe.isEmpty()){
+            return;
         }
+        for (SipSubscribeEvent sipSubscribeEvent : errorSubscribe) {
+            sipSubscribeEvent.response(new EventResult<RestResultEvent>(new RestResultEvent(RespCode.CODE_2.getValue(),error)));
+        }
+        sipSubscribeHandle.removeAllSubscribe(callIdHeader.getCallId());
+
     }
 
 }

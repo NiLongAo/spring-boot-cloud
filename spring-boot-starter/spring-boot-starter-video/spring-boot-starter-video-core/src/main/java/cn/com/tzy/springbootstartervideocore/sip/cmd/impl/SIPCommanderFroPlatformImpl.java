@@ -101,7 +101,7 @@ public class SIPCommanderFroPlatformImpl implements SIPCommanderForPlatform {
                     .createUserAgentHeader()
                     .createContactHeader(parentPlatformVo.getDeviceGbId(), String.format("%s:%s", parentPlatformVo.getDeviceIp(), parentPlatformVo.getDevicePort()))
                     .createExpiresHeader(isRegister ? parentPlatformVo.getExpires() : 0)
-                    .createAuthorizationHeader(StringUtils.isEmpty(parentPlatformVo.getUsername())? parentPlatformVo.getDeviceGbId(): parentPlatformVo.getUsername(), parentPlatformVo.getServerGbId(),String.format("%s:%s", parentPlatformVo.getServerIp(), parentPlatformVo.getServerPort()), parentPlatformVo.getPassword(),www)
+                    .createAuthorizationHeader(Request.REGISTER,StringUtils.isEmpty(parentPlatformVo.getUsername())? parentPlatformVo.getDeviceGbId(): parentPlatformVo.getUsername(), parentPlatformVo.getServerGbId(),String.format("%s:%s", parentPlatformVo.getServerIp(), parentPlatformVo.getServerPort()), parentPlatformVo.getPassword(),www)
                     .buildRequest();
         }
         SipSendMessage.sendMessage(sipServer, parentPlatformVo, request,okEvent, error->{
@@ -385,7 +385,7 @@ public class SIPCommanderFroPlatformImpl implements SIPCommanderForPlatform {
             //获取订阅工厂
             SipSubscribeHandle sipSubscribeHandle = sipServer.getSubscribeManager();
             dynamicTask.startDelay(timeoutTaskKey, 20, ()->{
-                sipSubscribeHandle.removeOkSubscribe(callId);
+                sipSubscribeHandle.removeAllSubscribe(callId);
                 int indexNext = index + parentPlatformVo.getCatalogGroup();
                 try {
                     sendCatalogResponse(sipServer,channels, parentPlatformVo, sn, fromTag, indexNext, false,null,null);

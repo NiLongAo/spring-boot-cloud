@@ -7,15 +7,15 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 /**
- * 用户推流参数
+ * 更新用户状态或 获取客服最新信息
  */
 @Data
 @SuperBuilder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class AgentInPushPathData extends Message {
+public class AgentInStatusData extends Message {
     /**
-     * 拨打方式 1.音频 2.视频
+     * 是否更新信息
      */
-    private Integer type;
+    private Integer updateStatus;
 }

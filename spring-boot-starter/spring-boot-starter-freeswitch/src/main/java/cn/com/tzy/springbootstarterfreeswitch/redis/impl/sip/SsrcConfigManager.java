@@ -48,14 +48,14 @@ public class SsrcConfigManager {
      * @return ssrc
      */
     public String getPlaySsrc(String mediaServerId) {
-        return "0" + getSN(mediaServerId);
+        return "1" + getSN(mediaServerId);
     }
 
     /**
      * 获取录像回放的SSRC值,第一位固定为1
      */
     public String getPlayBackSsrc(String mediaServerId) {
-        return "1" + getSN(mediaServerId);
+        return "2" + getSN(mediaServerId);
     }
 
     /**

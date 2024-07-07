@@ -1,25 +1,30 @@
 package cn.com.tzy.springbootstarterfreeswitch.client.sip.utils;
 
+import cn.com.tzy.springbootstarterfreeswitch.enums.sip.VideoStreamType;
 import cn.com.tzy.springbootstarterfreeswitch.vo.sip.Address;
+import cn.com.tzy.springbootstarterfreeswitch.vo.sip.DeviceRawContent;
 import cn.com.tzy.springbootstarterfreeswitch.vo.sip.Gb28181Sdp;
 import gov.nist.javax.sip.address.AddressImpl;
 import gov.nist.javax.sip.address.SipUri;
 import gov.nist.javax.sip.header.Via;
 import gov.nist.javax.sip.message.SIPRequest;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.util.ObjectUtils;
 
-import javax.sdp.SdpFactory;
-import javax.sdp.SdpParseException;
-import javax.sdp.SessionDescription;
+import javax.sdp.*;
+import javax.sip.SipException;
 import javax.sip.header.FromHeader;
 import javax.sip.header.ToHeader;
+import javax.sip.message.Message;
 import javax.sip.message.Request;
 import java.net.InetAddress;
+import java.util.Vector;
 
 /**
  * SIP的工具类
  */
+@Log4j2
 public class SipUtils {
 
     public static String getUserIdFromHeader(Request request) {
@@ -27,22 +32,23 @@ public class SipUtils {
         return getUserIdFromHeader(fromHeader);
     }
 
-    public static String getUserIdToHeader(Request request) {
-        ToHeader fromHeader = (ToHeader)request.getHeader(ToHeader.NAME);
-        return getUserIdFromHeader(fromHeader);
-    }
-
-    public static String getUserIdFromHeader(ToHeader toHeader) {
-        AddressImpl address = (AddressImpl)toHeader.getAddress();
-        SipUri uri = (SipUri) address.getURI();
-        return uri.getUser();
-    }
-
     public static String getUserIdFromHeader(FromHeader fromHeader) {
         AddressImpl address = (AddressImpl)fromHeader.getAddress();
         SipUri uri = (SipUri) address.getURI();
         return uri.getUser();
     }
+
+    public static String getUserIdToHeader(Request request) {
+        ToHeader fromHeader = (ToHeader)request.getHeader(ToHeader.NAME);
+        return getUserIdToHeader(fromHeader);
+    }
+    public static String getUserIdToHeader(ToHeader toHeader) {
+        AddressImpl address = (AddressImpl)toHeader.getAddress();
+        SipUri uri = (SipUri) address.getURI();
+        return uri.getUser();
+    }
+
+
 
     public static  String getNewViaTag() {
         return "z9hG4bKPj" + getNewFromTag();
@@ -131,4 +137,79 @@ public class SipUtils {
         }
         return Gb28181Sdp.getInstance(sdp, ssrc, mediaDescription);
     }
+
+    public static DeviceRawContent handleDeviceRawContent(Message response) {
+        // 解析sdp消息, 使用jainsip 自带的sdp解析方式
+        DeviceRawContent deviceRawContent = new DeviceRawContent();
+        try {
+            String contentString = new String(response.getRawContent());
+            Gb28181Sdp gb28181Sdp = SipUtils.parseSDP(contentString);
+            SessionDescription sdp = gb28181Sdp.getBaseSdb();
+            String sessionName = sdp.getSessionName().getValue();
+            //  获取支持的格式
+            Vector mediaDescriptions = sdp.getMediaDescriptions(true);
+            // 查看是否支持PS 负载96
+            //String ip = null;
+            int port = -1;
+            String downloadSpeed = "1";
+            boolean mediaTransmissionTCP = false;
+            boolean tcpActive = false;
+            String ssrc  = gb28181Sdp.getSsrc();
+            String username = sdp.getOrigin().getUsername();
+            String addressStr = sdp.getOrigin().getAddress();
+
+
+            for (Object description : mediaDescriptions) {
+                MediaDescription mediaDescription = (MediaDescription) description;
+                Media media = mediaDescription.getMedia();
+                downloadSpeed = mediaDescription.getAttribute("downloadspeed");
+                Vector mediaFormats = media.getMediaFormats(false);
+                String mediaFormat = null;
+                if (mediaFormats.contains(String.valueOf(VideoStreamType.CALL_AUDIO_PHONE.getPt()))) {
+                    mediaFormat = String.valueOf(VideoStreamType.CALL_AUDIO_PHONE.getPt());
+                }else if(mediaFormats.contains(String.valueOf(VideoStreamType.CALL_VIDEO_PHONE.getPt()))){
+                    mediaFormat = String.valueOf(VideoStreamType.CALL_VIDEO_PHONE.getPt());
+                }else {
+                    continue;
+                }
+                port = media.getMediaPort();
+                if (port == -1) {
+                    log.info("不支持的媒体格式，返回415");
+                    return null;
+                }
+                //String mediaType = media.getMediaType();
+                String protocol = media.getProtocol();
+                // 区分TCP发流还是udp， 当前默认udp
+                if ("TCP/RTP/AVP".equalsIgnoreCase(protocol)) {
+                    String setup = mediaDescription.getAttribute("setup");
+                    if (setup != null) {
+                        mediaTransmissionTCP = true;
+                        if ("active".equalsIgnoreCase(setup)) {
+                            tcpActive = true;
+                        } else if ("passive".equalsIgnoreCase(setup)) {
+                            tcpActive = false;
+                        }
+                    }
+                }
+
+                deviceRawContent.setDeviceInfo(mediaFormat,
+                        DeviceRawContent.DeviceInfo.builder()
+                                .username(username)
+                                .addressStr(addressStr)
+                                .downloadSpeed(downloadSpeed)
+                                .port(port)
+                                .ssrc(ssrc)
+                                .mediaTransmissionTCP(mediaTransmissionTCP)
+                                .tcpActive(tcpActive)
+                                .sessionName(sessionName)
+                                .build());
+                ;
+            }
+        }catch (SdpException | SipException e){
+            log.error("解析Sip数据失败：",e);
+            return null;
+        }
+        return deviceRawContent;
+    }
+
 }

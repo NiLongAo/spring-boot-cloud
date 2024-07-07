@@ -1,9 +1,12 @@
 package cn.com.tzy.springbootstarterfreeswitch.vo.sip;
 
+import cn.com.tzy.springbootstarterfreeswitch.enums.sip.VideoStreamType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import javax.sip.SipException;
 
 @Data
 @Builder
@@ -11,19 +14,40 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class DeviceRawContent {
 
-    private String username;
+    private DeviceInfo audioInfo;
 
-    private String addressStr;
+    private DeviceInfo videoInfo;
 
-    private Integer port;
+    public void setDeviceInfo(String mediaFormat,DeviceInfo info) throws SipException {
+        if(VideoStreamType.CALL_AUDIO_PHONE.getPt() == Integer.parseInt(mediaFormat)){
+            this.audioInfo =info;
+        }else if(VideoStreamType.CALL_VIDEO_PHONE.getPt() == Integer.parseInt(mediaFormat)){
+            this.videoInfo =info;
+        }else {
+            throw new SipException("不支持此类型数据");
+        }
+    }
 
-    private String ssrc;
+    @Data
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class DeviceInfo{
+        private String username;
 
-    private boolean mediaTransmissionTCP;
+        private String addressStr;
 
-    private boolean tcpActive;
+        private Integer port;
 
-    private String sessionName;
+        private String ssrc;
 
-    private String downloadSpeed;
+        private boolean mediaTransmissionTCP;
+
+        private boolean tcpActive;
+
+        private String sessionName;
+
+        private String downloadSpeed;
+    }
+
 }

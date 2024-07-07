@@ -119,6 +119,7 @@ public class EventNextHandler {
     public void callOther(Integer type,CallInfo callInfo, DeviceInfo deviceInfo, EslEvent event){
         //被叫号码
         String called = callInfo.getCalled();
+        String sdp = event.getEventHeaders().get("variable_switch_r_sdp");//获取sip中sdp信息
         //主叫组
         GroupInfo groupInfo = RedisService.getGroupInfoManager().get(callInfo.getGroupId());
         if(groupInfo == null){
@@ -188,6 +189,7 @@ public class EventNextHandler {
          */
         callHandlerStrategy.handler(MakeCallModel.builder()
                 .deviceId(deviceId)
+                .sdp(sdp)
                 .callId(callInfo.getCallId())
                 .display(callInfo.getCalledDisplay())//主叫
                 .called(called)//被叫

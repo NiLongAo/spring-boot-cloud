@@ -12,8 +12,6 @@ public class SsrcTransaction {
 
     private String agentKey;
     private String callId;
-    private boolean onPush;
-    private boolean onVideo;
     private String app;
     private String stream;
     private String mediaServerId;

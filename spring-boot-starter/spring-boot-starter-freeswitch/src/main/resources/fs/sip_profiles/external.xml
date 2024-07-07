@@ -54,7 +54,7 @@
           <param name="nonce-ttl" value="60"/>
           <param name="auth-calls" value="false"/>
           <param name="inbound-late-negotiation" value="true"/>
-          <param name="inbound-zrtp-passthru" value="true"/> <!-- (also enables late negotiation) -->
+          <param name="inbound-zrtp-passthru" value="true"/>
           #if($config.remoteIp  && $config.remoteIp != '')
           <param name="rtp-ip" value="${config.remoteIp}"/>
           <param name="sip-ip" value="${config.remoteIp}"/>
@@ -67,7 +67,7 @@
           <param name="ext-sip-ip" value="${config.stunAddress}"/>
           #else
           <param name="ext-rtp-ip" value="$${external_rtp_ip}"/>
-          <param name="ext-sip-ip" value="$${external_sip_ip}"/>
+          <param name="ext-sip-ip" value="$${external_rtp_ip}"/>
           #end
           <param name="rtp-timeout-sec" value="300"/>
           <param name="rtp-hold-timeout-sec" value="1800"/>

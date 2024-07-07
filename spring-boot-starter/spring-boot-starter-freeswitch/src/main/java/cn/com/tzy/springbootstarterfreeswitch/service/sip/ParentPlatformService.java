@@ -2,6 +2,7 @@ package cn.com.tzy.springbootstarterfreeswitch.service.sip;
 
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootcomm.utils.DynamicTask;
+import cn.com.tzy.springbootstarterfreeswitch.enums.fs.LoginTypeEnum;
 import cn.com.tzy.springbootstarterfreeswitch.model.bean.ConfigModel;
 import cn.com.tzy.springbootstarterfreeswitch.model.fs.AgentVoInfo;
 import cn.com.tzy.springbootstarterfreeswitch.service.FsService;
@@ -80,6 +81,7 @@ public abstract class ParentPlatformService {
         sipTransactionInfo.setKeepAliveReply(0);
         sipTransactionInfo.setRegisterAliveReply(sipTransactionInfo.getRegisterAliveReply() +1);
         RedisService.getSipTransactionManager().putParentPlatform(agentVoInfo.getAgentKey(),sipTransactionInfo);
+        agentVoInfo.setLoginType(LoginTypeEnum.SOCKET.getType());
         try {
             sipCommanderForPlatform.register(sipServer, agentVoInfo,null, true, ok->{
                 if(okEvent !=null){
@@ -100,6 +102,7 @@ public abstract class ParentPlatformService {
      * 向上级平台注销
      */
     public void unregister(AgentVoInfo parentPlatformVo, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent){
+        parentPlatformVo.setLoginType(LoginTypeEnum.SOCKET.getType());
         try {
             sipCommanderForPlatform.unregister(sipServer, parentPlatformVo, (ok->{
                 if(okEvent != null){
@@ -220,24 +223,36 @@ public abstract class ParentPlatformService {
 
     private void stopAllPush(String agentCode) {
         SendRtpManager sendRtpManager = RedisService.getSendRtpManager();
-        SsrcConfigManager ssrcConfigManager = RedisService.getSsrcConfigManager();
-        MediaServerVoService mediaServerVoService = SipService.getMediaServerService();
         List<SendRtp> sendRtpItems = sendRtpManager.querySendRTPServerByChnnelId(agentCode);
         if (sendRtpItems != null && !sendRtpItems.isEmpty()) {
             for (SendRtp sendRtpItem : sendRtpItems) {
-                ssrcConfigManager.releaseSsrc(sendRtpItem.getMediaServerId(),sendRtpItem.getSsrc());
-                sendRtpManager.deleteSendRTPServer(sendRtpItem.getAgentKey(), null, null);
-                MediaServerVo mediaServerVo = mediaServerVoService.findOnLineMediaServerId(sendRtpItem.getMediaServerId());
-                MediaRestResult mediaRestResult = MediaClient.stopSendRtp(mediaServerVo, "__defaultVhost__", sendRtpItem.getApp(), sendRtpItem.getStreamId(), sendRtpItem.getSsrc());
-                if (mediaRestResult == null) {
-                    log.error("[停止RTP推流] 失败: 请检查ZLM服务");
-                } else if (mediaRestResult.getCode() == 0) {
-                    log.info("[停止RTP推流] 成功");
-                } else {
-                    log.error("[停止RTP推流] 失败: {}, 参数：{}->\r\n{}",mediaRestResult.getMsg(), JSONUtil.toJsonStr(sendRtpItem), JSONUtil.toJsonStr(mediaRestResult));
+                if(sendRtpItem.getAudioInfo()!=null){
+                    stopPush(sendRtpItem.getMediaServerId(),sendRtpItem.getAudioInfo());
                 }
+                if(sendRtpItem.getVideoInfo()!=null){
+                    stopPush(sendRtpItem.getMediaServerId(),sendRtpItem.getVideoInfo());
+                }
+                sendRtpManager.deleteSendRTPServer(null, sendRtpItem.getPushStreamId(), null);
             }
         }
     }
 
+    private void stopPush(String mediaServerId,SendRtp.SendRtpInfo sendRtpItem){
+        SsrcConfigManager ssrcConfigManager = RedisService.getSsrcConfigManager();
+        MediaServerVoService mediaServerVoService = SipService.getMediaServerService();
+        ssrcConfigManager.releaseSsrc(mediaServerId,sendRtpItem.getSsrc());
+        MediaServerVo mediaServerVo = mediaServerVoService.findOnLineMediaServerId(mediaServerId);
+        if (mediaServerVo == null) {
+            log.error("[停止RTP推流] 失败: 流媒体[{}]未上线",mediaServerId);
+            return;
+        }
+        MediaRestResult mediaRestResult = MediaClient.stopSendRtp(mediaServerVo, "__defaultVhost__", sendRtpItem.getApp(), sendRtpItem.getStreamId(), sendRtpItem.getSsrc());
+        if (mediaRestResult == null) {
+            log.error("[停止RTP推流] 失败: 请检查ZLM服务");
+        } else if (mediaRestResult.getCode() == 0) {
+            log.info("[停止RTP推流] 成功");
+        } else {
+            log.error("[停止RTP推流] 失败: {}, 参数：{}->\r\n{}",mediaRestResult.getMsg(), JSONUtil.toJsonStr(sendRtpItem), JSONUtil.toJsonStr(mediaRestResult));
+        }
+    }
 }

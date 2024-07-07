@@ -4,6 +4,7 @@ import cn.com.tzy.springbootstarterfreeswitch.client.sip.SipServer;
 import cn.com.tzy.springbootstarterfreeswitch.common.sip.SipConstant;
 import cn.com.tzy.springbootstarterfreeswitch.enums.fs.LoginTypeEnum;
 import cn.com.tzy.springbootstarterfreeswitch.model.fs.AgentVoInfo;
+import cn.com.tzy.springbootstarterfreeswitch.redis.subscribe.sip.message.AgentSubscribeHandle;
 import cn.com.tzy.springbootstarterfreeswitch.redis.subscribe.sip.message.SipSubscribeEvent;
 import cn.com.tzy.springbootstarterfreeswitch.redis.subscribe.sip.message.SipSubscribeHandle;
 import cn.com.tzy.springbootstarterfreeswitch.vo.sip.MessageTypeVo;
@@ -26,27 +27,43 @@ public class SipSendMessage {
      */
     public static void sendMessage(SipServer sipServer, AgentVoInfo vo, Message message, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent){
         CallIdHeader callIdHeader = (CallIdHeader) message.getHeader(CallIdHeader.NAME);
-        handleEvent(sipServer,callIdHeader.getCallId(),okEvent,errorEvent);
+        handleSipEvent(sipServer,callIdHeader.getCallId(),okEvent,errorEvent);
         LoginTypeEnum loginType = LoginTypeEnum.getLoginType(vo.getLoginType());
         RedisUtils.redisTemplate.convertAndSend(SipConstant.VIDEO_SEND_SIP_MESSAGE, Objects.requireNonNull(SerializationUtils.serialize(MessageTypeVo.builder().type(loginType == LoginTypeEnum.SIP?MessageTypeVo.TypeEnum.SIP.getValue():MessageTypeVo.TypeEnum.SOCKET.getValue()).agentKey(vo.getAgentKey()).message(message).build())));
     }
 
-    public static void handleEvent(SipServer sipServer,String callId,SipSubscribeEvent okEvent,SipSubscribeEvent errorEvent){
-        SipSubscribeHandle sipSubscribeHandle = sipServer.getSubscribeManager();
+    public static void handleSipEvent(SipServer sipServer, String callId, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent){
+        SipSubscribeHandle sipSubscribeHandle = sipServer.getSipSubscribeManager();
         // 添加成功订阅
         if (okEvent != null) {
             sipSubscribeHandle.addOkSubscribe(callId, eventResult -> {
                 okEvent.response(eventResult);
-                sipSubscribeHandle.removeOkSubscribe(eventResult.getCallId());
-                sipSubscribeHandle.removeErrorSubscribe(eventResult.getCallId());
+                sipSubscribeHandle.removeAllSubscribe(eventResult.getCallId());
             });
         }
         // 添加错误订阅
         if (errorEvent != null) {
             sipSubscribeHandle.addErrorSubscribe(callId, (eventResult -> {
                 errorEvent.response(eventResult);
-                sipSubscribeHandle.removeErrorSubscribe(eventResult.getCallId());
-                sipSubscribeHandle.removeOkSubscribe(eventResult.getCallId());
+                sipSubscribeHandle.removeAllSubscribe(eventResult.getCallId());
+            }));
+        }
+    }
+
+    public static void handleAgentEvent(SipServer sipServer, String callId, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent){
+        AgentSubscribeHandle agentSubscribeManager = sipServer.getAgentSubscribeManager();
+        // 添加成功订阅
+        if (okEvent != null) {
+            agentSubscribeManager.addOkSubscribe(callId, eventResult -> {
+                okEvent.response(eventResult);
+                agentSubscribeManager.removeAllSubscribe(eventResult.getCallId());
+            });
+        }
+        // 添加错误订阅
+        if (errorEvent != null) {
+            agentSubscribeManager.addErrorSubscribe(callId, (eventResult -> {
+                errorEvent.response(eventResult);
+                agentSubscribeManager.removeAllSubscribe(eventResult.getCallId());
             }));
         }
     }

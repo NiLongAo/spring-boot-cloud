@@ -9,6 +9,7 @@ import cn.com.tzy.springbootstarterfreeswitch.client.sip.properties.DefaultSipPr
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.properties.SipConfigProperties;
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.properties.VideoProperties;
 import cn.com.tzy.springbootstarterfreeswitch.redis.RedisService;
+import cn.com.tzy.springbootstarterfreeswitch.redis.subscribe.sip.message.AgentSubscribeHandle;
 import cn.com.tzy.springbootstarterfreeswitch.redis.subscribe.sip.message.SipSubscribeHandle;
 import cn.com.tzy.springbootstarterfreeswitch.vo.sip.Address;
 import cn.com.tzy.springbootstarterfreeswitch.vo.sip.GbStringMsgParserFactory;
@@ -47,6 +48,10 @@ public class SipServer {
      */
     private final SipSubscribeHandle sipSubscribeHandle;
     /**
+     * 订阅工厂
+     */
+    private final AgentSubscribeHandle agentSubscribeHandle;
+    /**
      * tcp实现
      */
     private final Map<String, SipProviderImpl> tcpSipProviderMap = new ConcurrentHashMap<>();
@@ -55,9 +60,10 @@ public class SipServer {
      */
     private final Map<String, SipProviderImpl> udpSipProviderMap = new ConcurrentHashMap<>();
 
-    public SipServer(SipConfigProperties sipConfigProperties, SipSubscribeHandle sipSubscribeHandle, VideoProperties videoProperties, NacosDiscoveryProperties nacosDiscoveryProperties){
+    public SipServer(SipConfigProperties sipConfigProperties, SipSubscribeHandle sipSubscribeHandle,AgentSubscribeHandle agentSubscribeHandle, VideoProperties videoProperties, NacosDiscoveryProperties nacosDiscoveryProperties){
         this.sipListener = new SipListenerImpl(this);
         this.sipSubscribeHandle = sipSubscribeHandle;
+        this.agentSubscribeHandle = agentSubscribeHandle;
         this.sipConfigProperties = sipConfigProperties;
         this.videoProperties = videoProperties;
         this.nacosDiscoveryProperties = nacosDiscoveryProperties;
@@ -174,8 +180,12 @@ public class SipServer {
         return getUdpSipProvider().getListeningPoint().getIPAddress();
     }
 
-    public SipSubscribeHandle getSubscribeManager(){
+    public SipSubscribeHandle getSipSubscribeManager(){
         return this.sipSubscribeHandle;
+    }
+
+    public AgentSubscribeHandle getAgentSubscribeManager(){
+        return this.agentSubscribeHandle;
     }
 
     public SipConfigProperties getSipConfigProperties(){

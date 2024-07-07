@@ -4,8 +4,8 @@ import cn.com.tzy.springbootcomm.common.jwt.JwtCommon;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootcomm.utils.JwtUtils;
 import cn.com.tzy.springbootentity.dome.fs.Agent;
-import cn.com.tzy.springbootstarterfreeswitch.common.socket.AgentCommon;
 import cn.com.tzy.springbootfs.service.fs.AgentService;
+import cn.com.tzy.springbootstarterfreeswitch.common.socket.AgentCommon;
 import cn.com.tzy.springbootstarterfreeswitch.redis.RedisService;
 import cn.com.tzy.springbootstartersocketio.pool.NamespaceListener;
 import cn.hutool.core.map.MapUtil;
@@ -25,7 +25,6 @@ public class AgentNamespace implements NamespaceListener {
     /**
      * 空间名称
      */
-
     private SocketIOServer socketIOServer;
 
     @Resource
@@ -54,7 +53,7 @@ public class AgentNamespace implements NamespaceListener {
             return;
         }
         //建立客服房间
-        client.joinRoom(getSocketAgentKey(agent.getAgentCode()));
+        client.joinRoom(getSocketAgentKey(agent.getAgentKey()));
         RedisService.getAgentInfoManager().putAgentKey(client.getSessionId().toString(),agent.getAgentKey());
         agentService.login(agent.getAgentKey(),(data)->{
             client.sendEvent(AgentCommon.AGENT_OUT_LOGIN, RestResult.result(data.getCode(),data.getMessage(),data.getData()));
@@ -85,7 +84,9 @@ public class AgentNamespace implements NamespaceListener {
         //移除
         client.leaveRoom(getSocketAgentKey(agent.getAgentKey()));
         RedisService.getAgentInfoManager().delAgentKey(client.getSessionId().toString());
-        agentService.logout(agent.getAgentKey());
+        agentService.logout(agent.getAgentKey(),(data)->{
+            log.info("退出消息：{}",data.getMessage());
+        });
     }
 
     @Override
@@ -102,7 +103,7 @@ public class AgentNamespace implements NamespaceListener {
         return  (Namespace)socketIOServer.getNamespace(AgentCommon.SOCKET_AGENT);
     }
 
-    public String getSocketAgentKey(String agentCode){
-        return String.format("%s:%s", AgentCommon.SOCKET_AGENT,agentCode);
+    public String getSocketAgentKey(String agentKey){
+        return String.format("%s:%s", AgentCommon.SOCKET_AGENT,agentKey);
     }
 }

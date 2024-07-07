@@ -9,10 +9,8 @@ import cn.com.tzy.springbootstarterfreeswitch.client.sip.SipServer;
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.cmd.SIPCommander;
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.cmd.SIPCommanderForPlatform;
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.properties.VideoProperties;
-import cn.com.tzy.springbootstarterfreeswitch.common.socket.AgentCommon;
 import cn.com.tzy.springbootstarterfreeswitch.enums.media.HookType;
 import cn.com.tzy.springbootstarterfreeswitch.enums.sip.VideoStreamType;
-import cn.com.tzy.springbootstarterfreeswitch.exception.SsrcTransactionNotFoundException;
 import cn.com.tzy.springbootstarterfreeswitch.model.fs.AgentVoInfo;
 import cn.com.tzy.springbootstarterfreeswitch.redis.RedisService;
 import cn.com.tzy.springbootstarterfreeswitch.redis.impl.fs.AgentInfoManager;
@@ -145,20 +143,37 @@ public class MediaHookServer {
             //是否开启鉴权
             if(videoProperties.getPushAuthority()){
                 if (hookVo.getParams() == null) {
-                    log.info("推流鉴权失败： 缺少不要参数：sign=md5(user表的pushKey)");
+                    log.error("推流鉴权失败： 缺少不要参数：sign=md5(user表的pushKey)");
                     return  new NotNullMap(){{putInteger("code",401);putString("msg","Unauthorized");}};
                 }
                 Map<String, String> paramMap = HttpUtil.decodeParamMap(hookVo.getParams(), CharsetUtil.CHARSET_UTF_8);
                 String token = paramMap.get("token");
                 if (token == null) {
-                    log.info("推流鉴权失败： 缺少必要参数：token");
+                    log.error("推流鉴权失败： 缺少必要参数：token");
                     return  new NotNullMap(){{putInteger("code",401);putString("msg","Unauthorized");}};
                 }
                 boolean authentication = tokenService.authentication(token);
                 if(! authentication){
-                    log.info("推流鉴权失败： 用户 无权限:  token={}", token);
+                    log.error("推流鉴权失败： 用户 无权限:  token={}", token);
                     return  new NotNullMap(){{putInteger("code",401);putString("msg","Unauthorized");}};
                 }
+            }
+            //检测是否符合推流条件
+            if(VideoStreamType.PUSH_RTP_STREAM.getName().equals(hookVo.getApp())){
+                enableAudio = true;
+                String[] split = hookVo.getStream().split(":");
+                if(split.length < 2){
+                    log.error("推流鉴权失败： 当前流格式错误:  stream={}", hookVo.getStream());
+                    return  new NotNullMap(){{putInteger("code",401);putString("msg","当前流格式错误");}};
+                }
+
+                RestResult<?> restResult = FsService.getAgentService().pushWebRtp(VideoStreamType.valueOf(split[0]),split[1]);
+                if(restResult.getCode() != RespCode.CODE_0.getValue()){
+                    return  new NotNullMap(){{putInteger("code",401);putString("msg",restResult.getMessage());}};
+                }
+            }else {
+                log.info("推流鉴权失败： 当前流不支持接收:  app={}", hookVo.getApp());
+                return  new NotNullMap(){{putInteger("code",401);putString("msg","当前流不支持接收");}};
             }
         }else {
             enableMp4 = videoProperties.getRecordSip();
@@ -166,10 +181,11 @@ public class MediaHookServer {
             if(mediaServerVo.getRtpEnable() == ConstEnum.Flag.NO.getValue()){
                 String ssrc = String.format("%010d", Long.parseLong(hookVo.getStream(), 16));;
                 InviteInfo inviteInfo = inviteStreamManager.getInviteInfoBySSRC(ssrc);
+                //不进此逻辑
                 if (inviteInfo != null) {
-                    log.info("[ZLM HOOK]推流鉴权 stream: {} 替换为 {}", hookVo.getStream(), inviteInfo.getStream());
-                    map.put("stream_replace",inviteInfo.getStream());
-                    hookVo.setStream(inviteInfo.getStream());
+                    log.info("[ZLM HOOK]推流鉴权 stream: {} 替换为 {}", hookVo.getStream(), inviteInfo.getAudioSsrcInfo().getStream());
+                    map.put("stream_replace",inviteInfo.getAudioSsrcInfo().getStream());
+                    hookVo.setStream(inviteInfo.getAudioSsrcInfo().getStream());
                 }
             }
         }
@@ -177,9 +193,8 @@ public class MediaHookServer {
         if(ssrcTransaction != null){
             enableAudio = true;
             enableMp4 = false;
-
             // 如果是录像下载就设置视频间隔十秒
-            if(ssrcTransaction.getType() == VideoStreamType.download){
+            if(ssrcTransaction.getType() == VideoStreamType.DOWNLOAD){
                 enableMp4 = true;
                 map.putInteger("mp4_max_second",10);
             }
@@ -190,6 +205,12 @@ public class MediaHookServer {
                 mediaHookSubscribe.sendNotify(MediaHookVo.builder().type(HookType.on_publish).onAll(ConstEnum.Flag.NO.getValue()).mediaServerVo(mediaServerVo).hookVo(hookVo).build());
             }
         });
+        map.put("enable_hls",false);
+        map.put("enable_hls_fmp4",false);
+        map.put("enable_fmp4",false);
+        map.put("enable_rtmp",false);
+        map.put("enable_ts",false);
+        map.put("enable_rtsp",true);
         map.put("enable_audio",enableAudio);
         map.put("enable_mp4",enableMp4);
         log.info("[ZLM HOOK]推流鉴权 响应：{}->{}->>>>{}", hookVo.getMediaServerId(), JSONUtil.toJsonStr(hookVo), JSONUtil.toJsonStr(map));
@@ -232,9 +253,9 @@ public class MediaHookServer {
                 mediaHookSubscribe.sendNotify(MediaHookVo.builder().type(HookType.on_stream_changed).onAll(ConstEnum.Flag.NO.getValue()).mediaServerVo(mediaServerVo).hookVo(hookVo).build());
                 if("rtp".equals(hookVo.getApp())){
                     InviteInfo inviteInfo = inviteStreamManager.getInviteInfoByStream(null, hookVo.getStream());
-                    if(inviteInfo != null && (inviteInfo.getType() == VideoStreamType.call_phone || inviteInfo.getType() == VideoStreamType.playback)){
+                    if(inviteInfo != null && (inviteInfo.getType() == VideoStreamType.CALL_AUDIO_PHONE || inviteInfo.getType() == VideoStreamType.CALL_VIDEO_PHONE)){
                         if(hookVo.isRegist()){
-                            agentVoService.startPlay(inviteInfo.getAgentKey(),inviteInfo.getStream());
+                            agentVoService.startPlay(inviteInfo.getAgentKey(),inviteInfo.getAudioSsrcInfo().getStream());
                         }else {
                             //设备播放流
                             agentVoService.stopPlay(inviteInfo.getAgentKey());
@@ -243,19 +264,8 @@ public class MediaHookServer {
                             deferredResultHolder.invokeAllResult(key, RestResult.result(RespCode.CODE_0.getValue(),"停止点播成功"));
                         }
                     }
-                }else if("push_web_rtp".equals(hookVo.getApp())){
+                }else if(VideoStreamType.PUSH_RTP_STREAM.getName().equals(hookVo.getApp())){
                     log.info("[ZLM HOOK] 视频 | 语音推流, {}->{}->{}/{}", hookVo.getMediaServerId(), hookVo.getSchema(), hookVo.getApp(), hookVo.getStream());
-                    SsrcTransaction paramOne = ssrcTransactionManager.getParamOne(hookVo.getStream(), null, null, VideoStreamType.push_web_rtp);
-                    if(hookVo.isRegist()){
-                        if(paramOne !=null){
-                            paramOne.setOnPush(true);
-                            ssrcTransactionManager.put(paramOne);
-                        }
-                        FsService.getSendAgentMessage().sendMessage(AgentCommon.SOCKET_AGENT,AgentCommon.AGENT_OUT_PUSH_PATH_OK,paramOne.getAgentKey(),RestResult.result(RespCode.CODE_0.getValue(),"推流接收成功",null));
-                    }else {
-                        ssrcTransactionManager.remove(paramOne.getAgentKey(),paramOne.getStream());
-                        FsService.getSendAgentMessage().sendMessage(AgentCommon.SOCKET_AGENT,AgentCommon.AGENT_OUT_PUSH_PATH_LOGOUT,paramOne.getAgentKey(),RestResult.result(RespCode.CODE_0.getValue(),"推流关闭成功",null));
-                    }
                 }else {
                     log.error("[ZLM HOOK] 未知流，请查询接口, {}->{}->{}/{}", hookVo.getMediaServerId(), hookVo.getSchema(), hookVo.getApp(), hookVo.getStream());
                 }
@@ -263,6 +273,7 @@ public class MediaHookServer {
                 if(!hookVo.isRegist()){
                     List<SendRtp> sendRtpList = sendRtpManager.querySendRTPServerByStream(hookVo.getStream());
                     for (SendRtp sendRtp : sendRtpList) {
+                        sendRtpManager.deleteSendRTPServer(sendRtp.getAgentKey(),sendRtp.getPushStreamId(),sendRtp.getCallId());
                         // 设备编号 或 上级平台
                         AgentVoInfo agentVoInfo = RedisService.getAgentInfoManager().get(sendRtp.getAgentKey());
                         if(agentVoInfo == null){
@@ -270,14 +281,11 @@ public class MediaHookServer {
                             continue;
                         }
                         try {
-                            if(StringUtils.isEmpty(agentVoInfo.getRemoteAddress())){
+                            if(StringUtils.isNotEmpty(sendRtp.getCallId())){
                                 sipCommanderForPlatform.streamByeCmd(sipServer, agentVoInfo,sendRtp,null,null);
-                            }else {
-                                sipCommander.streamByeCmd(sipServer, agentVoInfo,sendRtp.getStreamId(),sendRtp.getCallId(),null,null,null);
                             }
-                            sendRtpManager.deleteSendRTPServer(sendRtp.getAgentKey(),sendRtp.getStreamId(),sendRtp.getCallId());
                         }catch (Exception e){
-                            log.error("[命令发送失败] 国标级联 发送BYE: {}", e.getMessage());
+                            log.error("[命令发送失败] 推流关闭 发送BYE: {}", e.getMessage());
                         }
                     }
                 }
@@ -312,7 +320,7 @@ public class MediaHookServer {
             log.info("无人观看流时 {}，{}",hookVo.getStream(), ObjectUtils.isEmpty(inviteInfo)?"未发现 inviteInfo":"发现 inviteInfo");
             if(inviteInfo != null){
                 // 录像下载
-                if (inviteInfo.getType() == VideoStreamType.download) {
+                if (inviteInfo.getType() == VideoStreamType.DOWNLOAD) {
                     map.put("close", false);
                     deferredResultHolder.invokeResult(key,uuid,map);
                     return deferredResult;
@@ -334,13 +342,13 @@ public class MediaHookServer {
                 AgentVoInfo agentVoInfo = agentInfoManager.get(inviteInfo.getAgentKey());
                 if(agentVoInfo != null){
                     try {
-                        sipCommander.streamByeCmd(sipServer, agentVoInfo,inviteInfo.getStream(),null,null,(ok)->{
+                        sipCommanderForPlatform.streamByeCmd(sipServer, agentVoInfo,inviteInfo.getAudioSsrcInfo().getStream(),inviteInfo.getVideoSsrcInfo()==null?null:inviteInfo.getVideoSsrcInfo().getStream(),null,null,(ok)->{
                             deferredResultHolder.invokeResult(key,uuid,map);
                         },(error)->{
                             log.error("[无人观看]点播， BYE异常 {}",error.getMsg());
                             deferredResultHolder.invokeResult(key,uuid,map);
                         });
-                    }catch (InvalidArgumentException | ParseException | SipException | SsrcTransactionNotFoundException e){
+                    }catch (InvalidArgumentException | ParseException | SipException e){
                         log.error("[无人观看]点播， 发送BYE失败 {}", e.getMessage());
                     }
                     return deferredResult;
@@ -399,29 +407,27 @@ public class MediaHookServer {
         SsrcConfigManager ssrcConfigManager = RedisService.getSsrcConfigManager();
         AgentInfoManager agentInfoManager = RedisService.getAgentInfoManager();
         if("rtp".equals(hookVo.getApp())){
-            ThreadUtil.execute(()->{
-                List<SendRtp> sendRtpList = sendRtpManager.querySendRTPServerByStream(hookVo.getStream());
-                for (SendRtp sendRtp : sendRtpList) {
-                    ssrcConfigManager.releaseSsrc(sendRtp.getMediaServerId(),sendRtp.getSsrc());
-                    // 设备编号 或 上级平台
-                    String platformId = sendRtp.getAgentKey();
-                    AgentVoInfo agentVoInfo = agentInfoManager.get(platformId);
-                    if(agentVoInfo == null){
-                        log.error("[命令发送失败] 国标级联 发送BYE: {}", platformId);
-                       continue;
-                    }
-                    try {
-                        if(StringUtils.isEmpty(agentVoInfo.getRemoteAddress())){
-                            sipCommanderForPlatform.streamByeCmd(sipServer, agentVoInfo,sendRtp,null,null);
-                        }else {
-                            sipCommander.streamByeCmd(sipServer, agentVoInfo,sendRtp.getStreamId(),sendRtp.getCallId(),null,null,null);
-                        }
-                    }catch (Exception e){
-                        log.error("[命令发送失败] 国标级联 发送BYE: {}", e.getMessage());
-                    }
-                    sendRtpManager.deleteSendRTPServer(sendRtp.getAgentKey(),sendRtp.getStreamId(),sendRtp.getCallId());
+            List<SendRtp> sendRtpList = sendRtpManager.querySendRTPServerByStream(hookVo.getStream());
+            for (SendRtp sendRtp : sendRtpList) {
+                sendRtpManager.deleteSendRTPServer(sendRtp.getAgentKey(),sendRtp.getPushStreamId(),sendRtp.getCallId());
+                if(sendRtp.getAudioInfo()!= null){
+                    ssrcConfigManager.releaseSsrc(sendRtp.getMediaServerId(),sendRtp.getAudioInfo().getSsrc());
                 }
-            });
+                if(sendRtp.getVideoInfo() != null){
+                    ssrcConfigManager.releaseSsrc(sendRtp.getMediaServerId(),sendRtp.getVideoInfo().getSsrc());
+                }
+                // 设备编号 或 上级平台
+                AgentVoInfo agentVoInfo = agentInfoManager.get(sendRtp.getAgentKey());
+                if(agentVoInfo == null){
+                    log.error("[命令发送失败] 未获取坐席信息 : {}", sendRtp.getAgentKey());
+                    continue;
+                }
+                try {
+                    sipCommanderForPlatform.streamByeCmd(sipServer, agentVoInfo,sendRtp,null,null);
+                }catch (Exception e){
+                    log.error("[命令发送失败] 国标级联 发送BYE: {}", e.getMessage());
+                }
+            }
         }
         return new NotNullMap(){{putInteger("code",0);putString("msg","success");}};
     }

@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 流媒体服务回调事件 的事件订阅
@@ -30,8 +31,8 @@ public class MediaHookSubscribe {
     private final static Integer millis = 20;
 
     private final RedisMessageListenerContainer redisMessageListenerContainer;
-    private final Map<HookType, Map<HookKey, HookEvent>> allSubscribes = new HashMap<>();
-    private final Map<String, AbstractMessageListener> allListenerMap = new HashMap<>();
+    private final Map<String, Map<HookKey, HookEvent>> allSubscribes = new ConcurrentHashMap<>();
+    private final Map<String, AbstractMessageListener> allListenerMap = new ConcurrentHashMap<>();
 
     public MediaHookSubscribe(DynamicTask dynamicTask,RedisMessageListenerContainer redisMessageListenerContainer){
         dynamicTask.startCron(MEDIA_HOOK_SUBSCRIBE_MANAGER,millis, this::execute);
@@ -42,9 +43,9 @@ public class MediaHookSubscribe {
      */
     public void execute(){
         Date dateTime =new Date();
-        for (HookType hookType : allSubscribes.keySet()) {
-            Map<HookKey, HookEvent> hookSubscribeEventMap = allSubscribes.get(hookType);
-            if (hookSubscribeEventMap.size() > 0) {
+        for (String hookType : allSubscribes.keySet()) {
+            Map<HookKey, HookEvent> hookSubscribeEventMap = allSubscribes.computeIfAbsent(hookType,o->new ConcurrentHashMap<>());
+            if (!hookSubscribeEventMap.isEmpty()) {
                 for (HookKey hookSubscribe : hookSubscribeEventMap.keySet()) {
                     if (dateTime.compareTo(hookSubscribe.getExpires()) > 0) {
                         // 过期的
@@ -61,7 +62,7 @@ public class MediaHookSubscribe {
      * @return
      */
     public List<HookEvent> getSubscribes(HookType type) {
-        Map<HookKey, HookEvent> eventMap = allSubscribes.get(type);
+        Map<HookKey, HookEvent> eventMap = allSubscribes.get(type.getCode());
         if (eventMap == null) {
             return null;
         }
@@ -74,12 +75,12 @@ public class MediaHookSubscribe {
 
     public void sendNotify(MediaHookVo vo) {
         Map<String, Object> map = HookKeyFactory.buildContent(vo);
-        String key = String.format("%s:%s:%s",MEDIA_HOOK_SUBSCRIBE_MANAGER,vo.getType(), JSONUtil.toJsonStr(map));
+        String key = String.format("%s:%s:%s",MEDIA_HOOK_SUBSCRIBE_MANAGER,vo.getType().getCode(), JSONUtil.toJsonStr(map));
         RedisUtils.redisTemplate.convertAndSend(key,vo);
     }
 
     public void addSubscribe(HookKey hookSubscribe, HookEvent event) {
-        String key = String.format("%s:%s:%s",MEDIA_HOOK_SUBSCRIBE_MANAGER,hookSubscribe.getHookType(), JSONUtil.toJsonStr(hookSubscribe.getContent()));
+        String key = String.format("%s:%s:%s",MEDIA_HOOK_SUBSCRIBE_MANAGER,hookSubscribe.getHookType().getCode(), JSONUtil.toJsonStr(hookSubscribe.getContent()));
         AbstractMessageListener abstractMessageListener = new AbstractMessageListener(key){
             @Override
             public void onMessage(Message message, byte[] pattern) {
@@ -89,8 +90,8 @@ public class MediaHookSubscribe {
                     return;
                 }
                 Map<String, Object> hookResponse = BeanUtil.beanToMap(event.getHookVo());
-                Map<HookKey, HookEvent> eventMap = allSubscribes.get(event.getType());
-                if (eventMap == null) {
+                Map<HookKey, HookEvent> eventMap = allSubscribes.computeIfAbsent(event.getType().getCode(),o->new ConcurrentHashMap<>());
+                if (eventMap.isEmpty()) {
                     return;
                 }
                 if(event.getOnAll() == ConstEnum.Flag.YES.getValue()){
@@ -108,11 +109,11 @@ public class MediaHookSubscribe {
         };
         redisMessageListenerContainer.addMessageListener(abstractMessageListener,new PatternTopic(abstractMessageListener.getPatternTopicName()));
         allListenerMap.put(key,abstractMessageListener);
-        allSubscribes.computeIfAbsent(hookSubscribe.getHookType(), k -> new HashMap<>()).put(hookSubscribe, event);
+        allSubscribes.computeIfAbsent(hookSubscribe.getHookType().getCode(), k -> new ConcurrentHashMap<>()).put(hookSubscribe, event);
     }
 
     public void removeSubscribe(HookKey hookSubscribe) {
-        Map<HookKey, HookEvent> eventMap = allSubscribes.get(hookSubscribe.getHookType());
+        Map<HookKey, HookEvent> eventMap = allSubscribes.get(hookSubscribe.getHookType().getCode());
         if (eventMap == null || eventMap.isEmpty()) {
             return;
         }
@@ -126,7 +127,7 @@ public class MediaHookSubscribe {
             return;
         }
         for (Map.Entry<HookKey, HookEvent> entry : entriesToRemove) {
-            String key = String.format("%s:%s:%s",MEDIA_HOOK_SUBSCRIBE_MANAGER,entry.getKey().getHookType(), JSONUtil.toJsonStr(entry.getKey().getContent()));
+            String key = String.format("%s:%s:%s",MEDIA_HOOK_SUBSCRIBE_MANAGER,entry.getKey().getHookType().getCode(), JSONUtil.toJsonStr(entry.getKey().getContent()));
             AbstractMessageListener abstractMessageListener = allListenerMap.remove(key);
             eventMap.remove(entry.getKey());
             if(abstractMessageListener != null){
@@ -134,11 +135,11 @@ public class MediaHookSubscribe {
             }
         }
         if (eventMap.isEmpty()) {
-            allSubscribes.remove(hookSubscribe.getHookType());
+            allSubscribes.remove(hookSubscribe.getHookType().getCode());
         }
     }
     public HookKey getHookKey(HookKey hookSubscribe){
-        Map<HookKey, HookEvent> eventMap = allSubscribes.get(hookSubscribe.getHookType());
+        Map<HookKey, HookEvent> eventMap = allSubscribes.get(hookSubscribe.getHookType().getCode());
         if (eventMap == null || eventMap.isEmpty()) {
             return null;
         }

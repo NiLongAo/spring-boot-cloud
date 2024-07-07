@@ -14,7 +14,6 @@ import cn.com.tzy.springbootstarterfreeswitch.model.message.HangupCallModel;
 import cn.com.tzy.springbootstarterfreeswitch.model.notice.CallMessage;
 import cn.com.tzy.springbootstarterfreeswitch.redis.RedisService;
 import cn.com.tzy.springbootstarterfreeswitch.service.FsService;
-import cn.com.tzy.springbootstarterfreeswitch.utils.FreeswitchUtils;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.RandomUtil;
@@ -117,7 +116,6 @@ public class ChannelParkEventHandler implements EslEventHandler {
         deviceInfo.setRingStartTime(answerTime);
         DirectionEnum directionEnum = callInfo.getDirection();
         log.info("callId:{} device:{} park deviceType:{} cdrType:{} direction:{} sipProtocol:{}", deviceInfo.getCallId(), deviceInfo.getDeviceId(), deviceInfo.getDeviceType(), deviceInfo.getCdrType(), direction, sipProtocol);
-
         ringEntity.setDirection(callInfo.getDirection());
         if (directionEnum.equals(DirectionEnum.OUTBOUND)) {
             outboundCall(callInfo, deviceInfo, agentVoInfo, ringEntity);
@@ -133,29 +131,31 @@ public class ChannelParkEventHandler implements EslEventHandler {
             }
             FsService.getSendAgentMessage().sendMessage(AgentStateEnum.IN_CALL_RING, agentVoInfo,ringEntity);
         }
+        RedisService.getAgentInfoManager().put(agentVoInfo);
     }
     //呼入电话处理
     private void inbound(String uniqueId,String addr, EslEvent event){
         String sipPort = event.getEventHeaders().get("variable_sip_via_port");//硬话机发起呼叫时携带
         String sipContactPort = event.getEventHeaders().get("variable_sip_contact_port");
+        String callId = event.getEventHeaders().get("variable_sip_call_id");//通话唯一标识
         if (sipPort == null) {
             //呼入
-            inboundCall(addr,uniqueId,event);
+            inboundCall(addr,uniqueId,event,callId);
         }else if (sipContactPort.equals(sipPort)) {
             //硬话机外呼
-            sipOutboundCall(addr,uniqueId,event);
+            sipOutboundCall(addr,uniqueId,event,callId);
         }
     }
     /**
      * b-腿 呼入
      * @param event
      */
-    private void inboundCall(String addr,String deviceId,EslEvent event) {
-        String callId = String.valueOf(FreeswitchUtils.snowflake.nextId());
+    private void inboundCall(String addr,String deviceId,EslEvent event,String callId) {
         String localMediaIp = event.getEventHeaders().get("variable_local_media_ip");//fs 服务地址
         String caller = event.getEventHeaders().get("variable_sip_from_user");//主叫号码
         String called = event.getEventHeaders().get("Caller-Destination-Number");//被叫号码
         String contactUri = event.getEventHeaders().get("variable_sip_contact_uri");
+        String sdp = event.getEventHeaders().get("variable_switch_r_sdp");//获取sip中sdp信息
         //客户号码归属地
         String numberLocaton = "";
         log.info("inbount callId:{} park, caller:{}, called:{}, deviceId:{}, uri:{}", callId, caller, called, deviceId, contactUri);
@@ -188,6 +188,7 @@ public class ChannelParkEventHandler implements EslEventHandler {
                 .direction(DirectionEnum.INBOUND)
                 .callTime(new Date())
                 .numberLocation(numberLocaton)
+                .sipSdp(sdp)
                 //接入号码
                 .callerDisplay(called)
                 .companyId(vdnPhoneInfo.getCompanyId())
@@ -221,10 +222,10 @@ public class ChannelParkEventHandler implements EslEventHandler {
      * a-腿 呼出
      * @param event
      */
-    private void sipOutboundCall(String addr,String deviceId,EslEvent event) {
+    private void sipOutboundCall(String addr,String deviceId,EslEvent event,String callId) {
         String caller = event.getEventHeaders().get("variable_sip_from_user");//主叫号码
         String called = event.getEventHeaders().get("Caller-Destination-Number");//被叫号码
-        String callId = String.valueOf(FreeswitchUtils.snowflake.nextId());
+        String sdp = event.getEventHeaders().get("variable_switch_r_sdp");//获取sip中sdp信息
         AgentVoInfo agent = FsService.getAgentService().getAgentBySip(caller);
         if (agent == null || agent.getGroupId() == null) {
             log.warn("sipOutbound callId:{}  sip:{} called:{}", callId, caller, called);
@@ -263,6 +264,7 @@ public class ChannelParkEventHandler implements EslEventHandler {
         CallInfo callInfo  = RedisService.getCallInfoManager().get(callId);
         if(callInfo == null){
             callInfo = CallInfo.builder()
+                .sipSdp(sdp)
                 .callId(callId)
                 .callType(callTypeEunm)
                 .conference(callTypeEunm==CallTypeEunm.CONFERENCE_CALL?called:null)

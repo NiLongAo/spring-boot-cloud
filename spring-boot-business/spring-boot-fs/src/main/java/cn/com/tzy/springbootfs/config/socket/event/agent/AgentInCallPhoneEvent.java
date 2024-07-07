@@ -56,11 +56,15 @@ public class AgentInCallPhoneEvent implements EventListener<AgentInCallPhoneData
         MediaServerVo mediaServerVo = SipService.getMediaServerService().findMediaServerForMinimumLoad(agentVoInfo);
         if (mediaServerVo == null) {
             client.sendEvent(AgentCommon.AGENT_OUT_CALL_PHONE,RestResult.result(RespCode.CODE_0.getValue(),"未获取到可用流媒体"));
+            return;
+        } else if (agentVoInfo == null) {
+            client.sendEvent(AgentCommon.AGENT_OUT_CALL_PHONE,RestResult.result(RespCode.CODE_0.getValue(),String.format("客服 ： %s ,未登录",agentKey)));
+            return;
         }
         //被叫
         String caller = data.getCaller();
         //拨打电话
-        agentService.callPhone(sipServer,mediaServerVo,agentVoInfo,caller,null,(code,msg,vo)->{
+        agentService.callPhone(data.getType(),sipServer,mediaServerVo,agentVoInfo,caller,null,(code,msg,vo)->{
             client.sendEvent(AgentCommon.AGENT_OUT_CALL_PHONE,RestResult.result(code,msg,vo));
         });
     }

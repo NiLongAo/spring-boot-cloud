@@ -16,34 +16,23 @@ public class InviteInfo {
      * 操作用户
      */
     private Long userId;
-
     private String agentKey;
-
-    private String stream;
-
-    private SSRCInfo ssrcInfo;
-
     private String receiveIp;
-
-    private Integer receivePort;
     /**
      * 数据流传输模式 0.UDP:udp传输 2.TCP-ACTIVE：tcp主动模式 2.TCP-PASSIVE：tcp被动模式
      */
     private Integer streamMode;
-
     private VideoStreamType type;
-
     private InviteSessionStatus status;
-
     private StreamInfo streamInfo;
-
-    public InviteInfo(Long userId, String agentKey, String stream, SSRCInfo ssrcInfo, String receiveIp, Integer receivePort, Integer streamMode, VideoStreamType type, InviteSessionStatus status){
+    private SSRCInfo audioSsrcInfo;
+    private SSRCInfo videoSsrcInfo;
+    public InviteInfo(Long userId, String agentKey, SSRCInfo videoSsrcInfo,SSRCInfo audioSsrcInfo, String receiveIp, Integer streamMode, VideoStreamType type, InviteSessionStatus status){
         this.userId = userId;
         this.agentKey = agentKey;
-        this.stream = stream;
-        this.ssrcInfo = ssrcInfo;
+        this.videoSsrcInfo = videoSsrcInfo;
+        this.audioSsrcInfo = audioSsrcInfo;
         this.receiveIp = receiveIp;
-        this.receivePort = receivePort;
         this.streamMode = streamMode;
         this.type = type;
         this.status = status;

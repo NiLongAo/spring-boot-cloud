@@ -41,8 +41,6 @@ public abstract class SipResponseEvent {
     @Resource
     protected SIPCommanderForPlatform sipCommanderForPlatform;
 
-
-
     /**
      * 信息回复
      */

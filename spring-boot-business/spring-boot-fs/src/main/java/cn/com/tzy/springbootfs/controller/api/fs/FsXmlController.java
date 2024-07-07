@@ -98,7 +98,7 @@ public class FsXmlController extends ApiController {
                         .modelMap(new HashMap<String, Object>(){{
                             put(FsTypeEnum.SWITCH.getName(), ConfigModel.builder()
                                     .iceStart(ConstEnum.Flag.YES.getValue())
-                                    .stunAddress("autonat:192.168.1.26")
+                                    .stunAddress("autonat:192.168.1.27")
                                     .build());
                         }})
                         .build()
@@ -110,7 +110,7 @@ public class FsXmlController extends ApiController {
                         .modelMap(new HashMap<String, Object>(){{
                             put(FsTypeEnum.SWITCH.getName(), ConfigModel.builder()
                                     .iceStart(ConstEnum.Flag.YES.getValue())
-                                    .stunAddress("autonat:192.168.1.26")
+                                    .stunAddress("autonat:192.168.1.27")
                                     .build());
                             put(FsTypeEnum.EXTERNAL.getName(),GateWayModel.builder().build());
                         }})

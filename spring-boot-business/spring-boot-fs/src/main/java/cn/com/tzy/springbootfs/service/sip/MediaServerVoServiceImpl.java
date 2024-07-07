@@ -38,7 +38,7 @@ public class MediaServerVoServiceImpl implements MediaServerVoService {
             log.info("[流媒体信息]：未获取到流媒体编号信息");
             return null;
         }
-        MediaServer one = mediaServerService.getOne(new LambdaQueryWrapper<MediaServer>().eq(MediaServer::getEnable, ConstEnum.Flag.YES.getValue()).eq(MediaServer::getId, mediaServerId).eq(MediaServer::getStatus,ConstEnum.Flag.YES.getValue()));
+        MediaServer one = mediaServerService.getOne(new LambdaQueryWrapper<MediaServer>().eq(MediaServer::getId, mediaServerId));
         if(one == null){
             log.info("[流媒体信息]：未获取到流媒体信息");
             return null;
@@ -52,7 +52,7 @@ public class MediaServerVoServiceImpl implements MediaServerVoService {
             log.info("[流媒体信息]：未获取到流媒体编号信息");
             return null;
         }
-        MediaServer one = mediaServerService.getOne(new LambdaQueryWrapper<MediaServer>().eq(MediaServer::getId, mediaServerId));
+        MediaServer one = mediaServerService.getOne(new LambdaQueryWrapper<MediaServer>().eq(MediaServer::getEnable, ConstEnum.Flag.YES.getValue()).eq(MediaServer::getId, mediaServerId).eq(MediaServer::getStatus,ConstEnum.Flag.YES.getValue()));
         if(one == null){
             log.info("[流媒体信息]：未获取到流媒体信息");
             return null;
@@ -78,19 +78,17 @@ public class MediaServerVoServiceImpl implements MediaServerVoService {
             mediaServerItem = findOnLineMediaServerId(agentVoInfo.getMediaServerId());
             if (videoProperties.getUseClientOnLineZlm() && ObjectUtils.isEmpty(mediaServerItem)) {
                 mediaServerItem = findMediaServerForMinimumLoad();
-                agentVoInfo.setMediaServerId(mediaServerItem.getId());
-                AgentVoInfo manager = RedisService.getAgentInfoManager().get(agentVoInfo.getAgentKey());
-                if(manager != null){
-                    manager.setMediaServerId(mediaServerItem.getId());
-                    RedisService.getAgentInfoManager().put(manager);
-                }
             }
         }else {
             mediaServerItem = findMediaServerForMinimumLoad();
         }
         if (mediaServerItem == null) {
             log.warn("[获取可用的ZLM节点]未找到可使用的ZLM...");
+        }else {
+            agentVoInfo.setMediaServerId(mediaServerItem.getId());
+            agentVoInfo.setMediaAddress(String.format("%s://%s:%s%s/index/api/webrtc",mediaServerItem.getSslStatus()== ConstEnum.Flag.NO.getValue()?"http":"https",mediaServerItem.getStreamIp(), mediaServerItem.getSslStatus()== ConstEnum.Flag.NO.getValue()?mediaServerItem.getHttpPort():mediaServerItem.getHttpSslPort(), StringUtils.isNotEmpty(mediaServerItem.getVideoHttpPrefix())?String.format("/%s",mediaServerItem.getVideoHttpPrefix()):""));
         }
+        RedisService.getAgentInfoManager().put(agentVoInfo);
         return mediaServerItem;
     }
 

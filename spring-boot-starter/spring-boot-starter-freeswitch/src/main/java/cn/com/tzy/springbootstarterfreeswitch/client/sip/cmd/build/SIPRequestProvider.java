@@ -1,8 +1,8 @@
 package cn.com.tzy.springbootstarterfreeswitch.client.sip.cmd.build;
 
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.SipServer;
-import cn.com.tzy.springbootstarterfreeswitch.common.sip.SipConstant;
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.utils.SipUtils;
+import cn.com.tzy.springbootstarterfreeswitch.common.sip.SipConstant;
 import gov.nist.javax.sip.SipProviderImpl;
 import gov.nist.javax.sip.message.MessageFactoryImpl;
 import gov.nist.javax.sip.message.SIPRequest;
@@ -17,7 +17,6 @@ import javax.sip.SipFactory;
 import javax.sip.address.Address;
 import javax.sip.address.SipURI;
 import javax.sip.header.*;
-import javax.sip.message.Request;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -85,7 +84,13 @@ public class SIPRequestProvider {
          * @return
          */
         public Builder createSipURI(String deviceGbId,String hostAddress) throws PeerUnavailableException, ParseException {
+            return createSipURI(deviceGbId,hostAddress,null);
+        }
+        public Builder createSipURI(String deviceGbId,String hostAddress,String transport) throws PeerUnavailableException, ParseException {
             this.sipURI = this.sipFactory.createAddressFactory().createSipURI(deviceGbId, hostAddress);
+            if(StringUtils.isNotEmpty(transport)){
+                this.sipURI.setTransportParam(transport);
+            }
             return this;
         }
 
@@ -183,19 +188,7 @@ public class SIPRequestProvider {
          * @return
          */
         public  Builder addViaHeader(String ip, int port, String transport,boolean rPort) throws PeerUnavailableException, InvalidArgumentException, ParseException {
-            addViaHeader(ip, port, transport, SipUtils.getNewViaTag(),rPort);
-            return this;
-        }
-
-        /**
-         *
-         * @param ip 设备ip
-         * @param port 设备地址
-         * @param transport TCP或UDP
-         * @return
-         */
-        public  Builder addViaHeader(String ip, int port, String transport,String branch,boolean rPort) throws PeerUnavailableException, InvalidArgumentException, ParseException {
-            ViaHeader viaHeader = this.sipFactory.createHeaderFactory().createViaHeader(ip, port, transport, branch);
+            ViaHeader viaHeader = this.sipFactory.createHeaderFactory().createViaHeader(ip, port, transport, SipUtils.getNewViaTag());
             if(rPort){
                 viaHeader.setRPort();
             }
@@ -248,16 +241,16 @@ public class SIPRequestProvider {
             return this;
         }
 
-        public Builder createAuthorizationHeader(String deviceGbId,String serverGbId,String host,String password,WWWAuthenticateHeader www){
-            AuthorizationHeader authorization = createAuthorization(sipFactory, deviceGbId, serverGbId, host, password, www);
+        public Builder createAuthorizationHeader(String request,String deviceGbId,String serverGbId,String host,String password,WWWAuthenticateHeader www){
+            AuthorizationHeader authorization = createAuthorization(request,sipFactory, deviceGbId, serverGbId, host, password, www);
             if(authorization != null){
                 headerList.add(authorization);
             }
             return this;
         }
 
-        public Builder createProxyAuthorizationHeader(String deviceGbId,String serverGbId,String host,String password,WWWAuthenticateHeader www){
-            ProxyAuthorizationHeader authorization = SIPRequestProvider.createProxyAuthenticateHeader(sipServer.getSipFactory(), deviceGbId, serverGbId, host, password, www);
+        public Builder createProxyAuthenticateHeader(String request,String deviceGbId,String serverGbId,String host,String password,WWWAuthenticateHeader www){
+            AuthorizationHeader authorization = createProxyAuthenticate(request,sipFactory, deviceGbId, serverGbId, host, password, www);
             if(authorization != null){
                 headerList.add(authorization);
             }
@@ -357,12 +350,24 @@ public class SIPRequestProvider {
     }
 
 
-    public static AuthorizationHeader  createAuthorization(SipFactory sipFactory,String deviceGbId,String serverGbId,String host,String password,WWWAuthenticateHeader www){
+    public static AuthorizationHeader  createAuthorization(String request,SipFactory sipFactory,String deviceGbId,String serverGbId,String host,String password,WWWAuthenticateHeader www){
+        return createAuthorization(false,request,sipFactory,deviceGbId,serverGbId,host,password,www);
+    }
+
+    public static AuthorizationHeader createProxyAuthenticate(String request, SipFactory sipFactory, String deviceGbId, String serverGbId, String host, String password, WWWAuthenticateHeader www){
+        return createAuthorization(true,request,sipFactory,deviceGbId,serverGbId,host,password,www);
+    }
+
+    public static AuthorizationHeader  createAuthorization(boolean isProxy,String request,SipFactory sipFactory,String deviceGbId,String serverGbId,String host,String password,WWWAuthenticateHeader www){
         AuthorizationHeader authorizationHeader = null;
         try {
             SipURI requestURI = sipFactory.createAddressFactory().createSipURI(serverGbId,host);
             if(www == null){
-                authorizationHeader = sipFactory.createHeaderFactory().createAuthorizationHeader("Digest");
+                if(isProxy){
+                    authorizationHeader = sipFactory.createHeaderFactory().createProxyAuthorizationHeader("Digest");
+                }else {
+                    authorizationHeader = sipFactory.createHeaderFactory().createAuthorizationHeader("Digest");
+                }
                 authorizationHeader.setUsername(deviceGbId);
                 authorizationHeader.setURI(requestURI);
                 authorizationHeader.setAlgorithm("MD5");
@@ -389,7 +394,7 @@ public class SIPRequestProvider {
             }
 
             String HA1 = DigestUtils.md5DigestAsHex((deviceGbId + ":" + realm + ":" + password).getBytes());
-            String HA2=DigestUtils.md5DigestAsHex((Request.REGISTER + ":" + requestURI.toString()).getBytes());
+            String HA2=DigestUtils.md5DigestAsHex((request + ":" + requestURI.toString()).getBytes());
 
             StringBuffer reStr = new StringBuffer(200);
             reStr.append(HA1);
@@ -407,76 +412,11 @@ public class SIPRequestProvider {
             reStr.append(HA2);
 
             String RESPONSE = DigestUtils.md5DigestAsHex(reStr.toString().getBytes());
-            authorizationHeader = sipFactory.createHeaderFactory().createAuthorizationHeader(scheme);
-            authorizationHeader.setUsername(deviceGbId);
-            authorizationHeader.setRealm(realm);
-            authorizationHeader.setNonce(nonce);
-            authorizationHeader.setURI(requestURI);
-            authorizationHeader.setResponse(RESPONSE);
-            authorizationHeader.setAlgorithm("MD5");
-            if (qop != null) {
-                authorizationHeader.setQop(qop);
-                authorizationHeader.setCNonce(cNonce);
-                authorizationHeader.setNonceCount(1);
-            }
-        }catch (PeerUnavailableException | ParseException e){
-            log.error(" authorization 解密错误：",e);
-            return authorizationHeader;
-        }
-        return authorizationHeader;
-    }
-
-    public static ProxyAuthorizationHeader  createProxyAuthenticateHeader(SipFactory sipFactory,String deviceGbId,String serverGbId,String host,String password,WWWAuthenticateHeader www){
-        ProxyAuthorizationHeader authorizationHeader = null;
-        try {
-            SipURI requestURI = sipFactory.createAddressFactory().createSipURI(serverGbId,host);
-            if(www == null){
+            if(isProxy){
                 authorizationHeader = sipFactory.createHeaderFactory().createProxyAuthorizationHeader("Digest");
-                authorizationHeader.setUsername(deviceGbId);
-                authorizationHeader.setURI(requestURI);
-                authorizationHeader.setAlgorithm("MD5");
-                return authorizationHeader;
+            }else {
+                authorizationHeader = sipFactory.createHeaderFactory().createAuthorizationHeader("Digest");
             }
-            String realm = www.getRealm();
-            String nonce = www.getNonce();
-            String scheme = www.getScheme();
-            // 参考 https://blog.csdn.net/y673533511/article/details/88388138
-            // qop 保护质量 包含auth（默认的）和auth-int（增加了报文完整性检测）两种策略
-            String qop = www.getQop();
-
-            String cNonce = null;
-            String nc = "00000001";
-            if (qop != null) {
-                if ("auth".equalsIgnoreCase(qop)) {
-                    // 客户端随机数，这是一个不透明的字符串值，由客户端提供，并且客户端和服务器都会使用，以避免用明文文本。
-                    // 这使得双方都可以查验对方的身份，并对消息的完整性提供一些保护
-                    cNonce = UUID.randomUUID().toString();
-
-                }else if ("auth-int".equalsIgnoreCase(qop)){
-                    // TODO
-                }
-            }
-
-            String HA1 = DigestUtils.md5DigestAsHex((deviceGbId + ":" + realm + ":" + password).getBytes());
-            String HA2=DigestUtils.md5DigestAsHex((Request.REGISTER + ":" + requestURI.toString()).getBytes());
-
-            StringBuffer reStr = new StringBuffer(200);
-            reStr.append(HA1);
-            reStr.append(":");
-            reStr.append(nonce);
-            reStr.append(":");
-            if (qop != null) {
-                reStr.append(nc);
-                reStr.append(":");
-                reStr.append(cNonce);
-                reStr.append(":");
-                reStr.append(qop);
-                reStr.append(":");
-            }
-            reStr.append(HA2);
-
-            String RESPONSE = DigestUtils.md5DigestAsHex(reStr.toString().getBytes());
-            authorizationHeader = sipFactory.createHeaderFactory().createProxyAuthorizationHeader(scheme);
             authorizationHeader.setUsername(deviceGbId);
             authorizationHeader.setRealm(realm);
             authorizationHeader.setNonce(nonce);
@@ -494,5 +434,4 @@ public class SIPRequestProvider {
         }
         return authorizationHeader;
     }
-
 }

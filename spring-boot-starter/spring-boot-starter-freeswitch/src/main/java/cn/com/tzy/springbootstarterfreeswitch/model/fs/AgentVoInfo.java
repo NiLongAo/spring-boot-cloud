@@ -3,6 +3,7 @@ package cn.com.tzy.springbootstarterfreeswitch.model.fs;
 import cn.com.tzy.springbootcomm.common.enumcom.ConstEnum;
 import cn.com.tzy.springbootcomm.constant.Constant;
 import cn.com.tzy.springbootstarterfreeswitch.enums.fs.AgentStateEnum;
+import cn.com.tzy.springbootstarterfreeswitch.enums.fs.LoginTypeEnum;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -123,6 +124,7 @@ public class AgentVoInfo implements Serializable {
     private Integer charset= 2;
     //-----------------以下为缓存数据---------------------------
 
+    private String sipPhone;
     /**
      * 绑定的电话号码
      */
@@ -132,10 +134,15 @@ public class AgentVoInfo implements Serializable {
      */
     private String mediaServerId;
     /**
+     * 流媒体编号
+     */
+    private String mediaAddress;
+    /**
      * 1：socket登陆
      * 2：sip登陆
      */
-    private Integer loginType;
+    @Builder.Default
+    private Integer loginType = LoginTypeEnum.SOCKET.getType();
     /**
      * 总机坐席
      */
@@ -275,10 +282,14 @@ public class AgentVoInfo implements Serializable {
         if (loginType == null) {
             return null;
         }
+        if(sipPhone != null){
+            return sipPhone;
+        }
         if(sipPhoneList==null || sipPhoneList.isEmpty()){
             return null;
         }
-        return sipPhoneList.get(0);
+        sipPhone = sipPhoneList.get(0);
+        return sipPhone;
     }
     public Integer getState() {
         if(agentState == null || agentState == AgentStateEnum.LOGOUT){

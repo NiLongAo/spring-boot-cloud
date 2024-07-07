@@ -45,16 +45,14 @@ public class SipSendMessage {
         if (okEvent != null) {
             sipSubscribeHandle.addOkSubscribe(callId, eventResult -> {
                 okEvent.response(eventResult);
-                sipSubscribeHandle.removeOkSubscribe(eventResult.getCallId());
-                sipSubscribeHandle.removeErrorSubscribe(eventResult.getCallId());
+                sipSubscribeHandle.removeAllSubscribe(eventResult.getCallId());
             });
         }
         // 添加错误订阅
         if (errorEvent != null) {
             sipSubscribeHandle.addErrorSubscribe(callId, (eventResult -> {
                 errorEvent.response(eventResult);
-                sipSubscribeHandle.removeErrorSubscribe(eventResult.getCallId());
-                sipSubscribeHandle.removeOkSubscribe(eventResult.getCallId());
+                sipSubscribeHandle.removeAllSubscribe(eventResult.getCallId());
             }));
         }
     }

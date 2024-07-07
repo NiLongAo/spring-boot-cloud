@@ -5,11 +5,10 @@ spring:
     name: fs-server
   profiles:
     active: dev
-
 sip:
   name: fs-sip-server
   id: fs-sip-server
-  port: 5060
+  port: 5021
   domain: 6101251001
 video-settings:
   # 是否开启sip日志
@@ -21,7 +20,7 @@ link:
         inbound:
           defaultPassword: ClueCon
           servers:
-            - host: 192.168.1.26
+            - host: 192.168.1.27
               port: 8021
               timeoutSeconds: 5
           # 开启性能监控 - 事件驱动-业务逻辑处理时间

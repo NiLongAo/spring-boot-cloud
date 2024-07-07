@@ -29,6 +29,7 @@ public class ChannelCustomeventHandler implements EslEventHandler {
     public void handle(String addr, EslEvent event) {
         String userName = event.getEventHeaders().get("user_name");//主叫号码
         String eventSubclass = event.getEventHeaders().get("Event-Subclass");//相关事件
+
         if ("sofia::register".equals(eventSubclass)) {
             log.info("进入事件 [ 用户注册 ] CUSTOM");
             String networkIp = event.getEventHeaders().get("network-ip");
@@ -36,7 +37,14 @@ public class ChannelCustomeventHandler implements EslEventHandler {
             //注册
             AgentVoInfo agentVoInfo = FsService.getAgentService().getAgentBySip(userName);
             if (agentVoInfo != null) {
-                RedisService.getAgentInfoManager().put(agentVoInfo);
+                AgentVoInfo redisAgentVoInfo = RedisService.getAgentInfoManager().get(agentVoInfo.getAgentKey());
+                if(redisAgentVoInfo != null){
+                    agentVoInfo = redisAgentVoInfo;
+                }
+                String[] split = addr.split(":");
+                agentVoInfo.setFsHost(split[0]);
+                agentVoInfo.setFsPost(split[1]);
+                agentVoInfo.setSipPhone(userName);
                 FsService.getAgentService().online(agentVoInfo, null);
                 CompanyInfo companyInfo = RedisService.getCompanyInfoManager().get(agentVoInfo.getCompanyId());
                 if (companyInfo != null) {

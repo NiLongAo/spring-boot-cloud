@@ -1,10 +1,12 @@
 package cn.com.tzy.springbootstarterfreeswitch.service.freeswitch;
 
 import cn.com.tzy.springbootcomm.common.enumcom.ConstEnum;
+import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootcomm.utils.DynamicTask;
 import cn.com.tzy.springbootstarterfreeswitch.client.media.client.MediaClient;
 import cn.com.tzy.springbootstarterfreeswitch.common.sip.SipConstant;
 import cn.com.tzy.springbootstarterfreeswitch.enums.fs.AgentStateEnum;
+import cn.com.tzy.springbootstarterfreeswitch.enums.sip.VideoStreamType;
 import cn.com.tzy.springbootstarterfreeswitch.model.fs.AgentVoInfo;
 import cn.com.tzy.springbootstarterfreeswitch.redis.RedisService;
 import cn.com.tzy.springbootstarterfreeswitch.redis.impl.sip.InviteStreamManager;
@@ -31,6 +33,9 @@ public abstract class AgentVoService {
     public abstract AgentVoInfo getAgentBySip(String sip);
 
     public abstract AgentVoInfo getAgentByKey(String agentKey);
+
+    public abstract void stopStream(String callId);
+    public abstract RestResult<?> pushWebRtp(VideoStreamType type, String agentKey);
 
     public abstract AgentVoInfo getAgentByCompanyCode(String company,String agentCode);
     public abstract AgentVoInfo findAgentId(String id);

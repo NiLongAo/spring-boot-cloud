@@ -20,8 +20,14 @@ public class MakeCallModel implements MessageModel {
      * 设备uuid
      */
     private String deviceId;
-
+    /**
+     * 设备uuid
+     */
     private String callId;
+    /**
+     * sip中 sdp消息
+     */
+    private String sdp;
     /**
      * 主叫
      */

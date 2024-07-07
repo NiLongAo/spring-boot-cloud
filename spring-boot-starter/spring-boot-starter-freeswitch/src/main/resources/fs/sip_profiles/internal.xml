@@ -76,7 +76,7 @@
     <param name="ext-sip-ip" value="${config.stunAddress}"/>
     #else
     <param name="ext-rtp-ip" value="$${external_rtp_ip}"/>
-    <param name="ext-sip-ip" value="$${external_sip_ip}"/>
+    <param name="ext-sip-ip" value="$${external_rtp_ip}"/>
     #end
     <param name="odbc-dsn" value="$${mysql_in_to}"/>
     <param name="apply-candidate-acl" value="localnet.auto"/>

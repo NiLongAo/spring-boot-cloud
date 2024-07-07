@@ -5,6 +5,7 @@ import cn.com.tzy.springbootstarterfreeswitch.client.sip.properties.VideoPropert
 import cn.com.tzy.springbootstarterfreeswitch.vo.sip.SendRtp;
 import cn.com.tzy.springbootstarterredis.utils.RedisUtils;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -22,38 +23,11 @@ public class SendRtpManager {
     private String PLATFORM_SEND_RTP_INFO_PREFIX = SipConstant.PLATFORM_SEND_RTP_INFO_PREFIX;
 
     public void put(SendRtp sendRtpItem) {
-        String key = String.format(
-                "%s:%s:%s:%s:%s:%s",
-                PLATFORM_SEND_RTP_INFO_PREFIX,
-                videoProperties.getServerId(),
-                sendRtpItem.getMediaServerId(),
-                sendRtpItem.getAgentKey(),
-                sendRtpItem.getStreamId(),
-                sendRtpItem.getCallId()
-        );
-        RedisUtils.set(key, sendRtpItem);
+        RedisUtils.set(getKey(sendRtpItem.getMediaServerId(),sendRtpItem.getAgentKey(),sendRtpItem.getPushStreamId(),sendRtpItem.getCallId()), sendRtpItem);
     }
 
-    public SendRtp querySendRTPServer(String agentCode, String streamId, String callId) {
-        if (agentCode == null) {
-            agentCode = "*";
-        }
-        if (streamId == null) {
-            streamId = "*";
-        }
-        if (callId == null) {
-            callId = "*";
-        }
-        String key = String.format(
-                "%s:%s:%s:%s:%s:%s",
-                PLATFORM_SEND_RTP_INFO_PREFIX,
-                videoProperties.getServerId(),
-                "*",
-                agentCode,
-                streamId,
-                callId
-        );
-        List<String> scan = RedisUtils.keys(key);
+    public SendRtp querySendRTPServer(String agentKey, String streamId, String callId) {
+        List<String> scan = RedisUtils.keys(getKey(null,agentKey,streamId,callId));
         if (scan.size() > 0) {
             return (SendRtp)RedisUtils.get((String)scan.get(0));
         }else {
@@ -61,22 +35,8 @@ public class SendRtpManager {
         }
     }
 
-    public List<SendRtp> querySendRTPServerByChnnelId(String agentCode) {
-        if (agentCode == null) {
-            return null;
-        }
-        String callId = "*";
-        String streamId = "*";
-        String key = String.format(
-                "%s:%s:%s:%s:%s:%s",
-                PLATFORM_SEND_RTP_INFO_PREFIX,
-                videoProperties.getServerId(),
-                "*",
-                agentCode,
-                streamId,
-                callId
-        );
-        List<String> scan = RedisUtils.keys(key);
+    public List<SendRtp> querySendRTPServerByChnnelId(String agentKey) {
+        List<String> scan = RedisUtils.keys(getKey(null,agentKey,null,null));
         List<SendRtp> result = new ArrayList<>();
         for (Object o : scan) {
             result.add((SendRtp) RedisUtils.get((String) o));
@@ -85,21 +45,7 @@ public class SendRtpManager {
     }
 
     public List<SendRtp> querySendRTPServerByStream(String stream) {
-        if (stream == null) {
-            return null;
-        }
-        String callId = "*";
-        String agentCode = "*";
-        String key = String.format(
-                "%s:%s:%s:%s:%s:%s",
-                PLATFORM_SEND_RTP_INFO_PREFIX,
-                videoProperties.getServerId(),
-                "*",
-                agentCode,
-                stream,
-                callId
-        );
-        List<String> scan = RedisUtils.keys(key);
+        List<String> scan = RedisUtils.keys(getKey(null,null,stream,null));
         List<SendRtp> result = new ArrayList<>();
         for (Object o : scan) {
             result.add((SendRtp) RedisUtils.get((String) o));
@@ -109,25 +55,9 @@ public class SendRtpManager {
 
     /**
      * 删除RTP推送信息缓存
-     * @param agentCode
      */
-    public void deleteSendRTPServer( String agentCode, String streamId ,String callId) {
-        if (streamId == null) {
-            streamId = "*";
-        }
-        if (callId == null) {
-            callId = "*";
-        }
-        String key = String.format(
-                "%s:%s:%s:%s:%s:%s",
-                PLATFORM_SEND_RTP_INFO_PREFIX,
-                videoProperties.getServerId(),
-                "*",
-                agentCode,
-                streamId,
-                callId
-        );
-        List<String> scan = RedisUtils.keys(key);
+    public void deleteSendRTPServer( String agentKey, String streamId ,String callId) {
+        List<String> scan = RedisUtils.keys(getKey(null,agentKey,streamId,callId));
         if (scan.size() > 0) {
             for (Object keyStr : scan) {
                 RedisUtils.del((String)keyStr);
@@ -136,16 +66,7 @@ public class SendRtpManager {
     }
 
     public List<SendRtp> queryAllSendRTPServer() {
-        String key = String.format(
-                "%s:%s:%s:%s:%s:%s",
-                PLATFORM_SEND_RTP_INFO_PREFIX,
-                videoProperties.getServerId(),
-                "*",
-                "*",
-                "*",
-                "*"
-        );
-        List<String> queryResult = RedisUtils.keys(key);
+        List<String> queryResult = RedisUtils.keys(getKey(null,null,null,null));
         List<SendRtp> result= new ArrayList<>();
 
         for (String o : queryResult) {
@@ -157,23 +78,37 @@ public class SendRtpManager {
 
     /**
      * 查询某个通道是否存在上级点播（RTP推送）
-     * @param agentCode
      */
-    public boolean isChannelSendingRTP(String agentCode) {
-        String key = String.format(
-                "%s:%s:%s:%s:%s:%s",
-                PLATFORM_SEND_RTP_INFO_PREFIX,
-                videoProperties.getServerId(),
-                "*",
-                agentCode,
-                "*",
-                "*"
-        );
-        List<String> RtpStreams = RedisUtils.keys(key);
+    public boolean isChannelSendingRTP(String agentKey) {
+        List<String> RtpStreams = RedisUtils.keys(getKey(null,agentKey,null,null));
         if (RtpStreams.size() > 0) {
             return true;
         } else {
             return false;
         }
+    }
+
+    private String getKey(String mediaServerId,String agentKey, String streamId ,String callId){
+        if (StringUtils.isEmpty(mediaServerId)) {
+            mediaServerId = "*";
+        }
+        if (StringUtils.isEmpty(agentKey)) {
+            agentKey = "*";
+        }
+        if (StringUtils.isEmpty(streamId)) {
+            streamId = "*";
+        }
+        if (StringUtils.isEmpty(callId)) {
+            callId = "*";
+        }
+        return String.format(
+                "%s:%s:%s:%s:%s:%s",
+                PLATFORM_SEND_RTP_INFO_PREFIX,
+                videoProperties.getServerId(),
+                mediaServerId,
+                agentKey,
+                streamId,
+                callId
+        );
     }
 }

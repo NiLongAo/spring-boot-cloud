@@ -237,7 +237,7 @@ public class ZlmService {
         if(mediaServerAll != null && !mediaServerAll.isEmpty()){
             List<OnStreamChangedHookVo> delete = new ArrayList<>();
             for (OnStreamChangedHookVo vo : mediaServerAll) {
-                MediaServerVo mediaServer = mediaServerService.findMediaServerId(vo.getMediaServerId());
+                MediaServerVo mediaServer = mediaServerService.findOnLineMediaServerId(vo.getMediaServerId());
                 if(mediaServer == null){
                     delete.add(vo);
                     continue;

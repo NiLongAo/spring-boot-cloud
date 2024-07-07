@@ -30,8 +30,8 @@ import java.util.stream.Collectors;
  */
 @Log4j2
 public class CallStrategyHandler extends StrategyHandler {
-    //private final static String codecs = "^^:OPUS:G722:PCMU:PCMA:H264";//视频通话
-    private final static String codecs = "^^:OPUS:G722:PCMU:PCMA";//音频通话
+    private final static String videoCode = "^^:OPUS:G722:PCMU:PCMA:H264:VP8";//视频通话
+    private final static String audioCode = "^^:OPUS:G722:PCMU:PCMA";//音频通话
 
     public CallStrategyHandler(InboundClient inboundClient) {
         super(inboundClient);
@@ -160,9 +160,10 @@ public class CallStrategyHandler extends StrategyHandler {
 
         Map<String, Object> fsParams=new HashMap<>();
         fsParams.put("return_ring_ready",true);
+        fsParams.put("sip_sticky_contact",true);// 该参数主要用于固定住contact地址，防止在sip协商过程中被对方的内网地址所改写。
         fsParams.put("sip_contact_user",display);
         fsParams.put("ring_asr",true);
-        fsParams.put("absolute_codec_string",codecs);
+        fsParams.put("absolute_codec_string",(StringUtils.isNoneEmpty(makeCallModel.getSdp()) && makeCallModel.getSdp().contains("m=video"))?videoCode:audioCode);//判断给 音频或视频 编码
         fsParams.put("origination_caller_id_number",display);
         fsParams.put("origination_caller_id_name",display);
         fsParams.put("origination_uuid",makeCallModel.getDeviceId());

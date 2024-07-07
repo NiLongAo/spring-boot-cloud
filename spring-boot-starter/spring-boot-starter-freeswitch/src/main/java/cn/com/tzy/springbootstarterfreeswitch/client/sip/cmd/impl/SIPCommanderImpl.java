@@ -23,14 +23,12 @@ import cn.com.tzy.springbootstarterfreeswitch.vo.sip.EventResult;
 import cn.com.tzy.springbootstarterfreeswitch.vo.sip.MediaServerVo;
 import cn.com.tzy.springbootstarterfreeswitch.vo.sip.SipTransactionInfo;
 import cn.com.tzy.springbootstarterfreeswitch.vo.sip.SsrcTransaction;
-import gov.nist.javax.sip.ResponseEventExt;
 import gov.nist.javax.sip.message.SIPResponse;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import javax.sdp.SdpParseException;
-import javax.sdp.SessionDescription;
 import javax.sip.InvalidArgumentException;
 import javax.sip.SipException;
 import javax.sip.address.SipURI;
@@ -60,36 +58,40 @@ public class SIPCommanderImpl implements SIPCommander {
             }
             return;
         }
-        MediaServerVo mediaServerVo = mediaServerService.findOnLineMediaServerId(ssrcTransaction.getMediaServerId());
+        SipTransactionInfo sipTransactionInfo = ssrcTransaction.getSipTransactionInfo();
+        if(sipTransactionInfo == null){
+            log.info("[视频流停止]当前流未请求成功，无法关闭，设备：{}, 流ID: {}", agentVoInfo.getDeviceId(), stream);
+            if(errorEvent != null){
+                errorEvent.response(new EventResult<RestResultEvent>(new RestResultEvent(RespCode.CODE_2.getValue(),"当前流未请求成功，无法关闭")));
+            }
+            return;
+        }
         SsrcConfigManager ssrcConfigManager = RedisService.getSsrcConfigManager();
         ssrcConfigManager.releaseSsrc(ssrcTransaction.getMediaServerId(),ssrcTransaction.getSsrc());
         ssrcTransactionManager.remove(agentVoInfo.getAgentKey(),ssrcTransaction.getStream());
-        SipTransactionInfo sipTransactionInfo = ssrcTransaction.getSipTransactionInfo();
         String localIp = sipServer.getLocalIp(agentVoInfo.getFsHost());
         SipConfigProperties sipConfigProperties = sipServer.getSipConfigProperties();
+        MediaServerVo mediaServerVo = mediaServerService.findOnLineMediaServerId(ssrcTransaction.getMediaServerId());
+        if(mediaServerVo != null){
+            MediaClient.closeRtpServer(mediaServerVo,ssrcTransaction.getStream());
+            MediaClient.closeStreams(mediaServerVo,"__defaultVhost__",ssrcTransaction.getApp(),ssrcTransaction.getStream());
+        }
         //构建器
         Request request = SIPRequestProvider.builder(sipServer, null, Request.BYE,null)
-                .createSipURI(ssrcTransaction.getAgentKey(), agentVoInfo.getRemoteAddress())
+                .createSipURI(agentVoInfo.getCalled(), agentVoInfo.getRemoteAddress())
                 .addViaHeader(localIp, sipConfigProperties.getPort(),TransportType.UDP.getName(), false)
-                .createFromHeader(agentVoInfo.getAgentKey(), sipConfigProperties.getIp(), sipTransactionInfo.getFromTag())
-                .createToHeader(agentVoInfo.getAgentKey(), agentVoInfo.getRemoteAddress(), sipTransactionInfo.getToTag())
+                .createFromHeader(agentVoInfo.getCalled(), sipConfigProperties.getIp(), sipTransactionInfo.getFromTag())
+                .createToHeader(agentVoInfo.getCalled(), agentVoInfo.getRemoteAddress(), sipTransactionInfo.getToTag())
                 .createCSeqHeader(RedisService.getCseqManager().getCSEQ())
                 .createCallIdHeader(null,null,sipTransactionInfo.getCallId())
                 .createUserAgentHeader()
                 .createContactHeader(sipConfigProperties.getId(),String.format("%s:%s",localIp, sipConfigProperties.getPort()))
                 .buildRequest();
         SipSendMessage.sendMessage(sipServer, agentVoInfo, request, ok->{
-            if(mediaServerVo != null){
-                MediaClient.closeRtpServer(mediaServerVo,ssrcTransaction.getStream());
-                MediaClient.closeStreams(mediaServerVo,"__defaultVhost__",ssrcTransaction.getApp(),ssrcTransaction.getStream());
-            }
             if(okEvent!= null){
                 okEvent.response(ok);
             }
         },error->{
-            if(mediaServerVo != null){
-                MediaClient.closeRtpServer(mediaServerVo,ssrcTransaction.getStream());
-            }
             if(errorEvent!= null){
                 errorEvent.response(error);
             }
@@ -97,37 +99,20 @@ public class SIPCommanderImpl implements SIPCommander {
     }
 
     @Override
-    public void sendAckMessage(SipServer sipServer, SessionDescription sdp, ResponseEventExt event, SIPResponse response, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws InvalidArgumentException, SipException, ParseException, SdpParseException {
-        SipConfigProperties sipConfigProperties = sipServer.getSipConfigProperties();
-        Request reqAck = SIPRequestProvider.builder(sipServer, null, Request.ACK, null)
-                .createSipURI(sdp.getOrigin().getUsername(), event.getRemoteIpAddress() + ":" + event.getRemotePort())
-                .addViaHeader(response.getLocalAddress().getHostAddress(), sipConfigProperties.getPort(), response.getTopmostViaHeader().getTransport(),response.getTopmostViaHeader().getBranch(), false)
-                .createCallIdHeader(response.getCallIdHeader())
-                .createFromHeader(response.getFromHeader())
-                .createToHeader(response.getToHeader())
-                .createCSeqHeader(RedisService.getCseqManager().getCSEQ())
-//                .createContactHeader(sipConfigProperties.getId(),String.format("%s:%s",response.getLocalAddress().getHostAddress(), sipConfigProperties.getPort()))
-//                .createUserAgentHeader()
-                .buildRequest();
-        log.info("[回复ack] {}-> {}:{} ", sdp.getOrigin().getUsername(), event.getRemoteIpAddress(), event.getRemotePort());
-        SipSendMessage.handleEvent(sipServer,response.getCallIdHeader().getCallId(),okEvent,errorEvent);
-        sipMessageHandle.handleMessage(response.getLocalAddress().getHostAddress(),reqAck);
-    }
-
-    @Override
     public void sendAckMessage(SipServer sipServer, SIPResponse response, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws InvalidArgumentException, SipException, ParseException, SdpParseException {
+
         Request reqAck = SIPRequestProvider.builder(sipServer, null, Request.ACK, null)
-                .createSipURI(((SipURI) response.getToHeader().getAddress().getURI()).getUser(), response.getRemoteAddress().getHostAddress() + ":" + response.getRemotePort())
-                .addViaHeader(response.getLocalAddress().getHostAddress(), response.getTopmostViaHeader().getPort(), response.getTopmostViaHeader().getTransport(),response.getTopmostViaHeader().getBranch(), false)
+                .createSipURI(((SipURI) response.getToHeader().getAddress().getURI()).getUser(), response.getRemoteAddress().getHostAddress() + ":" + response.getRemotePort(),"udp")
+                .addViaHeader(response.getLocalAddress().getHostAddress(), response.getTopmostViaHeader().getPort(), response.getTopmostViaHeader().getTransport(), true)
                 .createCallIdHeader(response.getCallIdHeader())
                 .createFromHeader(response.getFromHeader())
                 .createToHeader(response.getToHeader())
-                .createCSeqHeader(RedisService.getCseqManager().getCSEQ())
-//                .createContactHeader(((SipURI) response.getFromHeader().getAddress().getURI()).getUser(),String.format("%s:%s",response.getLocalAddress().getHostAddress(), response.getLocalPort()))
+                .createCSeqHeader(response.getCSeq().getSeqNumber())
+                .createContactHeader(((SipURI) response.getFromHeader().getAddress().getURI()).getUser(),String.format("%s:%s",response.getLocalAddress().getHostAddress(), response.getLocalPort()))
 //                .createUserAgentHeader()
                 .buildRequest();
         log.info("[回复ack] {}-> {}:{} ", ((SipURI) response.getFromHeader().getAddress().getURI()).getUser(), response.getRemoteAddress().getHostAddress(), response.getRemotePort());
-        SipSendMessage.handleEvent(sipServer,response.getCallIdHeader().getCallId(),okEvent,errorEvent);
+        SipSendMessage.handleSipEvent(sipServer,response.getCallIdHeader().getCallId(),okEvent,errorEvent);
         sipMessageHandle.handleMessage(response.getLocalAddress().getHostAddress(),reqAck);
     }
 }

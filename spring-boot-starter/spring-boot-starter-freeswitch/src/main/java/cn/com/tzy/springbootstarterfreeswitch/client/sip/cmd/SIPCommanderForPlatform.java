@@ -10,9 +10,11 @@ import cn.com.tzy.springbootstarterfreeswitch.vo.sip.MediaServerVo;
 import cn.com.tzy.springbootstarterfreeswitch.vo.sip.SSRCInfo;
 import cn.com.tzy.springbootstarterfreeswitch.vo.sip.SendRtp;
 import gov.nist.javax.sip.message.SIPRequest;
+import gov.nist.javax.sip.message.SIPResponse;
 
 import javax.sip.InvalidArgumentException;
 import javax.sip.SipException;
+import javax.sip.header.ProxyAuthenticateHeader;
 import javax.sip.header.WWWAuthenticateHeader;
 import java.text.ParseException;
 
@@ -45,7 +47,7 @@ public interface SIPCommanderForPlatform {
      * 向发起点播的上级回复bye
      * 点播时检查是否开启过
      */
-    void streamByeCmd(SipServer sipServer, AgentVoInfo agentVoInfo, String stream, String callId, VideoStreamType type, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws SipException, InvalidArgumentException, ParseException;
+    void streamByeCmd(SipServer sipServer, AgentVoInfo agentVoInfo, String audioStream, String videoStream, String callId, VideoStreamType type, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws SipException, InvalidArgumentException, ParseException;
 
     /**
      * presence 订阅、取消订阅信息
@@ -57,5 +59,7 @@ public interface SIPCommanderForPlatform {
     /**
      * 请求拨打电话请求
      */
-    SIPRequest callPhone(SipServer sipServer, MediaServerVo mediaServerVo, SSRCInfo ssrcInfo, AgentVoInfo deviceVo,String caller, HookEvent hookEvent, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws InvalidArgumentException, SipException, ParseException;
+    SIPRequest callPhone(SipServer sipServer, MediaServerVo mediaServerVo, SSRCInfo videoSsrcInfo, SSRCInfo audioSsrcInfo, AgentVoInfo deviceVo,String caller, HookEvent hookEvent, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws InvalidArgumentException, SipException, ParseException;
+    SIPRequest callPhone(SipServer sipServer,AgentVoInfo agentVoInfo, ProxyAuthenticateHeader header, SIPRequest sipRequest, SIPResponse response) throws InvalidArgumentException, SipException, ParseException;
+
 }

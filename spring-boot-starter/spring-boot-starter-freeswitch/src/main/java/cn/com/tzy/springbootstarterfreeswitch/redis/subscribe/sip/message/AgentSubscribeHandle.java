@@ -23,13 +23,13 @@ import java.util.concurrent.TimeUnit;
 
 @Log4j2
 @Component
-public class SipSubscribeHandle {
+public class AgentSubscribeHandle {
 
-    private final static String VIDEO_EVENT_SUBSCRIBE_MANAGER = SipConstant.VIDEO_SIP_EVENT_SUBSCRIBE_MANAGER;
+    private final static String VIDEO_AGENT_EVENT_SUBSCRIBE_MANAGER = SipConstant.VIDEO_AGENT_EVENT_SUBSCRIBE_MANAGER;
 
-    public final static String VIDEO_SIP_ERROR_EVENT_SUBSCRIBE_MANAGER = SipConstant.VIDEO_SIP_ERROR_EVENT_SUBSCRIBE_MANAGER;
+    public final static String VIDEO_AGENT_ERROR_EVENT_SUBSCRIBE_MANAGER = SipConstant.VIDEO_AGENT_ERROR_EVENT_SUBSCRIBE_MANAGER;
 
-    public final static String VIDEO_SIP_OK_EVENT_SUBSCRIBE_MANAGER = SipConstant.VIDEO_SIP_OK_EVENT_SUBSCRIBE_MANAGER;
+    public final static String VIDEO_AGENT_OK_EVENT_SUBSCRIBE_MANAGER = SipConstant.VIDEO_AGENT_OK_EVENT_SUBSCRIBE_MANAGER;
     private final Integer millis = 15;
 
     private final RedisMessageListenerContainer redisMessageListenerContainer;
@@ -48,8 +48,8 @@ public class SipSubscribeHandle {
 
 
 
-    public SipSubscribeHandle(DynamicTask dynamicTask, RedisMessageListenerContainer redisMessageListenerContainer){
-        dynamicTask.startCron(VIDEO_EVENT_SUBSCRIBE_MANAGER,millis, this::execute);
+    public AgentSubscribeHandle(DynamicTask dynamicTask, RedisMessageListenerContainer redisMessageListenerContainer){
+        dynamicTask.startCron(VIDEO_AGENT_EVENT_SUBSCRIBE_MANAGER,millis, this::execute);
         this.redisMessageListenerContainer = redisMessageListenerContainer;
     }
 
@@ -72,7 +72,7 @@ public class SipSubscribeHandle {
     public void addErrorSubscribe(String key, SipSubscribeEvent event) {
         errorTimeSubscribes.put(key, Instant.now());
         errorSubscribes.computeIfAbsent(key, o -> new ArrayList<SipSubscribeEvent>()).add(event);
-        String redisListenerKey = String.format("%s%s", VIDEO_SIP_ERROR_EVENT_SUBSCRIBE_MANAGER, key);
+        String redisListenerKey = String.format("%s%s", VIDEO_AGENT_ERROR_EVENT_SUBSCRIBE_MANAGER, key);
         //创建监听
         AbstractMessageListener abstractMessageListener = errorMessageListener.computeIfAbsent(key, o -> new AbstractMessageListener(redisListenerKey) {
             @Override
@@ -99,7 +99,7 @@ public class SipSubscribeHandle {
     public void addOkSubscribe(String key, SipSubscribeEvent event) {
         okTimeSubscribes.put(key, Instant.now());
         okSubscribes.computeIfAbsent(key, o -> new ArrayList<SipSubscribeEvent>()).add(event);
-        String redisListenerKey = String.format("%s%s", VIDEO_SIP_OK_EVENT_SUBSCRIBE_MANAGER, key);
+        String redisListenerKey = String.format("%s%s", VIDEO_AGENT_OK_EVENT_SUBSCRIBE_MANAGER, key);
         //创建监听
         AbstractMessageListener abstractMessageListener = okMessageListener.computeIfAbsent(key, o -> new AbstractMessageListener(redisListenerKey) {
             @Override

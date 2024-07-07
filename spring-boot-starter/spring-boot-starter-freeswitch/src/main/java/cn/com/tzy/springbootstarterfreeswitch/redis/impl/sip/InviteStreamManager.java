@@ -39,13 +39,14 @@ public class InviteStreamManager {
     private final Map<String, List<InviteErrorCallback<Object>>> inviteErrorCallbackMap = new ConcurrentHashMap<>();
 
     public InviteInfo updateInviteInfoForSSRC(InviteInfo inviteInfo, String ssrc){
-        InviteInfo info = getInviteInfo(inviteInfo.getType(), inviteInfo.getAgentKey(), inviteInfo.getStream(),null);
-        if(info == null || info.getSsrcInfo() == null){
+        InviteInfo info = getInviteInfo(inviteInfo.getType(), inviteInfo.getAgentKey(), inviteInfo.getAudioSsrcInfo().getStream(),null);
+        if(info == null || info.getAudioSsrcInfo() == null){
             return null;
         }
+
         removeInviteInfo(info);
-        info.getSsrcInfo().setSsrc(ssrc);
-        RedisUtils.set(getKey(info.getType(),info.getAgentKey(),info.getStream(),info.getSsrcInfo().getSsrc()), info);
+        info.getAudioSsrcInfo().setSsrc(ssrc);
+        RedisUtils.set(getKey(info.getType(),info.getAgentKey(),info.getAudioSsrcInfo().getStream(),info.getAudioSsrcInfo().getSsrc()), info);
         return info;
     }
 
@@ -60,22 +61,25 @@ public class InviteStreamManager {
         if (InviteSessionStatus.ready == inviteInfo.getStatus()) {
             if (inviteInfo.getAgentKey() == null
                     || inviteInfo.getType() == null
-                    || inviteInfo.getStream() == null
+                    || inviteInfo.getAudioSsrcInfo().getStream() == null
             ) {
                 return;
             }
             inviteInfoForUpdate = inviteInfo;
         } else {
-            InviteInfo inviteInfoInRedis = getInviteInfo(inviteInfo.getType(), inviteInfo.getAgentKey(), inviteInfo.getStream(),null);
+            InviteInfo inviteInfoInRedis = getInviteInfo(inviteInfo.getType(), inviteInfo.getAgentKey(), inviteInfo.getAudioSsrcInfo().getStream(),null);
             if (inviteInfoInRedis == null) {
-                log.warn("[更新Invite信息]，未从缓存中读取到Invite信息： deviceId: {},  stream: {}", inviteInfo.getAgentKey(),  inviteInfo.getStream());
+                log.warn("[更新Invite信息]，未从缓存中读取到Invite信息： deviceId: {},  stream: {}", inviteInfo.getAgentKey(),  inviteInfo.getAudioSsrcInfo().getStream());
                 return;
             }
             if (inviteInfo.getStreamInfo() != null) {
                 inviteInfoInRedis.setStreamInfo(inviteInfo.getStreamInfo());
             }
-            if (inviteInfo.getSsrcInfo() != null) {
-                inviteInfoInRedis.setSsrcInfo(inviteInfo.getSsrcInfo());
+            if (inviteInfo.getAudioSsrcInfo() != null) {
+                inviteInfoInRedis.setAudioSsrcInfo(inviteInfo.getAudioSsrcInfo());
+            }
+            if (inviteInfo.getVideoSsrcInfo() != null) {
+                inviteInfoInRedis.setVideoSsrcInfo(inviteInfo.getVideoSsrcInfo());
             }
             if (inviteInfo.getStreamMode() != null) {
                 inviteInfoInRedis.setStreamMode(inviteInfo.getStreamMode());
@@ -83,21 +87,18 @@ public class InviteStreamManager {
             if (inviteInfo.getReceiveIp() != null) {
                 inviteInfoInRedis.setReceiveIp(inviteInfo.getReceiveIp());
             }
-            if (inviteInfo.getReceivePort() != null) {
-                inviteInfoInRedis.setReceivePort(inviteInfo.getReceivePort());
-            }
             if (inviteInfo.getStatus() != null) {
                 inviteInfoInRedis.setStatus(inviteInfo.getStatus());
             }
             inviteInfoForUpdate = inviteInfoInRedis;
         }
         //下载操作时关联用户与当前key的
-        if(inviteInfoForUpdate.getType() == VideoStreamType.download && InviteSessionStatus.ok == inviteInfoForUpdate.getStatus()){
+        if(inviteInfoForUpdate.getType() == VideoStreamType.DOWNLOAD && InviteSessionStatus.ok == inviteInfoForUpdate.getStatus()){
             String userKey = String.format("%s:%s",INVITE_DOWNLOAD_USER_PREFIX,inviteInfoForUpdate.getUserId());
-            RedisUtils.sSet(userKey,inviteInfoForUpdate.getStream());
+            RedisUtils.sSet(userKey,inviteInfoForUpdate.getAudioSsrcInfo().getStream());
         }
-        RedisUtils.set(getKey(inviteInfoForUpdate.getType(),inviteInfoForUpdate.getAgentKey() ,inviteInfoForUpdate.getStream(),inviteInfoForUpdate.getSsrcInfo().getSsrc()), inviteInfoForUpdate);
-        RedisService.getRecordMp4Manager().put(inviteInfoForUpdate.getStream(),inviteInfoForUpdate);
+        RedisUtils.set(getKey(inviteInfoForUpdate.getType(),inviteInfoForUpdate.getAgentKey() ,inviteInfoForUpdate.getAudioSsrcInfo().getStream(),inviteInfoForUpdate.getAudioSsrcInfo().getSsrc()), inviteInfoForUpdate);
+        RedisService.getRecordMp4Manager().put(inviteInfoForUpdate.getAudioSsrcInfo().getStream(),inviteInfoForUpdate);
     }
 
     public InviteInfo getInviteInfo(VideoStreamType type, String agentKey,  String stream, String ssrc) {
@@ -155,8 +156,12 @@ public class InviteStreamManager {
             if(inviteInfo != null && inviteInfo.getStatus() == InviteSessionStatus.ok && inviteInfo.getStreamInfo() != null){
                 StreamInfo streamInfo = inviteInfo.getStreamInfo();
                 MediaServerVo mediaServerVo = SipService.getMediaServerService().findOnLineMediaServerId(streamInfo.getMediaServerId());
+                if(mediaServerVo == null){
+                    log.error("流媒体[{}]未上线，无法清除用户下载录像",streamInfo.getMediaServerId());
+                    return;
+                }
                 MediaClient.deleteRecordDirectory(mediaServerVo,"__defaultVhost__",streamInfo.getApp(),streamInfo.getStream(),null);
-                RedisService.getRecordMp4Manager().del(inviteInfo.getStream());
+                RedisService.getRecordMp4Manager().del(inviteInfo.getAudioSsrcInfo().getStream());
                 RedisUtils.del(key);
             }
             RedisUtils.setRemove(userKey,key);
@@ -191,7 +196,7 @@ public class InviteStreamManager {
                 if (inviteInfo != null) {
                     del = true;
                     if(inviteInfo.getStreamInfo() != null){
-                        MediaServerVo mediaServerVo = mediaServerService.findMediaServerId(inviteInfo.getStreamInfo().getMediaServerId());
+                        MediaServerVo mediaServerVo = mediaServerService.findOnLineMediaServerId(inviteInfo.getStreamInfo().getMediaServerId());
                         if(mediaServerVo != null){
                             OnStreamChangedResult result = MediaClient.getMediaInfo(mediaServerVo, null, "rtsp", inviteInfo.getStreamInfo().getApp(), inviteInfo.getStreamInfo().getStream());
                             if(result != null && result.getCode() == RespCode.CODE_0.getValue()){
@@ -202,21 +207,21 @@ public class InviteStreamManager {
                 }
                 if(del){
                     RedisUtils.del(key);
-                    RedisService.getRecordMp4Manager().del(inviteInfo.getStream());
+                    RedisService.getRecordMp4Manager().del(inviteInfo.getAudioSsrcInfo().getStream());
                     String userKey = String.format("%s:%s",INVITE_DOWNLOAD_USER_PREFIX,inviteInfo.getUserId());
                     RedisUtils.setRemove(userKey,key);
-                    inviteErrorCallbackMap.remove(buildKey(type, agentKey, inviteInfo.getStream()));
+                    inviteErrorCallbackMap.remove(buildKey(type, agentKey, inviteInfo.getAudioSsrcInfo().getStream()));
                 }
             }
         }
     }
 
-    public void removeInviteInfoByDeviceAndChannel(VideoStreamType inviteSessionType, String agentCode) {
-        removeInviteInfo(inviteSessionType, agentCode, null);
+    public void removeInviteInfoByDeviceAndChannel(VideoStreamType inviteSessionType, String agentKey) {
+        removeInviteInfo(inviteSessionType, agentKey, null);
     }
 
     public void removeInviteInfo(InviteInfo inviteInfo) {
-        removeInviteInfo(inviteInfo.getType(), inviteInfo.getAgentKey(), inviteInfo.getStream());
+        removeInviteInfo(inviteInfo.getType(), inviteInfo.getAgentKey(), inviteInfo.getAudioSsrcInfo().getStream());
     }
 
     public void once(VideoStreamType type, String agentCode, String stream, InviteErrorCallback<Object> callback) {
@@ -251,8 +256,8 @@ public class InviteStreamManager {
     }
 
     public void clearInviteInfo(String agentKey) {
-        removeInviteInfo(VideoStreamType.playback, agentKey, null);
-        removeInviteInfo(VideoStreamType.call_phone, agentKey, null);
+        removeInviteInfo(VideoStreamType.CALL_VIDEO_PHONE, agentKey, null);
+        removeInviteInfo(VideoStreamType.CALL_AUDIO_PHONE, agentKey, null);
     }
 
     public String getKey(VideoStreamType type,String agentKey,String stream,String ssrc){

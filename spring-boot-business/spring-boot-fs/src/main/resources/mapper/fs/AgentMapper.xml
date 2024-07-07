@@ -44,8 +44,7 @@
     select
       a.id as id,
       a.agent_code as name,
-      a.agent_code as number,
-      b.sip as sip,
+      b.sip as number,
       b.sip_pwd as password,
       1 as audio,
       1 as video,
