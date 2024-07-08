@@ -1,11 +1,15 @@
 package cn.com.tzy.springbootstarterfreeswitch.client.sip.listener.request.impl;
 
+import cn.com.tzy.springbootcomm.common.vo.RespCode;
+import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootstarterfreeswitch.client.media.client.MediaClient;
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.listener.request.AbstractSipRequestEvent;
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.listener.request.SipRequestEvent;
+import cn.com.tzy.springbootstarterfreeswitch.common.socket.AgentCommon;
 import cn.com.tzy.springbootstarterfreeswitch.redis.RedisService;
 import cn.com.tzy.springbootstarterfreeswitch.redis.impl.sip.SendRtpManager;
 import cn.com.tzy.springbootstarterfreeswitch.redis.impl.sip.SsrcConfigManager;
+import cn.com.tzy.springbootstarterfreeswitch.service.FsService;
 import cn.com.tzy.springbootstarterfreeswitch.service.SipService;
 import cn.com.tzy.springbootstarterfreeswitch.service.sip.MediaServerVoService;
 import cn.com.tzy.springbootstarterfreeswitch.vo.sip.MediaServerVo;
@@ -41,14 +45,14 @@ public class ByeRequestProcessor extends AbstractSipRequestEvent implements SipR
             log.error("[回复BYE信息失败]，{}", e.getMessage());
         }
         SendRtpManager sendRtpManager = RedisService.getSendRtpManager();
-        SsrcConfigManager ssrcConfigManager = RedisService.getSsrcConfigManager();
         MediaServerVoService mediaServerVoService = SipService.getMediaServerService();
-
         CallIdHeader callIdHeader = (CallIdHeader)evt.getRequest().getHeader(CallIdHeader.NAME);
         String agentSip = ((SipURI) ((HeaderAddress) evt.getRequest().getHeader(ToHeader.NAME)).getAddress().getURI()).getUser();
         SendRtp sendRtpItem =  sendRtpManager.querySendRTPServer(null, null, callIdHeader.getCallId());
+
         log.info("[收到bye] {}", agentSip);
         if (sendRtpItem != null){
+            FsService.getSendAgentMessage().sendMessage(AgentCommon.SOCKET_AGENT,AgentCommon.AGENT_OUT_HANG_UP_PHONE,sendRtpItem.getAgentKey(), RestResult.result(RespCode.CODE_0.getValue(),"对方挂机"));//发送挂机命令
             log.info("[收到bye] 停止向上级推流：{}", sendRtpItem.getPushStreamId());
             MediaServerVo mediaServerVo = mediaServerVoService.findOnLineMediaServerId(sendRtpItem.getMediaServerId());
             if(mediaServerVo != null){

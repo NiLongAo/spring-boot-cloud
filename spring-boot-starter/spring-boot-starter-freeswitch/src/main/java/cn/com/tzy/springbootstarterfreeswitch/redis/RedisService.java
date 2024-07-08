@@ -5,6 +5,7 @@ import cn.com.tzy.springbootstarterfreeswitch.redis.impl.media.MediaServerManage
 import cn.com.tzy.springbootstarterfreeswitch.redis.impl.media.RecordMp4Manager;
 import cn.com.tzy.springbootstarterfreeswitch.redis.impl.media.StreamChangedManager;
 import cn.com.tzy.springbootstarterfreeswitch.redis.impl.sip.*;
+import cn.com.tzy.springbootstarterfreeswitch.redis.subscribe.notify.AgentLoginSubscribe;
 import cn.hutool.extra.spring.SpringUtil;
 
 public class RedisService {
@@ -32,5 +33,7 @@ public class RedisService {
     public static InviteStreamManager getInviteStreamManager(){return SpringUtil.getBean(InviteStreamManager.class);}
     public static SsrcTransactionManager getSsrcTransactionManager(){return SpringUtil.getBean(SsrcTransactionManager.class);}
     public static AgentNotifySubscribeManager getAgentNotifySubscribeManager(){return SpringUtil.getBean(AgentNotifySubscribeManager.class);}
+
+    public static AgentLoginSubscribe getAgentLoginSubscribe(){return SpringUtil.getBean(AgentLoginSubscribe.class);}
 
 }

@@ -166,6 +166,20 @@ public class RedisUtils {
         }
         return redisTemplate.opsForValue().increment(key, -delta);
     }
+
+    /**
+     *  加锁
+     **/
+    public static Boolean getLock(String key, Long time){
+        return redisTemplate.opsForValue().setIfAbsent(key,key, time, TimeUnit.SECONDS);
+    }
+
+    /**
+     *  释放锁
+     **/
+    public static Boolean releaseLock(String key){
+        return redisTemplate.delete(key);
+    }
     // ================================Hash(哈希)=================================
 
     /**

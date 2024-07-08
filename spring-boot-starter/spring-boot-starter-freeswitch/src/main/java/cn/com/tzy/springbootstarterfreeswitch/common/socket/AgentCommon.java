@@ -22,11 +22,6 @@ public class AgentCommon {
     public static final String AGENT_OUT_PUSH_PATH = "AGENT:OUT:PUSH_PATH";
     /**
      *
-     * 客服推流关闭
-     */
-    public static final String AGENT_OUT_PUSH_PATH_LOGOUT = "AGENT:OUT:PUSH_PATH_LOGOUT";
-    /**
-     *
      * 客服拨打电话
      */
     public static final String AGENT_IN_CALL_PHONE = "AGENT:IN:CALL_PHONE";
