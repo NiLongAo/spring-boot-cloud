@@ -31,6 +31,8 @@ public class AgentNotifyVo implements Serializable {
      */
     private String agentKey;
 
+
+
     public enum TypeEnum {
         PRESENCE(1, "presence"),
         MESSAGE_SUMMARY(2, "message-summary"),

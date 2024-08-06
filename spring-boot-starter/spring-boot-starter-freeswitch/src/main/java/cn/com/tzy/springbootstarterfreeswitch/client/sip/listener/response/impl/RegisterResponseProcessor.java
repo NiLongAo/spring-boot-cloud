@@ -18,6 +18,7 @@ import javax.sip.header.WWWAuthenticateHeader;
 import javax.sip.message.Request;
 import javax.sip.message.Response;
 import java.text.ParseException;
+import java.util.Date;
 
 /**
  * @description:Register响应处理器
@@ -64,6 +65,7 @@ public class RegisterResponseProcessor extends AbstractSipResponseEvent {
                 log.error("[命令发送失败] 国标级联 再次注册: {}", e.getMessage());
             }
         }else if (response.getStatusCode() == Response.OK){
+            agentVoInfo.setRenewTime(new Date());//续订时间
             if (platformRegisterInfo.isRegister()) {
                 sipTransactionInfo.sipTransactionInfo(response);
                 sipTransactionInfo.setRegisterAliveReply(0);

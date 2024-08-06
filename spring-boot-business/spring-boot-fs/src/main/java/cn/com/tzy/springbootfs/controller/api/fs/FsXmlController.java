@@ -6,7 +6,6 @@ import cn.com.tzy.springbootstartercloud.api.ApiController;
 import cn.com.tzy.springbootstarterfreeswitch.common.fs.Constant;
 import cn.com.tzy.springbootstarterfreeswitch.enums.fs.FsTypeEnum;
 import cn.com.tzy.springbootstarterfreeswitch.model.bean.ConfigModel;
-import cn.com.tzy.springbootstarterfreeswitch.model.bean.GateWayModel;
 import cn.com.tzy.springbootstarterfreeswitch.model.bean.UserModel;
 import cn.com.tzy.springbootstarterfreeswitch.utils.FreeswitchUtils;
 import cn.com.tzy.springbootstarterfreeswitch.vo.fs.FreeswitchXmlVo;
@@ -96,51 +95,49 @@ public class FsXmlController extends ApiController {
                      xml = FreeswitchUtils.getXmlConfig(FreeswitchXmlVo.builder()
                         .fsTypeEnum(FsTypeEnum.INTERNAL)
                         .modelMap(new HashMap<String, Object>(){{
-                            put(FsTypeEnum.SWITCH.getName(), ConfigModel.builder()
+                            put(FsTypeEnum.INTERNAL.getName(), ConfigModel.builder()
                                     .iceStart(ConstEnum.Flag.YES.getValue())
                                     .stunAddress("autonat:192.168.1.27")
                                     .build());
                         }})
                         .build()
                     );
-                     break;
-                }else if("external".equals(req.getParameter("profile"))){
-                    xml = FreeswitchUtils.getXmlConfig(FreeswitchXmlVo.builder()
-                        .fsTypeEnum(FsTypeEnum.EXTERNAL)
-                        .modelMap(new HashMap<String, Object>(){{
-                            put(FsTypeEnum.SWITCH.getName(), ConfigModel.builder()
-                                    .iceStart(ConstEnum.Flag.YES.getValue())
-                                    .stunAddress("autonat:192.168.1.27")
-                                    .build());
-                            put(FsTypeEnum.EXTERNAL.getName(),GateWayModel.builder().build());
-                        }})
-                        .build()
-                    );
-                    break;
-                }else if("internal-ipv6".equals(req.getParameter("profile"))){
-                    xml = FreeswitchUtils.getXmlConfig(FreeswitchXmlVo.builder()
-                        .fsTypeEnum(FsTypeEnum.INTERNAL_IPV6)
-                        .modelMap(new HashMap<String, Object>(){{
-                            put(FsTypeEnum.SWITCH.getName(), ConfigModel.builder().build());
-                        }})
-                        .build()
-                    );
-                    break;
-                }else if("external-ipv6".equals(req.getParameter("profile"))){
-                    xml = FreeswitchUtils.getXmlConfig(FreeswitchXmlVo.builder()
-                        .fsTypeEnum(FsTypeEnum.INTERNAL_IPV6)
-                        .modelMap(new HashMap<String, Object>(){{
-                            put(FsTypeEnum.SWITCH.getName(), ConfigModel.builder().build());
-                        }})
-                        .build()
-                    );
-                    break;
                 }
-            case "switch.conf": {
+//                }else if("external".equals(req.getParameter("profile"))){
+//                    xml = FreeswitchUtils.getXmlConfig(FreeswitchXmlVo.builder()
+//                        .fsTypeEnum(FsTypeEnum.EXTERNAL)
+//                        .modelMap(new HashMap<String, Object>(){{
+//                            put(FsTypeEnum.POST_LOAD_SWITCH.getName(), ConfigModel.builder()
+//                                    .iceStart(ConstEnum.Flag.YES.getValue())
+//                                    .stunAddress("autonat:192.168.1.27")
+//                                    .build());
+//                            put(FsTypeEnum.EXTERNAL.getName(),GateWayModel.builder().build());
+//                        }})
+//                        .build()
+//                    );
+//                }else if("internal-ipv6".equals(req.getParameter("profile"))){
+//                    xml = FreeswitchUtils.getXmlConfig(FreeswitchXmlVo.builder()
+//                        .fsTypeEnum(FsTypeEnum.INTERNAL_IPV6)
+//                        .modelMap(new HashMap<String, Object>(){{
+//                            put(FsTypeEnum.INTERNAL_IPV6.getName(), ConfigModel.builder().build());
+//                        }})
+//                        .build()
+//                    );
+//                }else if("external-ipv6".equals(req.getParameter("profile"))){
+//                    xml = FreeswitchUtils.getXmlConfig(FreeswitchXmlVo.builder()
+//                        .fsTypeEnum(FsTypeEnum.EXTERNAL_IPV6)
+//                        .modelMap(new HashMap<String, Object>(){{
+//                            put(FsTypeEnum.EXTERNAL_IPV6.getName(), ConfigModel.builder().build());
+//                        }})
+//                        .build()
+//                    );
+//                }
+                break;
+            case "post_load_switch.conf": { //实际是 switch.conf
                 xml = FreeswitchUtils.getXmlConfig(FreeswitchXmlVo.builder()
-                    .fsTypeEnum(FsTypeEnum.SWITCH)
+                    .fsTypeEnum(FsTypeEnum.POST_LOAD_SWITCH)
                     .modelMap(new HashMap<String, Object>(){{
-                        put(FsTypeEnum.SWITCH.getName(), ConfigModel.builder()
+                        put(FsTypeEnum.POST_LOAD_SWITCH.getName(), ConfigModel.builder()
                                 .startRtpPort("16384")
                                 .endRtpPort("16484")
                                 .build());
@@ -153,7 +150,7 @@ public class FsXmlController extends ApiController {
                 xml = FreeswitchUtils.getXmlConfig(FreeswitchXmlVo.builder()
                         .fsTypeEnum(FsTypeEnum.CONFERENCE)
                         .modelMap(new HashMap<String, Object>(){{
-                            put("SOUND_PREFIX", Constant.SOUND_PREFIX );
+                            put(FsTypeEnum.CONFERENCE.getName(), Constant.SOUND_PREFIX );
                         }})
                         .build()
                 );

@@ -3,6 +3,7 @@ package cn.com.tzy.springbootcomm.utils;
 
 import cn.com.tzy.springbootcomm.common.bean.TreeNode;
 import cn.com.tzy.springbootcomm.constant.Constant;
+import cn.hutool.core.bean.BeanUtil;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.JsonParser;
@@ -10,7 +11,10 @@ import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.type.TypeReference;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 
+import java.beans.PropertyDescriptor;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -265,5 +269,25 @@ public class AppUtils {
             name = name.substring(0, 1).toLowerCase(Locale.ENGLISH) + name.substring(1);
         }
         return name;
+    }
+
+    /**
+     * 对象属性合并(比beanCopy好用)
+     */
+    public static <M> void merge(M source, M target) {
+        BeanUtil.copyProperties(source, target, getNullPropertyNames(source));
+    }
+
+    private static String[] getNullPropertyNames(Object source) {
+        final BeanWrapper src = new BeanWrapperImpl(source);
+        PropertyDescriptor[] pds = src.getPropertyDescriptors();
+
+        Set<String> emptyNames = new HashSet<>();
+        for (PropertyDescriptor pd : pds) {
+            Object srcValue = src.getPropertyValue(pd.getName());
+            if (srcValue == null) emptyNames.add(pd.getName());
+        }
+        String[] result = new String[emptyNames.size()];
+        return emptyNames.toArray(result);
     }
 }

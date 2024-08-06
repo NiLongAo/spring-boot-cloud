@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <document type="freeswitch/xml">
     <section name="configuration" description="Various Configuration">
-        <configuration name="switch.conf" description="Core Configuration">
+        <configuration name="post_load_switch.conf" description="Core Configuration">
             <cli-keybindings>
                 <key name="1" value="help"/>
                 <key name="2" value="status"/>

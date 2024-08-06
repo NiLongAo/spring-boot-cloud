@@ -25,7 +25,7 @@ public class ApplicationTests {
         FreeswitchXmlVo vo = new FreeswitchXmlVo();
         vo.setFsTypeEnum(FsTypeEnum.INTERNAL);
         vo.setModelMap(new NotNullMap(){{
-            put(FsTypeEnum.SWITCH.getName(), ConfigModel.builder().build());
+            put(FsTypeEnum.POST_LOAD_SWITCH.getName(), ConfigModel.builder().build());
         }});
         String xmlConfig = FreeswitchUtils.getXmlConfig(vo);
         System.out.println(xmlConfig);

@@ -8,7 +8,6 @@ import cn.com.tzy.springbootstarterfreeswitch.common.sip.SipConstant;
 import cn.com.tzy.springbootstarterfreeswitch.model.fs.AgentVoInfo;
 import cn.com.tzy.springbootstarterfreeswitch.redis.RedisService;
 import cn.com.tzy.springbootstarterfreeswitch.vo.fs.AgentNotifyVo;
-import cn.com.tzy.springbootstarterfreeswitch.vo.sip.Address;
 import cn.com.tzy.springbootstarterredis.pool.AbstractMessageListener;
 import cn.com.tzy.springbootstarterredis.utils.RedisUtils;
 import cn.hutool.core.codec.Base64;
@@ -48,11 +47,6 @@ public class AgentNotifyHandle extends AbstractMessageListener {
         AgentNotifyVo event = (AgentNotifyVo) body;
         if(event == null){
             log.error("[订阅消息]：消息接收异常！");
-            return;
-        }
-        Address device = RedisService.getRegisterServerManager().getPlatform(event.getAgentKey());
-        if(device == null){
-            log.warn("[订阅消息]：当前设备：{}，未注册在此服务",event.getAgentKey());
             return;
         }
         if(event.getType().equals(AgentNotifyVo.TypeEnum.PRESENCE.getValue())){

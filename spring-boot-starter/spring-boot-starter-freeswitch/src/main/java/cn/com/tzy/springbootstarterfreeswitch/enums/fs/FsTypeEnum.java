@@ -15,7 +15,7 @@ public enum FsTypeEnum {
     //对内网关IPV6设置
     INTERNAL_IPV6(4, "fs/sip_profiles/internal-ipv6.xml", "internalIpv6"),
     //主要设置控制台快捷键、数据库处理句柄、session会话、日志等级等
-    SWITCH(5, "fs/autoload_configs/switch.conf.xml", "config"),
+    POST_LOAD_SWITCH(5, "fs/autoload_configs/post_load_switch.conf.xml", "config"),
     //用户目录配置
     USER(6, "fs/directory/user.xml", "user"),
     //拨号计划

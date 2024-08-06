@@ -47,7 +47,6 @@ public class InviteRequestProcessor  extends AbstractSipRequestEvent implements 
     public void process(RequestEvent evt) {
         //  Invite Request消息实现，此消息一般为级联消息，上级给下级发送请求视频指令
         SIPRequest request = (SIPRequest)evt.getRequest();
-
         CallIdHeader callIdHeader = (CallIdHeader) request.getHeader(CallIdHeader.NAME);
         String userId = SipUtils.getUserIdFromHeader(request);
         if (userId == null) {
@@ -61,7 +60,7 @@ public class InviteRequestProcessor  extends AbstractSipRequestEvent implements 
             return;
         }else if(agentVoInfo.getAgentState() != AgentStateEnum.READY){
             try {
-                responseAck(request, Response.TEMPORARILY_UNAVAILABLE,String.format("客服%s中，请稍后再拨",agentVoInfo.getAgentState().getName()));
+                responseAck(request, Response.TEMPORARILY_UNAVAILABLE,String.format("客服%s中，请稍后再拨",agentVoInfo.getAgentState() ==  null?"未正常登录":agentVoInfo.getAgentState().getName()));
             } catch (SipException | InvalidArgumentException | ParseException e) {
                 log.error("[命令发送失败] invite TRYING: {}", e.getMessage());
             }
@@ -80,7 +79,6 @@ public class InviteRequestProcessor  extends AbstractSipRequestEvent implements 
         //再此处理用户是否接听逻辑
         //15秒未接听则超时，挂断电话
         String timeoutKey = String.format("%s_%s", "INVITE_REQUEST", callIdHeader.getCallId());
-
         dynamicTask.startDelay(timeoutKey,15,()->{
             log.warn("执行invite超时任务，断开电话以及向客服发送挂断电话 回复对方480");
             try {

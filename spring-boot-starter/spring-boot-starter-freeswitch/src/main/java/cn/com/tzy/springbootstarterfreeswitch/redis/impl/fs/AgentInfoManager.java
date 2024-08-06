@@ -1,6 +1,8 @@
 package cn.com.tzy.springbootstarterfreeswitch.redis.impl.fs;
 
+import cn.com.tzy.springbootcomm.utils.AppUtils;
 import cn.com.tzy.springbootstarterfreeswitch.common.fs.RedisConstant;
+import cn.com.tzy.springbootstarterfreeswitch.enums.fs.AgentStateEnum;
 import cn.com.tzy.springbootstarterfreeswitch.model.fs.AgentVoInfo;
 import cn.com.tzy.springbootstarterredis.utils.RedisUtils;
 import cn.hutool.core.codec.Base64;
@@ -24,9 +26,19 @@ public class AgentInfoManager {
         if(model == null ){
             return;
         }
-        RedisUtils.set(getKey(model.getAgentKey()),model,-1L);
-        if(StringUtils.isNotEmpty(model.getSipPhone())){
-            RedisUtils.set(getAgentSipKey(model.getSipPhone()),model.getAgentKey(),-1L);
+        AgentVoInfo agentVoInfo = this.get(model.getAgentKey());
+        if(agentVoInfo !=null){
+            AgentStateEnum agentState = agentVoInfo.getAgentState();
+            AppUtils.merge(model,agentVoInfo);
+            if(model.getAgentState() ==  AgentStateEnum.LOGIN && agentState != AgentStateEnum.LOGIN){
+                agentVoInfo.setAgentState(agentState);
+            }
+        }else {
+            agentVoInfo = model;
+        }
+        RedisUtils.set(getKey(agentVoInfo.getAgentKey()),agentVoInfo,-1L);
+        if(StringUtils.isNotEmpty(agentVoInfo.getSipPhone())){
+            RedisUtils.set(getAgentSipKey(agentVoInfo.getSipPhone()),agentVoInfo.getAgentKey(),-1L);
         }
     }
     public AgentVoInfo get(String agentKey) {
@@ -53,6 +65,7 @@ public class AgentInfoManager {
         }
     }
     public void del(String agentKey){
+        delSip(agentKey);
         List<String> scan = RedisUtils.keys(getKey(agentKey));
         for (String key : scan) {
             RedisUtils.del(key);
@@ -64,7 +77,6 @@ public class AgentInfoManager {
     }
     public void delAll(){
         del("*");
-        delSip("*");
     }
 
     public void putCallPhone(String callId, SIPRequest model){

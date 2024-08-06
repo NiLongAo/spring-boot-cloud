@@ -134,11 +134,13 @@ public class CallStrategyHandler extends StrategyHandler {
         if (StringUtils.isBlank(gatewayModel.getMediaHost())) {
             throw new BusinessException(RespCode.CODE_2.getValue(),"未获取发送 host ");
         }
-        String display = makeCallModel.getDisplay();//主叫
-        String called = makeCallModel.getCalled() + Constant.AT + gatewayModel.getMediaHost() + Constant.CO + gatewayModel.getMediaPort ();//被叫
+        //主叫
+        String display = makeCallModel.getDisplay();
         if (StringUtils.isNotBlank(gatewayModel.getCallerPrefix())) {
             display = gatewayModel.getCallerPrefix() + display;
         }
+        //被叫
+        String called = makeCallModel.getCalled() + Constant.AT + gatewayModel.getMediaHost() + Constant.CO + gatewayModel.getMediaPort ();
         if (StringUtils.isNotBlank(gatewayModel.getCalledPrefix())) {
             called = gatewayModel.getCalledPrefix() + called;
         }
@@ -165,7 +167,7 @@ public class CallStrategyHandler extends StrategyHandler {
         fsParams.put("ring_asr",true);
         fsParams.put("absolute_codec_string",(StringUtils.isNoneEmpty(makeCallModel.getSdp()) && makeCallModel.getSdp().contains("m=video"))?videoCode:audioCode);//判断给 音频或视频 编码
         fsParams.put("origination_caller_id_number",display);
-        fsParams.put("origination_caller_id_name",display);
+        fsParams.put("origination_caller_id_name",makeCallModel.getCalledDisplay());
         fsParams.put("origination_uuid",makeCallModel.getDeviceId());
         if(makeCallModel.getOriginateTimeout() !=null){
             fsParams.put("originate_timeout", makeCallModel.getOriginateTimeout());

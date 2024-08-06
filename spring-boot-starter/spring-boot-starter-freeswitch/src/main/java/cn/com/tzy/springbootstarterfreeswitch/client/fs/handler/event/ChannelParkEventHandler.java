@@ -238,7 +238,8 @@ public class ChannelParkEventHandler implements EslEventHandler {
         }else {
             agent = agentVoInfo;
         }
-        caller = agent.getAgentCode();
+        //获取主叫呼号
+        caller = agent.getCalled();
         //获取显号
         GroupInfo groupInfo = RedisService.getGroupInfoManager().get(agent.getGroupId());
         if (groupInfo == null || CollectionUtils.isEmpty(groupInfo.getCalledDisplays())) {
@@ -274,7 +275,7 @@ public class ChannelParkEventHandler implements EslEventHandler {
                 .called(called)
                 .companyId(agent.getCompanyId())
                 .mediaHost(addr)
-                .callerDisplay(agent.getAgentId())
+                .callerDisplay(called)
                 .calledDisplay(calledDisplay)
                 .groupId(groupInfo.getId())
                 .agentKey(agent.getAgentKey())

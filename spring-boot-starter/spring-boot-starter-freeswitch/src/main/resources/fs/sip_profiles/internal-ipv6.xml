@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <document type="freeswitch/xml">
-<section name="configuration">
+<section name="configuration" description="Various Configuration">
 <configuration name="sofia.conf" description="sofia Endpoint">
+<global_settings>
+  <param name="log-level" value="0"/>
+  <param name="debug-presence" value="0"/>
+</global_settings>
 <profiles>
     <profile name="internal-ipv6">
       <aliases>
@@ -19,9 +23,9 @@
         <param name="sip-port" value="$${internal_sip_port}"/>
         <param name="dialplan" value="XML"/>
         <param name="dtmf-duration" value="2000"/>
-        #if($config.audioCode && $config.audioCode != '' || $config.videoCode  && $config.videoCode != '')
-        <param name="inbound-codec-prefs" value="${config.audioCode},${config.videoCode}"/>
-        <param name="outbound-codec-prefs" value="${config.audioCode},${config.videoCode}"/>
+        #if($internalIpv6.audioCode && $internalIpv6.audioCode != '' || $internalIpv6.videoCode  && $internalIpv6.videoCode != '')
+        <param name="inbound-codec-prefs" value="${internalIpv6.audioCode},${internalIpv6.videoCode}"/>
+        <param name="outbound-codec-prefs" value="${internalIpv6.audioCode},${internalIpv6.videoCode}"/>
         #else
         <param name="inbound-codec-prefs" value="$${global_codec_prefs}"/>
         <param name="outbound-codec-prefs" value="$${global_codec_prefs}"/>
@@ -32,8 +36,8 @@
         <param name="sip-ip" value="$${local_ip_v6}"/>
         <param name="hold-music" value="$${hold_music}"/>>
         <param name="apply-inbound-acl" value="domains"/>
-        #if($config.audioRecordPath && $config.audioRecordPath != '')
-        <param name="record-template" value="${config.audioRecordPath}/\${caller_id_number}.\${ strftime(%Y-%m-%d-%H-%M-%S)}.wav"/>
+        #if($internalIpv6.audioRecordPath && $internalIpv6.audioRecordPath != '')
+        <param name="record-template" value="${internalIpv6.audioRecordPath}/\${caller_id_number}.\${ strftime(%Y-%m-%d-%H-%M-%S)}.wav"/>
         #else
         <param name="record-template" value="$${recordings_dir}/\${caller_id_number}.\${ strftime(%Y-%m-%d-%H-%M-%S)}.wav"/>
         #end

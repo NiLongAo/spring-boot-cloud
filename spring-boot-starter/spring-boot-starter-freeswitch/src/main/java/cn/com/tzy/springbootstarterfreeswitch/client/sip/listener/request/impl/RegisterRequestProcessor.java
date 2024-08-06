@@ -69,7 +69,10 @@ public class RegisterRequestProcessor extends AbstractSipRequestEvent implements
             String routeId = ((SipUri)request.getRequestLine().getUri()).getUser();
             Response response;
             String agentSip = ((SipUri)(((FromHeader) request.getHeader(FromHeader.NAME)).getAddress()).getURI()).getUser();
-            AgentVoInfo agentVoInfo = agentVoService.getAgentBySip(agentSip);
+            AgentVoInfo agentVoInfo = RedisService.getAgentInfoManager().getSip(agentSip);
+            if(agentVoInfo == null){
+                agentVoInfo = agentVoService.getAgentBySip(agentSip);
+            }
             if(agentVoInfo == null){
                 // 注册失败
                 response = sipServer.getSipFactory().createMessageFactory().createResponse(Response.FORBIDDEN, request);
@@ -79,7 +82,9 @@ public class RegisterRequestProcessor extends AbstractSipRequestEvent implements
                 return;
             }
             agentVoInfo.setLoginType(LoginTypeEnum.SOCKET.getType());
-            agentVoInfo.setAgentState(AgentStateEnum.LOGIN);
+            if(agentVoInfo.getAgentState() == null){
+                agentVoInfo.setAgentState(AgentStateEnum.LOGIN);
+            }
             log.info("[{}] 设备：{}, 开始处理: {}",title, agentVoInfo.getAgentKey(), remoteAddress);
             if (registerFlag) {
                 //是否已注册 注册过则续订

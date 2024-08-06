@@ -32,10 +32,15 @@ public class MakeCallModel implements MessageModel {
      * 主叫
      */
     private String display;
+
     /**
      * 被叫
      */
     private String called;
+    /**
+     * 被叫显号
+     */
+    private String calledDisplay;
     /**
      * 超时时长（秒）
      */

@@ -126,7 +126,7 @@ public class EventNextHandler {
             log.warn("呼叫另外一侧 未获取技能组信息 CallId：{}",callInfo.getCallId());
             callHandlerStrategy.handler(HangupCallModel.builder().mediaAddr(callInfo.getMediaHost()).deviceId(deviceInfo.getDeviceId()).build());
             return;
-        } else if (groupInfo != null && groupInfo.getRecordType() == 1 && StringUtils.isEmpty(deviceInfo.getRecord())) {
+        } else if (groupInfo.getRecordType() == 1 && StringUtils.isEmpty(deviceInfo.getRecord())) {
             //振铃录音
             String record = String.format("%s/%s/%s_%s_%s.%s",recordPath,DateUtil.format(new Date(), DatePattern.PURE_DATE_PATTERN),callInfo.getCallId(),deviceInfo.getDeviceId(),Instant.now().getEpochSecond(),recordFile);
             callHandlerStrategy.handler(RecordCallModel.builder().mediaAddr(callInfo.getMediaHost()).deviceId(callInfo.getDeviceList().get(0)).playPath(record).build());
@@ -191,7 +191,8 @@ public class EventNextHandler {
                 .deviceId(deviceId)
                 .sdp(sdp)
                 .callId(callInfo.getCallId())
-                .display(callInfo.getCalledDisplay())//主叫
+                .display(callInfo.getCaller())//主叫getCalledDisplay
+                .calledDisplay(callInfo.getCalledDisplay())
                 .called(called)//被叫
                 .originateTimeout(groupInfo.getCallTimeOut())
                 .sipHeaderList(null)

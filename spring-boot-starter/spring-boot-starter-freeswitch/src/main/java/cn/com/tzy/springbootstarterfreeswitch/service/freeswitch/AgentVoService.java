@@ -5,7 +5,6 @@ import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootcomm.utils.DynamicTask;
 import cn.com.tzy.springbootstarterfreeswitch.client.media.client.MediaClient;
 import cn.com.tzy.springbootstarterfreeswitch.common.sip.SipConstant;
-import cn.com.tzy.springbootstarterfreeswitch.enums.fs.AgentStateEnum;
 import cn.com.tzy.springbootstarterfreeswitch.enums.sip.VideoStreamType;
 import cn.com.tzy.springbootstarterfreeswitch.model.fs.AgentVoInfo;
 import cn.com.tzy.springbootstarterfreeswitch.redis.RedisService;
@@ -73,7 +72,6 @@ public abstract class AgentVoService {
         if(agentVoGb == null){
             agentVoInfo.setState(ConstEnum.Flag.YES.getValue());
             agentVoInfo.setAgentOnline(ConstEnum.Flag.YES.getValue());
-            agentVoInfo.setAgentState(AgentStateEnum.LOGIN);
             agentVoInfo.setRegisterTime(new Date());
             log.info("[设备上线,首次注册]: {}，查询设备信息以及通道信息", agentVoInfo.getAgentKey());
             this.save(agentVoInfo);
@@ -83,7 +81,6 @@ public abstract class AgentVoService {
                 log.info("[设备上线]: {}，查询设备信息以及通道信息", agentVoInfo.getAgentKey());
                 agentVoInfo.setState(ConstEnum.Flag.YES.getValue());
                 agentVoInfo.setAgentOnline(ConstEnum.Flag.YES.getValue());
-                agentVoInfo.setAgentState(AgentStateEnum.LOGIN);
                 agentVoInfo.setRegisterTime(new Date());
                 this.save(agentVoInfo);
             }else {

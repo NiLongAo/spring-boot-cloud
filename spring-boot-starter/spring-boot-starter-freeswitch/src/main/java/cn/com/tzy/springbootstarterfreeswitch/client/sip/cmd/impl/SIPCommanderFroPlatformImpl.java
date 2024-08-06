@@ -8,6 +8,7 @@ import cn.com.tzy.springbootstarterfreeswitch.client.sip.cmd.SipSendMessage;
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.cmd.build.SIPRequestProvider;
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.properties.SipConfigProperties;
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.utils.SipUtils;
+import cn.com.tzy.springbootstarterfreeswitch.enums.fs.AgentStateEnum;
 import cn.com.tzy.springbootstarterfreeswitch.enums.sip.CharsetType;
 import cn.com.tzy.springbootstarterfreeswitch.enums.sip.StreamModeType;
 import cn.com.tzy.springbootstarterfreeswitch.enums.sip.TransportType;
@@ -128,6 +129,9 @@ public class SIPCommanderFroPlatformImpl implements SIPCommanderForPlatform {
             }
         });
         if(isRegister){
+            if(agentVoInfo.getAgentState() == null){
+                agentVoInfo.setAgentState(AgentStateEnum.LOGIN);
+            }
             RedisService.getAgentInfoManager().put(agentVoInfo);
         }
     }

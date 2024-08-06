@@ -2,8 +2,11 @@ package cn.com.tzy.springbootstarterfreeswitch.model.fs;
 
 import cn.com.tzy.springbootcomm.common.enumcom.ConstEnum;
 import cn.com.tzy.springbootcomm.constant.Constant;
+import cn.com.tzy.springbootstarterfreeswitch.common.sip.SipConstant;
 import cn.com.tzy.springbootstarterfreeswitch.enums.fs.AgentStateEnum;
 import cn.com.tzy.springbootstarterfreeswitch.enums.fs.LoginTypeEnum;
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -134,7 +137,7 @@ public class AgentVoInfo implements Serializable {
      */
     private String mediaServerId;
     /**
-     * 流媒体编号
+     * 流媒体地址
      */
     private String mediaAddress;
     /**
@@ -297,5 +300,20 @@ public class AgentVoInfo implements Serializable {
         }else{
             return ConstEnum.Flag.YES.getValue();
         }
+    }
+    public boolean expire(){
+        if(renewTime == null){
+            return true;
+        }
+        DateTime endTime = DateUtil.offsetSecond(renewTime, expires+ SipConstant.DELAY_TIME);
+        return endTime.isBefore(new Date());
+    }
+
+    public boolean keepalive(){
+        if(keepaliveTime == null || keepTimeout == null){
+            return true;
+        }
+        DateTime endTime = DateUtil.offsetSecond(keepaliveTime, keepTimeout+ SipConstant.DELAY_TIME);
+        return endTime.isBefore(new Date());
     }
 }

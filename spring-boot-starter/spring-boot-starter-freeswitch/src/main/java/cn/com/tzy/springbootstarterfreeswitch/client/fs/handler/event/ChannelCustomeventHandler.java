@@ -1,5 +1,6 @@
 package cn.com.tzy.springbootstarterfreeswitch.client.fs.handler.event;
 
+import cn.com.tzy.springbootstarterfreeswitch.enums.fs.AgentStateEnum;
 import cn.com.tzy.springbootstarterfreeswitch.model.fs.AgentVoInfo;
 import cn.com.tzy.springbootstarterfreeswitch.model.fs.CompanyInfo;
 import cn.com.tzy.springbootstarterfreeswitch.model.fs.RouteGateWayInfo;
@@ -15,6 +16,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
+import java.util.Date;
 
 /**
  *  用户注册注销事件
@@ -42,8 +44,11 @@ public class ChannelCustomeventHandler implements EslEventHandler {
                     agentVoInfo = redisAgentVoInfo;
                 }
                 String[] split = addr.split(":");
+                agentVoInfo.setRenewTime(new Date());
+                agentVoInfo.setRegisterTime(new Date());
                 agentVoInfo.setFsHost(split[0]);
                 agentVoInfo.setFsPost(split[1]);
+                agentVoInfo.setAgentState(AgentStateEnum.READY);
                 agentVoInfo.setSipPhone(userName);
                 FsService.getAgentService().online(agentVoInfo, null);
                 CompanyInfo companyInfo = RedisService.getCompanyInfoManager().get(agentVoInfo.getCompanyId());

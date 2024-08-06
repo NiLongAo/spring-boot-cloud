@@ -28,7 +28,7 @@
                     <param name="rate" value="8000"/>
                     <param name="interval" value="20"/>
                     <param name="energy-level" value="100"/>
-                    <param name="sound-prefix" value="${SOUND_PREFIX}"/>
+                    <param name="sound-prefix" value="${conference}"/>
                     <param name="muted-sound" value="conference/conf-muted.wav"/>
                     <param name="unmuted-sound" value="conference/conf-unmuted.wav"/>
                     <param name="alone-sound" value="conference/conf-alone.wav"/>
@@ -51,7 +51,7 @@
                     <param name="rate" value="16000"/>
                     <param name="interval" value="20"/>
                     <param name="energy-level" value="100"/>
-                    <param name="sound-prefix" value="${SOUND_PREFIX}"/>
+                    <param name="sound-prefix" value="${conference}"/>
                     <param name="muted-sound" value="conference/conf-muted.wav"/>
                     <param name="unmuted-sound" value="conference/conf-unmuted.wav"/>
                     <param name="alone-sound" value="conference/conf-alone.wav"/>
@@ -74,7 +74,7 @@
                     <param name="rate" value="32000"/>
                     <param name="interval" value="20"/>
                     <param name="energy-level" value="100"/>
-                    <param name="sound-prefix" value="${SOUND_PREFIX}"/>
+                    <param name="sound-prefix" value="${conference}"/>
                     <param name="muted-sound" value="conference/conf-muted.wav"/>
                     <param name="unmuted-sound" value="conference/conf-unmuted.wav"/>
                     <param name="alone-sound" value="conference/conf-alone.wav"/>
@@ -97,7 +97,7 @@
                     <param name="rate" value="48000"/>
                     <param name="interval" value="20"/>
                     <param name="energy-level" value="100"/>
-                    <param name="sound-prefix" value="${SOUND_PREFIX}"/>
+                    <param name="sound-prefix" value="${conference}"/>
                     <param name="muted-sound" value="conference/conf-muted.wav"/>
                     <param name="unmuted-sound" value="conference/conf-unmuted.wav"/>
                     <param name="alone-sound" value="conference/conf-alone.wav"/>
