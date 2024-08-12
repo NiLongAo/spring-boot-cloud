@@ -19,6 +19,6 @@ public interface AgentService extends IService<Agent>{
     RestResult<?> stopStream(String callId);
     void login(String agentKey,ResultEvent event);
     void logout(String agentCode,ResultEvent event);
-    void callPhone(VideoStreamType type, SipServer sipServer, MediaServerVo mediaServerVo, AgentVoInfo agentBySip, String caller, String ssrc, InviteErrorCallback<Object> callback);
+    void callPhone(VideoStreamType type, SipServer sipServer, MediaServerVo mediaServerVo, AgentVoInfo agentBySip, String caller, String ssrc,String callBackId, InviteErrorCallback<Object> callback);
 
 }

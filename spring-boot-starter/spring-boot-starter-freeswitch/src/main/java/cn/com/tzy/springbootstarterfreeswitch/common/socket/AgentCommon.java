@@ -42,11 +42,6 @@ public class AgentCommon {
     public static final String AGENT_OUT_CALL_PHONE = "AGENT:OUT:CALL_PHONE";
 
     /**
-     *
-     * 客服电话通知处理
-     */
-    public static final String AGENT_OUT_CALL_NOTIFICATION = "AGENT:OUT:PHONE_NOTIFICATION";
-    /**
      * 客服状态更变
      */
     public static final String AGENT_IN_STATUS = "AGENT:IN:STATUS";
@@ -55,13 +50,15 @@ public class AgentCommon {
      */
     public static final String AGENT_OUT_STATUS = "AGENT:OUT:STATUS";
 
+    /**
+     *
+     * 客服电话通知接收处理
+     */
+    public static final String AGENT_IN_CALL_NOTIFICATION = "AGENT:IN:PHONE_NOTIFICATION";
+    /**
+     *
+     * 客服电话通知处理
+     */
+    public static final String AGENT_OUT_CALL_NOTIFICATION = "AGENT:OUT:PHONE_NOTIFICATION";
 
-    /**
-     * 客服来电操作
-     */
-    public static final String AGENT_IN_ANSWER_PHONE = "AGENT:IN:ANSWER_PHONE";
-    /**
-     * 客服来电操作
-     */
-    public static final String AGENT_OUT_ANSWER_PHONE = "AGENT:OUT:ANSWER_PHONE";
 }

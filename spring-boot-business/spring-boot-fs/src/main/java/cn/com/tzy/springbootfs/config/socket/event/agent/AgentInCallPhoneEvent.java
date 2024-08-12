@@ -64,7 +64,7 @@ public class AgentInCallPhoneEvent implements EventListener<AgentInCallPhoneData
         //被叫
         String caller = data.getCaller();
         //拨打电话
-        agentService.callPhone(data.getType(),sipServer,mediaServerVo,agentVoInfo,caller,null,(code,msg,vo)->{
+        agentService.callPhone(data.getType(),sipServer,mediaServerVo,agentVoInfo,caller,null,null,(code,msg,vo)->{
             client.sendEvent(AgentCommon.AGENT_OUT_CALL_PHONE,RestResult.result(code,msg,vo));
         });
     }

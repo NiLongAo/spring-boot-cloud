@@ -21,7 +21,7 @@ public class AgentInfoManager {
     private String FS_AGENT_SIP_INFO = RedisConstant.FS_AGENT_SIP_INFO;
     private String FS_SOCKET_AGENT_CODE = RedisConstant.FS_SOCKET_AGENT_CODE;
     private String FS_CALL_PHONE = RedisConstant.FS_CALL_PHONE;
-    private String FS_AGENT_LOGIN_LOGOUT = RedisConstant.FS_AGENT_LOGIN_LOGOUT;
+    private String FS_COMPANY_AGENT = RedisConstant.FS_COMPANY_AGENT;
     public void put(AgentVoInfo model){
         if(model == null ){
             return;
@@ -37,8 +37,11 @@ public class AgentInfoManager {
             agentVoInfo = model;
         }
         RedisUtils.set(getKey(agentVoInfo.getAgentKey()),agentVoInfo,-1L);
-        if(StringUtils.isNotEmpty(agentVoInfo.getSipPhone())){
-            RedisUtils.set(getAgentSipKey(agentVoInfo.getSipPhone()),agentVoInfo.getAgentKey(),-1L);
+        RedisUtils.set(getCompanyAgentIdKey(agentVoInfo.getCompanyId(),agentVoInfo.getAgentId()),agentVoInfo.getAgentKey(),-1L);
+        if(!ObjectUtils.isEmpty(agentVoInfo.getSipPhoneList())){
+            for (String sipPhone : agentVoInfo.getSipPhoneList()) {
+                RedisUtils.set(getAgentSipKey(sipPhone),agentVoInfo.getAgentKey(),-1L);
+            }
         }
     }
     public AgentVoInfo get(String agentKey) {
@@ -58,21 +61,37 @@ public class AgentInfoManager {
         String agentKey = (String) RedisUtils.get(scan.get(0));
         return get(agentKey);
     }
-    public void delSip(String agentKey){
-        List<String> scan = RedisUtils.keys(getAgentSipKey(agentKey));
+    public AgentVoInfo getCompanyAgentId(String companyId, String agentId) {
+        List<String> scan = RedisUtils.keys(getCompanyAgentIdKey(companyId,agentId));
+        if (scan.isEmpty()) {
+            return null;
+        }
+        String agentKey = (String) RedisUtils.get(scan.get(0));
+        return get(agentKey);
+    }
+    public void delSip(String sipPhone){
+        List<String> scan = RedisUtils.keys(getAgentSipKey(sipPhone));
+        for (String key : scan) {
+            RedisUtils.del(key);
+        }
+    }
+    public void delCompanyAgent(String companyId, String agentId){
+        List<String> scan = RedisUtils.keys(getCompanyAgentIdKey(companyId,agentId));
         for (String key : scan) {
             RedisUtils.del(key);
         }
     }
     public void del(String agentKey){
-        delSip(agentKey);
         List<String> scan = RedisUtils.keys(getKey(agentKey));
         for (String key : scan) {
-            RedisUtils.del(key);
             AgentVoInfo agentVoInfo =  (AgentVoInfo)RedisUtils.get(key);
-            if(agentVoInfo != null && StringUtils.isNotEmpty(agentVoInfo.getSipPhone())){
-                RedisUtils.del(getAgentSipKey(agentVoInfo.getSipPhone()));
+            if(!ObjectUtils.isEmpty(agentVoInfo.getSipPhoneList())){
+                for (String sipPhone : agentVoInfo.getSipPhoneList()) {
+                    delSip(sipPhone);
+                }
             }
+            delCompanyAgent(agentVoInfo.getCompanyId(),agentVoInfo.getAgentId());
+            RedisUtils.del(key);
         }
     }
     public void delAll(){
@@ -140,5 +159,9 @@ public class AgentInfoManager {
 
     private String getAgentKeyKey(String uuid){
         return String.format("%s%s",FS_SOCKET_AGENT_CODE,uuid);
+    }
+
+    private String getCompanyAgentIdKey(String companyId, String agentId){
+        return String.format("%s%s:%s",FS_COMPANY_AGENT,companyId,agentId);
     }
 }

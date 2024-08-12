@@ -8,10 +8,10 @@ public class RedisConstant {
     public static final String FS_COMPANY_CONFERENCE_INFO = "FS_COMPANY_CONFERENCE_INFO:";
     public static final String FS_GROUP_INFO = "FS_GROUP_INFO:";
     public static final String FS_AGENT_INFO = "FS_AGENT_INFO:";
-    public static final String FS_AGENT_LOGIN_LOGOUT = "FS_AGENT_LOGIN_LOGOUT:";
+    public static final String FS_COMPANY_AGENT = "FS_COMPANY_AGENT:";
     public static final String FS_AGENT_SIP_INFO = "FS_AGENT_SIP_INFO:";
-    public static final String FS_DEVICE_INFO = "FS_DEVICE_INFO:";
-    public static final String FS_DEVICE_CALLID = "FS_DEVICE_CALLID:";
+    public static final String FS_CALLER_CALL_ID = "FS_AGENT_kEY_CALL_ID:";
+    public static final String FS_DEVICE_CALL_ID = "FS_DEVICE_CALL_ID:";
     public static final String FS_PLAYBACK_INFO = "FS_PLAYBACK_INFO:";
     public static final String FS_CALL_PHONE = "FS_CALL_PHONE:";
     public static final String FS_SOCKET_AGENT_CODE = "FS_SOCKET_AGENT_CODE:";

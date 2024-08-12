@@ -23,6 +23,7 @@ import cn.com.tzy.springbootstarterfreeswitch.redis.impl.sip.SsrcTransactionMana
 import cn.com.tzy.springbootstarterfreeswitch.redis.subscribe.media.HookEvent;
 import cn.com.tzy.springbootstarterfreeswitch.redis.subscribe.media.HookKeyFactory;
 import cn.com.tzy.springbootstarterfreeswitch.redis.subscribe.media.MediaHookSubscribe;
+import cn.com.tzy.springbootstarterfreeswitch.redis.subscribe.sip.message.AgentSubscribeHandle;
 import cn.com.tzy.springbootstarterfreeswitch.redis.subscribe.sip.message.SipSubscribeEvent;
 import cn.com.tzy.springbootstarterfreeswitch.service.SipService;
 import cn.com.tzy.springbootstarterfreeswitch.service.sip.MediaServerVoService;
@@ -31,6 +32,7 @@ import cn.com.tzy.springbootstarterfreeswitch.vo.media.HookKey;
 import cn.com.tzy.springbootstarterfreeswitch.vo.media.HookVo;
 import cn.com.tzy.springbootstarterfreeswitch.vo.result.RestResultEvent;
 import cn.com.tzy.springbootstarterfreeswitch.vo.sip.*;
+import cn.com.tzy.springbootstarterredis.utils.RedisUtils;
 import cn.hutool.core.util.RandomUtil;
 import gov.nist.javax.sip.message.SIPMessage;
 import gov.nist.javax.sip.message.SIPRequest;
@@ -39,9 +41,11 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
+import org.springframework.util.SerializationUtils;
 
 import javax.annotation.Resource;
 import javax.sip.InvalidArgumentException;
+import javax.sip.RequestEvent;
 import javax.sip.ResponseEvent;
 import javax.sip.SipException;
 import javax.sip.address.SipURI;
@@ -284,16 +288,16 @@ public class SIPCommanderFroPlatformImpl implements SIPCommanderForPlatform {
     }
 
     @Override
-    public SIPRequest callPhone(SipServer sipServer, MediaServerVo mediaServerVo, SSRCInfo videoSsrcInfo, SSRCInfo audioSsrcInfo, AgentVoInfo agentVoInfo, String caller,HookEvent hookEvent, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws InvalidArgumentException, SipException, ParseException {
-        return callPhone(sipServer,mediaServerVo,videoSsrcInfo,audioSsrcInfo,agentVoInfo,caller,null,null,null,hookEvent,okEvent,errorEvent);
+    public SIPRequest callPhone(SipServer sipServer, MediaServerVo mediaServerVo, SSRCInfo videoSsrcInfo, SSRCInfo audioSsrcInfo, AgentVoInfo agentVoInfo, String caller,String callBackId,HookEvent hookEvent, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws InvalidArgumentException, SipException, ParseException {
+        return callPhone(sipServer,mediaServerVo,videoSsrcInfo,audioSsrcInfo,agentVoInfo,caller,null,null,null,callBackId,hookEvent,okEvent,errorEvent);
     }
 
     @Override
     public SIPRequest callPhone(SipServer sipServer,AgentVoInfo agentVoInfo,ProxyAuthenticateHeader header,SIPRequest sipRequest,SIPResponse response) throws InvalidArgumentException, SipException, ParseException {
-        return callPhone(sipServer,null,null,null,agentVoInfo,null,header,sipRequest,response,null,null,null);
+        return callPhone(sipServer,null,null,null,agentVoInfo,null,header,sipRequest,response,null,null,null,null);
     }
 
-    private SIPRequest callPhone(SipServer sipServer, MediaServerVo mediaServerVo, SSRCInfo videoSsrcInfo, SSRCInfo audioSsrcInfo, AgentVoInfo agentVoInfo, String caller, ProxyAuthenticateHeader header,SIPRequest sipRequest ,SIPResponse response, HookEvent hookEvent, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws InvalidArgumentException, SipException, ParseException {
+    private SIPRequest callPhone(SipServer sipServer, MediaServerVo mediaServerVo, SSRCInfo videoSsrcInfo, SSRCInfo audioSsrcInfo, AgentVoInfo agentVoInfo, String caller, ProxyAuthenticateHeader header,SIPRequest sipRequest ,SIPResponse response,String callBackId, HookEvent hookEvent, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws InvalidArgumentException, SipException, ParseException {
         SsrcTransactionManager ssrcTransactionManager = RedisService.getSsrcTransactionManager();
         SsrcConfigManager ssrcConfigManager = RedisService.getSsrcConfigManager();
         SIPRequest request = null;
@@ -315,6 +319,61 @@ public class SIPCommanderFroPlatformImpl implements SIPCommanderForPlatform {
                     .createUserAgentHeader()
                     .buildRequest();
             SipSendMessage.sendMessage(sipServer,agentVoInfo, request,null,null);
+        }else if(StringUtils.isNotEmpty(callBackId)){//在对方拨打时回接时 触发
+            //添加流变动回调
+            if(hookEvent != null){
+                HookKey audioHookKey = HookKeyFactory.onStreamChanged("rtp", audioSsrcInfo.getStream(), true, "rtsp", mediaServerVo.getId());
+                mediaHookSubscribe.addSubscribe(audioHookKey,(MediaServerVo mediaServer, HookVo res)->{
+                    res.setCallId(callBackId);
+                    hookEvent.response(mediaServer,res);
+                    mediaHookSubscribe.removeSubscribe(audioHookKey);
+                });
+                if(videoSsrcInfo != null){
+                    HookKey videoHookKey = HookKeyFactory.onStreamChanged("rtp", videoSsrcInfo.getStream(), true, "rtsp", mediaServerVo.getId());
+                    mediaHookSubscribe.addSubscribe(videoHookKey,(MediaServerVo mediaServer, HookVo res)->{
+                        res.setCallId(callBackId);
+                        hookEvent.response(mediaServer,res);
+                        mediaHookSubscribe.removeSubscribe(videoHookKey);
+                    });
+                }
+            }
+            //提前缓存，后续推流时需要
+            ssrcTransactionManager.put(agentVoInfo.getAgentKey(),callBackId,"rtp",audioSsrcInfo.getStream(), audioSsrcInfo.getSsrc(), mediaServerVo.getId(),null, VideoStreamType.CALL_AUDIO_PHONE);
+            if(videoSsrcInfo != null){
+                ssrcTransactionManager.put(agentVoInfo.getAgentKey(),callBackId,"rtp",videoSsrcInfo.getStream(), videoSsrcInfo.getSsrc(), mediaServerVo.getId(),null, VideoStreamType.CALL_VIDEO_PHONE);
+            }
+            SipSendMessage.sendMessage(sipServer,agentVoInfo, callBackId,(handle)->{
+                //触发 INVITE 请求回调，开始继续下步流程
+                String key = String.format("%s%s", AgentSubscribeHandle.VIDEO_AGENT_OK_EVENT_SUBSCRIBE_MANAGER, callBackId);
+                RedisUtils.redisTemplate.convertAndSend(key, SerializationUtils.serialize(new RestResultEvent(RespCode.CODE_0.getValue(),String.format("坐席:[%S]接听电话操作",agentVoInfo.getAgentKey()),null)));
+            },(ok)->{
+                SIPMessage message = null;
+                if(ok.getEvent() instanceof ResponseEvent){
+                    ResponseEvent event = (ResponseEvent) ok.getEvent();
+                     message = (SIPMessage)event.getResponse();
+                }else if(ok.getEvent() instanceof RequestEvent){
+                    RequestEvent event = (RequestEvent) ok.getEvent();
+                    message = (SIPMessage)event.getRequest();
+                }
+                // 这里为例避免一个通道的点播多次点播只有一个callID这个参数使用一个固定值
+                ssrcTransactionManager.put(agentVoInfo.getAgentKey(),callBackId,"rtp",audioSsrcInfo.getStream(), audioSsrcInfo.getSsrc(), mediaServerVo.getId(),message, VideoStreamType.CALL_AUDIO_PHONE);
+                if(videoSsrcInfo != null){
+                    ssrcTransactionManager.put(agentVoInfo.getAgentKey(),callBackId,"rtp",videoSsrcInfo.getStream(), videoSsrcInfo.getSsrc(), mediaServerVo.getId(),message, VideoStreamType.CALL_VIDEO_PHONE);
+                }
+                okEvent.response(ok);
+            },(error)->{
+                RedisService.getSendRtpManager().deleteSendRTPServer(agentVoInfo.getAgentKey(),agentVoInfo.getAgentKey(),callBackId);
+                ssrcTransactionManager.remove(agentVoInfo.getAgentKey(),audioSsrcInfo.getStream(),callBackId,null);
+                ssrcConfigManager.releaseSsrc(mediaServerVo.getId(),audioSsrcInfo.getSsrc());
+                if(videoSsrcInfo != null){
+                    ssrcTransactionManager.remove(agentVoInfo.getAgentKey(),videoSsrcInfo.getStream(),callBackId,null);
+                    ssrcConfigManager.releaseSsrc(mediaServerVo.getId(),videoSsrcInfo.getSsrc());
+                }
+                errorEvent.response(error);
+                //发送报错
+                String key = String.format("%s%s", AgentSubscribeHandle.VIDEO_AGENT_ERROR_EVENT_SUBSCRIBE_MANAGER, callBackId);
+                RedisUtils.redisTemplate.convertAndSend(key, SerializationUtils.serialize(new RestResultEvent(RespCode.CODE_2.getValue(),error.getMsg(),null)));
+            });
         }else {
             String content = createSdp(sipServer, mediaServerVo, videoSsrcInfo,audioSsrcInfo, agentVoInfo);
             // f字段:f= v/编码格式/分辨率/帧率/码率类型/码率大小a/编码格式/码率大小/采样率
@@ -339,7 +398,6 @@ public class SIPCommanderFroPlatformImpl implements SIPCommanderForPlatform {
                 HookKey audioHookKey = HookKeyFactory.onStreamChanged("rtp", audioSsrcInfo.getStream(), true, "rtsp", mediaServerVo.getId());
                 mediaHookSubscribe.addSubscribe(audioHookKey,(MediaServerVo mediaServer, HookVo res)->{
                     res.setCallId(callId);
-                    log.info("测试音频进入次数");
                     hookEvent.response(mediaServer,res);
                     mediaHookSubscribe.removeSubscribe(audioHookKey);
                 });
@@ -379,7 +437,8 @@ public class SIPCommanderFroPlatformImpl implements SIPCommanderForPlatform {
         return request;
     }
 
-    private String createSdp(SipServer sipServer, MediaServerVo mediaServerVo, SSRCInfo videoSsrcInfo, SSRCInfo audioSsrcInfo, AgentVoInfo agentVoInfo){
+    @Override
+    public String createSdp(SipServer sipServer, MediaServerVo mediaServerVo, SSRCInfo videoSsrcInfo, SSRCInfo audioSsrcInfo, AgentVoInfo agentVoInfo){
         //创建发流端口
         boolean tcp = Arrays.asList("TCP-PASSIVE","TCP-ACTIVE").contains(StreamModeType.getName(agentVoInfo.getStreamMode()));
         boolean tcpActive= false;

@@ -535,10 +535,11 @@ CREATE TABLE fs_agent_sip (
     UNIQUE KEY idx_sip (sip) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='sip表';
 
+-- 拨打时 01 标识内部呼叫客服 02 标识开启会议
 insert into fs_agent_sip(id,company_id,agent_id,sip,sip_pwd,`status`,create_user_id,create_time,update_user_id,update_time)
-VALUES(1,1,1,'011001','123456',1,1, now(), 1, now())
-,(2,1,2,'011002','123456',1,1, now(), 1, now())
-,(3,1,3,'011010','123456',1,1, now(), 1, now())
+VALUES(1,1,1,'100101','123456',1,1, now(), 1, now())
+,(2,1,2,'100201','123456',1,1, now(), 1, now())
+,(3,1,3,'101001','123456',1,1, now(), 1, now())
 ;
 
 CREATE TABLE fs_agent_state_log (

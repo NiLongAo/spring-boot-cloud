@@ -11,5 +11,7 @@ import cn.com.tzy.springbootstarterfreeswitch.model.notice.CallMessage;
 public interface SendAgentMessage {
     void sendMessage(AgentStateEnum agentStateEnum, AgentVoInfo agentVoInfo, CallMessage callMessage);
 
+    void sendErrorMessage( AgentVoInfo agentVoInfo, String errorMessage);
+
     void sendMessage(String namespace,String agentCommon,String agentKey, RestResult<?> result);
 }

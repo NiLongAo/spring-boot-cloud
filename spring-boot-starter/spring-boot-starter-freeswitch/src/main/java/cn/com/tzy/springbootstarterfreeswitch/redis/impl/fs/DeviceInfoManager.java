@@ -1,7 +1,6 @@
 package cn.com.tzy.springbootstarterfreeswitch.redis.impl.fs;
 
 import cn.com.tzy.springbootstarterfreeswitch.common.fs.RedisConstant;
-import cn.com.tzy.springbootstarterfreeswitch.model.call.DeviceInfo;
 import cn.com.tzy.springbootstarterredis.utils.RedisUtils;
 import org.springframework.stereotype.Component;
 
@@ -10,28 +9,25 @@ import java.util.List;
 @Component
 public class DeviceInfoManager {
 
-    private String FS_DEVICE_INFO = RedisConstant.FS_DEVICE_INFO;
-    private String FS_DEVICE_CALLID = RedisConstant.FS_DEVICE_CALLID;
+    private String FS_CALLER_CALL_ID = RedisConstant.FS_CALLER_CALL_ID;
+    private String FS_DEVICE_CALL_ID = RedisConstant.FS_DEVICE_CALL_ID;
 
-    public void putDeviceInfo(DeviceInfo model){
-        if(model == null ){
-            return;
-        }
-        RedisUtils.set(getKeyDeviceInfo(model.getDeviceId()),model,-1L);
+    public void putCallerCallId(String caller, String callId){
+        RedisUtils.set(getCallerCallIdKey(caller),callId,-1L);
     }
-    public DeviceInfo getDeviceInfo(String key) {
-        List<String> scan = RedisUtils.keys(getKeyDeviceInfo(key));
+    public String getCallerCallId(String key) {
+        List<String> scan = RedisUtils.keys(getCallerCallIdKey(key));
         if (!scan.isEmpty()) {
-            return (DeviceInfo)RedisUtils.get(scan.get(0));
+            return (String) RedisUtils.get(scan.get(0));
         }else {
             return null;
         }
     }
-    public void delDeviceInfo(String key){
-        RedisUtils.del(getKeyDeviceInfo(key));
+    public void delCallerCallId(String key){
+        RedisUtils.del(getCallerCallIdKey(key));
     }
-    private String getKeyDeviceInfo(String key){
-        return String.format("%s%s",FS_DEVICE_INFO,key);
+    private String getCallerCallIdKey(String key){
+        return String.format("%s%s", FS_CALLER_CALL_ID,key);
     }
 
     //**********************************************
@@ -51,6 +47,6 @@ public class DeviceInfoManager {
         RedisUtils.del(getKeyCallId(key));
     }
     private String getKeyCallId(String key){
-        return String.format("%s%s",FS_DEVICE_CALLID,key);
+        return String.format("%s%s", FS_DEVICE_CALL_ID,key);
     }
 }

@@ -39,8 +39,8 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import gov.nist.javax.sip.message.SIPMessage;
 import gov.nist.javax.sip.message.SIPRequest;
-import gov.nist.javax.sip.message.SIPResponse;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
@@ -50,6 +50,7 @@ import javax.sdp.MediaDescription;
 import javax.sdp.SdpException;
 import javax.sdp.SessionDescription;
 import javax.sip.InvalidArgumentException;
+import javax.sip.RequestEvent;
 import javax.sip.ResponseEvent;
 import javax.sip.SipException;
 import java.text.ParseException;
@@ -143,7 +144,7 @@ public class AgentServiceImpl extends ServiceImpl<AgentMapper, Agent> implements
      * 拨打电话
      */
     @Override
-    public void callPhone(VideoStreamType type,SipServer sipServer, MediaServerVo mediaServerVo, AgentVoInfo agentBySip,String caller, String ssrc, InviteErrorCallback<Object> callback) {
+    public void callPhone(VideoStreamType type,SipServer sipServer, MediaServerVo mediaServerVo, AgentVoInfo agentBySip,String caller, String ssrc,String callBackId,  InviteErrorCallback<Object> callback) {
         if(mediaServerVo == null){
             throw new RespException(RespCode.CODE_2.getValue(),"未找到可用的zlm");
         }
@@ -219,7 +220,7 @@ public class AgentServiceImpl extends ServiceImpl<AgentMapper, Agent> implements
                     null);
             return;
         }
-        callPhone(type,sipServer, mediaServerVo,videoSsrcInfo,audioSsrcInfo, agentBySip,caller,callback);
+        callPhone(type,sipServer, mediaServerVo,videoSsrcInfo,audioSsrcInfo, agentBySip,caller,callBackId,callback);
     }
 
 
@@ -227,7 +228,7 @@ public class AgentServiceImpl extends ServiceImpl<AgentMapper, Agent> implements
     /**
      * 电话实时流
      */
-    private void callPhone(VideoStreamType type,SipServer sipServer, MediaServerVo mediaServerVo,SSRCInfo videoSsrcInfo, SSRCInfo audioSsrcInfo, AgentVoInfo agentVoInfo, String caller,InviteErrorCallback<Object> callback) {
+    private void callPhone(VideoStreamType type,SipServer sipServer, MediaServerVo mediaServerVo,SSRCInfo videoSsrcInfo, SSRCInfo audioSsrcInfo, AgentVoInfo agentVoInfo, String caller,String callBackId, InviteErrorCallback<Object> callback) {
         SsrcConfigManager ssrcConfigManager = RedisService.getSsrcConfigManager();
         SsrcTransactionManager ssrcTransactionManager = RedisService.getSsrcTransactionManager();
         InviteStreamManager inviteStreamManager = RedisService.getInviteStreamManager();
@@ -281,7 +282,7 @@ public class AgentServiceImpl extends ServiceImpl<AgentMapper, Agent> implements
             }
         });
         try {
-            SIPRequest rtp = sipCommanderForPlatform.callPhone(sipServer, mediaServerVo,videoSsrcInfo, audioSsrcInfo, agentVoInfo,caller, (media, response) -> {
+            SIPRequest rtp = sipCommanderForPlatform.callPhone(sipServer, mediaServerVo,videoSsrcInfo, audioSsrcInfo, agentVoInfo,caller, callBackId,(media, response) -> {
                 log.info("收到订阅消息： " + JSONUtil.toJsonStr(response));
                 dynamicTask.stop(timeOutTaskKey);
                 OnStreamChangedHookVo vo = (OnStreamChangedHookVo) response;
@@ -340,9 +341,18 @@ public class AgentServiceImpl extends ServiceImpl<AgentMapper, Agent> implements
         SsrcTransactionManager ssrcTransactionManager = RedisService.getSsrcTransactionManager();
 
         inviteInfo.setStatus(InviteSessionStatus.ok);
+        String contentString = null;
+        SIPMessage message = null;
         //发送成功后操作
-        ResponseEvent responseEvent = (ResponseEvent) okEvent.getEvent();
-        String contentString = new String(responseEvent.getResponse().getRawContent());
+        if( okEvent.getEvent() instanceof ResponseEvent){
+            ResponseEvent responseEvent = (ResponseEvent) okEvent.getEvent();
+            contentString = new String(responseEvent.getResponse().getRawContent());
+            message = (SIPMessage)responseEvent.getResponse();
+        }else if(okEvent.getEvent() instanceof RequestEvent){
+            RequestEvent responseEvent = (RequestEvent) okEvent.getEvent();
+            contentString = new String(responseEvent.getRequest().getRawContent());
+            message = (SIPMessage)responseEvent.getRequest();
+        }
         String ssrcInResponse = SipUtils.getSsrcFromSdp(contentString);
         // 检查是否有y字段
         //不进 此条件 fs 没有返回ssrc
@@ -363,11 +373,11 @@ public class AgentServiceImpl extends ServiceImpl<AgentMapper, Agent> implements
                 if(inviteInfo.getVideoSsrcInfo()!=null){
                     SsrcTransaction paramOne = ssrcTransactionManager.getParamOne(agentVoInfo.getAgentKey(), null, inviteInfo.getVideoSsrcInfo().getStream(),null);
                     ssrcTransactionManager.remove(agentVoInfo.getAgentKey(),inviteInfo.getVideoSsrcInfo().getStream());
-                    ssrcTransactionManager.put(agentVoInfo.getAgentKey(),paramOne.getCallId(),"rtp",inviteInfo.getVideoSsrcInfo().getStream(),ssrcInResponse,mediaServerVo.getId(),(SIPResponse) responseEvent.getResponse(),paramOne.getType());
+                    ssrcTransactionManager.put(agentVoInfo.getAgentKey(),paramOne.getCallId(),"rtp",inviteInfo.getVideoSsrcInfo().getStream(),ssrcInResponse,mediaServerVo.getId(),message,paramOne.getType());
                 }
                 SsrcTransaction paramOne = ssrcTransactionManager.getParamOne(agentVoInfo.getAgentKey(), null, inviteInfo.getAudioSsrcInfo().getStream(),null);
                 ssrcTransactionManager.remove(agentVoInfo.getAgentKey(),inviteInfo.getAudioSsrcInfo().getStream());
-                ssrcTransactionManager.put(agentVoInfo.getAgentKey(),paramOne.getCallId(),"rtp",inviteInfo.getAudioSsrcInfo().getStream(),ssrcInResponse,mediaServerVo.getId(),(SIPResponse) responseEvent.getResponse(),paramOne.getType());
+                ssrcTransactionManager.put(agentVoInfo.getAgentKey(),paramOne.getCallId(),"rtp",inviteInfo.getAudioSsrcInfo().getStream(),ssrcInResponse,mediaServerVo.getId(),message,paramOne.getType());
                 //有问题待修复，暂不进此逻辑
                 inviteStreamManager.updateInviteInfoForSSRC(inviteInfo,ssrcInResponse);
                 return;

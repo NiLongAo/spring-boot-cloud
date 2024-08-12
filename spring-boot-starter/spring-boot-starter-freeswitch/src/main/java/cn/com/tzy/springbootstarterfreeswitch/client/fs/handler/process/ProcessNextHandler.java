@@ -188,7 +188,7 @@ public class ProcessNextHandler {
         DeviceInfo deviceInfo = new DeviceInfo();
         deviceInfo.setCaller(agentVoInfo.getAgentId());
         deviceInfo.setDisplay(callInfo.getCaller());
-        deviceInfo.setCalled(agentVoInfo.getAgentCode());
+        deviceInfo.setCalled(agentVoInfo.getAgentId());
         deviceInfo.setCallTime(new Date());
         deviceInfo.setCallId(callInfo.getCallId());
         deviceInfo.setDeviceId(deviceId);
@@ -201,8 +201,7 @@ public class ProcessNextHandler {
         callInfo.getNextCommands().add(new NextCommand(deviceId, NextTypeEnum.NEXT_CALL_BRIDGE, thisDeviceId));
         RedisService.getCallInfoManager().put(callInfo);
         RedisService.getDeviceInfoManager().putDeviceCallId(deviceId, callInfo.getCallId());
-
-        RouteGateWayInfo routeGateWayInfo = RedisService.getCompanyInfoManager().getRouteGateWayInfo(callInfo.getCompanyId(), agentVoInfo.getAgentCode());
+        RouteGateWayInfo routeGateWayInfo = RedisService.getCompanyInfoManager().getRouteGateWayInfo(callInfo.getCompanyId(), agentVoInfo.getAgentId());
         if (routeGateWayInfo == null) {
             strategyHandler.handler(HangupCallModel.builder().mediaAddr(callInfo.getMediaHost()).deviceId(thisDeviceId).build());
             return;

@@ -27,7 +27,7 @@
 								<variable name="directory-visible" value="true"/>
 								<variable name="directory-exten-visible" value="true"/>
 								<variable name="limit_max" value="15"/>
-								<variable name="effective_caller_id_name" value="${user.name}"/>
+								<variable name="effective_caller_id_name" value="${user.number}"/>
 								<variable name="effective_caller_id_number" value="${user.number}"/>
 								<variable name="callgroup" value="techsupport"/>
 							</variables>

@@ -1,6 +1,7 @@
 package cn.com.tzy.springbootstarterfreeswitch.vo.sip;
 
 import gov.nist.javax.sip.message.SIPMessage;
+import gov.nist.javax.sip.message.SIPRequest;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,14 +25,24 @@ public class SipTransactionInfo implements Serializable {
 
     public void sipTransactionInfo(SIPMessage response){
         this.callId = response.getCallIdHeader().getCallId();
-        this.fromTag = response.getFromTag();
-        this.toTag = response.getToTag();
         this.viaBranch = response.getTopmostViaHeader().getBranch();
+        if(response instanceof SIPRequest){
+            this.fromTag = response.getToTag();
+            this.toTag = response.getFromTag();
+        }else {
+            this.fromTag = response.getFromTag();
+            this.toTag = response.getToTag();
+        }
     }
     public SipTransactionInfo(SIPMessage response) {
         this.callId = response.getCallIdHeader().getCallId();
-        this.fromTag = response.getFromTag();
-        this.toTag = response.getToTag();
         this.viaBranch = response.getTopmostViaHeader().getBranch();
+        if(response instanceof SIPRequest){
+            this.fromTag = response.getToTag();
+            this.toTag = response.getFromTag();
+        }else {
+            this.fromTag = response.getFromTag();
+            this.toTag = response.getToTag();
+        }
     }
 }

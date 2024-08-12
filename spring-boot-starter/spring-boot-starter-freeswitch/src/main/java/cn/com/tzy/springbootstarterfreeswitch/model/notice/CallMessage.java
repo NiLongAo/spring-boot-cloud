@@ -4,14 +4,14 @@ import cn.com.tzy.springbootstarterfreeswitch.enums.fs.AgentStateEnum;
 import cn.com.tzy.springbootstarterfreeswitch.enums.fs.CallTypeEunm;
 import cn.com.tzy.springbootstarterfreeswitch.enums.fs.DirectionEnum;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 import java.io.Serializable;
 
 @Data
-@SuperBuilder(toBuilder = true)
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class CallMessage implements Serializable {
@@ -21,6 +21,8 @@ public class CallMessage implements Serializable {
     private DirectionEnum direction;
 
     private CallTypeEunm callType;
+
+    private Integer onVideo;
 
     private String caller;
 

@@ -129,7 +129,6 @@ public class ChannelParkEventHandler implements EslEventHandler {
             if (agentVoInfo.getHiddenCustomer() == 1) {
                 ringEntity.setCaller(ringEntity.getCaller());
             }
-            FsService.getSendAgentMessage().sendMessage(AgentStateEnum.IN_CALL_RING, agentVoInfo,ringEntity);
         }
         RedisService.getAgentInfoManager().put(agentVoInfo);
     }
@@ -206,7 +205,6 @@ public class ChannelParkEventHandler implements EslEventHandler {
                 .deviceType(2)
                 .cdrType(1)
                 .build();
-
         CompanyInfo companyInfo = RedisService.getCompanyInfoManager().get(vdnPhoneInfo.getCompanyId());
         callInfo.setHiddenCustomer(companyInfo.getHiddenCustomer());
         callInfo.setCdrNotifyUrl(companyInfo.getNotifyUrl());
@@ -238,8 +236,6 @@ public class ChannelParkEventHandler implements EslEventHandler {
         }else {
             agent = agentVoInfo;
         }
-        //获取主叫呼号
-        caller = agent.getCalled();
         //获取显号
         GroupInfo groupInfo = RedisService.getGroupInfoManager().get(agent.getGroupId());
         if (groupInfo == null || CollectionUtils.isEmpty(groupInfo.getCalledDisplays())) {
@@ -255,7 +251,7 @@ public class ChannelParkEventHandler implements EslEventHandler {
         if(called.startsWith(Constant.AGENT_SIP_PREFIX)){//内呼坐席
             called = called.substring(Constant.AGENT_SIP_PREFIX.length());
             callTypeEunm = CallTypeEunm.INNER_CALL;
-            calledDisplay = agent.getAgentCode();
+            calledDisplay = agent.getAgentId();
         }else if(called.startsWith(Constant.CONFERENCE_ID_PREFIX)){//呼叫会议
             called = called.substring(Constant.CONFERENCE_ID_PREFIX.length());
             callTypeEunm = CallTypeEunm.CONFERENCE_CALL;
@@ -307,9 +303,10 @@ public class ChannelParkEventHandler implements EslEventHandler {
             callInfo.getNextCommands().add(new NextCommand(deviceInfo.getDeviceId(), NextTypeEnum.NEXT_CALL_OTHER, null));
         }
         //直接执行下一步操作
+        RedisService.getDeviceInfoManager().putDeviceCallId(deviceId, callId);
+        RedisService.getDeviceInfoManager().putCallerCallId(caller, callId);
         eventNextHandler.next(callInfo,event);
         RedisService.getCallInfoManager().put(callInfo);
-        RedisService.getDeviceInfoManager().putDeviceCallId(deviceId, callId);
     }
 
     /**
@@ -368,7 +365,6 @@ public class ChannelParkEventHandler implements EslEventHandler {
             } else if (callType == CallTypeEunm.INNER_CALL) {
                 //内呼坐席振铃
                 ringEntity.setAgentState(AgentStateEnum.IN_CALL_RING);
-                FsService.getSendAgentMessage().sendMessage(AgentStateEnum.IN_CALL_RING, agentVoInfo,ringEntity);
             }
         } else {
             //外呼被叫振铃

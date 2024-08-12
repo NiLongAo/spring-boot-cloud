@@ -1,13 +1,13 @@
 package cn.com.tzy.springbootstarterfreeswitch.client.sip.listener.request;
 
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.SipServer;
-import cn.com.tzy.springbootstarterfreeswitch.client.sip.properties.VideoProperties;
-import cn.com.tzy.springbootstarterfreeswitch.vo.sip.DeviceVo;
-import cn.com.tzy.springbootstarterfreeswitch.vo.sip.ParentPlatformVo;
-import cn.com.tzy.springbootstarterfreeswitch.redis.subscribe.sip.message.SipMessageHandle;
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.cmd.SIPCommander;
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.cmd.SIPCommanderForPlatform;
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.cmd.build.SIPResponseProvider;
+import cn.com.tzy.springbootstarterfreeswitch.client.sip.properties.VideoProperties;
+import cn.com.tzy.springbootstarterfreeswitch.model.fs.AgentVoInfo;
+import cn.com.tzy.springbootstarterfreeswitch.redis.subscribe.sip.message.SipMessageHandle;
+import cn.com.tzy.springbootstarterfreeswitch.vo.sip.ParentPlatformVo;
 import cn.hutool.core.util.XmlUtil;
 import gov.nist.javax.sip.message.SIPRequest;
 import gov.nist.javax.sip.message.SIPResponse;
@@ -22,6 +22,7 @@ import javax.sip.InvalidArgumentException;
 import javax.sip.RequestEvent;
 import javax.sip.SipException;
 import javax.sip.message.Request;
+import javax.sip.message.Response;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -57,7 +58,7 @@ public abstract class SipResponseEvent {
      * 回复带sdp
      */
     public SIPResponse responseSdpAck(SIPRequest request, String sdp, ParentPlatformVo parentPlatformVo) throws InvalidArgumentException, SipException, ParseException {
-        SIPResponse sipResponse = SIPResponseProvider.builder(sipServer, 200, null, sdp, request)
+        SIPResponse sipResponse = SIPResponseProvider.builder(sipServer, Response.OK, null, sdp, request)
                 .createSipURI(parentPlatformVo.getServerGbId(),String.format("%s:%s", parentPlatformVo.getServerIp(), parentPlatformVo.getServerPort()))
                 .createContentTypeHeader("APPLICATION","SDP")
                 .createContactHeader()
@@ -69,9 +70,9 @@ public abstract class SipResponseEvent {
     /**
      * 回复带sdp
      */
-    public SIPResponse responseSdpAck(SIPRequest request, String sdp, DeviceVo deviceVo) throws InvalidArgumentException, SipException, ParseException {
-        SIPResponse sipResponse = SIPResponseProvider.builder(sipServer, 200, null, sdp, request)
-                .createSipURI(deviceVo.getDeviceId(),deviceVo.getHostAddress())
+    public SIPResponse responseSdpAck(SIPRequest request, String sdp, AgentVoInfo agentVoInfo) throws InvalidArgumentException, SipException, ParseException {
+        SIPResponse sipResponse = SIPResponseProvider.builder(sipServer, Response.OK, null, sdp, request)
+                .createSipURI(agentVoInfo.getCalled(),String.format("%s:%s", agentVoInfo.getFsHost(), agentVoInfo.getFsPost()))
                 .createContentTypeHeader("APPLICATION","SDP")
                 .createContactHeader()
                 .buildResponse();

@@ -43,6 +43,13 @@ public class CallInfoManager {
         }
         return get(callId);
     }
+    public CallInfo findCaller(String caller){
+        String callId = RedisService.getDeviceInfoManager().getCallerCallId(caller);
+        if(StringUtils.isBlank(callId)){
+            return null;
+        }
+        return get(callId);
+    }
 
 
     public void del(String callId){
@@ -50,8 +57,14 @@ public class CallInfoManager {
         if(callInfo != null){
             Map<String, DeviceInfo> deviceInfoMap = callInfo.getDeviceInfoMap();
             if(deviceInfoMap!= null && !deviceInfoMap.isEmpty()){
-                for (String deviceId : deviceInfoMap.keySet()) {
-                    RedisService.getDeviceInfoManager().delDeviceInfo(deviceId);
+                for (DeviceInfo deviceInfo : deviceInfoMap.values()) {
+                    RedisService.getDeviceInfoManager().delDeviceCallId(deviceInfo.getDeviceId());
+                    if(StringUtils.isNotEmpty(deviceInfo.getCaller())){
+                        RedisService.getDeviceInfoManager().delCallerCallId(deviceInfo.getCaller());
+                    }
+                    if(StringUtils.isNotEmpty(deviceInfo.getCalled())){
+                        RedisService.getDeviceInfoManager().delCallerCallId(deviceInfo.getCalled());
+                    }
                 }
             }
         }

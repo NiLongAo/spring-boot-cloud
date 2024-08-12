@@ -53,9 +53,9 @@ public class ChannelCustomeventHandler implements EslEventHandler {
                 FsService.getAgentService().online(agentVoInfo, null);
                 CompanyInfo companyInfo = RedisService.getCompanyInfoManager().get(agentVoInfo.getCompanyId());
                 if (companyInfo != null) {
-                    RouteGroupInfo routeGroupInfo = companyInfo.getRouteGroupMap().computeIfAbsent(agentVoInfo.getAgentCode(), k -> new RouteGroupInfo());
+                    RouteGroupInfo routeGroupInfo = companyInfo.getRouteGroupMap().computeIfAbsent(agentVoInfo.getAgentId(), k -> new RouteGroupInfo());
                     routeGroupInfo.setRouteGateWayInfoList(Collections.singletonList(RouteGateWayInfo.builder()
-                            .name(String.format("坐席AgentCode：%s", agentVoInfo.getAgentCode()))
+                            .name(String.format("坐席AgentId：%s", agentVoInfo.getAgentId()))
                             .mediaHost(networkIp)
                             .profile("internal")
                             .mediaPort(Integer.valueOf(networkPort))
@@ -71,7 +71,7 @@ public class ChannelCustomeventHandler implements EslEventHandler {
             if (agentBySip != null) {
                 CompanyInfo companyInfo = RedisService.getCompanyInfoManager().get(agentBySip.getCompanyId());
                 if (companyInfo != null) {
-                    companyInfo.getRouteGroupMap().remove(agentBySip.getAgentCode());
+                    companyInfo.getRouteGroupMap().remove(agentBySip.getAgentId());
                     RedisService.getCompanyInfoManager().put(companyInfo);
                 }
                 FsService.getAgentService().offline(agentBySip.getAgentKey());

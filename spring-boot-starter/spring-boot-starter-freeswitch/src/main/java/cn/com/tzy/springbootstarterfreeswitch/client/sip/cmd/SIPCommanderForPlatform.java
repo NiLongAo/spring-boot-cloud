@@ -59,7 +59,13 @@ public interface SIPCommanderForPlatform {
     /**
      * 请求拨打电话请求
      */
-    SIPRequest callPhone(SipServer sipServer, MediaServerVo mediaServerVo, SSRCInfo videoSsrcInfo, SSRCInfo audioSsrcInfo, AgentVoInfo deviceVo,String caller, HookEvent hookEvent, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws InvalidArgumentException, SipException, ParseException;
+    SIPRequest callPhone(SipServer sipServer, MediaServerVo mediaServerVo, SSRCInfo videoSsrcInfo, SSRCInfo audioSsrcInfo, AgentVoInfo deviceVo,String caller,String callBackId, HookEvent hookEvent, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws InvalidArgumentException, SipException, ParseException;
+    /**
+     * 重新认证发起拨打电话
+     */
     SIPRequest callPhone(SipServer sipServer,AgentVoInfo agentVoInfo, ProxyAuthenticateHeader header, SIPRequest sipRequest, SIPResponse response) throws InvalidArgumentException, SipException, ParseException;
-
+    /**
+     * 发起拨打电话
+     */
+    public String createSdp(SipServer sipServer, MediaServerVo mediaServerVo, SSRCInfo videoSsrcInfo, SSRCInfo audioSsrcInfo, AgentVoInfo agentVoInfo);
 }

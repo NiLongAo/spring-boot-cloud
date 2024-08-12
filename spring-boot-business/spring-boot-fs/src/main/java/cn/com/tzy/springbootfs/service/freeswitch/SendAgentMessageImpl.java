@@ -22,7 +22,13 @@ public class SendAgentMessageImpl implements SendAgentMessage {
 
     @Override
     public void sendMessage(AgentStateEnum agentStateEnum, AgentVoInfo agentVoInfo, CallMessage callMessage) {
+        callMessage.setAgentState(agentStateEnum);
         sendMessage(AgentCommon.SOCKET_AGENT,AgentCommon.AGENT_OUT_CALL_NOTIFICATION,agentVoInfo.getAgentKey(),RestResult.result(RespCode.CODE_0.getValue(),null,callMessage));
+    }
+
+    @Override
+    public void sendErrorMessage(AgentVoInfo agentVoInfo, String errorMessage) {
+        sendMessage(AgentCommon.SOCKET_AGENT,AgentCommon.AGENT_OUT_CALL_NOTIFICATION,agentVoInfo.getAgentKey(),RestResult.result(RespCode.CODE_2.getValue(),errorMessage,null));
     }
 
     @Override
