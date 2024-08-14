@@ -169,6 +169,8 @@ public class SipUtils {
                     mediaFormat = String.valueOf(VideoStreamType.CALL_AUDIO_PHONE.getPt());
                 }else if(mediaFormats.contains(String.valueOf(VideoStreamType.CALL_VIDEO_PHONE.getPt()))){
                     mediaFormat = String.valueOf(VideoStreamType.CALL_VIDEO_PHONE.getPt());
+                }else if(mediaFormats.contains("103")){//也标识 h264
+                    mediaFormat = String.valueOf(VideoStreamType.CALL_VIDEO_PHONE.getPt());
                 }else {
                     continue;
                 }

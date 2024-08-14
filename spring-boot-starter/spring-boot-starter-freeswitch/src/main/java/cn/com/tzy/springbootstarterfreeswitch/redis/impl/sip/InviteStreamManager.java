@@ -75,6 +75,9 @@ public class InviteStreamManager {
             if (inviteInfo.getStreamInfo() != null) {
                 inviteInfoInRedis.setStreamInfo(inviteInfo.getStreamInfo());
             }
+            if (inviteInfo.getSdp() != null) {
+                inviteInfoInRedis.setSdp(inviteInfo.getSdp());
+            }
             if (inviteInfo.getAudioSsrcInfo() != null) {
                 inviteInfoInRedis.setAudioSsrcInfo(inviteInfo.getAudioSsrcInfo());
             }
@@ -92,13 +95,8 @@ public class InviteStreamManager {
             }
             inviteInfoForUpdate = inviteInfoInRedis;
         }
-        //下载操作时关联用户与当前key的
-        if(inviteInfoForUpdate.getType() == VideoStreamType.DOWNLOAD && InviteSessionStatus.ok == inviteInfoForUpdate.getStatus()){
-            String userKey = String.format("%s:%s",INVITE_DOWNLOAD_USER_PREFIX,inviteInfoForUpdate.getUserId());
-            RedisUtils.sSet(userKey,inviteInfoForUpdate.getAudioSsrcInfo().getStream());
-        }
         RedisUtils.set(getKey(inviteInfoForUpdate.getType(),inviteInfoForUpdate.getAgentKey() ,inviteInfoForUpdate.getAudioSsrcInfo().getStream(),inviteInfoForUpdate.getAudioSsrcInfo().getSsrc()), inviteInfoForUpdate);
-        RedisService.getRecordMp4Manager().put(inviteInfoForUpdate.getAudioSsrcInfo().getStream(),inviteInfoForUpdate);
+        //RedisService.getRecordMp4Manager().put(inviteInfoForUpdate.getAudioSsrcInfo().getStream(),inviteInfoForUpdate);
     }
 
     public InviteInfo getInviteInfo(VideoStreamType type, String agentKey,  String stream, String ssrc) {

@@ -18,6 +18,7 @@ public class InviteInfo {
     private Long userId;
     private String agentKey;
     private String receiveIp;
+    private String sdp;
     /**
      * 数据流传输模式 0.UDP:udp传输 2.TCP-ACTIVE：tcp主动模式 2.TCP-PASSIVE：tcp被动模式
      */

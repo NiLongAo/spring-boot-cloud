@@ -102,7 +102,6 @@ public class InviteRequestProcessor  extends AbstractSipRequestEvent implements 
             }
             return;
         }
-
         LoginTypeEnum loginType = LoginTypeEnum.getLoginType(toAgentVoInfo.getLoginType());
         if(loginType == null){
             this.sendErrorMessage(request,Response.TEMPORARILY_UNAVAILABLE,"未获取登陆方式");
@@ -112,7 +111,18 @@ public class InviteRequestProcessor  extends AbstractSipRequestEvent implements 
         //向用户发送来电消息
         DeviceRawContent deviceRawContent =SipUtils.handleDeviceRawContent(request);
         if(deviceRawContent == null){
+            this.sendErrorMessage(request,Response.TEMPORARILY_UNAVAILABLE,"未解析出 DeviceRawContent");
             log.error("[视频语音流] agentKey : {} 未解析出 DeviceRawContent",toAgentVoInfo.getAgentKey());
+            return;
+        }
+        InviteInfo invite = RedisService.getInviteStreamManager().getInviteInfoByDeviceAndChannel(deviceRawContent.getVideoInfo() != null?VideoStreamType.CALL_VIDEO_PHONE:VideoStreamType.CALL_AUDIO_PHONE, toAgentVoInfo.getAgentKey());
+        if(invite != null && StringUtils.isNotEmpty(invite.getSdp())){
+            //类似 心跳认证是否继续通话中
+            try {
+                responseSdpAck(request,invite.getSdp(),toAgentVoInfo);
+            } catch (SipException | InvalidArgumentException | ParseException e) {
+                this.sendErrorMessage(request,Response.TEMPORARILY_UNAVAILABLE,String.format("[命令发送失败] invite TRYING: %s", e.getMessage()));
+            }
             return;
         }
         //通知用户 是否 接听电话
@@ -163,7 +173,7 @@ public class InviteRequestProcessor  extends AbstractSipRequestEvent implements 
                 FsService.getSendAgentMessage().sendErrorMessage(toAgentVoInfo,e.getMessage());
                 return;
             }
-            //发送报错
+            //发送成功处理
             String key = String.format("%s%s", SipSubscribeHandle.VIDEO_SIP_OK_EVENT_SUBSCRIBE_MANAGER, callIdHeader.getCallId());
             RedisUtils.redisTemplate.convertAndSend(key,SerializationUtils.serialize(evt));
         },error->{
@@ -276,11 +286,14 @@ public class InviteRequestProcessor  extends AbstractSipRequestEvent implements 
         startSendRtpStreamHand(sendRtp,agentVoInfo,restResult);
         RedisService.getSendRtpManager().put(sendRtp);
         //3.发送sdp
+        String sdp = sipCommanderForPlatform.createSdp(sipServer, mediaServerVo, invite.getVideoSsrcInfo(), invite.getAudioSsrcInfo(), agentVoInfo);
         try {
-            responseSdpAck(request,sipCommanderForPlatform.createSdp(sipServer,mediaServerVo,invite.getVideoSsrcInfo(),invite.getAudioSsrcInfo(),agentVoInfo),agentVoInfo);
+            responseSdpAck(request,sdp,agentVoInfo);
         } catch (SipException | InvalidArgumentException | ParseException e) {
            sendErrorExceptionMessage(String.format("[命令发送失败] invite TRYING: %s", e.getMessage()));
         }
+        invite.setSdp(sdp);
+        RedisService.getInviteStreamManager().updateInviteInfo(invite);
         return;
     }
 
