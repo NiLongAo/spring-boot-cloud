@@ -66,7 +66,7 @@ public abstract class DeviceVoService {
         deviceVo.setKeepaliveTime(new Date());
         DeviceVo deviceVoGb = this.findDeviceGbId(deviceVo.getDeviceId());
         //缓存设备注册服务
-        RedisService.getRegisterServerManager().putDevice(deviceVo.getDeviceId(),deviceVo.getKeepaliveIntervalTime()+ VideoConstant.DELAY_TIME , Address.builder().gbId(deviceVo.getDeviceId()).ip(nacosDiscoveryProperties.getIp()).port(nacosDiscoveryProperties.getPort()).build());
+        RedisService.getRegisterServerManager().putDevice(deviceVo.getDeviceId(),deviceVo.getKeepaliveIntervalTime()+ VideoConstant.DELAY_TIME * 2 , Address.builder().gbId(deviceVo.getDeviceId()).ip(nacosDiscoveryProperties.getIp()).port(nacosDiscoveryProperties.getPort()).build());
         if(deviceVoGb == null){
             deviceVo.setOnline(ConstEnum.Flag.YES.getValue());
             deviceVo.setRegisterTime(new Date());
