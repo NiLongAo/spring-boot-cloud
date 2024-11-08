@@ -28,7 +28,7 @@ public class VideoConstant {
     /**
      * 允许事件延迟时长（秒）
      */
-    public static final Integer DELAY_TIME = 3;
+    public static final Integer DELAY_TIME = 5;
     /**
      * 视频流点播/回放缓存前缀Key
      */

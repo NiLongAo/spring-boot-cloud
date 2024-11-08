@@ -96,9 +96,9 @@ public class RegisterRequestProcessor extends AbstractSipRequestEvent implements
                 }
             }
             //设备密码
-            String password = (deviceVo != null && StringUtils.isNotEmpty(sipConfigProperties.getPassword())? deviceVo.getPassword() :null);
+            String password = (deviceVo != null && StringUtils.isNotEmpty(deviceVo.getPassword()) ? deviceVo.getPassword() : sipConfigProperties.getPassword());
             AuthorizationHeader authHead = (AuthorizationHeader) request.getHeader(AuthorizationHeader.NAME);
-            if (authHead == null && !ObjectUtils.isEmpty(password)) {
+            if (authHead == null && StringUtils.isNotEmpty(password)) {
                 log.info("[{}] 回复401: {}",title, requestAddress);
                 response = sipServer.getSipFactory().createMessageFactory().createResponse(Response.UNAUTHORIZED, request);
                 new DigestServerAuthenticationHelper().generateChallenge(sipServer.getSipFactory().createHeaderFactory(), response, sipConfigProperties.getDomain());

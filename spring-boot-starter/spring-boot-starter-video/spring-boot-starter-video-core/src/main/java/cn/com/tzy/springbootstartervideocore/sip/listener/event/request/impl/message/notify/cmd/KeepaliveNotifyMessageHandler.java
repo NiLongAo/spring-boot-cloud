@@ -87,7 +87,7 @@ public class KeepaliveNotifyMessageHandler extends SipResponseEvent implements M
             }
         }
         // 刷新过期任务,如果三次心跳失败，则设置设备离线
-        dynamicTask.startDelay(String.format("%s_%s", VideoConstant.REGISTER_EXPIRE_TASK_KEY_PREFIX, deviceVo.getDeviceId()), deviceVo.getKeepaliveIntervalTime()*3,()-> deviceVoService.offline(deviceVo.getDeviceId()));
+        dynamicTask.startDelay(String.format("%s_%s", VideoConstant.REGISTER_EXPIRE_TASK_KEY_PREFIX, deviceVo.getDeviceId()), deviceVo.getKeepaliveIntervalTime()*2,()-> deviceVoService.offline(deviceVo.getDeviceId()));
         Address remoteAddressInfo = SipUtils.getRemoteAddressFromRequest(request, videoProperties.getSipUseSourceIpAsRemoteAddress());
         if (!deviceVo.getIp().equalsIgnoreCase(remoteAddressInfo.getIp()) || deviceVo.getPort() != remoteAddressInfo.getPort()) {
             log.info("[心跳] 设备{}地址变化, 远程地址为: {}:{}", deviceVo.getDeviceId(), remoteAddressInfo.getIp(), remoteAddressInfo.getPort());

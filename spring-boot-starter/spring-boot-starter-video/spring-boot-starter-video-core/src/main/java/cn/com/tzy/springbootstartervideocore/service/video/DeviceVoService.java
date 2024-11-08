@@ -115,7 +115,7 @@ public abstract class DeviceVoService {
         }
         String key = String.format("%s_%s", VideoConstant.REGISTER_EXPIRE_TASK_KEY_PREFIX, deviceVo.getDeviceId());
         //设置设备过期任务
-        dynamicTask.startDelay(key, deviceVo.getKeepaliveIntervalTime()+ VideoConstant.DELAY_TIME,()->offline(deviceVo.getDeviceId()));
+        dynamicTask.startDelay(key, deviceVo.getKeepaliveIntervalTime()+ VideoConstant.DELAY_TIME * 2 ,()->offline(deviceVo.getDeviceId()));
     }
 
     /**

@@ -131,7 +131,7 @@ public class DeviceVo extends LongIdEntity {
     /**
      * 心跳间隔
      */
-    private Integer keepaliveIntervalTime= 30;
+    private Integer keepaliveIntervalTime;
 
     /**
      * 数据流传输模式 0.UDP:udp传输 1.TCP-PASSIVE：tcp被动模式 2.TCP-ACTIVE：tcp主动模式
