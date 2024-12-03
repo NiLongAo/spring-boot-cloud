@@ -20,7 +20,7 @@ ENTRYPOINT [ \
     "java", \
     "-javaagent:/spring-boot-sso/skywalking-agent-lib/skywalking-agent.jar", \
     "-Dskywalking.agent.service_name=spring-boot-sso", \
-    "-Dskywalking.collector.backend_service=1.15.9.228:12011", \
+    "-Dskywalking.collector.backend_service=1.82.217.118:12011", \
     "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=14005", \
     "-XX:MetaspaceSize=256M", "-XX:MaxMetaspaceSize=256M","-XX:+AlwaysPreTouch","-XX:ReservedCodeCacheSize=128m", "-Xms256m", "-Xmx256m", "-Xss512k", "-XX:+UseG1GC","-XX:G1HeapRegionSize=4M",\
     "-Dloader.path=/spring-boot-sso/lib", \

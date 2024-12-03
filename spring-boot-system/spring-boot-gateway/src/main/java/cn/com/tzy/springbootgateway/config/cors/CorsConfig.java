@@ -33,7 +33,7 @@ public class CorsConfig {
         if(environment.acceptsProfiles(Profiles.of("dev"))){
             configuration.addAllowedOrigin("*");//请求域名
         }else {
-            configuration.addAllowedOrigin("http://1.15.9.228:9200");//请求域名
+            configuration.addAllowedOrigin("http://1.82.217.118:9200");//请求域名
         }
         configuration.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","OPTIONS"));//请求方法
         configuration.setAllowedHeaders(Collections.singletonList("*"));//请求头

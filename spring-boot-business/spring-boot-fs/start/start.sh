@@ -2,7 +2,7 @@
 
 APP_NAME=debug
 #skywalking包路径
-SKY_LIB='-javaagent:/usr/local/program/spring-cloud/lib/skywalking-agent/skywalking-agent.jar -Dskywalking.agent.service_name=spring-boot-fs -Dskywalking.collector.backend_service=1.15.9.228:12011'
+SKY_LIB='-javaagent:/usr/local/program/spring-cloud/lib/skywalking-agent/skywalking-agent.jar -Dskywalking.agent.service_name=spring-boot-fs -Dskywalking.collector.backend_service=1.82.217.118:12011'
 #lib包路径
 JAR_LIB='/usr/local/program/spring-cloud/lib/oa-lib'
 #jar包路径

@@ -13,7 +13,7 @@ spring:
 db:
   num: 1
   url:
-    '0': jdbc:mysql://${MYSQL-HOST:1.15.9.228}:${MYSQL-PORT:3401}/${MYSQL-DB:nacos}?characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true&useUnicode=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    '0': jdbc:mysql://${MYSQL-HOST:1.82.217.118}:${MYSQL-PORT:3401}/${MYSQL-DB:nacos}?characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true&useUnicode=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
   user:
     '0': ${MYSQL-USER:root}
   password:

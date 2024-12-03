@@ -36,19 +36,19 @@ insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,h
 insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('monitor.naocs','monitore.naocs:list','列表','',1);
 insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('monitor','monitor.minio',2,'资源文件','/monitor/minio','https://www.nilongao.cn/minio','grommet-icons:test',1,0,2);
 insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('monitor.minio','monitore.minio:list','列表','',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('monitor','monitor.sentinel',2,'熔断限流配置','http://1.15.9.228:8850/','http://1.15.9.228:8850/','grommet-icons:test',1,0,3);
+insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('monitor','monitor.sentinel',2,'熔断限流配置','http://1.82.217.118:8850/','http://1.82.217.118:8850/','grommet-icons:test',1,0,3);
 insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('monitor.sentinel','monitore.sentinel:list','列表','',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('monitor','monitor.skywalking',2,'链路追踪','http://1.15.9.228:12013/','http://1.15.9.228:12013/','grommet-icons:test',1,0,4);
+insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('monitor','monitor.skywalking',2,'链路追踪','http://1.82.217.118:12013/','http://1.82.217.118:12013/','grommet-icons:test',1,0,4);
 insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('monitor.skywalking','monitore.skywalking:list','列表','',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('monitor','monitor.jenkins',2,'服务构建','http://1.15.9.228:10240/','http://1.15.9.228:10240/','grommet-icons:test',1,0,5);
+insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('monitor','monitor.jenkins',2,'服务构建','http://1.82.217.118:10240/','http://1.82.217.118:10240/','grommet-icons:test',1,0,5);
 insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('monitor.jenkins','monitore.jenkins:list','列表','',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('monitor','monitor.elasticsearch',2,'elasticsearch可视化','http://1.15.9.228:10012/','http://1.15.9.228:10012/','grommet-icons:test',1,0,6);
+insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('monitor','monitor.elasticsearch',2,'elasticsearch可视化','http://1.82.217.118:10012/','http://1.82.217.118:10012/','grommet-icons:test',1,0,6);
 insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('monitor.elasticsearch','monitore.elasticsearch:list','列表','',1);
 insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('monitor','monitor.swagger',2,'Swagger接口文档','/monitor/swagger','http://122.51.147.244:9100/doc.html','grommet-icons:test',1,0,7);
 insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('monitor.swagger','monitore.swagger:list','列表','',1);
 insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('monitor','monitor.rabbitmq',2,'RabbitMq消息队列','/monitor/rabbitmq','https://www.nilongao.cn/rabbitmq/','grommet-icons:test',1,0,7);
 insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('monitor.rabbitmq','monitore.rabbitmq:list','列表','',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('monitor','monitor.seata',2,'Seata分布式事务','http://1.15.9.228:8092/','http://1.15.9.228:8092/','grommet-icons:test',1,0,7);
+insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('monitor','monitor.seata',2,'Seata分布式事务','http://1.82.217.118:8092/','http://1.82.217.118:8092/','grommet-icons:test',1,0,7);
 insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('monitor.seata','monitore.seata:list','列表','',1);
 insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('monitor','monitor.xxl-job',2,'XXL-JOB分布式定时器','/monitor/xxl-job','https://nilongao.cn/xxl-job-admin/','grommet-icons:test',1,0,7);
 insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('monitor.xxl-job','monitore.xxl-job:list','列表','',1);
@@ -184,7 +184,7 @@ insert into sys_tenant(id,tenant_name,tenant_user_id,tenant_user_name,status,acc
 (0,'系统租户',1,'root',1,0,1,now(),1,now());
 
 /*系统配置*/
-insert into sys_config(config_name,k,v)values('minio服务器地址','minio.path','http://1.15.9.228:9000/spring-clond');
+insert into sys_config(config_name,k,v)values('minio服务器地址','minio.path','http://1.82.217.118:9000/spring-clond');
 insert into sys_config(config_name,k,v)values('打印水印名称','print.name','测试水印信息');
 
 
@@ -203,7 +203,7 @@ insert into bean_user_set(id,is_admin,is_enabled)values (1,1,1);
 
 /*初始化客户端*/
 insert into sys_oauth_client(client_id,resource_ids,client_secret,scope,authorized_grant_types,web_server_redirect_uri,authorities,access_token_validity,refresh_token_validity,additional_information,autoapprove)values
-('web-api-client',null,'web-api-client','all','authorization_code,password,refresh_token,implicit,client_credentials','http://1.15.9.228:9200',null,7200,7200,null,null);
+('web-api-client',null,'web-api-client','all','authorization_code,password,refresh_token,implicit,client_credentials','http://1.82.217.118:9200',null,7200,7200,null,null);
 
 /*定时器初始化*/
 insert into sms_quartz(id,classes_name,cron_expression,task_name,group_name,description,type,task_status,start_time,end_time)values (1,'cn.com.tzy.springbootsms.config.quartz.task.PubLicScheduler','0 0 0/1 * * ?','QUARTZ_SOCKET_SOCKET','QUARTZ_SOCKET','socket定时推送信息',1,1,null,null);

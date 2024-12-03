@@ -5,7 +5,7 @@
 export JAVA_HOME=/usr/local/program/jdk/jdk1.8.0_291
 export PATH=$JAVA_HOME/bin:$PATH
 # skywalking-ip地址
-SKYWALKING_IP=1.15.9.228:12011
+SKYWALKING_IP=1.82.217.118:12011
 # 基础路径，由参数传入 $1 = /usr/local/program/spring-cloud
 JAR_BATH=/usr/local/program/spring-cloud
 # 多模块的时候，需要在路径中使用*统配一下多模块  /usr/local/program/spring-cloud/spring-boot-oa/spring-boot-oa.jar
