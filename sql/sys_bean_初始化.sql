@@ -52,6 +52,8 @@ insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,h
 insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('monitor.seata','monitore.seata:list','列表','',1);
 insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('monitor','monitor.xxl-job',2,'XXL-JOB分布式定时器','/monitor/xxl-job','https://nilongao.cn/xxl-job-admin/','grommet-icons:test',1,0,7);
 insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('monitor.xxl-job','monitore.xxl-job:list','列表','',1);
+insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('monitor','monitor.certd',2,'自动化SSL证书','/monitor/certd','http://1.82.217.118:7001/','grommet-icons:test',1,0,7);
+insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('monitor.certd','monitore.certd:list','列表','',1);
 insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values(null,'video',1,'视频管理','/video','/vide','grommet-icons:test',1,0,4);
 insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('video','video.dispatch',2,'分屏调度','/video/dispatch','/video/dispatch/index','grommet-icons:test',1,0,1);
 insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.dispatch','video.dispatch:list','列表','/webapi/video/device/page',1);
