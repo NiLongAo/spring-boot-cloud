@@ -8,7 +8,6 @@ import cn.com.tzy.springbootstarterfreeswitch.client.sip.cmd.SipSendMessage;
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.cmd.build.SIPRequestProvider;
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.properties.SipConfigProperties;
 import cn.com.tzy.springbootstarterfreeswitch.enums.sip.TransportType;
-import cn.com.tzy.springbootstarterfreeswitch.enums.sip.VideoStreamType;
 import cn.com.tzy.springbootstarterfreeswitch.exception.SsrcTransactionNotFoundException;
 import cn.com.tzy.springbootstarterfreeswitch.model.fs.AgentVoInfo;
 import cn.com.tzy.springbootstarterfreeswitch.redis.RedisService;
@@ -47,10 +46,10 @@ public class SIPCommanderImpl implements SIPCommander {
     private SipMessageHandle sipMessageHandle;
 
     @Override
-    public void streamByeCmd(SipServer sipServer, AgentVoInfo agentVoInfo, String stream, String callId, VideoStreamType type, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws InvalidArgumentException, SipException, ParseException, SsrcTransactionNotFoundException {
+    public void streamByeCmd(SipServer sipServer, AgentVoInfo agentVoInfo, String stream, String callId, String typeName, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws InvalidArgumentException, SipException, ParseException, SsrcTransactionNotFoundException {
         SsrcTransactionManager ssrcTransactionManager = RedisService.getSsrcTransactionManager();
         MediaServerVoService mediaServerService = SipService.getMediaServerService();
-        SsrcTransaction ssrcTransaction = ssrcTransactionManager.getParamOne(agentVoInfo.getAgentKey(), callId, stream,type);
+        SsrcTransaction ssrcTransaction = ssrcTransactionManager.getParamOne(agentVoInfo.getAgentKey(), callId, stream,typeName);
         if(ssrcTransaction == null){
             log.info("[视频流停止]未找到视频流信息，设备：{}, 流ID: {}", agentVoInfo.getDeviceId(), stream);
             if(errorEvent != null){

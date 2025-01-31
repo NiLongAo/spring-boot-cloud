@@ -39,14 +39,14 @@ public class InviteStreamManager {
     private final Map<String, List<InviteErrorCallback<Object>>> inviteErrorCallbackMap = new ConcurrentHashMap<>();
 
     public InviteInfo updateInviteInfoForSSRC(InviteInfo inviteInfo, String ssrc){
-        InviteInfo info = getInviteInfo(inviteInfo.getType(), inviteInfo.getAgentKey(), inviteInfo.getAudioSsrcInfo().getStream(),null);
+        InviteInfo info = getInviteInfo(inviteInfo.getTypeName(), inviteInfo.getAgentKey(), inviteInfo.getAudioSsrcInfo().getStream(),null);
         if(info == null || info.getAudioSsrcInfo() == null){
             return null;
         }
 
         removeInviteInfo(info);
         info.getAudioSsrcInfo().setSsrc(ssrc);
-        RedisUtils.set(getKey(info.getType(),info.getAgentKey(),info.getAudioSsrcInfo().getStream(),info.getAudioSsrcInfo().getSsrc()), info);
+        RedisUtils.set(getKey(info.getTypeName(),info.getAgentKey(),info.getAudioSsrcInfo().getStream(),info.getAudioSsrcInfo().getSsrc()), info);
         return info;
     }
 
@@ -60,14 +60,14 @@ public class InviteStreamManager {
 
         if (InviteSessionStatus.ready == inviteInfo.getStatus()) {
             if (inviteInfo.getAgentKey() == null
-                    || inviteInfo.getType() == null
+                    || inviteInfo.getTypeName() == null
                     || inviteInfo.getAudioSsrcInfo().getStream() == null
             ) {
                 return;
             }
             inviteInfoForUpdate = inviteInfo;
         } else {
-            InviteInfo inviteInfoInRedis = getInviteInfo(inviteInfo.getType(), inviteInfo.getAgentKey(), inviteInfo.getAudioSsrcInfo().getStream(),null);
+            InviteInfo inviteInfoInRedis = getInviteInfo(inviteInfo.getTypeName(), inviteInfo.getAgentKey(), inviteInfo.getAudioSsrcInfo().getStream(),null);
             if (inviteInfoInRedis == null) {
                 log.warn("[更新Invite信息]，未从缓存中读取到Invite信息： deviceId: {},  stream: {}", inviteInfo.getAgentKey(),  inviteInfo.getAudioSsrcInfo().getStream());
                 return;
@@ -95,12 +95,12 @@ public class InviteStreamManager {
             }
             inviteInfoForUpdate = inviteInfoInRedis;
         }
-        RedisUtils.set(getKey(inviteInfoForUpdate.getType(),inviteInfoForUpdate.getAgentKey() ,inviteInfoForUpdate.getAudioSsrcInfo().getStream(),inviteInfoForUpdate.getAudioSsrcInfo().getSsrc()), inviteInfoForUpdate);
+        RedisUtils.set(getKey(inviteInfoForUpdate.getTypeName(),inviteInfoForUpdate.getAgentKey() ,inviteInfoForUpdate.getAudioSsrcInfo().getStream(),inviteInfoForUpdate.getAudioSsrcInfo().getSsrc()), inviteInfoForUpdate);
         //RedisService.getRecordMp4Manager().put(inviteInfoForUpdate.getAudioSsrcInfo().getStream(),inviteInfoForUpdate);
     }
 
-    public InviteInfo getInviteInfo(VideoStreamType type, String agentKey,  String stream, String ssrc) {
-        List<String> scan = RedisUtils.keys(getKey(type,agentKey,stream,ssrc));
+    public InviteInfo getInviteInfo(String typeName, String agentKey,  String stream, String ssrc) {
+        List<String> scan = RedisUtils.keys(getKey(typeName,agentKey,stream,ssrc));
         if (scan.size() > 0) {
             return (InviteInfo)RedisUtils.get(scan.get(0));
         }else {
@@ -170,8 +170,8 @@ public class InviteStreamManager {
         return getInviteInfo(null, null, null,ssrc);
     }
 
-    public InviteInfo getInviteInfoByDeviceAndChannel(VideoStreamType type, String agentKey) {
-        return getInviteInfo(type, agentKey, null,null);
+    public InviteInfo getInviteInfoByDeviceAndChannel(String typeName, String agentKey) {
+        return getInviteInfo(typeName, agentKey, null,null);
     }
 
     /**
@@ -180,12 +180,12 @@ public class InviteStreamManager {
      * 历史播放 流Id规则 国标编号+通道编号+开始时间戳+结束时间戳
      * 下载 流Id规则 ssrc 的16进制 取前8位
      */
-    public InviteInfo getInviteInfoByStream(VideoStreamType type, String stream) {
-        return getInviteInfo(type, null, stream,null);
+    public InviteInfo getInviteInfoByStream(String typeName, String stream) {
+        return getInviteInfo(typeName, null, stream,null);
     }
 
-    public void removeInviteInfo(VideoStreamType type, String agentKey,  String stream) {
-        List<String> scan = RedisUtils.keys(getKey(type,agentKey,stream,null));
+    public void removeInviteInfo(String typeName, String agentKey,  String stream) {
+        List<String> scan = RedisUtils.keys(getKey(typeName,agentKey,stream,null));
         if (scan.size() > 0) {
             MediaServerVoService mediaServerService = SipService.getMediaServerService();
             for (String key : scan) {
@@ -208,22 +208,22 @@ public class InviteStreamManager {
                     RedisService.getRecordMp4Manager().del(inviteInfo.getAudioSsrcInfo().getStream());
                     String userKey = String.format("%s:%s",INVITE_DOWNLOAD_USER_PREFIX,inviteInfo.getUserId());
                     RedisUtils.setRemove(userKey,key);
-                    inviteErrorCallbackMap.remove(buildKey(type, agentKey, inviteInfo.getAudioSsrcInfo().getStream()));
+                    inviteErrorCallbackMap.remove(buildKey(typeName, agentKey, inviteInfo.getAudioSsrcInfo().getStream()));
                 }
             }
         }
     }
 
-    public void removeInviteInfoByDeviceAndChannel(VideoStreamType inviteSessionType, String agentKey) {
-        removeInviteInfo(inviteSessionType, agentKey, null);
+    public void removeInviteInfoByDeviceAndChannel(String typeName, String agentKey) {
+        removeInviteInfo(typeName, agentKey, null);
     }
 
     public void removeInviteInfo(InviteInfo inviteInfo) {
-        removeInviteInfo(inviteInfo.getType(), inviteInfo.getAgentKey(), inviteInfo.getAudioSsrcInfo().getStream());
+        removeInviteInfo(inviteInfo.getTypeName(), inviteInfo.getAgentKey(), inviteInfo.getAudioSsrcInfo().getStream());
     }
 
-    public void once(VideoStreamType type, String agentCode, String stream, InviteErrorCallback<Object> callback) {
-        String key = buildKey(type, agentCode, stream);
+    public void once(String typeName, String agentCode, String stream, InviteErrorCallback<Object> callback) {
+        String key = buildKey(typeName, agentCode, stream);
         List<InviteErrorCallback<Object>> callbacks = inviteErrorCallbackMap.get(key);
         if (callbacks == null) {
             callbacks = new CopyOnWriteArrayList<>();
@@ -232,8 +232,8 @@ public class InviteStreamManager {
         callbacks.add(callback);
     }
 
-    public void call(VideoStreamType type, String agentCode, String stream, int code, String msg, Object data) {
-        String key = buildKey(type, agentCode, stream);
+    public void call(String typeName, String agentCode, String stream, int code, String msg, Object data) {
+        String key = buildKey(typeName, agentCode, stream);
         List<InviteErrorCallback<Object>> callbacks = inviteErrorCallbackMap.get(key);
         if (callbacks == null) {
             return;
@@ -244,8 +244,8 @@ public class InviteStreamManager {
         inviteErrorCallbackMap.remove(key);
     }
 
-    private String buildKey(VideoStreamType type, String agentCode,  String stream) {
-        String key = type + ":" +  agentCode;
+    private String buildKey(String typeName, String agentCode,  String stream) {
+        String key = typeName + ":" +  agentCode;
         // 如果ssrc未null那么可以实现一个通道只能一次操作，ssrc不为null则可以支持一个通道多次invite
         if (stream != null) {
             key += (":" + stream);
@@ -254,14 +254,15 @@ public class InviteStreamManager {
     }
 
     public void clearInviteInfo(String agentKey) {
-        removeInviteInfo(VideoStreamType.CALL_VIDEO_PHONE, agentKey, null);
-        removeInviteInfo(VideoStreamType.CALL_AUDIO_PHONE, agentKey, null);
+        removeInviteInfo(VideoStreamType.CALL_VIDEO_PHONE.getCallName(), agentKey, null);
+        removeInviteInfo(VideoStreamType.CALL_AUDIO_PHONE.getCallName(), agentKey, null);
+        removeInviteInfo(VideoStreamType.CALL_VIDEO_PHONE.getPushName(), agentKey, null);
+        removeInviteInfo(VideoStreamType.CALL_AUDIO_PHONE.getCallName(), agentKey, null);
     }
 
-    public String getKey(VideoStreamType type,String agentKey,String stream,String ssrc){
-        String typeName ="*";
-        if(type != null){
-            typeName = String.valueOf(type.ordinal());
+    public String getKey(String typeName,String agentKey,String stream,String ssrc){
+        if(StringUtils.isBlank(typeName)){
+            typeName = "*";
         }
         if(StringUtils.isBlank(agentKey)){
             agentKey = "*";

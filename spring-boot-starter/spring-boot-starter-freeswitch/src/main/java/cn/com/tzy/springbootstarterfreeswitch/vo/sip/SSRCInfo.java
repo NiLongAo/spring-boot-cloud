@@ -11,6 +11,7 @@ public class SSRCInfo {
 
     private int port;
     private String ssrc;
+    private String app;
     private String stream;
 
 }

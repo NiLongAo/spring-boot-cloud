@@ -28,7 +28,7 @@ public class RecordMp4Manager {
         }
         String key = getKey(streamId);
         Map<Object, Object> data = new HashMap<>();
-        data.put("type",inviteInfo.getType().ordinal());
+        data.put("type",inviteInfo.getTypeName());
         data.put("streamInfo", JSONUtil.toJsonStr(inviteInfo.getStreamInfo()));
         RedisUtils.set(key,data,-1L);
     }

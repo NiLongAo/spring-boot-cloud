@@ -2,7 +2,6 @@ package cn.com.tzy.springbootstarterfreeswitch.client.sip.cmd;
 
 
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.SipServer;
-import cn.com.tzy.springbootstarterfreeswitch.enums.sip.VideoStreamType;
 import cn.com.tzy.springbootstarterfreeswitch.model.fs.AgentVoInfo;
 import cn.com.tzy.springbootstarterfreeswitch.redis.subscribe.media.HookEvent;
 import cn.com.tzy.springbootstarterfreeswitch.redis.subscribe.sip.message.SipSubscribeEvent;
@@ -47,7 +46,7 @@ public interface SIPCommanderForPlatform {
      * 向发起点播的上级回复bye
      * 点播时检查是否开启过
      */
-    void streamByeCmd(SipServer sipServer, AgentVoInfo agentVoInfo, String audioStream, String videoStream, String callId, VideoStreamType type, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws SipException, InvalidArgumentException, ParseException;
+    void streamByeCmd(SipServer sipServer, AgentVoInfo agentVoInfo, String audioStream, String videoStream, String callId, String typeName, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws SipException, InvalidArgumentException, ParseException;
 
     /**
      * presence 订阅、取消订阅信息

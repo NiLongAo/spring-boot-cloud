@@ -115,7 +115,7 @@ public class InviteRequestProcessor  extends AbstractSipRequestEvent implements 
             log.error("[视频语音流] agentKey : {} 未解析出 DeviceRawContent",toAgentVoInfo.getAgentKey());
             return;
         }
-        InviteInfo invite = RedisService.getInviteStreamManager().getInviteInfoByDeviceAndChannel(deviceRawContent.getVideoInfo() != null?VideoStreamType.CALL_VIDEO_PHONE:VideoStreamType.CALL_AUDIO_PHONE, toAgentVoInfo.getAgentKey());
+        InviteInfo invite = RedisService.getInviteStreamManager().getInviteInfoByDeviceAndChannel(deviceRawContent.getVideoInfo() != null?VideoStreamType.CALL_VIDEO_PHONE.getCallName():VideoStreamType.CALL_AUDIO_PHONE.getCallName(), toAgentVoInfo.getAgentKey());
         if(invite != null && StringUtils.isNotEmpty(invite.getSdp())){
             //类似 心跳认证是否继续通话中
             try {
@@ -189,7 +189,7 @@ public class InviteRequestProcessor  extends AbstractSipRequestEvent implements 
     }
     private void inviteHandle(DeviceRawContent deviceRawContent,SIPRequest request,CallIdHeader callIdHeader, AgentVoInfo agentVoInfo) throws SipException {
         //1.发送用户的视频流以及音频流
-        SendRtp sendRtp = RedisService.getSendRtpManager().querySendRTPServer(agentVoInfo.getAgentKey(), String.format("%s:%s",deviceRawContent.getVideoInfo()==null? VideoStreamType.PUSH_AUDIO_RTP_STREAM.getName():VideoStreamType.PUSH_VIDEO_RTP_STREAM.getName(), agentVoInfo.getAgentKey()), null);
+        SendRtp sendRtp = RedisService.getSendRtpManager().querySendRTPServer(agentVoInfo.getAgentKey(), String.format("%s:%s",deviceRawContent.getVideoInfo() != null? VideoStreamType.CALL_VIDEO_PHONE.getPushName():VideoStreamType.CALL_AUDIO_PHONE.getPushName(), agentVoInfo.getAgentKey()), null);
         if(sendRtp==null){
             sendErrorExceptionMessage(String.format("[视频语音流]坐席：%s,未获取 推流信息",agentVoInfo.getAgentKey()));
             return;
@@ -207,7 +207,7 @@ public class InviteRequestProcessor  extends AbstractSipRequestEvent implements 
             sendErrorExceptionMessage(String.format("[视频语音流] 流媒体[ %s ]未上线，无法发送请求",sendRtp.getMediaServerId()));
             return;
         }
-        InviteInfo invite = RedisService.getInviteStreamManager().getInviteInfoByDeviceAndChannel(deviceRawContent.getVideoInfo() != null?VideoStreamType.CALL_VIDEO_PHONE:VideoStreamType.CALL_AUDIO_PHONE, agentVoInfo.getAgentKey());
+        InviteInfo invite = RedisService.getInviteStreamManager().getInviteInfoByDeviceAndChannel(deviceRawContent.getVideoInfo() != null?VideoStreamType.CALL_VIDEO_PHONE.getCallName():VideoStreamType.CALL_AUDIO_PHONE.getCallName(), agentVoInfo.getAgentKey());
         if(invite == null){
            sendErrorExceptionMessage(String.format("[视频语音流] agentKey : %s 未获取流播放信息",agentVoInfo.getAgentKey()));
             return;

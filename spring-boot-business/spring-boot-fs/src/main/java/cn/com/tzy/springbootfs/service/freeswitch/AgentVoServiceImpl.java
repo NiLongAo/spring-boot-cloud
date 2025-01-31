@@ -83,7 +83,7 @@ public class AgentVoServiceImpl extends AgentVoService {
     public RestResult<?> pushWebRtp(VideoStreamType type,String agentKey) {
         SendRtpManager sendRtpManager = RedisService.getSendRtpManager();
         MediaHookSubscribe mediaHookSubscribe = MediaService.getMediaHookSubscribe();
-        String streamId = String.format("%s:%s",type.getName(),agentKey);
+        String streamId = String.format("%s:%s",type.getPushName(),agentKey);
         SendRtp sendRtp = sendRtpManager.querySendRTPServer(agentKey, streamId, null);
         if(sendRtp != null){
             if(StringUtils.isEmpty(sendRtp.getCallId())){
@@ -113,7 +113,7 @@ public class AgentVoServiceImpl extends AgentVoService {
                         null,
                         null,
                         null,
-                        VideoStreamType.PUSH_RTP_STREAM.getName(),
+                        VideoStreamType.RTP_STREAM.getCallName(),
                         streamId,
                        null,
                        null,
@@ -122,14 +122,14 @@ public class AgentVoServiceImpl extends AgentVoService {
                         true,
                         null))
                 .build();
-        if(type.getName().equals(VideoStreamType.PUSH_VIDEO_RTP_STREAM.getName())){
+        if(type.getPushName().equals(VideoStreamType.CALL_VIDEO_PHONE.getPushName())){
             build.setVideoInfo(SendRtp.createSendRtpInfo(
                     null,
                     null,
                     null,
                     null,
                     null,
-                    VideoStreamType.PUSH_RTP_STREAM.getName(),
+                    VideoStreamType.RTP_STREAM.getCallName(),
                     streamId,
                     null,
                     null,
@@ -143,14 +143,14 @@ public class AgentVoServiceImpl extends AgentVoService {
             sendRtpManager.deleteSendRTPServer(build.getAgentKey(), build.getPushStreamId(), build.getCallId());
             if(StringUtils.isEmpty(build.getCallId())){// 如何没有callId表示没有接收到Invite请求 则直接关闭
                 try {
-                    sipCommanderForPlatform.streamByeCmd(sipServer, agentVoInfo,null,null,build.getCallId(),type,null,null);
+                    sipCommanderForPlatform.streamByeCmd(sipServer, agentVoInfo,null,null,build.getCallId(),type.getCallName(),null,null);
                 } catch (SipException | InvalidArgumentException | ParseException e) {
                     log.error("[命令发送失败] 语音流 发送BYE: {}", e.getMessage());
                 }
             }
         });
         //开始拨打电话
-        HookKey hookKey = HookKeyFactory.onStreamChanged(VideoStreamType.PUSH_RTP_STREAM.getName(), streamId, true, "rtsp", mediaServerVo.getId());
+        HookKey hookKey = HookKeyFactory.onStreamChanged(VideoStreamType.RTP_STREAM.getCallName(), streamId, true, "rtsp", mediaServerVo.getId());
         mediaHookSubscribe.addSubscribe(hookKey,(MediaServerVo mediaServer, HookVo response)->{
             FsService.getSendAgentMessage().sendMessage(AgentCommon.SOCKET_AGENT,AgentCommon.AGENT_OUT_PUSH_PATH,build.getAgentKey(),RestResult.result(RespCode.CODE_0.getValue(),"推流接收成功",null));
             //dynamicTask.stop(streamId); // 在INVITE响应200后关闭 超时回调

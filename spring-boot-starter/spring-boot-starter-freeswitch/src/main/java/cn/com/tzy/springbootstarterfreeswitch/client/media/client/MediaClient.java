@@ -47,7 +47,7 @@ public class MediaClient {
      * @param port 流端口
      * @return
      */
-    public static SSRCInfo openRTPServer(MediaServerVo mediaServerVo, String streamId, String ssrc, boolean ssrcCheck, boolean isPlayback, Integer port, Boolean reUsePort, Integer tcpMode){
+    public static SSRCInfo openRTPServer(MediaServerVo mediaServerVo,String app ,String streamId, String ssrc, boolean ssrcCheck, boolean isPlayback, Integer port, Boolean reUsePort, Integer tcpMode){
         if(mediaServerVo == null || mediaServerVo.getId() == null){
             log.error("[openRTPServer] 失败, mediaServer == null || mediaServer.getId() == null");
             return  null;
@@ -70,7 +70,7 @@ public class MediaClient {
            rtpPort = mediaServerVo.getRtpProxyPort();
         }
 
-        return new SSRCInfo(rtpPort,ssrc,streamId);
+        return new SSRCInfo(rtpPort,ssrc,app,streamId);
     }
 
     public static StreamInfo getStreamInfo(MediaServerVo mediaServerVo, String app, String stream, String addr, String callId){

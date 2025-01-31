@@ -106,12 +106,12 @@ public class MediaHookServer {
         String token = paramMap.get("token");
         if (token == null) {
             log.info("播放鉴权失败： 缺少必要参数：token");
-            return  new NotNullMap(){{putInteger("code",401);putString("msg","Unauthorized");}};
+            return  new NotNullMap(){{putInteger("code",401);putString("msg","缺少必要参数：token");}};
         }
         boolean authentication = tokenService.authentication(token);
         if(! authentication){
             log.info("播放鉴权失败： 用户 无权限:  token={}", token);
-            return  new NotNullMap(){{putInteger("code",401);putString("msg","Unauthorized");}};
+            return  new NotNullMap(){{putInteger("code",401);putString("msg","用户 无权限");}};
         }
         ThreadUtil.execute(()->{
             if(mediaServerVo != null){
@@ -139,7 +139,7 @@ public class MediaHookServer {
         map.putInteger("mp4_max_second",0);
         boolean enableAudio = false;
         boolean enableMp4 = false;
-        if(!"rtp".equals(hookVo.getApp())){
+        if(!VideoStreamType.RTP.getCallName().equals(hookVo.getApp())){
             //是否开启鉴权
             if(videoProperties.getPushAuthority()){
                 if (hookVo.getParams() == null) {
@@ -149,27 +149,48 @@ public class MediaHookServer {
                 Map<String, String> paramMap = HttpUtil.decodeParamMap(hookVo.getParams(), CharsetUtil.CHARSET_UTF_8);
                 String token = paramMap.get("token");
                 if (token == null) {
-                    log.error("推流鉴权失败： 缺少必要参数：token");
-                    return  new NotNullMap(){{putInteger("code",401);putString("msg","Unauthorized");}};
-                }
-                boolean authentication = tokenService.authentication(token);
-                if(! authentication){
-                    log.error("推流鉴权失败： 用户 无权限:  token={}", token);
-                    return  new NotNullMap(){{putInteger("code",401);putString("msg","Unauthorized");}};
+                    if(VideoStreamType.RTP_STREAM.getCallName().equals(hookVo.getApp())){
+                        String[] split = hookVo.getStream().split(":");
+                        if(split.length < 2){
+                            log.error("推流鉴权失败： 当前流格式错误:  stream={}", hookVo.getStream());
+                            return  new NotNullMap(){{putInteger("code",401);putString("msg","当前流格式错误");}};
+                        }
+                        VideoStreamType videoStreamType = VideoStreamType.getPushName(split[0]);
+                        if(videoStreamType != null){
+                            log.error("推流鉴权失败： 缺少必要参数：token");
+                            return  new NotNullMap(){{putInteger("code",401);putString("msg","缺少必要参数：token");}};
+                        }
+                        videoStreamType = VideoStreamType.getCallName(split[0]);
+                        if(videoStreamType == null){
+                            log.error("[视频语音流]坐席：{},未获取 推流信息",split[1]);
+                            return new NotNullMap(){{putInteger("code",401);putString("msg","未获取 推流信息");}};
+                        }
+                    }else{
+                        log.error("推流鉴权失败： 缺少必要参数：token");
+                        return  new NotNullMap(){{putInteger("code",401);putString("msg","缺少必要参数：token");}};
+                    }
+                }else{
+                    boolean authentication = tokenService.authentication(token);
+                    if(! authentication){
+                        log.error("推流鉴权失败： 用户 无权限:  token={}", token);
+                        return  new NotNullMap(){{putInteger("code",401);putString("msg","用户 无权限");}};
+                    }
                 }
             }
             //检测是否符合推流条件
-            if(VideoStreamType.PUSH_RTP_STREAM.getName().equals(hookVo.getApp())){
+            if(VideoStreamType.RTP_STREAM.getCallName().equals(hookVo.getApp())){
                 enableAudio = true;
                 String[] split = hookVo.getStream().split(":");
                 if(split.length < 2){
                     log.error("推流鉴权失败： 当前流格式错误:  stream={}", hookVo.getStream());
                     return  new NotNullMap(){{putInteger("code",401);putString("msg","当前流格式错误");}};
                 }
-
-                RestResult<?> restResult = FsService.getAgentService().pushWebRtp(VideoStreamType.valueOf(split[0]),split[1]);
-                if(restResult.getCode() != RespCode.CODE_0.getValue()){
-                    return  new NotNullMap(){{putInteger("code",401);putString("msg",restResult.getMessage());}};
+                VideoStreamType videoStreamType = VideoStreamType.getPushName(split[0]);
+                if(videoStreamType != null){
+                    RestResult<?> restResult = FsService.getAgentService().pushWebRtp(videoStreamType,split[1]);
+                    if(restResult.getCode() != RespCode.CODE_0.getValue()){
+                        return  new NotNullMap(){{putInteger("code",401);putString("msg",restResult.getMessage());}};
+                    }
                 }
             }else {
                 log.info("推流鉴权失败： 当前流不支持接收:  app={}", hookVo.getApp());
@@ -194,7 +215,7 @@ public class MediaHookServer {
             enableAudio = true;
             enableMp4 = false;
             // 如果是录像下载就设置视频间隔十秒
-            if(ssrcTransaction.getType() == VideoStreamType.DOWNLOAD){
+            if(VideoStreamType.DOWNLOAD.getCallName().equals(ssrcTransaction.getTypeName())){
                 enableMp4 = true;
                 map.putInteger("mp4_max_second",10);
             }
@@ -228,7 +249,6 @@ public class MediaHookServer {
         InviteStreamManager inviteStreamManager = RedisService.getInviteStreamManager();
         StreamChangedManager streamChangedManager = RedisService.getStreamChangedManager();
         DeferredResultHolder deferredResultHolder = SpringUtil.getBean(DeferredResultHolder.class);
-        SsrcTransactionManager ssrcTransactionManager = RedisService.getSsrcTransactionManager();
         AgentVoService agentVoService = FsService.getAgentService();
         if(hookVo.isRegist()){
             log.info("[ZLM HOOK] 流注册, {}->{}->{}/{}", hookVo.getMediaServerId(), hookVo.getSchema(), hookVo.getApp(), hookVo.getStream());
@@ -251,9 +271,9 @@ public class MediaHookServer {
                     streamChangedManager.remove(hookVo);
                 }
                 mediaHookSubscribe.sendNotify(MediaHookVo.builder().type(HookType.on_stream_changed).onAll(ConstEnum.Flag.NO.getValue()).mediaServerVo(mediaServerVo).hookVo(hookVo).build());
-                if("rtp".equals(hookVo.getApp())){
+                if(VideoStreamType.RTP.getCallName().equals(hookVo.getApp())){
                     InviteInfo inviteInfo = inviteStreamManager.getInviteInfoByStream(null, hookVo.getStream());
-                    if(inviteInfo != null && (inviteInfo.getType() == VideoStreamType.CALL_AUDIO_PHONE || inviteInfo.getType() == VideoStreamType.CALL_VIDEO_PHONE)){
+                    if(inviteInfo != null && (inviteInfo.getTypeName().equals(VideoStreamType.CALL_AUDIO_PHONE.getCallName()) || inviteInfo.getTypeName().equals(VideoStreamType.CALL_VIDEO_PHONE.getCallName()))){
                         if(hookVo.isRegist()){
                             agentVoService.startPlay(inviteInfo.getAgentKey(),inviteInfo.getAudioSsrcInfo().getStream());
                         }else {
@@ -264,7 +284,7 @@ public class MediaHookServer {
                             deferredResultHolder.invokeAllResult(key, RestResult.result(RespCode.CODE_0.getValue(),"停止点播成功"));
                         }
                     }
-                }else if(VideoStreamType.PUSH_RTP_STREAM.getName().equals(hookVo.getApp())){
+                }else if(VideoStreamType.RTP_STREAM.getCallName().equals(hookVo.getApp())){
                     log.info("[ZLM HOOK] 视频 | 语音推流, {}->{}->{}/{}", hookVo.getMediaServerId(), hookVo.getSchema(), hookVo.getApp(), hookVo.getStream());
                 }else {
                     log.error("[ZLM HOOK] 未知流，请查询接口, {}->{}->{}/{}", hookVo.getMediaServerId(), hookVo.getSchema(), hookVo.getApp(), hookVo.getStream());
@@ -312,7 +332,7 @@ public class MediaHookServer {
         NotNullMap map = new NotNullMap();
         map.putInteger("code",0);
         map.putString("msg","success");
-        if("rtp".equals(hookVo.getApp())){
+        if(VideoStreamType.RTP.getCallName().equals(hookVo.getApp())){
             map.put("close",videoProperties.getStreamOnDemand());
             //获取国标流 ， 点播/录像回放/录像下载
             //点播
@@ -320,7 +340,7 @@ public class MediaHookServer {
             log.info("无人观看流时 {}，{}",hookVo.getStream(), ObjectUtils.isEmpty(inviteInfo)?"未发现 inviteInfo":"发现 inviteInfo");
             if(inviteInfo != null){
                 // 录像下载
-                if (inviteInfo.getType() == VideoStreamType.DOWNLOAD) {
+                if (inviteInfo.getTypeName().equals(VideoStreamType.DOWNLOAD.getCallName())) {
                     map.put("close", false);
                     deferredResultHolder.invokeResult(key,uuid,map);
                     return deferredResult;
@@ -406,7 +426,7 @@ public class MediaHookServer {
         SendRtpManager sendRtpManager = RedisService.getSendRtpManager();
         SsrcConfigManager ssrcConfigManager = RedisService.getSsrcConfigManager();
         AgentInfoManager agentInfoManager = RedisService.getAgentInfoManager();
-        if("rtp".equals(hookVo.getApp())){
+        if(VideoStreamType.RTP.getCallName().equals(hookVo.getApp())){
             List<SendRtp> sendRtpList = sendRtpManager.querySendRTPServerByStream(hookVo.getStream());
             for (SendRtp sendRtp : sendRtpList) {
                 sendRtpManager.deleteSendRTPServer(sendRtp.getAgentKey(),sendRtp.getPushStreamId(),sendRtp.getCallId());

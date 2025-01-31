@@ -1,7 +1,6 @@
 package cn.com.tzy.springbootstarterfreeswitch.client.sip.cmd;
 
 import cn.com.tzy.springbootstarterfreeswitch.client.sip.SipServer;
-import cn.com.tzy.springbootstarterfreeswitch.enums.sip.VideoStreamType;
 import cn.com.tzy.springbootstarterfreeswitch.exception.SsrcTransactionNotFoundException;
 import cn.com.tzy.springbootstarterfreeswitch.model.fs.AgentVoInfo;
 import cn.com.tzy.springbootstarterfreeswitch.redis.subscribe.sip.message.SipSubscribeEvent;
@@ -20,7 +19,7 @@ public interface SIPCommander {
     /**
      * 视频流停止
      */
-    void streamByeCmd(SipServer sipServer, AgentVoInfo deviceVo, String stream, String callId, VideoStreamType type, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws InvalidArgumentException, SipException, ParseException, SsrcTransactionNotFoundException;
+    void streamByeCmd(SipServer sipServer, AgentVoInfo deviceVo, String stream, String callId, String typeName, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws InvalidArgumentException, SipException, ParseException, SsrcTransactionNotFoundException;
 
     void sendAckMessage(SipServer sipServer, SIPResponse response, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws InvalidArgumentException, SipException, ParseException, SdpParseException;
 }

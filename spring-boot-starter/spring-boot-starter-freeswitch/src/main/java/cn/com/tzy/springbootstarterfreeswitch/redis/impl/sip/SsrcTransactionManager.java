@@ -1,7 +1,6 @@
 package cn.com.tzy.springbootstarterfreeswitch.redis.impl.sip;
 
 import cn.com.tzy.springbootstarterfreeswitch.common.sip.SipConstant;
-import cn.com.tzy.springbootstarterfreeswitch.enums.sip.VideoStreamType;
 import cn.com.tzy.springbootstarterfreeswitch.vo.sip.SipTransactionInfo;
 import cn.com.tzy.springbootstarterfreeswitch.vo.sip.SsrcTransaction;
 import cn.com.tzy.springbootstarterredis.utils.RedisUtils;
@@ -30,7 +29,7 @@ public class SsrcTransactionManager {
      * @param mediaServerId 所使用的流媒体ID
      * @param response 回复
      */
-    public void put(String agentKey, String callId, String app, String stream, String ssrc, String mediaServerId, SIPMessage response, VideoStreamType type){
+    public void put(String agentKey, String callId, String app, String stream, String ssrc, String mediaServerId, SIPMessage response, String typeName){
         SsrcTransaction ssrcTransaction = new SsrcTransaction();
         ssrcTransaction.setAgentKey(agentKey);
         ssrcTransaction.setStream(app);
@@ -39,15 +38,15 @@ public class SsrcTransactionManager {
         ssrcTransaction.setCallId(callId);
         ssrcTransaction.setSsrc(ssrc);
         ssrcTransaction.setMediaServerId(mediaServerId);
-        ssrcTransaction.setType(type);
-        RedisUtils.set(getKey(agentKey,stream,type,callId), ssrcTransaction);
+        ssrcTransaction.setTypeName(typeName);
+        RedisUtils.set(getKey(agentKey,stream,typeName,callId), ssrcTransaction);
     }
 
     public void put(SsrcTransaction ssrcTransaction){
-        RedisUtils.set(getKey(ssrcTransaction.getAgentKey(),ssrcTransaction.getStream(),ssrcTransaction.getType(),ssrcTransaction.getCallId()), ssrcTransaction);
+        RedisUtils.set(getKey(ssrcTransaction.getAgentKey(),ssrcTransaction.getStream(),ssrcTransaction.getTypeName(),ssrcTransaction.getCallId()), ssrcTransaction);
     }
 
-    public SsrcTransaction getParamOne(String agentKey,  String callId, String stream,VideoStreamType type){
+    public SsrcTransaction getParamOne(String agentKey,  String callId, String stream,String type){
         List<String> scanResult = RedisUtils.keys(getKey(agentKey,stream,type,callId));
         if (scanResult.size() == 0) {
             return null;
@@ -55,8 +54,8 @@ public class SsrcTransactionManager {
         return (SsrcTransaction)RedisUtils.get(scanResult.get(0));
     }
 
-    public List<SsrcTransaction> getParamAll(String agentKey,  String callId, String stream,VideoStreamType type){
-        List<String> scanResult = RedisUtils.keys(getKey(agentKey,stream,type,callId));
+    public List<SsrcTransaction> getParamAll(String agentKey,  String callId, String stream,String typeName){
+        List<String> scanResult = RedisUtils.keys(getKey(agentKey,stream,typeName,callId));
         if (scanResult.size() == 0) {
             return null;
         }
@@ -70,12 +69,12 @@ public class SsrcTransactionManager {
         this.remove(agentKey,stream,null,null);
     }
 
-    public void remove(String agentKey, String stream,VideoStreamType type) {
-        this.remove(agentKey,stream,null,type);
+    public void remove(String agentKey, String stream,String typeName) {
+        this.remove(agentKey,stream,null,typeName);
     }
 
-    public void remove(String agentKey, String stream,String callId,VideoStreamType type) {
-        List<String> scan = RedisUtils.keys(getKey(agentKey,stream,type,callId));
+    public void remove(String agentKey, String stream,String callId,String typeName) {
+        List<String> scan = RedisUtils.keys(getKey(agentKey,stream,typeName,callId));
         if (scan.size() > 0) {
             for (String keyStr : scan) {
                 RedisUtils.del(keyStr);
@@ -94,7 +93,7 @@ public class SsrcTransactionManager {
         return result;
     }
 
-    private String getKey(String agentKey,String stream,VideoStreamType type ,String callId){
+    private String getKey(String agentKey,String stream,String typeName ,String callId){
         if(StringUtils.isEmpty(agentKey)){
             agentKey ="*";
         }
@@ -104,8 +103,10 @@ public class SsrcTransactionManager {
         if(StringUtils.isEmpty(callId)){
             callId ="*";
         }
-        String typeStr = (type != null?type.getName():"*");
-        return String.format("%s:%s:%s:%s:%s",MEDIA_TRANSACTION_USED_PREFIX,agentKey,stream,typeStr,callId);
+        if(StringUtils.isEmpty(typeName)){
+            typeName ="*";
+        }
+        return String.format("%s:%s:%s:%s:%s",MEDIA_TRANSACTION_USED_PREFIX,agentKey,stream,typeName,callId);
     }
 
 }

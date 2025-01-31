@@ -198,10 +198,10 @@ public class SIPCommanderFroPlatformImpl implements SIPCommanderForPlatform {
     }
 
     @Override
-    public void streamByeCmd(SipServer sipServer, AgentVoInfo agentVoInfo, String audioStream, String videoStream, String callId, VideoStreamType type, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws SipException, InvalidArgumentException, ParseException {
-        SsrcTransaction ssrcTransaction = this.streamByeCmd(agentVoInfo,audioStream,callId,type,errorEvent);
+    public void streamByeCmd(SipServer sipServer, AgentVoInfo agentVoInfo, String audioStream, String videoStream, String callId, String typeName, SipSubscribeEvent okEvent, SipSubscribeEvent errorEvent) throws SipException, InvalidArgumentException, ParseException {
+        SsrcTransaction ssrcTransaction = this.streamByeCmd(agentVoInfo,audioStream,callId,typeName,errorEvent);
         if(StringUtils.isNotEmpty(videoStream)){
-            ssrcTransaction = streamByeCmd(agentVoInfo,videoStream,callId,type,errorEvent);
+            ssrcTransaction = streamByeCmd(agentVoInfo,videoStream,callId,typeName,errorEvent);
         }
         if(ssrcTransaction == null){
             return;
@@ -232,10 +232,10 @@ public class SIPCommanderFroPlatformImpl implements SIPCommanderForPlatform {
         });
     }
 
-    private SsrcTransaction streamByeCmd(AgentVoInfo agentVoInfo, String stream, String callId, VideoStreamType type, SipSubscribeEvent errorEvent){
+    private SsrcTransaction streamByeCmd(AgentVoInfo agentVoInfo, String stream, String callId, String typeName, SipSubscribeEvent errorEvent){
         SsrcTransactionManager ssrcTransactionManager = RedisService.getSsrcTransactionManager();
         MediaServerVoService mediaServerService = SipService.getMediaServerService();
-        SsrcTransaction ssrcTransaction = ssrcTransactionManager.getParamOne(agentVoInfo.getAgentKey(), callId, stream,type);
+        SsrcTransaction ssrcTransaction = ssrcTransactionManager.getParamOne(agentVoInfo.getAgentKey(), callId, stream,typeName);
         if(ssrcTransaction == null){
             log.info("[视频流停止]未找到视频流信息，坐席：{}, 流 callId: {}, 流ID: {}", agentVoInfo.getAgentKey(),callId, stream);
             if(errorEvent != null){
@@ -322,14 +322,14 @@ public class SIPCommanderFroPlatformImpl implements SIPCommanderForPlatform {
         }else if(StringUtils.isNotEmpty(callBackId)){//在对方拨打时回接时 触发
             //添加流变动回调
             if(hookEvent != null){
-                HookKey audioHookKey = HookKeyFactory.onStreamChanged("rtp", audioSsrcInfo.getStream(), true, "rtsp", mediaServerVo.getId());
+                HookKey audioHookKey = HookKeyFactory.onStreamChanged(audioSsrcInfo.getApp(), audioSsrcInfo.getStream(), true, "rtsp", mediaServerVo.getId());
                 mediaHookSubscribe.addSubscribe(audioHookKey,(MediaServerVo mediaServer, HookVo res)->{
                     res.setCallId(callBackId);
                     hookEvent.response(mediaServer,res);
                     mediaHookSubscribe.removeSubscribe(audioHookKey);
                 });
                 if(videoSsrcInfo != null){
-                    HookKey videoHookKey = HookKeyFactory.onStreamChanged("rtp", videoSsrcInfo.getStream(), true, "rtsp", mediaServerVo.getId());
+                    HookKey videoHookKey = HookKeyFactory.onStreamChanged(videoSsrcInfo.getApp(), videoSsrcInfo.getStream(), true, "rtsp", mediaServerVo.getId());
                     mediaHookSubscribe.addSubscribe(videoHookKey,(MediaServerVo mediaServer, HookVo res)->{
                         res.setCallId(callBackId);
                         hookEvent.response(mediaServer,res);
@@ -338,9 +338,9 @@ public class SIPCommanderFroPlatformImpl implements SIPCommanderForPlatform {
                 }
             }
             //提前缓存，后续推流时需要
-            ssrcTransactionManager.put(agentVoInfo.getAgentKey(),callBackId,"rtp",audioSsrcInfo.getStream(), audioSsrcInfo.getSsrc(), mediaServerVo.getId(),null, VideoStreamType.CALL_AUDIO_PHONE);
+            ssrcTransactionManager.put(agentVoInfo.getAgentKey(),callBackId,audioSsrcInfo.getApp(),audioSsrcInfo.getStream(), audioSsrcInfo.getSsrc(), mediaServerVo.getId(),null, VideoStreamType.CALL_AUDIO_PHONE.getCallName());
             if(videoSsrcInfo != null){
-                ssrcTransactionManager.put(agentVoInfo.getAgentKey(),callBackId,"rtp",videoSsrcInfo.getStream(), videoSsrcInfo.getSsrc(), mediaServerVo.getId(),null, VideoStreamType.CALL_VIDEO_PHONE);
+                ssrcTransactionManager.put(agentVoInfo.getAgentKey(),callBackId,videoSsrcInfo.getApp(),videoSsrcInfo.getStream(), videoSsrcInfo.getSsrc(), mediaServerVo.getId(),null, VideoStreamType.CALL_VIDEO_PHONE.getCallName());
             }
             SipSendMessage.sendMessage(sipServer,agentVoInfo, callBackId,(handle)->{
                 //触发 INVITE 请求回调，开始继续下步流程
@@ -356,9 +356,9 @@ public class SIPCommanderFroPlatformImpl implements SIPCommanderForPlatform {
                     message = (SIPMessage)event.getRequest();
                 }
                 // 这里为例避免一个通道的点播多次点播只有一个callID这个参数使用一个固定值
-                ssrcTransactionManager.put(agentVoInfo.getAgentKey(),callBackId,"rtp",audioSsrcInfo.getStream(), audioSsrcInfo.getSsrc(), mediaServerVo.getId(),message, VideoStreamType.CALL_AUDIO_PHONE);
+                ssrcTransactionManager.put(agentVoInfo.getAgentKey(),callBackId,audioSsrcInfo.getApp(),audioSsrcInfo.getStream(), audioSsrcInfo.getSsrc(), mediaServerVo.getId(),message, VideoStreamType.CALL_AUDIO_PHONE.getCallName());
                 if(videoSsrcInfo != null){
-                    ssrcTransactionManager.put(agentVoInfo.getAgentKey(),callBackId,"rtp",videoSsrcInfo.getStream(), videoSsrcInfo.getSsrc(), mediaServerVo.getId(),message, VideoStreamType.CALL_VIDEO_PHONE);
+                    ssrcTransactionManager.put(agentVoInfo.getAgentKey(),callBackId,videoSsrcInfo.getApp(),videoSsrcInfo.getStream(), videoSsrcInfo.getSsrc(), mediaServerVo.getId(),message, VideoStreamType.CALL_VIDEO_PHONE.getCallName());
                 }
                 okEvent.response(ok);
             },(error)->{
@@ -395,14 +395,14 @@ public class SIPCommanderFroPlatformImpl implements SIPCommanderForPlatform {
             String callId = request.getCallId().getCallId();
             //添加流变动回调
             if(hookEvent != null){
-                HookKey audioHookKey = HookKeyFactory.onStreamChanged("rtp", audioSsrcInfo.getStream(), true, "rtsp", mediaServerVo.getId());
+                HookKey audioHookKey = HookKeyFactory.onStreamChanged(audioSsrcInfo.getApp(), audioSsrcInfo.getStream(), true, "rtsp", mediaServerVo.getId());
                 mediaHookSubscribe.addSubscribe(audioHookKey,(MediaServerVo mediaServer, HookVo res)->{
                     res.setCallId(callId);
                     hookEvent.response(mediaServer,res);
                     mediaHookSubscribe.removeSubscribe(audioHookKey);
                 });
                 if(videoSsrcInfo != null){
-                    HookKey videoHookKey = HookKeyFactory.onStreamChanged("rtp", videoSsrcInfo.getStream(), true, "rtsp", mediaServerVo.getId());
+                    HookKey videoHookKey = HookKeyFactory.onStreamChanged(videoSsrcInfo.getApp(), videoSsrcInfo.getStream(), true, "rtsp", mediaServerVo.getId());
                     mediaHookSubscribe.addSubscribe(videoHookKey,(MediaServerVo mediaServer, HookVo res)->{
                         res.setCallId(callId);
                         hookEvent.response(mediaServer,res);
@@ -411,16 +411,16 @@ public class SIPCommanderFroPlatformImpl implements SIPCommanderForPlatform {
                 }
             }
             //提前缓存，后续推流时需要
-            ssrcTransactionManager.put(agentVoInfo.getAgentKey(),callId,"rtp",audioSsrcInfo.getStream(), audioSsrcInfo.getSsrc(), mediaServerVo.getId(),null, VideoStreamType.CALL_AUDIO_PHONE);
+            ssrcTransactionManager.put(agentVoInfo.getAgentKey(),callId,audioSsrcInfo.getApp(),audioSsrcInfo.getStream(), audioSsrcInfo.getSsrc(), mediaServerVo.getId(),null, VideoStreamType.CALL_AUDIO_PHONE.getCallName());
             if(videoSsrcInfo != null){
-                ssrcTransactionManager.put(agentVoInfo.getAgentKey(),callId,"rtp",videoSsrcInfo.getStream(), videoSsrcInfo.getSsrc(), mediaServerVo.getId(),null, VideoStreamType.CALL_VIDEO_PHONE);
+                ssrcTransactionManager.put(agentVoInfo.getAgentKey(),callId,videoSsrcInfo.getApp(),videoSsrcInfo.getStream(), videoSsrcInfo.getSsrc(), mediaServerVo.getId(),null, VideoStreamType.CALL_VIDEO_PHONE.getCallName());
             }
             SipSendMessage.sendMessage(sipServer,agentVoInfo, request,(ok)->{
                 ResponseEvent event = (ResponseEvent) ok.getEvent();
                 // 这里为例避免一个通道的点播多次点播只有一个callID这个参数使用一个固定值
-                ssrcTransactionManager.put(agentVoInfo.getAgentKey(),callId,"rtp",audioSsrcInfo.getStream(), audioSsrcInfo.getSsrc(), mediaServerVo.getId(),(SIPMessage) event.getResponse(), VideoStreamType.CALL_AUDIO_PHONE);
+                ssrcTransactionManager.put(agentVoInfo.getAgentKey(),callId,audioSsrcInfo.getApp(),audioSsrcInfo.getStream(), audioSsrcInfo.getSsrc(), mediaServerVo.getId(),(SIPMessage) event.getResponse(), VideoStreamType.CALL_AUDIO_PHONE.getCallName());
                 if(videoSsrcInfo != null){
-                    ssrcTransactionManager.put(agentVoInfo.getAgentKey(),callId,"rtp",videoSsrcInfo.getStream(), videoSsrcInfo.getSsrc(), mediaServerVo.getId(),(SIPMessage) event.getResponse(), VideoStreamType.CALL_VIDEO_PHONE);
+                    ssrcTransactionManager.put(agentVoInfo.getAgentKey(),callId,audioSsrcInfo.getApp(),videoSsrcInfo.getStream(), videoSsrcInfo.getSsrc(), mediaServerVo.getId(),(SIPMessage) event.getResponse(), VideoStreamType.CALL_VIDEO_PHONE.getCallName());
                 }
                 okEvent.response(ok);
             },(error)->{

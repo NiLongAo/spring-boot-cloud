@@ -55,41 +55,41 @@ public class InviteResponseProcessor extends AbstractSipResponseEvent {
     @Override
     public void process(ResponseEvent evt) {
         try {
-            SIPResponse response = (SIPResponse)evt.getResponse();
+            SIPResponse response = (SIPResponse) evt.getResponse();
             int statusCode = response.getStatusCode();
             // 未授权
-            if(statusCode == Response.PROXY_AUTHENTICATION_REQUIRED){
+            if (statusCode == Response.PROXY_AUTHENTICATION_REQUIRED) {
                 String callId = response.getCallId().getCallId();
-                ProxyAuthenticateHeader header = (ProxyAuthenticateHeader)response.getHeader(ProxyAuthenticateHeader.NAME);
-                if(header == null){
-                    log.error("[请求拨打电话 ]，未获取认证参数 callId: {}",callId);
+                ProxyAuthenticateHeader header = (ProxyAuthenticateHeader) response.getHeader(ProxyAuthenticateHeader.NAME);
+                if (header == null) {
+                    log.error("[请求拨打电话 ]，未获取认证参数 callId: {}", callId);
                     return;
                 }
                 SIPRequest sipRequest = RedisService.getAgentInfoManager().getCallPhone(callId);
-                if(sipRequest == null){
-                    log.error("[请求拨打电话 错误 ]，未获取缓存请求值 callId: {}",callId);
+                if (sipRequest == null) {
+                    log.error("[请求拨打电话 错误 ]，未获取缓存请求值 callId: {}", callId);
                     return;
                 }
                 String userId = SipUtils.getUserIdFromHeader(sipRequest);
                 AgentVoInfo agentVoInfo = RedisService.getAgentInfoManager().getSip(userId);
-                if(agentVoInfo == null){
-                    log.error("[请求拨打电话 错误 ]，未获取客服信息 agentSip: {}",callId);
+                if (agentVoInfo == null) {
+                    log.error("[请求拨打电话 错误 ]，未获取客服信息 agentSip: {}", callId);
                     return;
                 }
-                sipCommanderForPlatform.callPhone(sipServer,agentVoInfo,header,sipRequest,response);
+                sipCommanderForPlatform.callPhone(sipServer, agentVoInfo, header, sipRequest, response);
                 return;
-            } else if(statusCode != Response.OK){
-                log.error("[INVITE响应 状态码错误] statusCode: {}",statusCode);
+            } else if (statusCode != Response.OK) {
+                log.error("[INVITE响应 状态码错误] statusCode: {}", statusCode);
                 return;
             }
-            sipCommander.sendAckMessage(sipServer,response,null,error->{
-                log.info("[请求拨打电话回复ACK]，异常: {}",error.getMsg());
+            sipCommander.sendAckMessage(sipServer, response, null, error -> {
+                log.info("[请求拨打电话回复ACK]，异常: {}", error.getMsg());
             });
             //向对方推送流
             String agentSip = SipUtils.getUserIdFromHeader(response.getFromHeader());
             AgentVoInfo agentVoInfo = RedisService.getAgentInfoManager().getSip(agentSip);
-            if(agentVoInfo == null){
-                log.error("[INVITE响应]坐席Sip：{},未上线",agentSip);
+            if (agentVoInfo == null) {
+                log.error("[INVITE响应]坐席Sip：{},未上线", agentSip);
                 return;
             }
             String agentKey = agentVoInfo.getAgentKey();
@@ -97,39 +97,39 @@ public class InviteResponseProcessor extends AbstractSipResponseEvent {
             // 成功响应
             MediaServerVoService mediaServerService = SipService.getMediaServerService();
             DeviceRawContent deviceRawContent = SipUtils.handleDeviceRawContent(response);
-            if(deviceRawContent == null){
-                log.error("[视频语音流] agentKey : {} 未解析出 DeviceRawContent",agentKey);
+            if (deviceRawContent == null) {
+                log.error("[视频语音流] agentKey : {} 未解析出 DeviceRawContent", agentKey);
                 return;
             }
-            SendRtp sendRtp = RedisService.getSendRtpManager().querySendRTPServer(agentKey, String.format("%s:%s",deviceRawContent.getVideoInfo()==null?VideoStreamType.PUSH_AUDIO_RTP_STREAM.getName():VideoStreamType.PUSH_VIDEO_RTP_STREAM.getName(), agentKey), null);
-            if(sendRtp==null){
-                log.error("[视频语音流]坐席：{},未获取 推流信息",agentKey);
+            SendRtp sendRtp = RedisService.getSendRtpManager().querySendRTPServer(agentKey, String.format("%s:%s", deviceRawContent.getVideoInfo() != null ? VideoStreamType.CALL_VIDEO_PHONE.getPushName() : VideoStreamType.CALL_AUDIO_PHONE.getPushName(), agentKey), null);
+            if (sendRtp == null) {
+                log.error("[视频语音流]坐席：{},未获取 推流信息", agentKey);
                 return;
-            }else if(StringUtils.isNotEmpty(sendRtp.getCallId())){
+            } else if (StringUtils.isNotEmpty(sendRtp.getCallId())) {
                 //此处是为了防止消息未处理完，在发送过来200请求，过滤掉
-                log.error("[视频语音流] agentKey：{}，已收到200消息正在处理ACK。。。。。",agentKey);
+                log.error("[视频语音流] agentKey：{}，已收到200消息正在处理ACK。。。。。", agentKey);
                 return;
             }
-            RedisService.getSendRtpManager().deleteSendRTPServer(sendRtp.getAgentKey(),sendRtp.getPushStreamId(),sendRtp.getCallId());
+            RedisService.getSendRtpManager().deleteSendRTPServer(sendRtp.getAgentKey(), sendRtp.getPushStreamId(), sendRtp.getCallId());
             sendRtp.setCallId(callId);
             //关闭延迟超时
             dynamicTask.stop(sendRtp.getPushStreamId());
             MediaServerVo mediaServerVo = mediaServerService.findOnLineMediaServerId(sendRtp.getMediaServerId());
-            if(mediaServerVo == null){
-                log.error("[视频语音流] 流媒体[ {} ]未上线，无法发送请求",sendRtp.getMediaServerId());
+            if (mediaServerVo == null) {
+                log.error("[视频语音流] 流媒体[ {} ]未上线，无法发送请求", sendRtp.getMediaServerId());
                 return;
             }
-            InviteInfo invite = RedisService.getInviteStreamManager().getInviteInfoByDeviceAndChannel(deviceRawContent.getVideoInfo() != null?VideoStreamType.CALL_VIDEO_PHONE:VideoStreamType.CALL_AUDIO_PHONE, agentKey);
-            if(invite == null){
-                log.error("[视频语音流] agentKey : {} 未获取流播放信息",agentKey);
+            InviteInfo invite = RedisService.getInviteStreamManager().getInviteInfoByDeviceAndChannel(deviceRawContent.getVideoInfo() != null ? VideoStreamType.CALL_VIDEO_PHONE.getCallName() : VideoStreamType.CALL_AUDIO_PHONE.getCallName(), agentKey);
+            if (invite == null) {
+                log.error("[视频语音流] agentKey : {} 未获取流播放信息", agentKey);
                 return;
             }
-            if(deviceRawContent.getAudioInfo() != null){
+            if (deviceRawContent.getAudioInfo() != null) {
                 //关闭接收流端口，在发送流中开通此端口，然后接收流也可以使用此端口，保证收发流统一端口
-                MediaClient.closeRtpServer(mediaServerVo,invite.getAudioSsrcInfo().getStream());
+                MediaClient.closeRtpServer(mediaServerVo, invite.getAudioSsrcInfo().getStream());
 
                 SendRtp.SendRtpInfo audioInfo = sendRtp.getAudioInfo();
-                audioInfo =SendRtp.createSendRtpInfo(
+                audioInfo = SendRtp.createSendRtpInfo(
                         deviceRawContent.getAudioInfo().getSessionName(),
                         deviceRawContent.getAudioInfo().getAddressStr(),
                         deviceRawContent.getAudioInfo().getPort(),
@@ -157,12 +157,12 @@ public class InviteResponseProcessor extends AbstractSipResponseEvent {
                     mediaHookSubscribe.removeSubscribe(hookKey);
                 }
             }
-            if(deviceRawContent.getVideoInfo() != null){
+            if (deviceRawContent.getVideoInfo() != null) {
                 //关闭接收流端口，在发送流中开通此端口，然后接收流也可以使用此端口，保证收发流统一端口
-                MediaClient.closeRtpServer(mediaServerVo,invite.getVideoSsrcInfo().getStream());
+                MediaClient.closeRtpServer(mediaServerVo, invite.getVideoSsrcInfo().getStream());
 
                 SendRtp.SendRtpInfo videoInfo = sendRtp.getVideoInfo();
-                videoInfo =SendRtp.createSendRtpInfo(
+                videoInfo = SendRtp.createSendRtpInfo(
                         deviceRawContent.getVideoInfo().getSessionName(),
                         deviceRawContent.getVideoInfo().getAddressStr(),
                         deviceRawContent.getVideoInfo().getPort(),
@@ -190,27 +190,27 @@ public class InviteResponseProcessor extends AbstractSipResponseEvent {
                     mediaHookSubscribe.removeSubscribe(hookKey);
                 }
             }
-            MediaRestResult restResult  = MediaClient.startSendRtp(
+            MediaRestResult restResult = MediaClient.startSendRtp(
                     mediaServerVo,
                     sendRtp
             );
-            startSendRtpStreamHand(sendRtp,agentVoInfo,restResult);
+            startSendRtpStreamHand(sendRtp, agentVoInfo, restResult);
             RedisService.getSendRtpManager().put(sendRtp);
-        } catch (Exception e){
-            log.error("[点播回复ACK]，消息处理异常：", e );
+        } catch (Exception e) {
+            log.error("[点播回复ACK]，消息处理异常：", e);
         }
     }
 
     private void startSendRtpStreamHand(SendRtp sendRtpItem, AgentVoInfo agentVoInfo, MediaRestResult restResult) {
         if (restResult == null || restResult.getCode() != RespCode.CODE_0.getValue()) {
-            if(restResult == null){
+            if (restResult == null) {
                 log.error("RTP推流失败: 请检查ZLM服务");
-            }else {
-                log.error("RTP推流失败: {}, 参数：{}",restResult.getMsg(), JSONUtil.toJsonPrettyStr(sendRtpItem));
+            } else {
+                log.error("RTP推流失败: {}, 参数：{}", restResult.getMsg(), JSONUtil.toJsonPrettyStr(sendRtpItem));
             }
             // 向上级平台
             try {
-                sipCommanderForPlatform.streamByeCmd(sipServer, agentVoInfo,sendRtpItem,null,null);
+                sipCommanderForPlatform.streamByeCmd(sipServer, agentVoInfo, sendRtpItem, null, null);
             } catch (SipException | InvalidArgumentException | ParseException e) {
                 log.error("[命令发送失败] 国标级联 发送BYE: {}", e.getMessage());
             }

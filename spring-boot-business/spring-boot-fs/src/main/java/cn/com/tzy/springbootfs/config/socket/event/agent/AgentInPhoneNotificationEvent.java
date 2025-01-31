@@ -94,7 +94,7 @@ public class AgentInPhoneNotificationEvent implements EventListener<AgentInPhone
             return;
         }
         //拨打电话
-        agentService.callPhone(data.getOnVideo() == ConstEnum.Flag.YES.getValue() ? VideoStreamType.CALL_VIDEO_PHONE :VideoStreamType.CALL_AUDIO_PHONE,sipServer,mediaServerVo,agentVoInfo,null,null,data.getCallId(),(code, msg, vo)->{
+        agentService.callPhone(data.getOnVideo() == ConstEnum.Flag.YES.getValue() ? VideoStreamType.CALL_VIDEO_PHONE.getCallName() :VideoStreamType.CALL_AUDIO_PHONE.getCallName(),sipServer,mediaServerVo,agentVoInfo,null,null,data.getCallId(),(code, msg, vo)->{
             client.sendEvent(AgentCommon.AGENT_OUT_CALL_PHONE,RestResult.result(code,msg,vo));
             if(code != RespCode.CODE_0.getValue()){
                 //触发 INVITE 请求回调，开始继续下步流程
