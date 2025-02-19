@@ -54,6 +54,8 @@
         <module>spring-boot-starter-netty</module>
         <!--整合 freeswitch 通话中心相关功能-->
         <module>spring-boot-starter-freeswitch</module>
+        <!--整合 支付 相关功能-->
+        <module>spring-boot-starter-pay</module>
     </modules>
 
     <dependencies>

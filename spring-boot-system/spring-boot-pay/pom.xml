@@ -14,28 +14,6 @@
     <packaging>jar</packaging>
     <dependencies>
 
-        <!-- 微信开发工具  -->
-        <dependency>
-            <groupId>com.github.liyiorg</groupId>
-            <artifactId>weixin-popular</artifactId>
-            <version>${weixin-popular.version}</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>fastjson</artifactId>
-                    <groupId>com.alibaba</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.yungouos.pay</groupId>
-            <artifactId>yungouos-pay-sdk</artifactId>
-            <version>${yungouos-pay-sdk.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.alipay.sdk</groupId>
-            <artifactId>alipay-easysdk</artifactId>
-            <version>${alipay-easysdk.version}</version>
-        </dependency>
     </dependencies>
 
     <build>

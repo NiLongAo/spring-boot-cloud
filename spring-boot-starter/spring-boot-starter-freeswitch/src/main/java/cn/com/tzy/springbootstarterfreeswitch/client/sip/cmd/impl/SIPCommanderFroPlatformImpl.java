@@ -458,19 +458,19 @@ public class SIPCommanderFroPlatformImpl implements SIPCommanderForPlatform {
         content.append("s=pjmedia\r\n");
         content.append("t=0 0\r\n");
         if(tcpActive){
-            content.append("m=audio " + audioSsrcInfo.getPort() + " TCP/RTP/AVP 8 101\r\n");
+            content.append("m=audio " + audioSsrcInfo.getPort() + " TCP/RTP/AVP 8 126\r\n");
         }else if(tcp){
-            content.append("m=audio " + audioSsrcInfo.getPort() + " TCP/RTP/AVP 8 101\r\n");
+            content.append("m=audio " + audioSsrcInfo.getPort() + " TCP/RTP/AVP 8 126\r\n");
         }else {
-            content.append("m=audio " + audioSsrcInfo.getPort() + " RTP/AVP 8 101\r\n");
+            content.append("m=audio " + audioSsrcInfo.getPort() + " RTP/AVP 8 126\r\n");
         }
         content.append("c=IN IP4 " + sdpIp + "\r\n");
         // 某些需要rtcp 默认是发送端口+1 https://github.com/ZLMediaKit/ZLMediaKit/issues/1597
         content.append("a=rtcp:" + (audioSsrcInfo.getPort() + 1) + " IN IP4 " + sdpIp + "\r\n");
         content.append("a=sendrecv\r\n");//sendrecv 双向传输：（发送和接收）  recvonly：接受  sendonly：发送
         content.append("a=rtpmap:8 PCMA/8000\r\n");
-        content.append("a=rtpmap:101 telephone-event/8000\r\n");
-        content.append("a=fmtp:101 0-16\r\n");
+        content.append("a=rtpmap:126 telephone-event/8000\r\n");
+        content.append("a=fmtp:126 0-16\r\n");
         if (tcpActive) { // tcp主动模式
             content.append("a=setup:active\r\n");
             content.append("a=connection:new\r\n");

@@ -150,6 +150,6 @@ public class ChannelBridgeEventHandler implements EslEventHandler {
         agentVoInfo.setBeforeTime(agentVoInfo.getStateTime());
         agentVoInfo.setStateTime(Instant.now().getEpochSecond());
         agentVoInfo.setAgentState(agentState);
-        FsService.getSendAgentMessage().sendMessage(AgentStateEnum.TALKING, agentVoInfo,callMessage);
+        FsService.getSendAgentMessage().sendMessage(agentState, agentVoInfo,callMessage);
     }
 }

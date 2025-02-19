@@ -315,6 +315,47 @@
                 <artifactId>spring-boot-starter-freeswitch</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <!--      支付相关      -->
+            <dependency>
+                <groupId>cn.com.tzy</groupId>
+                <artifactId>spring-boot-starter-pay-alipay</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.com.tzy</groupId>
+                <artifactId>spring-boot-starter-pay-jdpay</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.com.tzy</groupId>
+                <artifactId>spring-boot-starter-pay-paypal</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.com.tzy</groupId>
+                <artifactId>spring-boot-starter-pay-qqpay</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.com.tzy</groupId>
+                <artifactId>spring-boot-starter-pay-starter</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.com.tzy</groupId>
+                <artifactId>spring-boot-starter-pay-unionpay</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.com.tzy</groupId>
+                <artifactId>spring-boot-starter-pay-wxpay</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.com.tzy</groupId>
+                <artifactId>spring-boot-starter-pay-xpay</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <!-- 底层程序 分包 版本-->
             <dependency>
                 <groupId>cn.com.tzy</groupId>

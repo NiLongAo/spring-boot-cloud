@@ -24,89 +24,86 @@ import java.util.Map;
 @Log4j2
 @Component
 public class AgentNamespace implements NamespaceListener {
-    /**
-     * 空间名称
-     */
     private SocketIOServer socketIOServer;
 
     @Resource
     private AgentService agentService;
+
     @Override
-    public String getNamespaceName() {return AgentCommon.SOCKET_AGENT;}
-    /**
-     * 客户端连接的时候触发，前端js触发：socket = io.connect("http://192.168.9.209:9092");
-     * 连接后直接登陆
-     * @param client
-     */
+    public String getNamespaceName() {
+        return AgentCommon.SOCKET_AGENT;
+    }
+
     @Override
     public void onConnect(SocketIOClient client) {
-        log.info("客户端:" + client.getSessionId() + "已连接");
-        Map<String, List<String>> urlParams = client.getHandshakeData().getUrlParams();
-        List<String> strings = urlParams.get(JwtCommon.JWT_AUTHORIZATION_KEY);
-        if(strings.isEmpty()){
-            log.error("客户端:" + client.getSessionId() + "未获取到 PublicMemberNamespace 连接");
-            return;
-        }
-        Map<String, String> map = JwtUtils.builder(JwtCommon.JWT_AUTHORIZATION_KEY, strings.get(0)).setPrefix(JwtCommon.AUTHORIZATION_PREFIX).builderJwtUser( null);;
-        Long userId = MapUtil.getLong(map, JwtCommon.JWT_USER_ID);
-        Agent agent = agentService.findUserId(userId);
-        if(agent == null){
-            log.error("客户端:{} 用户：{} 未获取到 客服信息",client.getSessionId(),userId);
-            return;
-        }
-        //建立客服房间
+        log.info("客户端:{} 已连接", client.getSessionId());
+        Agent agent = authenticateClient(client);
+        if (agent == null) return;
+
         client.joinRoom(getSocketAgentKey(agent.getAgentKey()));
-        RedisService.getAgentInfoManager().putAgentKey(client.getSessionId().toString(),agent.getAgentKey());
+        RedisService.getAgentInfoManager().putAgentKey(client.getSessionId().toString(), agent.getAgentKey());
+        handleAgentLogin(client, agent);
+    }
+
+    @Override
+    public void onDisconnect(SocketIOClient client) {
+        log.info("客户端:{} 断开连接", client.getSessionId());
+        Agent agent = authenticateClient(client);
+        if (agent == null) return;
+
+        client.leaveRoom(getSocketAgentKey(agent.getAgentKey()));
+        RedisService.getAgentInfoManager().delAgentKey(client.getSessionId().toString());
+        handleAgentLogout(agent);
+    }
+
+    private Agent authenticateClient(SocketIOClient client) {
+        Map<String, List<String>> urlParams = client.getHandshakeData().getUrlParams();
+        List<String> authTokens = urlParams.get(JwtCommon.JWT_AUTHORIZATION_KEY);
+        if (authTokens.isEmpty()) {
+            log.error("客户端:{} 未获取到 PublicMemberNamespace 连接", client.getSessionId());
+            return null;
+        }
+        Long userId = extractUserId(authTokens.get(0));
+        Agent agent = agentService.findUserId(userId);
+        if (agent == null) {
+            log.error("客户端:{} 用户：{} 未获取到客服信息", client.getSessionId(), userId);
+        }
+        return agent;
+    }
+
+    private Long extractUserId(String token) {
+        Map<String, String> claims = JwtUtils.builder(JwtCommon.JWT_AUTHORIZATION_KEY, token)
+                .setPrefix(JwtCommon.AUTHORIZATION_PREFIX)
+                .builderJwtUser(null);
+        return MapUtil.getLong(claims, JwtCommon.JWT_USER_ID);
+    }
+
+    private void handleAgentLogin(SocketIOClient client, Agent agent) {
         String key = String.format("%s%s", AgentLoginSubscribe.FS_AGENT_LOGIN_EVENT_SUBSCRIBE_MANAGER, agent.getAgentKey());
-        Boolean lock = RedisUtils.getLock(key, 8L);
-        if(lock){
-            RedisUtils.releaseLock(key);
-            agentService.login(agent.getAgentKey(),(data)->{
-                client.sendEvent(AgentCommon.AGENT_OUT_LOGIN, RestResult.result(data.getCode(),data.getMessage(),data.getData()));
-            });
-        }else {
-            //添加订阅
-            RedisService.getAgentLoginSubscribe().addLoginSubscribe(agent.getAgentKey(),()->{
+        if (RedisUtils.getLock(key, 8L)) {
+            agentService.login(agent.getAgentKey(), data -> {
+                client.sendEvent(AgentCommon.AGENT_OUT_LOGIN, RestResult.result(data.getCode(), data.getMessage(), data.getData()));
                 RedisUtils.releaseLock(key);
-                agentService.login(agent.getAgentKey(),(data)->{
-                    client.sendEvent(AgentCommon.AGENT_OUT_LOGIN, RestResult.result(data.getCode(),data.getMessage(),data.getData()));
+            });
+        } else {
+            log.warn("已被加锁，订阅延迟登陆");
+            RedisService.getAgentLoginSubscribe().addLoginSubscribe(agent.getAgentKey(), () -> {
+                agentService.login(agent.getAgentKey(), data -> {
+                    client.sendEvent(AgentCommon.AGENT_OUT_LOGIN, RestResult.result(data.getCode(), data.getMessage(), data.getData()));
+                    RedisUtils.releaseLock(key);
                 });
             });
         }
     }
 
-    /**
-     * 客户端关闭连接时触发：前端js触发：socket.disconnect();
-     * 移除后退出登陆客服
-     * @param client
-     */
-    @Override
-    public void onDisconnect(SocketIOClient client) {
-        log.info("客户端:" + client.getSessionId() + "断开连接");
-        Map<String, List<String>> urlParams = client.getHandshakeData().getUrlParams();
-        List<String> strings = urlParams.get(JwtCommon.JWT_AUTHORIZATION_KEY);
-        if(strings.isEmpty()){
-            log.error("客户端:" + client.getSessionId() + "未获取到 PublicMemberNamespace 连接");
-            return;
-        }
-        Map<String, String> map = JwtUtils.builder(JwtCommon.JWT_AUTHORIZATION_KEY, strings.get(0)).setPrefix(JwtCommon.AUTHORIZATION_PREFIX).builderJwtUser( null);;
-        Long userId = MapUtil.getLong(map, JwtCommon.JWT_USER_ID);
-        Agent agent = agentService.findUserId(userId);
-        if(agent == null){
-            log.error("客户端:{} 用户：{} 未获取到 客服信息",client.getSessionId(),userId);
-            return;
-        }
-        //移除
-        client.leaveRoom(getSocketAgentKey(agent.getAgentKey()));
-        RedisService.getAgentInfoManager().delAgentKey(client.getSessionId().toString());
+    private void handleAgentLogout(Agent agent) {
         String key = String.format("%s%s", AgentLoginSubscribe.FS_AGENT_LOGIN_EVENT_SUBSCRIBE_MANAGER, agent.getAgentKey());
-        //退出前加锁,退出成功后解锁
-        RedisUtils.getLock(key,8L);
-        agentService.logout(agent.getAgentKey(),(data)->{
-            //成功后删除锁，并看是否有登录方法，如果有则执行登录 保证退出后才能登录
+        RedisUtils.getLock(key, 8L);
+        agentService.logout(agent.getAgentKey(), data -> {
             RedisUtils.releaseLock(key);
-            RedisUtils.redisTemplate.convertAndSend(key, agent.getAgentKey());//如果有登录执行
-            log.info("退出消息：{}",data.getMessage());
+            log.warn("退出完成，执行登陆操作");
+            RedisUtils.redisTemplate.convertAndSend(key, agent.getAgentKey());
+            log.info("退出消息：{}", data.getMessage());
         });
     }
 
@@ -120,11 +117,11 @@ public class AgentNamespace implements NamespaceListener {
         this.socketIOServer = socketIOServer;
     }
 
-    public Namespace getNamespace(){
-        return  (Namespace)socketIOServer.getNamespace(AgentCommon.SOCKET_AGENT);
+    public Namespace getNamespace() {
+        return (Namespace) socketIOServer.getNamespace(AgentCommon.SOCKET_AGENT);
     }
 
-    public String getSocketAgentKey(String agentKey){
-        return String.format("%s:%s", AgentCommon.SOCKET_AGENT,agentKey);
+    public String getSocketAgentKey(String agentKey) {
+        return String.format("%s:%s", AgentCommon.SOCKET_AGENT, agentKey);
     }
 }
