@@ -1,10 +1,10 @@
 package cn.com.tzy.springbootpay.config;
 
+import cn.com.tzy.springbootpay.interceptor.AliPayInterceptor;
+import cn.com.tzy.springbootpay.interceptor.WxPayInterceptor;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.support.config.FastJsonConfig;
 import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
-import com.ijpay.demo.interceptor.AliPayInterceptor;
-import com.ijpay.demo.interceptor.WxPayInterceptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;

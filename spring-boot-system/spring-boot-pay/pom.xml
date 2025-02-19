@@ -57,6 +57,20 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+        <!--springcloud-公共启动类核心包-->
+        <dependency>
+            <groupId>cn.com.tzy</groupId>
+            <artifactId>spring-boot-starter-cloud</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.com.tzy</groupId>
+            <artifactId>spring-boot-starter-redis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.jfinal</groupId>
+            <artifactId>enjoy</artifactId>
+            <version>4.3</version>
+        </dependency>
     </dependencies>
 
     <build>
