@@ -1,7 +1,7 @@
 package cn.com.tzy.springbootstarterpayalipay;
 
 import cn.com.tzy.springbootstarterpayalipay.core.AliPayCore;
-import cn.com.tzy.springbootstarterpayalipay.kit.AliPayApiKit;
+import cn.com.tzy.springbootstarterpayalipay.kit.AliPayApiConfigKit;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
@@ -30,7 +30,7 @@ public class AliPayApi {
 	private static final String GATEWAY_NEW = "https://mapi.alipay.com/gateway.do?";
 
 	public static <T extends AlipayResponse> T doExecute(AlipayRequest<T> request) throws AlipayApiException {
-		if (AliPayApiKit.getAliPayModel().isCertModel()) {
+		if (AliPayApiConfigKit.getAliPayModel().isCertModel()) {
 			return certificateExecute(request);
 		} else {
 			return execute(request);
@@ -62,7 +62,7 @@ public class AliPayApi {
 
 
 	public static <T extends AlipayResponse> T doExecute(AlipayRequest<T> request, String authToken) throws AlipayApiException {
-		if (AliPayApiKit.getAliPayModel().isCertModel()) {
+		if (AliPayApiConfigKit.getAliPayModel().isCertModel()) {
 			return certificateExecute(request, authToken);
 		} else {
 			return execute(request, authToken);
@@ -74,7 +74,7 @@ public class AliPayApi {
 		if (alipayClient == null) {
 			throw new IllegalStateException("aliPayClient 未被初始化");
 		}
-		if (AliPayApiKit.getAliPayModel().isCertModel()) {
+		if (AliPayApiConfigKit.getAliPayModel().isCertModel()) {
 			return certificateExecute(alipayClient, request, authToken);
 		} else {
 			return execute(alipayClient, request, authToken);
@@ -82,7 +82,7 @@ public class AliPayApi {
 	}
 
 	public static <T extends AlipayResponse> T execute(AlipayRequest<T> request) throws AlipayApiException {
-		return AliPayApiKit.getAliPayModel().getAliPayClient().execute(request);
+		return AliPayApiConfigKit.getAliPayModel().getAliPayClient().execute(request);
 	}
 
 
@@ -94,7 +94,7 @@ public class AliPayApi {
 	}
 
 	public static <T extends AlipayResponse> T execute(AlipayRequest<T> request, String authToken) throws AlipayApiException {
-		return AliPayApiKit.getAliPayModel().getAliPayClient().execute(request, authToken);
+		return AliPayApiConfigKit.getAliPayModel().getAliPayClient().execute(request, authToken);
 	}
 
 	public static <T extends AlipayResponse> T execute(AlipayClient alipayClient, AlipayRequest<T> request, String authToken) throws AlipayApiException {
@@ -105,7 +105,7 @@ public class AliPayApi {
 	}
 
 	public static <T extends AlipayResponse> T execute(AlipayRequest<T> request, String accessToken, String appAuthToken) throws AlipayApiException {
-		return AliPayApiKit.getAliPayModel().getAliPayClient().execute(request, accessToken, appAuthToken);
+		return AliPayApiConfigKit.getAliPayModel().getAliPayClient().execute(request, accessToken, appAuthToken);
 	}
 
 	public static <T extends AlipayResponse> T execute(AlipayClient alipayClient, AlipayRequest<T> request, String accessToken, String appAuthToken) throws AlipayApiException {
@@ -116,7 +116,7 @@ public class AliPayApi {
 	}
 
 	public static <T extends AlipayResponse> T execute(AlipayRequest<T> request, String accessToken, String appAuthToken, String targetAppId) throws AlipayApiException {
-		return AliPayApiKit.getAliPayModel().getAliPayClient().execute(request, accessToken, appAuthToken, targetAppId);
+		return AliPayApiConfigKit.getAliPayModel().getAliPayClient().execute(request, accessToken, appAuthToken, targetAppId);
 	}
 
 	public static <T extends AlipayResponse> T execute(AlipayClient alipayClient, AlipayRequest<T> request, String accessToken, String appAuthToken, String targetAppId) throws AlipayApiException {
@@ -127,7 +127,7 @@ public class AliPayApi {
 	}
 
 	public static <T extends AlipayResponse> T pageExecute(AlipayRequest<T> request) throws AlipayApiException {
-		return AliPayApiKit.getAliPayModel().getAliPayClient().pageExecute(request);
+		return AliPayApiConfigKit.getAliPayModel().getAliPayClient().pageExecute(request);
 	}
 
 	public static <T extends AlipayResponse> T pageExecute(AlipayClient alipayClient, AlipayRequest<T> request) throws AlipayApiException {
@@ -138,7 +138,7 @@ public class AliPayApi {
 	}
 
 	public static <T extends AlipayResponse> T pageExecute(AlipayRequest<T> request, String method) throws AlipayApiException {
-		return AliPayApiKit.getAliPayModel().getAliPayClient().pageExecute(request, method);
+		return AliPayApiConfigKit.getAliPayModel().getAliPayClient().pageExecute(request, method);
 	}
 
 	public static <T extends AlipayResponse> T pageExecute(AlipayClient alipayClient, AlipayRequest<T> request, String method) throws AlipayApiException {
@@ -149,7 +149,7 @@ public class AliPayApi {
 	}
 
 	public static <T extends AlipayResponse> T sdkExecute(AlipayRequest<T> request) throws AlipayApiException {
-		return AliPayApiKit.getAliPayModel().getAliPayClient().sdkExecute(request);
+		return AliPayApiConfigKit.getAliPayModel().getAliPayClient().sdkExecute(request);
 	}
 
 	public static <T extends AlipayResponse> T sdkExecute(AlipayClient alipayClient, AlipayRequest<T> request) throws AlipayApiException {
@@ -160,7 +160,7 @@ public class AliPayApi {
 	}
 
 	public static BatchAlipayResponse execute(BatchAlipayRequest request) throws AlipayApiException {
-		return AliPayApiKit.getAliPayModel().getAliPayClient().execute(request);
+		return AliPayApiConfigKit.getAliPayModel().getAliPayClient().execute(request);
 	}
 
 	public static BatchAlipayResponse execute(AlipayClient alipayClient, BatchAlipayRequest request) throws AlipayApiException {
@@ -171,7 +171,7 @@ public class AliPayApi {
 	}
 
 	public static <T extends AlipayResponse> T certificateExecute(AlipayRequest<T> request) throws AlipayApiException {
-		return AliPayApiKit.getAliPayModel().getAliPayClient().certificateExecute(request);
+		return AliPayApiConfigKit.getAliPayModel().getAliPayClient().certificateExecute(request);
 	}
 
 	public static <T extends AlipayResponse> T certificateExecute(AlipayClient alipayClient, AlipayRequest<T> request) throws AlipayApiException {
@@ -182,7 +182,7 @@ public class AliPayApi {
 	}
 
 	public static <T extends AlipayResponse> T certificateExecute(AlipayRequest<T> request, String authToken) throws AlipayApiException {
-		return AliPayApiKit.getAliPayModel().getAliPayClient().certificateExecute(request, authToken);
+		return AliPayApiConfigKit.getAliPayModel().getAliPayClient().certificateExecute(request, authToken);
 	}
 
 	public static <T extends AlipayResponse> T certificateExecute(AlipayClient alipayClient, AlipayRequest<T> request, String authToken) throws AlipayApiException {
@@ -193,7 +193,7 @@ public class AliPayApi {
 	}
 
 	public static <T extends AlipayResponse> T certificateExecute(AlipayRequest<T> request, String accessToken, String appAuthToken) throws AlipayApiException {
-		return AliPayApiKit.getAliPayModel().getAliPayClient().certificateExecute(request, accessToken, appAuthToken);
+		return AliPayApiConfigKit.getAliPayModel().getAliPayClient().certificateExecute(request, accessToken, appAuthToken);
 	}
 
 	public static <T extends AlipayResponse> T certificateExecute(AlipayClient alipayClient, AlipayRequest<T> request, String accessToken, String appAuthToken) throws AlipayApiException {
@@ -204,7 +204,7 @@ public class AliPayApi {
 	}
 
 	public static <T extends AlipayResponse> T certificateExecute(AlipayRequest<T> request, String accessToken, String appAuthToken, String targetAppId) throws AlipayApiException {
-		return AliPayApiKit.getAliPayModel().getAliPayClient().certificateExecute(request, accessToken, appAuthToken, targetAppId);
+		return AliPayApiConfigKit.getAliPayModel().getAliPayClient().certificateExecute(request, accessToken, appAuthToken, targetAppId);
 	}
 
 	public static <T extends AlipayResponse> T certificateExecute(AlipayClient alipayClient, AlipayRequest<T> request, String accessToken, String appAuthToken, String targetAppId)
@@ -295,7 +295,7 @@ public class AliPayApi {
 	 */
 	public static void wapPay(HttpServletResponse response, AlipayTradeWapPayModel model, String returnUrl, String notifyUrl) throws AlipayApiException, IOException {
 		String form = wapPayStr(model, returnUrl, notifyUrl);
-		response.setContentType("text/html;charset=" + AliPayApiKit.getAliPayModel().getCharset());
+		response.setContentType("text/html;charset=" + AliPayApiConfigKit.getAliPayModel().getCharset());
 		PrintWriter out = response.getWriter();
 		out.write(form);
 		out.flush();
@@ -337,7 +337,7 @@ public class AliPayApi {
 	 */
 	public static void wapPay(HttpServletResponse response, AlipayTradeWapPayModel model, String returnUrl, String notifyUrl, String appAuthToken) throws AlipayApiException, IOException {
 		String form = wapPayStr(model, returnUrl, notifyUrl, appAuthToken);
-		response.setContentType("text/html;charset=" + AliPayApiKit.getAliPayModel().getCharset());
+		response.setContentType("text/html;charset=" + AliPayApiConfigKit.getAliPayModel().getCharset());
 		PrintWriter out = response.getWriter();
 		out.write(form);
 		out.flush();
@@ -387,9 +387,9 @@ public class AliPayApi {
 	public static void wapPayByOutputStream(HttpServletResponse response, AlipayTradeWapPayModel model, String returnUrl, String notifyUrl, String appAuthToken)
 		throws AlipayApiException, IOException {
 		String form = wapPayStr(model, returnUrl, notifyUrl, appAuthToken);
-		response.setContentType("text/html;charset=" + AliPayApiKit.getAliPayModel().getCharset());
+		response.setContentType("text/html;charset=" + AliPayApiConfigKit.getAliPayModel().getCharset());
 		OutputStream out = response.getOutputStream();
-		out.write(form.getBytes(AliPayApiKit.getAliPayModel().getCharset()));
+		out.write(form.getBytes(AliPayApiConfigKit.getAliPayModel().getCharset()));
 		response.getOutputStream().flush();
 	}
 
@@ -440,9 +440,9 @@ public class AliPayApi {
 	 */
 	public static void wapPayByOutputStream(HttpServletResponse response, AlipayTradeWapPayModel model, String returnUrl, String notifyUrl) throws AlipayApiException, IOException {
 		String form = wapPayStr(model, returnUrl, notifyUrl);
-		response.setContentType("text/html;charset=" + AliPayApiKit.getAliPayModel().getCharset());
+		response.setContentType("text/html;charset=" + AliPayApiConfigKit.getAliPayModel().getCharset());
 		OutputStream out = response.getOutputStream();
-		out.write(form.getBytes(AliPayApiKit.getAliPayModel().getCharset()));
+		out.write(form.getBytes(AliPayApiConfigKit.getAliPayModel().getCharset()));
 		response.getOutputStream().flush();
 	}
 
@@ -1525,7 +1525,7 @@ public class AliPayApi {
 		request.setNotifyUrl(notifyUrl);
 		request.setReturnUrl(returnUrl);
 		String form = pageExecute(request).getBody();
-		response.setContentType("text/html;charset=" + AliPayApiKit.getAliPayModel().getCharset());
+		response.setContentType("text/html;charset=" + AliPayApiConfigKit.getAliPayModel().getCharset());
 		PrintWriter out = response.getWriter();
 		out.write(form);
 		out.flush();
@@ -1549,7 +1549,7 @@ public class AliPayApi {
 		request.setNotifyUrl(notifyUrl);
 		request.setReturnUrl(returnUrl);
 		String form = pageExecute(request, method).getBody();
-		response.setContentType("text/html;charset=" + AliPayApiKit.getAliPayModel().getCharset());
+		response.setContentType("text/html;charset=" + AliPayApiConfigKit.getAliPayModel().getCharset());
 		PrintWriter out = response.getWriter();
 		out.write(form);
 		out.flush();
@@ -1626,7 +1626,7 @@ public class AliPayApi {
 		request.setReturnUrl(returnUrl);
 		request.putOtherTextParam("app_auth_token", appAuthToken);
 		String form = pageExecute(request).getBody();
-		response.setContentType("text/html;charset=" + AliPayApiKit.getAliPayModel().getCharset());
+		response.setContentType("text/html;charset=" + AliPayApiConfigKit.getAliPayModel().getCharset());
 		PrintWriter out = response.getWriter();
 		out.write(form);
 		out.flush();
@@ -1676,9 +1676,9 @@ public class AliPayApi {
 		request.setNotifyUrl(notifyUrl);
 		request.setReturnUrl(returnUrl);
 		String form = pageExecute(request).getBody();
-		response.setContentType("text/html;charset=" + AliPayApiKit.getAliPayModel().getCharset());
+		response.setContentType("text/html;charset=" + AliPayApiConfigKit.getAliPayModel().getCharset());
 		OutputStream out = response.getOutputStream();
-		out.write(form.getBytes(AliPayApiKit.getAliPayModel().getCharset()));
+		out.write(form.getBytes(AliPayApiConfigKit.getAliPayModel().getCharset()));
 		response.getOutputStream().flush();
 	}
 
@@ -1726,9 +1726,9 @@ public class AliPayApi {
 		request.setReturnUrl(returnUrl);
 		request.putOtherTextParam("app_auth_token", appAuthToken);
 		String form = pageExecute(request).getBody();
-		response.setContentType("text/html;charset=" + AliPayApiKit.getAliPayModel().getCharset());
+		response.setContentType("text/html;charset=" + AliPayApiConfigKit.getAliPayModel().getCharset());
 		OutputStream out = response.getOutputStream();
-		out.write(form.getBytes(AliPayApiKit.getAliPayModel().getCharset()));
+		out.write(form.getBytes(AliPayApiConfigKit.getAliPayModel().getCharset()));
 		response.getOutputStream().flush();
 	}
 
