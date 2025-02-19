@@ -62,7 +62,7 @@ public class VerifySignatureUtl {
 
 		String sha256SourceSignString = SHAUtil.Encrypt(sourceData, null);
 		byte[] newsks = RSACoder.encryptByPrivateKey(sha256SourceSignString.getBytes("UTF-8"), rsaPriKey);
-		String sign = Base64.encodeBase64String(newsks);
+		String sign = Base64.encode(newsks);
 		System.out.println(sign);
 
 
