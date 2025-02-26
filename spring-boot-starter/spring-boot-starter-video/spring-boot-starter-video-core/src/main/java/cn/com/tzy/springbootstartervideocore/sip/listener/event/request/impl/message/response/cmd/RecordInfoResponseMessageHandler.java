@@ -115,7 +115,7 @@ public class RecordInfoResponseMessageHandler  extends SipResponseEvent implemen
                     //额外处理
                     synchronized (this){
                         String key = String.format("%s%s:%s", VideoConstant.REDIS_RECORD_INFO_RES_PRE, channelId, sn);
-                        Map<String, Object> collect = recordList.stream().collect(Collectors.toMap(o -> o.getStartTime() + o.getEndTime(), o -> o));
+                        Map<String, Object> collect = recordList.stream().collect(Collectors.toMap(o -> o.getStartTime() + o.getEndTime(), o -> o,(o1,o2)->o2));
                         RedisUtils.hmset(key,collect,videoProperties.getPlayTimeout());
                         long num = RedisUtils.hmsize(key);
                         if(num < sumNum){
