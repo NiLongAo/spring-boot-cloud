@@ -78,6 +78,7 @@ public class PresetQueryResponseMessageHandler extends SipResponseEvent implemen
             } else {
                 presetQuerySipReq.setPresetName(textTrim);
             }
+            presetQuerySipReqList.add(presetQuerySipReq);
         }
         deferredResultHolder.invokeAllResult(key, RestResult.result(RespCode.CODE_0.getValue(),null,presetQuerySipReqList));
         try {
