@@ -161,7 +161,7 @@ public class PtzController extends ApiController {
      * @param speed
      */
     @GetMapping("/iris")
-    public RestResult<?> iris(@RequestParam("deviceId") String deviceId, @RequestParam("channelId") String channelId, @RequestParam String command, @RequestParam Integer speed){
+    public RestResult<?> iris(@RequestParam("deviceId") String deviceId, @RequestParam("channelId") String channelId, @RequestParam("command") String command, @RequestParam("speed") Integer speed){
         if (log.isDebugEnabled()) {
             log.debug("设备光圈控制 API调用，deviceId：{} ，channelId：{} ，command：{} ，speed：{} ",deviceId, channelId, command, speed);
         }
@@ -191,7 +191,7 @@ public class PtzController extends ApiController {
      * 聚焦控制
      */
     @GetMapping("/focus")
-    public RestResult<?> focus(@RequestParam("deviceId") String deviceId, @RequestParam("channelId") String channelId, @RequestParam String command, @RequestParam Integer speed){
+    public RestResult<?> focus(@RequestParam("deviceId") String deviceId, @RequestParam("channelId") String channelId, @RequestParam("command") String command, @RequestParam("speed") Integer speed){
         if (log.isDebugEnabled()) {
             log.debug("设备聚焦控制 API调用，deviceId：{} ，channelId：{} ，command：{} ，speed：{} ",deviceId, channelId, command, speed);
         }
@@ -246,7 +246,7 @@ public class PtzController extends ApiController {
     /**
      * 预置位指令-设置预置位
      */
-    @GetMapping("/addPreset")
+    @GetMapping("/add_preset")
     public RestResult<?> addPreset(@RequestParam("deviceId")String deviceId,@RequestParam("channelId")String channelId, @RequestParam("presetId") Integer presetId) {
         if (presetId == null || presetId < 1 || presetId > 255) {
             return RestResult.result(RespCode.CODE_2.getValue(),"预置位编号必须为1-255之间的数字");
@@ -257,7 +257,7 @@ public class PtzController extends ApiController {
     /**
      * 预置位指令-调用预置位
      */
-    @GetMapping("/callPreset")
+    @GetMapping("/call_preset")
     public RestResult<?> callPreset(@RequestParam("deviceId")String deviceId,@RequestParam("channelId")String channelId, @RequestParam("presetId") Integer presetId) {
         if (presetId == null || presetId < 1 || presetId > 255) {
             return RestResult.result(RespCode.CODE_2.getValue(),"预置位编号必须为1-255之间的数字");
@@ -268,7 +268,7 @@ public class PtzController extends ApiController {
     /**
      * 预置位指令-删除预置位
      */
-    @GetMapping("/delPreset")
+    @GetMapping("/del_preset")
     public RestResult<?> delPreset(@RequestParam("deviceId")String deviceId,@RequestParam("channelId")String channelId, @RequestParam("presetId") Integer presetId) {
         if (presetId == null || presetId < 1 || presetId > 255) {
             return RestResult.result(RespCode.CODE_2.getValue(),"预置位编号必须为1-255之间的数字");
@@ -279,7 +279,7 @@ public class PtzController extends ApiController {
     /**
      * 巡航指令-加入巡航点
      */
-    @GetMapping("/addCruisePoint")
+    @GetMapping("/add_cruise_point")
     public RestResult<?> addCruisePoint(@RequestParam("deviceId")String deviceId,@RequestParam("channelId")String channelId, @RequestParam("presetId") Integer presetId, @RequestParam("cruiseId") Integer cruiseId) {
         if (presetId == null || presetId < 1 || presetId > 255) {
             return RestResult.result(RespCode.CODE_2.getValue(),"预置位编号必须为1-255之间的数字, 为0时删除整个巡航");
@@ -293,7 +293,7 @@ public class PtzController extends ApiController {
     /**
      * 巡航指令-删除一个巡航点
      */
-    @GetMapping("/delCruisePoint")
+    @GetMapping("/del_cruise_point")
     public RestResult<?> delCruisePoint(@RequestParam("deviceId")String deviceId,@RequestParam("channelId")String channelId, @RequestParam("presetId") Integer presetId, @RequestParam("cruiseId") Integer cruiseId) {
         if (presetId == null || presetId < 1 || presetId > 255) {
             return RestResult.result(RespCode.CODE_2.getValue(),"预置位编号必须为1-255之间的数字, 为0时删除整个巡航");
@@ -307,7 +307,7 @@ public class PtzController extends ApiController {
     /**
      * 巡航指令-设置巡航速度
      */
-    @GetMapping("/speedCruisePoint")
+    @GetMapping("/speed_cruise_point")
     public RestResult<?> speedCruisePoint(@RequestParam("deviceId")String deviceId,@RequestParam("channelId")String channelId, @RequestParam("cruiseId") Integer cruiseId, @RequestParam("speed") Integer speed) {
         if (cruiseId == null || cruiseId < 1 || cruiseId > 255) {
             return RestResult.result(RespCode.CODE_2.getValue(),"巡航组号必须为1-255之间的数字");
@@ -323,7 +323,7 @@ public class PtzController extends ApiController {
     /**
      * 巡航指令-设置巡航停留时间
      */
-    @GetMapping("/timeCruisePoint")
+    @GetMapping("/time_cruise_point")
     public RestResult<?> timeCruisePoint(@RequestParam("deviceId")String deviceId,@RequestParam("channelId")String channelId, @RequestParam("cruiseId") Integer cruiseId, @RequestParam("time") Integer time) {
         if (cruiseId == null || cruiseId < 1 || cruiseId > 255) {
             return RestResult.result(RespCode.CODE_2.getValue(),"巡航组号必须为1-255之间的数字");
@@ -339,7 +339,7 @@ public class PtzController extends ApiController {
     /**
      * 巡航指令-开始巡航
      */
-    @GetMapping("/startCruisePoint")
+    @GetMapping("/start_cruise_point")
     public RestResult<?> startCruisePoint(@RequestParam("deviceId")String deviceId,@RequestParam("channelId")String channelId, @RequestParam("cruiseId") Integer cruiseId) {
         if (cruiseId == null || cruiseId < 1 || cruiseId > 255) {
             return RestResult.result(RespCode.CODE_2.getValue(),"巡航组号必须为1-255之间的数字");
@@ -350,7 +350,7 @@ public class PtzController extends ApiController {
     /**
      * 巡航指令-停止巡航
      */
-    @GetMapping("/stopCruisePoint")
+    @GetMapping("/stop_cruise_point")
     public RestResult<?> stopCruisePoint(@RequestParam("deviceId")String deviceId,@RequestParam("channelId")String channelId, @RequestParam("cruiseId") Integer cruiseId) {
         if (cruiseId == null || cruiseId < 1 || cruiseId > 255) {
             return RestResult.result(RespCode.CODE_2.getValue(),"巡航组号必须为1-255之间的数字");
@@ -361,7 +361,7 @@ public class PtzController extends ApiController {
     /**
      * 扫描指令-开始自动扫描
      */
-    @GetMapping("/startScan")
+    @GetMapping("/start_scan")
     public RestResult<?> startScan(@RequestParam("deviceId")String deviceId,@RequestParam("channelId")String channelId, @RequestParam("scanId") Integer scanId) {
         if (scanId == null || scanId < 1 || scanId > 255) {
             return RestResult.result(RespCode.CODE_2.getValue(),"扫描组号必须为1-255之间的数字");
@@ -372,7 +372,7 @@ public class PtzController extends ApiController {
     /**
      * 扫描指令-停止自动扫描
      */
-    @GetMapping("/stopScan")
+    @GetMapping("/stop_scan")
     public RestResult<?> stopScan(@RequestParam("deviceId")String deviceId,@RequestParam("channelId")String channelId, @RequestParam("scanId") Integer scanId) {
         if (scanId == null || scanId < 1 || scanId > 255) {
             return RestResult.result(RespCode.CODE_2.getValue(),"扫描组号必须为1-255之间的数字");
@@ -383,7 +383,7 @@ public class PtzController extends ApiController {
     /**
      * 扫描指令-设置自动扫描左边界
      */
-    @GetMapping("/setLeftScan")
+    @GetMapping("/set_left_scan")
     public RestResult<?> setLeftScan(@RequestParam("deviceId")String deviceId,@RequestParam("channelId")String channelId, @RequestParam("scanId") Integer scanId) {
         if (scanId == null || scanId < 1 || scanId > 255) {
             return RestResult.result(RespCode.CODE_2.getValue(),"扫描组号必须为1-255之间的数字");
@@ -394,7 +394,7 @@ public class PtzController extends ApiController {
     /**
      * 扫描指令-设置自动扫描右边界
      */
-    @GetMapping("/setRightScan")
+    @GetMapping("/set_right_scan")
     public RestResult<?> setRightScan(@RequestParam("deviceId")String deviceId,@RequestParam("channelId")String channelId, @RequestParam("scanId") Integer scanId) {
         if (scanId == null || scanId < 1 || scanId > 255) {
             return RestResult.result(RespCode.CODE_2.getValue(),"扫描组号必须为1-255之间的数字");
@@ -405,7 +405,7 @@ public class PtzController extends ApiController {
     /**
      * 扫描指令-设置自动扫描速度
      */
-    @GetMapping("/setSpeedScan")
+    @GetMapping("/set_speed_scan")
     public RestResult<?> setSpeedScan(@RequestParam("deviceId")String deviceId,@RequestParam("channelId")String channelId, @RequestParam("scanId") Integer scanId, @RequestParam("speed") Integer speed) {
         if (scanId == null || scanId < 1 || scanId > 255) {
             return RestResult.result(RespCode.CODE_2.getValue(),"扫描组号必须为1-255之间的数字");

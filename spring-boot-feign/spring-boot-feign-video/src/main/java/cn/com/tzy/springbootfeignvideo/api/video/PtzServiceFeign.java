@@ -52,6 +52,19 @@ public interface PtzServiceFeign {
             @RequestParam(value = "parameter2",defaultValue = "0") Integer parameter2,
             @RequestParam(value = "combindCode2",defaultValue = "0") Integer combindCode2
     );
+    /**
+     * 光圈控制
+     * @return
+     */
+    @RequestMapping(value ="/iris",method = RequestMethod.GET)
+    RestResult<?> iris(@RequestParam("deviceId") String deviceId, @RequestParam("channelId") String channelId, @RequestParam("command") String command, @RequestParam("speed") Integer speed);
+
+    /**
+     * 聚焦控制
+     * @return
+     */
+    @RequestMapping(value ="/focus",method = RequestMethod.GET)
+    RestResult<?> focus(@RequestParam("deviceId") String deviceId, @RequestParam("channelId") String channelId, @RequestParam("command") String command, @RequestParam("speed") Integer speed);
 
     /**
      * 预置位查询
@@ -61,7 +74,116 @@ public interface PtzServiceFeign {
      */
     @RequestMapping(value = "/preset_query",method = RequestMethod.GET)
     RestResult<?> presetQuery(@RequestParam("deviceId")String deviceId, @RequestParam("channelId")String channelId);
+    /**
+     * 预置位指令-设置预置位
+     * @return
+     */
+    @RequestMapping(value = "/add_preset",method = RequestMethod.GET)
+    RestResult<?> addPreset(@RequestParam("deviceId")String deviceId,@RequestParam("channelId")String channelId, @RequestParam("presetId") Integer presetId);
 
+    /**
+     * 预置位指令-调用预置位
+     * @return
+     */
+    @RequestMapping(value = "/call_preset",method = RequestMethod.GET)
+    RestResult<?> callPreset(@RequestParam("deviceId")String deviceId,@RequestParam("channelId")String channelId, @RequestParam("presetId") Integer presetId);
 
+    /**
+     * 预置位指令-删除预置位
+     * @return
+     */
+    @RequestMapping(value = "/del_preset",method = RequestMethod.GET)
+    RestResult<?> delPreset(@RequestParam("deviceId")String deviceId,@RequestParam("channelId")String channelId, @RequestParam("presetId") Integer presetId);
+
+    /**
+     * 巡航指令-加入巡航点
+     * @return
+     */
+    @RequestMapping(value = "/add_cruise_point",method = RequestMethod.GET)
+    RestResult<?> addCruisePoint(@RequestParam("deviceId")String deviceId,@RequestParam("channelId")String channelId, @RequestParam("presetId") Integer presetId, @RequestParam("cruiseId") Integer cruiseId);
+
+    /**
+     * 巡航指令-删除一个巡航点
+     * @return
+     */
+    @RequestMapping(value = "/del_cruise_point",method = RequestMethod.GET)
+    RestResult<?> delCruisePoint(@RequestParam("deviceId")String deviceId,@RequestParam("channelId")String channelId, @RequestParam("presetId") Integer presetId, @RequestParam("cruiseId") Integer cruiseId);
+
+    /**
+     * 巡航指令-设置巡航速度
+     * @return
+     */
+    @RequestMapping(value = "/speed_cruise_point",method = RequestMethod.GET)
+    RestResult<?> speedCruisePoint(@RequestParam("deviceId")String deviceId,@RequestParam("channelId")String channelId, @RequestParam("cruiseId") Integer cruiseId, @RequestParam("speed") Integer speed);
+
+    /**
+     * 巡航指令-设置巡航停留时间
+     * @return
+     */
+    @RequestMapping(value = "/time_cruise_point",method = RequestMethod.GET)
+    RestResult<?> timeCruisePoint(@RequestParam("deviceId")String deviceId,@RequestParam("channelId")String channelId, @RequestParam("cruiseId") Integer cruiseId, @RequestParam("time") Integer time);
+
+    /**
+     * 巡航指令-开始巡航
+     * @return
+     */
+    @RequestMapping(value = "/start_cruise_point",method = RequestMethod.GET)
+    RestResult<?> startCruisePoint(@RequestParam("deviceId")String deviceId,@RequestParam("channelId")String channelId, @RequestParam("cruiseId") Integer cruiseId);
+
+    /**
+     * 巡航指令-停止巡航
+     * @return
+     */
+    @RequestMapping(value = "/stop_cruise_point",method = RequestMethod.GET)
+    RestResult<?> stopCruisePoint(@RequestParam("deviceId")String deviceId,@RequestParam("channelId")String channelId, @RequestParam("cruiseId") Integer cruiseId);
+
+    /**
+     * 扫描指令-开始自动扫描
+     * @return
+     */
+    @RequestMapping(value = "/start_scan",method = RequestMethod.GET)
+    RestResult<?> startScan(@RequestParam("deviceId")String deviceId,@RequestParam("channelId")String channelId, @RequestParam("scanId") Integer scanId);
+
+    /**
+     * 扫描指令-停止自动扫描
+     * @return
+     */
+    @RequestMapping(value = "/stop_scan",method = RequestMethod.GET)
+    RestResult<?> stopScan(@RequestParam("deviceId")String deviceId,@RequestParam("channelId")String channelId, @RequestParam("scanId") Integer scanId);
+
+    /**
+     * 扫描指令-设置自动扫描左边界
+     * @return
+     */
+    @RequestMapping(value = "/set_left_scan",method = RequestMethod.GET)
+    RestResult<?> setLeftScan(@RequestParam("deviceId")String deviceId,@RequestParam("channelId")String channelId, @RequestParam("scanId") Integer scanId);
+
+    /**
+     * 扫描指令-设置自动扫描右边界
+     * @return
+     */
+    @RequestMapping(value = "/set_right_scan",method = RequestMethod.GET)
+    RestResult<?> setRightScan(@RequestParam("deviceId")String deviceId,@RequestParam("channelId")String channelId, @RequestParam("scanId") Integer scanId);
+
+    /**
+     * 扫描指令-设置自动扫描速度
+     * @return
+     */
+    @RequestMapping(value = "/set_speed_scan",method = RequestMethod.GET)
+    RestResult<?> setSpeedScan(@RequestParam("deviceId")String deviceId,@RequestParam("channelId")String channelId, @RequestParam("scanId") Integer scanId, @RequestParam("speed") Integer speed);
+
+    /**
+     * 辅助开关控制指令-雨刷控制
+     * @return
+     */
+    @RequestMapping(value = "/wiper",method = RequestMethod.GET)
+    RestResult<?> wiper(@RequestParam("deviceId")String deviceId,@RequestParam("channelId")String channelId, @RequestParam("command") String command);
+
+    /**
+     * 辅助开关控制指令-雨刷控制
+     * @return
+     */
+    @RequestMapping(value = "/auxiliary",method = RequestMethod.GET)
+    RestResult<?> auxiliary(@RequestParam("deviceId")String deviceId,@RequestParam("channelId")String channelId, @RequestParam("command") String command,@RequestParam("switchId") Integer switchId);
 
 }
