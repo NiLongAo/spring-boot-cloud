@@ -84,7 +84,7 @@ public class DeviceMobilePositionServiceImpl extends ServiceImpl<DeviceMobilePos
             if(expires > 0){
                 deviceVo.setSubscribeCycleForCatalog(expires);
                 VideoService.getDeviceService().save(deviceVo);
-                RedisService.getDeviceNotifySubscribeManager().addCatalogSubscribe(deviceVo);
+                RedisService.getDeviceNotifySubscribeManager().addCatalogSubscribe(deviceVo,"web页面订阅");
             }else {
                 RedisService.getDeviceNotifySubscribeManager().removeCatalogSubscribe(deviceVo);
             }
@@ -92,7 +92,7 @@ public class DeviceMobilePositionServiceImpl extends ServiceImpl<DeviceMobilePos
             if(expires > 0){
                 deviceVo.setSubscribeCycleForMobilePosition(expires);
                 VideoService.getDeviceService().save(deviceVo);
-                RedisService.getDeviceNotifySubscribeManager().addMobilePositionSubscribe(deviceVo);
+                RedisService.getDeviceNotifySubscribeManager().addMobilePositionSubscribe(deviceVo,"web页面订阅");
             }else {
                 RedisService.getDeviceNotifySubscribeManager().removeMobilePositionSubscribe(deviceVo);
             }
@@ -100,7 +100,7 @@ public class DeviceMobilePositionServiceImpl extends ServiceImpl<DeviceMobilePos
             if(expires > 0){
                 deviceVo.setSubscribeCycleForAlarm(expires);
                 VideoService.getDeviceService().save(deviceVo);
-                RedisService.getDeviceNotifySubscribeManager().addAlarmSubscribe(deviceVo);
+                RedisService.getDeviceNotifySubscribeManager().addAlarmSubscribe(deviceVo,"web页面订阅");
             }else {
                 RedisService.getDeviceNotifySubscribeManager().removeAlarmSubscribe(deviceVo);
             }

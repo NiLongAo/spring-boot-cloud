@@ -20,7 +20,7 @@ public class CseqManager {
      */
     public  long getCSEQ(){
         String key = SIP_CSEQ_PREFIX + videoProperties.getServerId();
-        long incr = RedisUtils.incr(key, 1L);
+        long incr = RedisUtils.incr(key, 1L,0);
         if(incr > Integer.MAX_VALUE){
             RedisUtils.set(key,1);
             incr = 1;

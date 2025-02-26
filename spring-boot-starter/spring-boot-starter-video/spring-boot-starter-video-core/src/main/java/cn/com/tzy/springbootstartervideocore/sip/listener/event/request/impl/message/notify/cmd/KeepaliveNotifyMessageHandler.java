@@ -70,15 +70,15 @@ public class KeepaliveNotifyMessageHandler extends SipResponseEvent implements M
             // 设备地址变化会引起目录订阅任务失效，需要重新添加
             if (RedisService.getDeviceNotifySubscribeManager().getCatalogSubscribe(deviceVo.getDeviceId())) {
                 RedisService.getDeviceNotifySubscribeManager().removeCatalogSubscribe(deviceVo);
-                RedisService.getDeviceNotifySubscribeManager().addCatalogSubscribe(deviceVo);
+                RedisService.getDeviceNotifySubscribeManager().addCatalogSubscribe(deviceVo,"设备地址变化订阅");
             }
             if(RedisService.getDeviceNotifySubscribeManager().getMobilePositionSubscribe(deviceVo.getDeviceId())){
                 RedisService.getDeviceNotifySubscribeManager().removeMobilePositionSubscribe(deviceVo);
-                RedisService.getDeviceNotifySubscribeManager().addMobilePositionSubscribe(deviceVo);
+                RedisService.getDeviceNotifySubscribeManager().addMobilePositionSubscribe(deviceVo,"设备地址变化订阅");
             }
             if(RedisService.getDeviceNotifySubscribeManager().getAlarmSubscribe(deviceVo.getDeviceId())){
                 RedisService.getDeviceNotifySubscribeManager().removeAlarmSubscribe(deviceVo);
-                RedisService.getDeviceNotifySubscribeManager().addAlarmSubscribe(deviceVo);
+                RedisService.getDeviceNotifySubscribeManager().addAlarmSubscribe(deviceVo,"设备地址变化订阅");
             }
         }
         if (deviceVo.getKeepaliveTime() == null) {
@@ -88,13 +88,13 @@ public class KeepaliveNotifyMessageHandler extends SipResponseEvent implements M
         if (deviceVo.getOnline() == ConstEnum.Flag.YES.getValue()) {
             if (deviceVo.getSubscribeCycleForCatalog() > 0 && !RedisService.getDeviceNotifySubscribeManager().getCatalogSubscribe(deviceVo.getDeviceId())) {
                 // 查询在线设备那些开启了订阅，为设备开启定时的目录订阅
-                RedisService.getDeviceNotifySubscribeManager().addCatalogSubscribe(deviceVo);
+                RedisService.getDeviceNotifySubscribeManager().addCatalogSubscribe(deviceVo,"设备在线订阅");
             }
             if (deviceVo.getSubscribeCycleForMobilePosition() > 0 && !RedisService.getDeviceNotifySubscribeManager().getMobilePositionSubscribe(deviceVo.getDeviceId())) {
-                RedisService.getDeviceNotifySubscribeManager().addMobilePositionSubscribe(deviceVo);
+                RedisService.getDeviceNotifySubscribeManager().addMobilePositionSubscribe(deviceVo,"设备在线订阅");
             }
             if (deviceVo.getSubscribeCycleForAlarm() > 0 && !RedisService.getDeviceNotifySubscribeManager().getAlarmSubscribe(deviceVo.getDeviceId())) {
-                RedisService.getDeviceNotifySubscribeManager().addAlarmSubscribe(deviceVo);
+                RedisService.getDeviceNotifySubscribeManager().addAlarmSubscribe(deviceVo,"设备在线订阅");
             }
             deviceVoService.save(deviceVo);
         }else{

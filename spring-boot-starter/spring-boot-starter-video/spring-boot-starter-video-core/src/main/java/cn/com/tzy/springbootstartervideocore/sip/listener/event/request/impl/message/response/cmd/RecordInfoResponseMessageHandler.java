@@ -118,15 +118,14 @@ public class RecordInfoResponseMessageHandler  extends SipResponseEvent implemen
                     String key = String.format("%s%s:%s", VideoConstant.REDIS_RECORD_INFO_RES_PRE, channelId, sn);
                     String countKey = String.format("%s%s:%s", VideoConstant.REDIS_RECORD_INFO_RES_COUNT_PRE, channelId, sn);
                     Map<String, Object> collect = recordList.stream().collect(Collectors.toMap(o -> o.getStartTime() + o.getEndTime(), o->o,(o1, o2)->o2));
-                    RedisUtils.set(key,collect,videoProperties.getPlayTimeout());
-                    long incr =  RedisUtils.incr(countKey,recordList.size());
+                    RedisUtils.hmset(key,collect,videoProperties.getPlayTimeout());
+                    long incr =  RedisUtils.incr(countKey,recordList.size(),videoProperties.getPlayTimeout());
                     if(incr < sumNum){
                         return;
                     }
                     RedisUtils.del(countKey);
                     // 已接收完成
-                    Map<String, RecordItem> map =(Map<String, RecordItem>) RedisUtils.get(key);
-
+                    Map<String, RecordItem> map =(Map<String, RecordItem>) RedisUtils.hmget(key);
                     RedisUtils.del(key);
                     RecordInfo build = RecordInfo.builder()
                             .deviceId(recordInfo.getDeviceId())

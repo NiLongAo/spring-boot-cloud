@@ -112,13 +112,13 @@ public abstract class DeviceVoService {
         // 上线添加订阅
         if (deviceVo.getSubscribeCycleForCatalog() > 0) {
             // 查询在线设备那些开启了订阅，为设备开启定时的目录订阅
-            RedisService.getDeviceNotifySubscribeManager().addCatalogSubscribe(deviceVo);
+            RedisService.getDeviceNotifySubscribeManager().addCatalogSubscribe(deviceVo,"设备上线订阅");
         }
         if (deviceVo.getSubscribeCycleForMobilePosition() > 0) {
-            RedisService.getDeviceNotifySubscribeManager().addMobilePositionSubscribe(deviceVo);
+            RedisService.getDeviceNotifySubscribeManager().addMobilePositionSubscribe(deviceVo,"设备上线订阅");
         }
         if (deviceVo.getSubscribeCycleForAlarm() > 0) {
-            RedisService.getDeviceNotifySubscribeManager().addAlarmSubscribe(deviceVo);
+            RedisService.getDeviceNotifySubscribeManager().addAlarmSubscribe(deviceVo,"设备上线订阅");
         }
         String key = String.format("%s_%s", VideoConstant.REGISTER_EXPIRE_TASK_KEY_PREFIX, deviceVo.getDeviceId());
         //设备过期任务

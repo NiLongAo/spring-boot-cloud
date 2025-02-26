@@ -146,11 +146,15 @@ public class RedisUtils {
      * @param delta 要增加几(大于0)
      * @return
      */
-    public static long incr(String key, long delta) {
+    public static long incr(String key, long delta, long time) {
         if (delta < 0) {
             throw new RuntimeException("递增因子必须大于0");
         }
-        return redisTemplate.opsForValue().increment(key, delta);
+        Long increment = redisTemplate.opsForValue().increment(key, delta);
+        if (time > 0) {
+            expire(key, time);
+        }
+        return increment;
     }
 
     /**
@@ -160,11 +164,15 @@ public class RedisUtils {
      * @param delta 要减少几(小于0)
      * @return
      */
-    public static long decr(String key, long delta) {
+    public static long decr(String key, long delta, long time) {
         if (delta < 0) {
             throw new RuntimeException("递减因子必须大于0");
         }
-        return redisTemplate.opsForValue().increment(key, -delta);
+        Long increment = redisTemplate.opsForValue().increment(key, -delta);
+        if (time > 0) {
+            expire(key, time);
+        }
+        return increment;
     }
 
     /**
