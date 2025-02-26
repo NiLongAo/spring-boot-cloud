@@ -1,6 +1,9 @@
 package cn.com.tzy.springbootstartervideobasic.vo.sip;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.List;
@@ -11,6 +14,9 @@ import java.util.List;
  * @date:   2020年5月8日 下午2:05:56     
  */
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class RecordInfo implements Serializable {
 
 	private String deviceId;

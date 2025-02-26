@@ -9,12 +9,12 @@ import cn.com.tzy.springbootstartervideobasic.vo.sip.RecordInfo;
 import cn.com.tzy.springbootstartervideobasic.vo.sip.RecordItem;
 import cn.com.tzy.springbootstartervideobasic.vo.video.DeviceVo;
 import cn.com.tzy.springbootstartervideobasic.vo.video.ParentPlatformVo;
-import cn.com.tzy.springbootstartervideocore.sip.listener.event.request.impl.message.response.ResponseMessageHandler;
-import cn.com.tzy.springbootstartervideocore.redis.subscribe.result.DeferredResultHolder;
 import cn.com.tzy.springbootstartervideocore.properties.VideoProperties;
+import cn.com.tzy.springbootstartervideocore.redis.subscribe.record.RecordEndSubscribeHandle;
+import cn.com.tzy.springbootstartervideocore.redis.subscribe.result.DeferredResultHolder;
 import cn.com.tzy.springbootstartervideocore.sip.listener.event.request.SipResponseEvent;
 import cn.com.tzy.springbootstartervideocore.sip.listener.event.request.impl.message.MessageHandler;
-import cn.com.tzy.springbootstartervideocore.redis.subscribe.record.RecordEndSubscribeHandle;
+import cn.com.tzy.springbootstartervideocore.sip.listener.event.request.impl.message.response.ResponseMessageHandler;
 import cn.com.tzy.springbootstartervideocore.utils.XmlUtils;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
@@ -111,25 +111,33 @@ public class RecordInfoResponseMessageHandler  extends SipResponseEvent implemen
                         record.setRecorderId(XmlUtils.getText(itemRecord, "RecorderID"));
                         recordList.add(record);
                     }
+                    recordInfo.setRecordList(recordList);
+                    recordInfo.setCount(Math.toIntExact(recordList.size()));
+                    recordEndSubscribeHandle.handlerEvent(recordInfo);
                     //数据有可能分次传输
-                    //额外处理
-                    synchronized (this){
-                        String key = String.format("%s%s:%s", VideoConstant.REDIS_RECORD_INFO_RES_PRE, channelId, sn);
-                        Map<String, Object> collect = recordList.stream().collect(Collectors.toMap(o -> o.getStartTime() + o.getEndTime(), o -> o,(o1,o2)->o2));
-                        RedisUtils.hmset(key,collect,videoProperties.getPlayTimeout());
-                        long num = RedisUtils.hmsize(key);
-                        if(num < sumNum){
-                            return;
-                        }
-                        Map<String, RecordItem> hmget =(Map<String, RecordItem>) RedisUtils.hmget(key);
-                        RedisUtils.del(key);
-                        List<RecordItem> recordItems = new ArrayList<>(hmget.values());
-                        Collections.sort(recordItems);
-                        recordInfo.setRecordList(recordItems);
-                        recordInfo.setCount(Math.toIntExact(recordItems.size()));
-                        recordEndSubscribeHandle.handlerEvent(recordInfo);
-                        releaseRequest(deviceVo.getDeviceId(), sn,recordInfo);
+                    String key = String.format("%s%s:%s", VideoConstant.REDIS_RECORD_INFO_RES_PRE, channelId, sn);
+                    String countKey = String.format("%s%s:%s", VideoConstant.REDIS_RECORD_INFO_RES_COUNT_PRE, channelId, sn);
+                    Map<String, Object> collect = recordList.stream().collect(Collectors.toMap(o -> o.getStartTime() + o.getEndTime(), o->o,(o1, o2)->o2));
+                    RedisUtils.set(key,collect,videoProperties.getPlayTimeout());
+                    long incr =  RedisUtils.incr(countKey,recordList.size());
+                    if(incr < sumNum){
+                        return;
                     }
+                    RedisUtils.del(countKey);
+                    // 已接收完成
+                    Map<String, RecordItem> map =(Map<String, RecordItem>) RedisUtils.get(key);
+
+                    RedisUtils.del(key);
+                    RecordInfo build = RecordInfo.builder()
+                            .deviceId(recordInfo.getDeviceId())
+                            .channelId(recordInfo.getChannelId())
+                            .sn(recordInfo.getSn())
+                            .name(recordInfo.getName())
+                            .count(map.size())
+                            .sumNum(recordInfo.getSumNum())
+                            .recordList(new ArrayList<>(map.values()))
+                            .build();
+                    releaseRequest(deviceVo.getDeviceId(), sn,build);
                 }
             } catch (Exception e) {
                 log.error("[国标录像] 发现未处理的异常, \r\n{}", evt.getRequest());

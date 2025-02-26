@@ -89,6 +89,11 @@ public class VideoConstant {
      */
     public static final String REDIS_RECORD_INFO_RES_PRE = "GB_RECORD_INFO_RES:";
     /**
+     * Redis Const
+     * 设备录像信息结果前缀
+     */
+    public static final String REDIS_RECORD_INFO_RES_COUNT_PRE = "GB_RECORD_INFO_RES_COUNT:";
+    /**
      * 通过订阅同步设备通道信息
      */
     public static final String VIDEO_CATALOG_DATA_MANAGER = "VIDEO_CATALOG_DATA_MANAGER:";

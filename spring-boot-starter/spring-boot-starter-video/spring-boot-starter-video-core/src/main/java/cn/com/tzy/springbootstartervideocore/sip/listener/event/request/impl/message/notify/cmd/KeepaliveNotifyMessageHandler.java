@@ -76,7 +76,7 @@ public class KeepaliveNotifyMessageHandler extends SipResponseEvent implements M
                 RedisService.getDeviceNotifySubscribeManager().removeMobilePositionSubscribe(deviceVo);
                 RedisService.getDeviceNotifySubscribeManager().addMobilePositionSubscribe(deviceVo);
             }
-            if( RedisService.getDeviceNotifySubscribeManager().getAlarmSubscribe(deviceVo.getDeviceId())){
+            if(RedisService.getDeviceNotifySubscribeManager().getAlarmSubscribe(deviceVo.getDeviceId())){
                 RedisService.getDeviceNotifySubscribeManager().removeAlarmSubscribe(deviceVo);
                 RedisService.getDeviceNotifySubscribeManager().addAlarmSubscribe(deviceVo);
             }
@@ -86,6 +86,16 @@ public class KeepaliveNotifyMessageHandler extends SipResponseEvent implements M
         }
         deviceVo.setKeepaliveTime(date);
         if (deviceVo.getOnline() == ConstEnum.Flag.YES.getValue()) {
+            if (deviceVo.getSubscribeCycleForCatalog() > 0 && !RedisService.getDeviceNotifySubscribeManager().getCatalogSubscribe(deviceVo.getDeviceId())) {
+                // 查询在线设备那些开启了订阅，为设备开启定时的目录订阅
+                RedisService.getDeviceNotifySubscribeManager().addCatalogSubscribe(deviceVo);
+            }
+            if (deviceVo.getSubscribeCycleForMobilePosition() > 0 && !RedisService.getDeviceNotifySubscribeManager().getMobilePositionSubscribe(deviceVo.getDeviceId())) {
+                RedisService.getDeviceNotifySubscribeManager().addMobilePositionSubscribe(deviceVo);
+            }
+            if (deviceVo.getSubscribeCycleForAlarm() > 0 && !RedisService.getDeviceNotifySubscribeManager().getAlarmSubscribe(deviceVo.getDeviceId())) {
+                RedisService.getDeviceNotifySubscribeManager().addAlarmSubscribe(deviceVo);
+            }
             deviceVoService.save(deviceVo);
         }else{
             deviceVoService.online(deviceVo,sipServer,sipCommander,videoProperties,null,"设备心跳");

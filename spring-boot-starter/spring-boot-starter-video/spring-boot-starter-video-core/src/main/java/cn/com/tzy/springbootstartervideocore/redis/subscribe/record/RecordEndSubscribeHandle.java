@@ -76,7 +76,7 @@ public class RecordEndSubscribeHandle {
                     //发送完后移除
                     int count = recordInfo.getCount();
                     int sumNum = recordInfo.getSumNum();
-                    if (count == sumNum){
+                    if (count >= sumNum){
                         delEndEventHandler(key);
                     }
                 }
