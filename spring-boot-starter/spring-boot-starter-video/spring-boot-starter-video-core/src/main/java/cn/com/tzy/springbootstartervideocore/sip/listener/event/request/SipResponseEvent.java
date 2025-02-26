@@ -3,16 +3,17 @@ package cn.com.tzy.springbootstartervideocore.sip.listener.event.request;
 import cn.com.tzy.springbootstartervideobasic.vo.video.DeviceVo;
 import cn.com.tzy.springbootstartervideobasic.vo.video.ParentPlatformVo;
 import cn.com.tzy.springbootstartervideocore.properties.VideoProperties;
+import cn.com.tzy.springbootstartervideocore.redis.subscribe.sip.message.SipMessageHandle;
 import cn.com.tzy.springbootstartervideocore.sip.SipServer;
 import cn.com.tzy.springbootstartervideocore.sip.cmd.SIPCommander;
 import cn.com.tzy.springbootstartervideocore.sip.cmd.SIPCommanderForPlatform;
-import cn.com.tzy.springbootstartervideocore.redis.subscribe.sip.message.SipMessageHandle;
 import cn.com.tzy.springbootstartervideocore.sip.cmd.build.SIPResponseProvider;
 import cn.hutool.core.util.XmlUtil;
 import gov.nist.javax.sip.message.SIPRequest;
 import gov.nist.javax.sip.message.SIPResponse;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ArrayUtils;
+import org.springframework.util.ObjectUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -20,7 +21,6 @@ import javax.annotation.Resource;
 import javax.sip.InvalidArgumentException;
 import javax.sip.RequestEvent;
 import javax.sip.SipException;
-import javax.sip.message.Request;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -96,19 +96,22 @@ public abstract class SipResponseEvent {
     }
 
     public Element getRootElement(RequestEvent evt, String charset) {
+        byte[] rawContent = evt.getRequest().getRawContent();
+        if (evt.getRequest().getContentLength().getContentLength() == 0
+                || rawContent == null
+                || rawContent.length == 0
+                || ObjectUtils.isEmpty(new String(rawContent))) {
+            return null;
+        }
         if (charset == null) {
             charset = "gb2312";
         }
-        Request request = evt.getRequest();
         // 对海康出现的未转义字符做处理。
         String[] destStrArray = new String[]{"&lt;","&gt;","&amp;","&apos;","&quot;"};
         char despChar = '&'; // 或许可扩展兼容其他字符
         byte destBye = (byte) despChar;
         List<Byte> result = new ArrayList<>();
-        byte[] rawContent = request.getRawContent();
-        if (rawContent == null) {
-            return null;
-        }
+
         for (int i = 0; i < rawContent.length; i++) {
             if (rawContent[i] == destBye) {
                 boolean resul = false;

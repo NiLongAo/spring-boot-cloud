@@ -243,7 +243,7 @@ public class MediaClient {
             putInteger("only_audio", onlyAudio);
         }};
         if(isRtcp != null){
-            map.putInteger("udp_rtcp_timeout", isRtcp);
+            map.putString("udp_rtcp_timeout", isRtcp>1?"500":"0");
         }
 
         return MediaUtils.request(mediaServerVo,ZLMediaKitConstant.START_SEND_RTP, map);
@@ -582,7 +582,7 @@ public class MediaClient {
         param.put("only_audio", sendRtp.isOnlyAudio() ? "1" : "0");
         if (!sendRtp.isTcp()) {
             // 开启rtcp保活
-            param.put("udp_rtcp_timeout", sendRtp.isRtcp()? "1":"0");
+            param.put("udp_rtcp_timeout", sendRtp.isRtcp()? "500":"0");
         }
         MediaRestResult request = MediaUtils.request(mediaServerVo, ZLMediaKitConstant.START_SEND_RTP_PASSIVE, param);
         if(request == null){

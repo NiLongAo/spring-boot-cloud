@@ -66,7 +66,7 @@ public class DeviceInfoResponseMessageHandler extends SipResponseEvent implement
         deviceVo.setModel(XmlUtils.getText(element, "Model"));
         deviceVo.setFirmware(XmlUtils.getText(element, "Firmware"));
         if (ObjectUtils.isEmpty(deviceVo.getStreamMode())) {
-            deviceVo.setStreamMode(StreamModeType.UDP.getValue());
+            deviceVo.setStreamMode(StreamModeType.TCP_PASSIVE.getValue());
         }
         deviceVoService.save(deviceVo);
         deferredResultHolder.invokeAllResult(key, deviceVo);

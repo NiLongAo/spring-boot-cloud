@@ -134,7 +134,7 @@ public class RegisterRequestProcessor extends AbstractSipRequestEvent implements
             response = getRegisterOkResponse(request);
             Address remoteAddressFromRequest = SipUtils.getRemoteAddressFromRequest(request, videoProperties.getSipUseSourceIpAsRemoteAddress());
             if (ObjectUtils.isEmpty(agentVoInfo.getStreamMode())) {
-                agentVoInfo.setStreamMode(StreamModeType.UDP.getValue());
+                agentVoInfo.setStreamMode(StreamModeType.TCP_PASSIVE.getValue());
             }
             if (ObjectUtils.isEmpty(agentVoInfo.getCharset())) {
                 agentVoInfo.setCharset(CharsetType.GB2312.getValue());

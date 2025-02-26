@@ -6,7 +6,6 @@ import cn.com.tzy.springbootcomm.constant.Constant;
 import cn.com.tzy.springbootstartervideobasic.enums.GbIdConstant;
 import cn.com.tzy.springbootstartervideobasic.utils.Coordtransform;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -298,5 +297,35 @@ public class DeviceChannelVo extends LongIdEntity {
         deviceChannel.setParental(1);
         deviceChannel.setSecrecy(0);
         return deviceChannel;
+    }
+
+    public void setPtzType(int ptzType) {
+        this.ptzType = ptzType;
+        switch (ptzType) {
+            case 0:
+                this.ptzTypeText = "未知";
+                break;
+            case 1:
+                this.ptzTypeText = "球机";
+                break;
+            case 2:
+                this.ptzTypeText = "半球";
+                break;
+            case 3:
+                this.ptzTypeText = "固定枪机";
+                break;
+            case 4:
+                this.ptzTypeText = "遥控枪机";
+                break;
+            case 5:
+                this.ptzTypeText = "遥控半球";
+                break;
+            case 6:
+                this.ptzTypeText = "多目设备的全景/拼接通道";
+                break;
+            case 7:
+                this.ptzTypeText = "多目设备的分割通道";
+                break;
+        }
     }
 }

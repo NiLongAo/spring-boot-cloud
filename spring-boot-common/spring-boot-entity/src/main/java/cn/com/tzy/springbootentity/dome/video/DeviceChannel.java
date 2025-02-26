@@ -322,4 +322,34 @@ public class DeviceChannel extends LongIdEntity {
     @TableField(exist = false)
     @ApiModelProperty(value="wan地址")
     private String hostAddress;
+
+    public void setPtzType(int ptzType) {
+        this.ptzType = ptzType;
+        switch (ptzType) {
+            case 0:
+                this.ptzTypeText = "未知";
+                break;
+            case 1:
+                this.ptzTypeText = "球机";
+                break;
+            case 2:
+                this.ptzTypeText = "半球";
+                break;
+            case 3:
+                this.ptzTypeText = "固定枪机";
+                break;
+            case 4:
+                this.ptzTypeText = "遥控枪机";
+                break;
+            case 5:
+                this.ptzTypeText = "遥控半球";
+                break;
+            case 6:
+                this.ptzTypeText = "多目设备的全景/拼接通道";
+                break;
+            case 7:
+                this.ptzTypeText = "多目设备的分割通道";
+                break;
+        }
+    }
 }

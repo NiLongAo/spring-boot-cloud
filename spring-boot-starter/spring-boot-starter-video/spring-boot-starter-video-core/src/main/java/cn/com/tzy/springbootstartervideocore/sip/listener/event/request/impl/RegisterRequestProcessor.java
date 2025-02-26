@@ -125,7 +125,7 @@ public class RegisterRequestProcessor extends AbstractSipRequestEvent implements
             Address remoteAddressFromRequest = SipUtils.getRemoteAddressFromRequest(request, videoProperties.getSipUseSourceIpAsRemoteAddress());
             if (deviceVo == null) {
                 deviceVo = new DeviceVo();
-                deviceVo.setStreamMode(StreamModeType.UDP.getValue());
+                deviceVo.setStreamMode(StreamModeType.TCP_PASSIVE.getValue());
                 deviceVo.setCharset(CharsetType.GB2312.getValue());
                 deviceVo.setGeoCoordSys(GeoCoordSysType.WGS84.getValue());
                 deviceVo.setTreeType(GbIdConstant.Type.TYPE_215.getValue());
@@ -133,7 +133,7 @@ public class RegisterRequestProcessor extends AbstractSipRequestEvent implements
                 deviceVo.setOnline(ConstEnum.Flag.NO.getValue());
             }else {
                 if (ObjectUtils.isEmpty(deviceVo.getStreamMode())) {
-                    deviceVo.setStreamMode(StreamModeType.UDP.getValue());
+                    deviceVo.setStreamMode(StreamModeType.TCP_PASSIVE.getValue());
                 }
                 if (ObjectUtils.isEmpty(deviceVo.getCharset())) {
                     deviceVo.setCharset(CharsetType.GB2312.getValue());

@@ -8,7 +8,6 @@ import cn.com.tzy.springbootstartervideobasic.vo.video.DeviceAlarmVo;
 import cn.com.tzy.springbootstartervideobasic.vo.video.DeviceChannelVo;
 import cn.com.tzy.springbootstartervideobasic.vo.video.DeviceMobilePositionVo;
 import cn.com.tzy.springbootstartervideobasic.vo.video.DeviceVo;
-import cn.com.tzy.springbootstartervideocore.properties.SipConfigProperties;
 import cn.com.tzy.springbootstartervideocore.service.VideoService;
 import cn.com.tzy.springbootstartervideocore.service.video.*;
 import cn.com.tzy.springbootstartervideocore.sip.listener.event.request.AbstractSipRequestEvent;
@@ -89,7 +88,6 @@ public class NotifyRequestProcessor extends AbstractSipRequestEvent implements S
     private void processNotifyCatalogList(RequestEvent event){
         DeviceVoService deviceVoService = VideoService.getDeviceService();
         DeviceChannelVoService deviceChannelVoService = VideoService.getDeviceChannelService();
-        ParentPlatformVoService parentPlatformVoService = VideoService.getParentPlatformService();
         PlatformCatalogVoService platformCatalogVoService = VideoService.getPlatformCatalogService();
         FromHeader fromHeader = (FromHeader) event.getRequest().getHeader(FromHeader.NAME);
         String deviceId = SipUtils.getUserIdFromFromHeader(fromHeader);

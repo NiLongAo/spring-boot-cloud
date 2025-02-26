@@ -16,21 +16,21 @@ import cn.com.tzy.springbootstartervideocore.demo.StreamInfo;
 import cn.com.tzy.springbootstartervideocore.media.client.MediaClient;
 import cn.com.tzy.springbootstartervideocore.model.EventResult;
 import cn.com.tzy.springbootstartervideocore.model.RestResultEvent;
-import cn.com.tzy.springbootstartervideocore.redis.subscribe.media.HookEvent;
-import cn.com.tzy.springbootstartervideocore.redis.subscribe.media.HookKeyFactory;
-import cn.com.tzy.springbootstartervideocore.redis.subscribe.media.MediaHookSubscribe;
 import cn.com.tzy.springbootstartervideocore.properties.SipConfigProperties;
 import cn.com.tzy.springbootstartervideocore.redis.RedisService;
 import cn.com.tzy.springbootstartervideocore.redis.impl.SsrcConfigManager;
 import cn.com.tzy.springbootstartervideocore.redis.impl.SsrcTransactionManager;
+import cn.com.tzy.springbootstartervideocore.redis.subscribe.media.HookEvent;
+import cn.com.tzy.springbootstartervideocore.redis.subscribe.media.HookKeyFactory;
+import cn.com.tzy.springbootstartervideocore.redis.subscribe.media.MediaHookSubscribe;
+import cn.com.tzy.springbootstartervideocore.redis.subscribe.sip.message.SipMessageHandle;
+import cn.com.tzy.springbootstartervideocore.redis.subscribe.sip.message.SipSubscribeEvent;
 import cn.com.tzy.springbootstartervideocore.service.VideoService;
 import cn.com.tzy.springbootstartervideocore.service.video.MediaServerVoService;
 import cn.com.tzy.springbootstartervideocore.sip.SipServer;
 import cn.com.tzy.springbootstartervideocore.sip.cmd.SIPCommander;
-import cn.com.tzy.springbootstartervideocore.redis.subscribe.sip.message.SipMessageHandle;
 import cn.com.tzy.springbootstartervideocore.sip.cmd.SipSendMessage;
 import cn.com.tzy.springbootstartervideocore.sip.cmd.build.SIPRequestProvider;
-import cn.com.tzy.springbootstartervideocore.redis.subscribe.sip.message.SipSubscribeEvent;
 import cn.com.tzy.springbootstartervideocore.utils.SipUtils;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
@@ -39,7 +39,6 @@ import gov.nist.javax.sip.ResponseEventExt;
 import gov.nist.javax.sip.message.SIPRequest;
 import gov.nist.javax.sip.message.SIPResponse;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -95,14 +94,10 @@ public class SIPCommanderImpl implements SIPCommander {
         builder.append(strTmp, 0, 2);
         strTmp = String.format("%02X", parameter2);
         builder.append(strTmp, 0, 2);
-        //优化zoom变倍速率
-        if (combineCode2 > 0 && combineCode2 <16) {
-            combineCode2 = 16;
-        }
-        strTmp = String.format("%X", combineCode2);
-        builder.append(strTmp, 0, 1).append("0");
+        strTmp = String.format("%02X", combineCode2 << 4);
+        builder.append(strTmp, 0, 2);
         //计算校验码
-        int checkCode = (0XA5 + 0X0F + 0X01 + cmdCode + parameter1 + parameter2 + (combineCode2 & 0XF0)) % 0X100;
+        int checkCode = (0XA5 + 0X0F + 0X01 + cmdCode + parameter1 + parameter2 + (combineCode2 << 4)) % 0X100;
         strTmp = String.format("%02X", checkCode);
         builder.append(strTmp, 0, 2);
         return builder.toString();

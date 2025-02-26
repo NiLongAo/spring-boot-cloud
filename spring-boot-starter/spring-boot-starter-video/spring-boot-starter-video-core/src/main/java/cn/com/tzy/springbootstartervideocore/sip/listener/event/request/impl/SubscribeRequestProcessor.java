@@ -37,12 +37,13 @@ public class SubscribeRequestProcessor extends AbstractSipRequestEvent implement
     public void process(RequestEvent event) {
         SIPRequest request = (SIPRequest) event.getRequest();
         Element rootElement = getRootElement(event);
-        if (rootElement == null) {
-            log.error("处理SUBSCRIBE请求  未获取到消息体{}", event.getRequest());
-            return;
-        }
-        String cmd = XmlUtils.getText(rootElement, "CmdType");
         try {
+            if (rootElement == null) {
+                log.error("处理SUBSCRIBE请求  未获取到消息体{}", event.getRequest());
+                responseAck(request, Response.BAD_REQUEST,"接受deviceControl命令错误 未获取到当前类型");
+                return;
+            }
+            String cmd = XmlUtils.getText(rootElement, "CmdType");
             if(CmdTypeConstant.MOBILE_POSITION.equals(cmd)){
                 processNotifyMobilePosition(request,rootElement);
             }else if(CmdTypeConstant.CATALOG.equals(cmd)){

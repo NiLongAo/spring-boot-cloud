@@ -485,7 +485,7 @@ public class MediaClient {
         }
         if (!sendRtp.getTcp()) {
             // 开启rtcp保活
-            map.put("udp_rtcp_timeout", sendRtp.isRtcp()? "1":"0");
+            map.put("udp_rtcp_timeout", sendRtp.isRtcp()? "500":"0");
         }
         if(StringUtils.isNotEmpty(sendRtp.getRecvStreamId())){
             map.putString("recv_stream_id", sendRtp.getRecvStreamId());
@@ -543,7 +543,7 @@ public class MediaClient {
         }
         if (!sendRtp.getTcp()) {
             // 开启rtcp保活
-            map.put("udp_rtcp_timeout", sendRtp.isRtcp()? "1":"0");
+            map.put("udp_rtcp_timeout", sendRtp.isRtcp()? "500":"0");
         }
         if(StringUtils.isNotEmpty(sendRtp.getRecvStreamId())){
             map.putString("recv_stream_id", sendRtp.getRecvStreamId());
