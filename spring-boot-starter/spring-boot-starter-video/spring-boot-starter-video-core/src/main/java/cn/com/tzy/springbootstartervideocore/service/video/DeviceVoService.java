@@ -50,15 +50,22 @@ public abstract class DeviceVoService {
      * 设备上线
      * @param deviceVo
      */
-    public void online(DeviceVo deviceVo, SipServer sipServer, SIPCommander sipCommander, VideoProperties videoProperties, SipTransactionInfo sipTransactionInfo) {
+    public void online(DeviceVo deviceVo, SipServer sipServer, SIPCommander sipCommander, VideoProperties videoProperties, SipTransactionInfo sipTransactionInfo,String reason) {
         DeviceChannelVoService deviceChannelVoService = VideoService.getDeviceChannelService();
         SipTransactionManager sipTransactionManager = RedisService.getSipTransactionManager();
         InviteStreamManager inviteStreamManager = RedisService.getInviteStreamManager();
         DynamicTask dynamicTask = SpringUtil.getBean(DynamicTask.class);
-        log.info("[设备上线] deviceId：{}->{}:{}", deviceVo.getDeviceId(), deviceVo.getIp(), deviceVo.getPort());
-        if ( null  == deviceVo.getKeepaliveIntervalTime() || 0 == deviceVo.getKeepaliveIntervalTime()) {
+        log.info("[设备上线] {},deviceId：{}->{}:{}", reason,deviceVo.getDeviceId(), deviceVo.getIp(), deviceVo.getPort());
+        if ( null  == deviceVo.getHeartBeatInterval() || 0 == deviceVo.getHeartBeatInterval()) {
             // 默认心跳间隔60
-            deviceVo.setKeepaliveIntervalTime(60);
+            deviceVo.setHeartBeatInterval(60);
+        }
+        if ( null  == deviceVo.getHeartBeatCount() || 0 == deviceVo.getHeartBeatCount()) {
+            // 默认心跳间隔60
+            deviceVo.setHeartBeatCount(2);
+        }
+        if ( null  == deviceVo.getPositionCapability()) {
+            deviceVo.setPositionCapability(0);
         }
         if (sipTransactionInfo != null) {
             sipTransactionManager.putDevice(deviceVo.getDeviceId(),sipTransactionInfo);
@@ -66,7 +73,7 @@ public abstract class DeviceVoService {
         deviceVo.setKeepaliveTime(new Date());
         DeviceVo deviceVoGb = this.findDeviceGbId(deviceVo.getDeviceId());
         //缓存设备注册服务
-        RedisService.getRegisterServerManager().putDevice(deviceVo.getDeviceId(),deviceVo.getKeepaliveIntervalTime()+ VideoConstant.DELAY_TIME * 2 , Address.builder().gbId(deviceVo.getDeviceId()).ip(nacosDiscoveryProperties.getIp()).port(nacosDiscoveryProperties.getPort()).build());
+        RedisService.getRegisterServerManager().putDevice(deviceVo.getDeviceId(),deviceVo.getHeartBeatInterval()+ VideoConstant.DELAY_TIME * 2 , Address.builder().gbId(deviceVo.getDeviceId()).ip(nacosDiscoveryProperties.getIp()).port(nacosDiscoveryProperties.getPort()).build());
         if(deviceVoGb == null){
             deviceVo.setOnline(ConstEnum.Flag.YES.getValue());
             deviceVo.setRegisterTime(new Date());
@@ -114,25 +121,26 @@ public abstract class DeviceVoService {
             RedisService.getDeviceNotifySubscribeManager().addAlarmSubscribe(deviceVo);
         }
         String key = String.format("%s_%s", VideoConstant.REGISTER_EXPIRE_TASK_KEY_PREFIX, deviceVo.getDeviceId());
-        //设置设备过期任务
-        dynamicTask.startDelay(key, deviceVo.getKeepaliveIntervalTime()+ VideoConstant.DELAY_TIME * 2 ,()->offline(deviceVo.getDeviceId()));
+        //设备过期任务
+        dynamicTask.startDelay(key, deviceVo.getHeartBeatInterval()*Math.max(deviceVo.getHeartBeatCount(),2),()->offline(deviceVo.getDeviceId(),"设备上线-设备过期任务"));
     }
 
     /**
      * 设备下线
      * @param deviceId
      */
-    public void offline(String deviceId) {
+    public void offline(String deviceId,String reason) {
         DynamicTask dynamicTask = SpringUtil.getBean(DynamicTask.class);
         MediaServerVoService mediaServerVoService = VideoService.getMediaServerService();
         SsrcTransactionManager ssrcTransactionManager = RedisService.getSsrcTransactionManager();
         SsrcConfigManager ssrcConfigManager = RedisService.getSsrcConfigManager();
-        log.info("[设备下线]， device：{}", deviceId);
+        log.info("[设备离线]， {},device：{}",reason, deviceId);
         DeviceVo deviceVo = this.findDeviceGbId(deviceId);
         if (deviceVo == null) {
-            log.warn("[设备下线]：未获取设备信息 deviceId ：{}",deviceId);
+            log.warn("[设备离线]：未获取设备信息 deviceId ：{}",deviceId);
             return;
         }
+        log.info("[设备离线] device：{}， 心跳间隔： {}，心跳超时次数： {}， 上次心跳时间：{}， 上次注册时间： {}", deviceId,deviceVo.getHeartBeatInterval(), deviceVo.getHeartBeatCount(), deviceVo.getKeepaliveTime(), deviceVo.getRegisterTime());
         String key = String.format("%s_%s", VideoConstant.REGISTER_EXPIRE_TASK_KEY_PREFIX, deviceVo.getDeviceId());
         dynamicTask.stop(key);
         this.updateStatus(deviceVo.getId(),false);

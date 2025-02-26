@@ -60,10 +60,10 @@ public class DeviceStatusResponseMessageHandler extends SipResponseEvent impleme
         }
         String text = XmlUtils.getText(element,"Online");
         if ("ONLINE".equalsIgnoreCase(text.trim())) {
-            deviceVoService.online(deviceVo,sipServer,sipCommander,videoProperties,null);
+            deviceVoService.online(deviceVo,sipServer,sipCommander,videoProperties,null,"设备状态的回复");
         }else {
             log.info("设备状态查询结果：" + text.trim());
-            deviceVoService.offline(deviceVo.getDeviceId());
+            deviceVoService.offline(deviceVo.getDeviceId(),"设备状态的回复");
         }
         String key = String.format("%s%s", DeferredResultHolder.CALLBACK_CMD_DEVICESTATUS,deviceVo.getDeviceId());
         deferredResultHolder.invokeAllResult(key, RestResult.result(RespCode.CODE_0.getValue(),null,map));

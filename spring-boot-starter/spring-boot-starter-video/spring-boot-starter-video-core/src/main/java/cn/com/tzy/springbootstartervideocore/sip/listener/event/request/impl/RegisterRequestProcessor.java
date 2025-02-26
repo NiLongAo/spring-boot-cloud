@@ -33,7 +33,6 @@ import javax.sip.header.FromHeader;
 import javax.sip.header.ViaHeader;
 import javax.sip.message.Request;
 import javax.sip.message.Response;
-import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
@@ -84,14 +83,13 @@ public class RegisterRequestProcessor extends AbstractSipRequestEvent implements
                     deviceVo.setPort(remoteAddress.getPort());
                     deviceVo.setHostAddress(remoteAddress.getIp().concat(":").concat(String.valueOf(remoteAddress.getPort())));
                     deviceVo.setLocalIp(request.getLocalAddress().getHostAddress());
-                    deviceVo.setRenewTime(new Date());
                     response = getRegisterOkResponse(request);
                     // 判断TCP还是UDP
                     ViaHeader reqViaHeader = (ViaHeader) request.getHeader(ViaHeader.NAME);
                     String transport = reqViaHeader.getTransport();
                     deviceVo.setTransport("TCP".equalsIgnoreCase(transport) ? TransportType.TCP.getValue() :TransportType.UDP.getValue());
                     sipMessageHandle.handleMessage(request.getLocalAddress().getHostAddress(),response);
-                    deviceVoService.online(deviceVo,sipServer,sipCommander,videoProperties,new SipTransactionInfo((SIPResponse)response));
+                    deviceVoService.online(deviceVo,sipServer,sipCommander,videoProperties,new SipTransactionInfo((SIPResponse)response),"注册续订");
                     return;
                 }
             }
@@ -101,13 +99,13 @@ public class RegisterRequestProcessor extends AbstractSipRequestEvent implements
             if (authHead == null && StringUtils.isNotEmpty(password)) {
                 log.info("[{}] 回复401: {}",title, requestAddress);
                 response = sipServer.getSipFactory().createMessageFactory().createResponse(Response.UNAUTHORIZED, request);
-                new DigestServerAuthenticationHelper().generateChallenge(sipServer.getSipFactory().createHeaderFactory(), response, sipConfigProperties.getDomain());
+                DigestServerAuthenticationHelper.generateChallenge(sipServer.getSipFactory().createHeaderFactory(), response, sipConfigProperties.getDomain());
                 //回复未注册消息 401
                 sipMessageHandle.handleMessage(request.getLocalAddress().getHostAddress(),response);
                 return;
             }
             // 校验密码是否正确
-            boolean passwordCorrect = ObjectUtils.isEmpty(password) || new DigestServerAuthenticationHelper().doAuthenticatePlainTextPassword(request, password);
+            boolean passwordCorrect = ObjectUtils.isEmpty(password) || DigestServerAuthenticationHelper.doAuthenticatePlainTextPassword(request, password);
             if (!passwordCorrect) {
                 // 注册失败
                 response = sipServer.getSipFactory().createMessageFactory().createResponse(Response.FORBIDDEN, request);
@@ -157,13 +155,12 @@ public class RegisterRequestProcessor extends AbstractSipRequestEvent implements
                 String transport = reqViaHeader.getTransport();
                 deviceVo.setTransport("TCP".equalsIgnoreCase(transport) ? 2 : 1);
                 deviceVo.setRegisterTime(new Date());
-                deviceVo.setRenewTime(new Date());
-                deviceVoService.online(deviceVo,sipServer,sipCommander,videoProperties,new SipTransactionInfo((SIPResponse)response));
+                deviceVoService.online(deviceVo,sipServer,sipCommander,videoProperties,new SipTransactionInfo((SIPResponse)response),"设备注册");
             } else {
                 log.info("[{}] deviceId: {}->{}",title ,deviceId, requestAddress);
-                deviceVoService.offline(deviceId);
+                deviceVoService.offline(deviceId,"设备注销");
             }
-        }catch (NoSuchAlgorithmException | SipException | ParseException e){
+        }catch (SipException | ParseException e){
             log.error(e.getMessage());
         }catch (Exception e){
             log.error("[REGISTER请求]，消息处理异常：", e );

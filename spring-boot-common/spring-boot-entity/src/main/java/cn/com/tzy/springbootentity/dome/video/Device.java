@@ -164,14 +164,6 @@ public class Device extends LongIdEntity {
     @JsonFormat(pattern =  Constant.DATE_TIME_FORMAT)
     private Date registerTime;
 
-    /**
-     * 续订时间
-     */
-    @TableField(value = "renew_time")
-    @ApiModelProperty(value="注册时间")
-    @DateTimeFormat(pattern = Constant.DATE_TIME_FORMAT)
-    @JsonFormat(pattern =  Constant.DATE_TIME_FORMAT)
-    private Date renewTime;
 
     /**
      * 心跳时间
@@ -183,11 +175,25 @@ public class Device extends LongIdEntity {
     private Date keepaliveTime;
 
     /**
+     * 心跳超时次数
+     */
+    @TableField(value = "heart_beat_interval")
+    @ApiModelProperty(value="心跳间隔")
+    private Integer heartBeatInterval;
+
+    /**
      * 心跳间隔
      */
-    @TableField(value = "keepalive_interval_time")
+    @TableField(value = "heart_beat_count")
     @ApiModelProperty(value="心跳间隔")
-    private Integer keepaliveIntervalTime;
+    private Integer heartBeatCount;
+
+    /**
+     * 定位功能支持情况
+     */
+    @TableField(value = "position_capability")
+    @ApiModelProperty(value="心跳间隔")
+    private Integer positionCapability;
 
     /**
      * 数据流传输模式 0.UDP:udp传输 1.TCP-PASSIVE：tcp被动模式 2.TCP-ACTIVE：tcp主动模式

@@ -10,8 +10,6 @@ import cn.com.tzy.springbootcomm.constant.NotNullMap;
 import cn.com.tzy.springbootentity.dome.video.Device;
 import cn.com.tzy.springbootentity.dome.video.DeviceChannel;
 import cn.com.tzy.springbootentity.dome.video.PlatformGbChannel;
-import cn.com.tzy.springbootentity.vo.video.DeviceChannelTreeVo;
-import cn.com.tzy.springbootfeignbean.api.bean.UserServiceFeign;
 import cn.com.tzy.springbootstartervideobasic.enums.StreamModeType;
 import cn.com.tzy.springbootstartervideobasic.vo.video.DeviceVo;
 import cn.com.tzy.springbootstartervideocore.demo.VideoRestResult;
@@ -100,7 +98,7 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
         RedisService.getDeviceNotifySubscribeManager().removeCatalogSubscribe(DeviceConvert.INSTANCE.convert(device));
         RedisService.getDeviceNotifySubscribeManager().removeMobilePositionSubscribe(DeviceConvert.INSTANCE.convert(device));
         //5设备下线
-        VideoService.getDeviceService().offline(deviceId);
+        VideoService.getDeviceService().offline(deviceId,"删除设备");
         //6.删除设备
         baseMapper.deleteById(device.getId());
         return RestResult.result(RespCode.CODE_0.getValue(),"删除成功");
@@ -131,7 +129,7 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
         if(save > 0){
             Device device = baseMapper.selectOne(new LambdaQueryWrapper<Device>().eq(Device::getDeviceId, deviceVo.getDeviceId()));
             if(device.getOnline()==ConstEnum.Flag.YES.getValue()){
-                VideoService.getDeviceService().offline(deviceVo.getDeviceId());
+                VideoService.getDeviceService().offline(deviceVo.getDeviceId(),"保存设备");
             }
             return RestResult.result(RespCode.CODE_0.getValue(),"保存成功");
         }else {

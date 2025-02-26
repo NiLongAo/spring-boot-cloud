@@ -23,8 +23,9 @@
     <result column="online" property="online" />
     <result column="register_time" property="registerTime" />
     <result column="keepalive_time" property="keepaliveTime" />
-    <result column="renew_time" property="renewTime" />
-    <result column="keepalive_interval_time" property="keepaliveIntervalTime" />
+    <result column="heart_beat_interval" property="heartBeatInterval" />
+    <result column="heart_beat_count" property="heartBeatCount" />
+    <result column="position_capability" property="positionCapability" />
     <result column="stream_mode" property="streamMode" />
     <result column="expires" property="expires" />
     <result column="mobile_position_submission_interval" property="mobilePositionSubmissionInterval" />
@@ -43,7 +44,7 @@
   <sql id="Base_Column_List">
     id, device_id, `name`, manufacturer, model, custom_name, firmware, transport, ip, 
     port, host_address, `password`, sdp_ip, local_ip, charset, tree_type, geo_coord_sys,
-    `online`, register_time, renew_time,keepalive_time, keepalive_interval_time,stream_mode, expires, mobile_position_submission_interval,
+    `online`, register_time,keepalive_time, heart_beat_interval,heart_beat_count,position_capability,stream_mode, expires, mobile_position_submission_interval,
     subscribe_cycle_for_catalog, subscribe_cycle_for_mobile_position, subscribe_cycle_for_alarm,
     has_administrator,as_message_channel,switch_primary_sub_stream,ssrc_check, create_user_id, create_time, update_user_id, update_time
   </sql>

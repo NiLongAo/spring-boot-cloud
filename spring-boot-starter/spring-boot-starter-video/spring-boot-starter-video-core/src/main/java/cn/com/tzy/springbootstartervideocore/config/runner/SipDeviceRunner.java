@@ -49,7 +49,7 @@ public class SipDeviceRunner implements CommandLineRunner {
             List<DeviceVo> allDeviceVo = deviceVoService.getAllOnlineDevice();
             for (DeviceVo deviceVo : allDeviceVo) {
                 if(deviceVo.keepalive()){
-                    deviceVoService.offline(deviceVo.getDeviceId());
+                    deviceVoService.offline(deviceVo.getDeviceId(),"设备离线定时任务");
                 }
             }
         });

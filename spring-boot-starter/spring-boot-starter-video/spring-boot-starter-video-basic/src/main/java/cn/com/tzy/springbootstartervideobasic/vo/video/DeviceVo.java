@@ -116,12 +116,6 @@ public class DeviceVo extends LongIdEntity {
     @JsonFormat(pattern =  Constant.DATE_TIME_FORMAT)
     private Date registerTime;
     /**
-     * 续订时间
-     */
-    @DateTimeFormat(pattern = Constant.DATE_TIME_FORMAT)
-    @JsonFormat(pattern =  Constant.DATE_TIME_FORMAT)
-    private Date renewTime;
-    /**
      * 心跳时间
      */
     @DateTimeFormat(pattern = Constant.DATE_TIME_FORMAT)
@@ -131,7 +125,17 @@ public class DeviceVo extends LongIdEntity {
     /**
      * 心跳间隔
      */
-    private Integer keepaliveIntervalTime;
+    private Integer heartBeatInterval;
+
+    /**
+     * 心跳间隔
+     */
+    private Integer heartBeatCount;
+
+    /**
+     * 定位功能支持情况
+     */
+    private Integer positionCapability;
 
     /**
      * 数据流传输模式 0.UDP:udp传输 1.TCP-PASSIVE：tcp被动模式 2.TCP-ACTIVE：tcp主动模式
@@ -186,19 +190,12 @@ public class DeviceVo extends LongIdEntity {
      */
     private Integer switchPrimarySubStream;
 
-    public boolean expire(){
-        if(renewTime == null || expires == null){
-            return true;
-        }
-        DateTime endTime = DateUtil.offsetSecond(renewTime, expires+ VideoConstant.DELAY_TIME);
-        return endTime.isBefore(new Date());
-    }
 
     public boolean keepalive(){
-        if(keepaliveTime == null || keepaliveIntervalTime == null){
+        if(keepaliveTime == null || heartBeatInterval == null){
             return true;
         }
-        DateTime endTime = DateUtil.offsetSecond(keepaliveTime, keepaliveIntervalTime+ VideoConstant.DELAY_TIME);
+        DateTime endTime = DateUtil.offsetSecond(keepaliveTime, heartBeatInterval + VideoConstant.DELAY_TIME);
         return endTime.isBefore(new Date());
     }
 

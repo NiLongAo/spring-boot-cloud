@@ -5,11 +5,15 @@ import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootstartervideobasic.enums.CmdType;
 import cn.com.tzy.springbootstartervideobasic.vo.video.DeviceVo;
 import cn.com.tzy.springbootstartervideobasic.vo.video.ParentPlatformVo;
-import cn.com.tzy.springbootstartervideocore.sip.listener.event.request.impl.message.response.ResponseMessageHandler;
 import cn.com.tzy.springbootstartervideocore.redis.subscribe.result.DeferredResultHolder;
+import cn.com.tzy.springbootstartervideocore.service.VideoService;
 import cn.com.tzy.springbootstartervideocore.sip.listener.event.request.SipResponseEvent;
 import cn.com.tzy.springbootstartervideocore.sip.listener.event.request.impl.message.MessageHandler;
+import cn.com.tzy.springbootstartervideocore.sip.listener.event.request.impl.message.response.ResponseMessageHandler;
 import cn.com.tzy.springbootstartervideocore.utils.XmlUtils;
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.XmlUtil;
 import gov.nist.javax.sip.message.SIPRequest;
 import lombok.extern.log4j.Log4j2;
@@ -50,6 +54,16 @@ public class ConfigDownloadResponseMessageHandler extends SipResponseEvent imple
         Map<String, Object> map = XmlUtil.xmlToMap(element);
         if (log.isDebugEnabled()) {
             log.debug(map);
+        }
+        Map<String, Object> basicParam = BeanUtil.beanToMap("BasicParam");
+        if(ObjectUtil.isNotEmpty(basicParam)){
+            DeviceVo build = DeviceVo.builder()
+                    .deviceId(deviceVo.getDeviceId())
+                    .heartBeatInterval(MapUtil.getInt(basicParam, "heartBeatInterval", 60))
+                    .heartBeatCount(MapUtil.getInt(basicParam, "heartBeatCount", 2))
+                    .positionCapability(MapUtil.getInt(basicParam, "positionCapability", 2))
+                    .build();
+            VideoService.getDeviceService().save(build);
         }
         deferredResultHolder.invokeAllResult(key, RestResult.result(RespCode.CODE_0.getValue(),null,map));
     }
