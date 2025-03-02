@@ -65,4 +65,14 @@ public class MediaServerController extends ApiController {
         return mediaServerService.findPlayUrl(deviceId,channelId);
     }
 
+    /**
+     * 获取流信息
+     * @param app APP编号
+     * @param stream 流编号
+     * @param mediaServerId 流媒体信息
+     */
+    @GetMapping("find_media_info")
+    public RestResult<?> findMediaInfo(@RequestParam("app") String app,@RequestParam("stream")String stream,@RequestParam("mediaServerId")String mediaServerId){
+        return mediaServerService.getMediaInfo(app,stream,mediaServerId);
+    }
 }

@@ -64,4 +64,14 @@ public class MediaServerController extends ApiController {
         return mediaServerService.findPlayUrl(deviceId,channelId);
     }
 
+    @ApiOperation(value = "获取流信息", notes = "获取流信息")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="app", value="设备编号", required=true, paramType="query", dataType="String", defaultValue=""),
+            @ApiImplicitParam(name="stream", value="通道编号", required=true, paramType="query", dataType="String", defaultValue=""),
+            @ApiImplicitParam(name="mediaServerId", value="流媒体信息", required=true, paramType="query", dataType="String", defaultValue=""),
+    })
+    @GetMapping("find_media_info")
+    public RestResult<?> findMediaInfo(@RequestParam("app") String app,@RequestParam("stream")String stream,@RequestParam("mediaServerId")String mediaServerId){
+        return mediaServerService.findMediaInfo(app,stream,mediaServerId);
+    }
 }

@@ -19,4 +19,6 @@ public interface MediaServerService extends IService<MediaServer>{
     RestResult<?> findPlayUrl(String deviceId, String channelId);
 
     RestResult<?> detail(String id);
+
+    RestResult<?> getMediaInfo(String app, String stream, String mediaServerId);
 }

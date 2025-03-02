@@ -312,7 +312,7 @@ public class PtzController extends ApiController {
         return ptzService.wiper(deviceId, channelId, command);
     }
 
-    @ApiOperation(value = "辅助开关控制指令-辅助开关控制", notes = "辅助开关控制指令-辅助开关控制")
+    @ApiOperation(value = "辅助开关控制指令-辅助控制", notes = "辅助开关控制指令-辅助控制")
     @ApiImplicitParams({
             @ApiImplicitParam(name="deviceId", value="设备国标编号", required=true, paramType="query", dataType="极tring", defaultValue=""),
             @ApiImplicitParam(name="channelId", value="通道国标编号", required=true, paramType="query", dataType="String", defaultValue=""),

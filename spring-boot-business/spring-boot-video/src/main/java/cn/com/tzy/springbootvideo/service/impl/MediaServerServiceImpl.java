@@ -9,6 +9,7 @@ import cn.com.tzy.springbootentity.dome.video.MediaServer;
 import cn.com.tzy.springbootentity.param.video.MediaServerPageParam;
 import cn.com.tzy.springbootentity.param.video.MediaServerSaveParam;
 import cn.com.tzy.springbootstartervideobasic.exception.VideoException;
+import cn.com.tzy.springbootstartervideobasic.vo.media.OnStreamChangedResult;
 import cn.com.tzy.springbootstartervideobasic.vo.media.ZLMServerConfig;
 import cn.com.tzy.springbootstartervideobasic.vo.video.MediaServerVo;
 import cn.com.tzy.springbootstartervideocore.demo.InviteInfo;
@@ -16,6 +17,7 @@ import cn.com.tzy.springbootstartervideocore.media.client.MediaClient;
 import cn.com.tzy.springbootstartervideocore.media.client.ZlmService;
 import cn.com.tzy.springbootstartervideocore.redis.RedisService;
 import cn.com.tzy.springbootstartervideocore.redis.impl.InviteStreamManager;
+import cn.com.tzy.springbootstartervideocore.service.VideoService;
 import cn.com.tzy.springbootvideo.convert.video.MediaServerConvert;
 import cn.com.tzy.springbootvideo.mapper.MediaServerMapper;
 import cn.com.tzy.springbootvideo.service.MediaServerService;
@@ -138,5 +140,18 @@ public class MediaServerServiceImpl extends ServiceImpl<MediaServerMapper, Media
             return  RestResult.result(RespCode.CODE_2.getValue(),"未获取流媒体信息");
         }
         return RestResult.result(RespCode.CODE_0.getValue(),null,mediaServer);
+    }
+
+    @Override
+    public RestResult<?> getMediaInfo(String deviceId, String channelId, String mediaServerId) {
+        MediaServerVo mediaServerVo = VideoService.getMediaServerService().findOnLineMediaServerId(mediaServerId);
+        if(mediaServerVo == null){
+            return RestResult.result(RespCode.CODE_2.getValue(),"未获取流媒体信息");
+        }
+        OnStreamChangedResult mediaInfo = MediaClient.getMediaInfo(mediaServerVo, null, null, deviceId, channelId);
+        if(mediaInfo == null || mediaInfo.getCode() != RespCode.CODE_0.getValue()){
+            return RestResult.result(RespCode.CODE_2.getValue(),"未获取当前流信息");
+        }
+        return RestResult.result(RespCode.CODE_0.getValue(),null,mediaInfo);
     }
 }

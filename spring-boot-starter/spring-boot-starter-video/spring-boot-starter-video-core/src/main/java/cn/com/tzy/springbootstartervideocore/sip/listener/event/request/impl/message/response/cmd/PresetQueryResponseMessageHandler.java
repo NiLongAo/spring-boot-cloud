@@ -71,13 +71,10 @@ public class PresetQueryResponseMessageHandler extends SipResponseEvent implemen
         for (Element itemOne : presetList) {
             PresetQuerySipReq presetQuerySipReq = new PresetQuerySipReq();
             // 遍历item
-            String name = itemOne.getNodeName();
-            String textTrim = itemOne.getNodeValue();
-            if ("PresetID".equalsIgnoreCase(name)) {
-                presetQuerySipReq.setPresetId(textTrim);
-            } else {
-                presetQuerySipReq.setPresetName(textTrim);
-            }
+            String PresetID = XmlUtils.getText(itemOne, "PresetID");
+            String PresetName = XmlUtils.getText(itemOne, "PresetName");
+            presetQuerySipReq.setPresetId(PresetID);
+            presetQuerySipReq.setPresetName(PresetName);
             presetQuerySipReqList.add(presetQuerySipReq);
         }
         deferredResultHolder.invokeAllResult(key, RestResult.result(RespCode.CODE_0.getValue(),null,presetQuerySipReqList));

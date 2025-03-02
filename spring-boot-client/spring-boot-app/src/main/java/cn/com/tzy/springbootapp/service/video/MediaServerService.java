@@ -55,4 +55,14 @@ public class MediaServerService {
     public RestResult<?> findPlayUrl(String deviceId,String channelId){
         return mediaServerServiceFeign.findPlayUrl(deviceId,channelId);
     }
+
+    /**
+     * 获取流信息
+     * @param app APP编号
+     * @param stream 流编号
+     * @param mediaServerId 流媒体信息
+     */
+    public RestResult<?> findMediaInfo(String app,String stream,String mediaServerId){
+        return mediaServerServiceFeign.findMediaInfo(app,stream,mediaServerId);
+    }
 }

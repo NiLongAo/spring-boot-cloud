@@ -441,7 +441,7 @@ public class PtzController extends ApiController {
     }
 
     /**
-     * 辅助开关控制指令-雨刷控制
+     * 辅助开关控制指令-辅助控制
      */
     @GetMapping("/auxiliary")
     public RestResult<?> auxiliary(@RequestParam("deviceId")String deviceId,@RequestParam("channelId")String channelId, @RequestParam("command") String command,@RequestParam("switchId") Integer switchId) {

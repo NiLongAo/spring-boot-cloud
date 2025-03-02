@@ -162,6 +162,10 @@ public class OnStreamChangedHookVo extends HookVo{
          * 视频宽
          */
         private int width;
+        /**
+         * 丢包率
+         */
+        private int loss;
     }
 
     @Data

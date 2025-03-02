@@ -180,7 +180,7 @@ public interface PtzServiceFeign {
     RestResult<?> wiper(@RequestParam("deviceId")String deviceId,@RequestParam("channelId")String channelId, @RequestParam("command") String command);
 
     /**
-     * 辅助开关控制指令-雨刷控制
+     * 辅助开关控制指令-辅助控制
      * @return
      */
     @RequestMapping(value = "/auxiliary",method = RequestMethod.GET)

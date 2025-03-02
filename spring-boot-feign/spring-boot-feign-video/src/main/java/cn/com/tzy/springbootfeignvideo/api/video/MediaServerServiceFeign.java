@@ -48,4 +48,13 @@ public interface MediaServerServiceFeign {
      */
     @RequestMapping(value = "/find_play_url",method = RequestMethod.GET)
     RestResult<?> findPlayUrl(@RequestParam("deviceId") String deviceId,@RequestParam("channelId")String channelId);
+
+    /**
+     * 获取流信息
+     * @param app APP编号
+     * @param stream 流编号
+     * @param mediaServerId 流媒体信息
+     */
+    @RequestMapping(value = "/find_media_info",method = RequestMethod.GET)
+    RestResult<?> findMediaInfo(@RequestParam("app") String app,@RequestParam("stream")String stream,@RequestParam("mediaServerId")String mediaServerId);
 }
