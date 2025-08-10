@@ -48,7 +48,7 @@ public class SmsConfigServiceImpl extends ServiceImpl<SmsConfigMapper, SmsConfig
             map.putDateTime("updateTime", obj.getUpdateTime());
             data.add(map);
         });
-        return PageResult.result(RespCode.CODE_0.getValue(), total, null, data);
+        return PageResult.result(RespCode.CODE_0.getValue(), null, data, total);
     }
 
     @Override

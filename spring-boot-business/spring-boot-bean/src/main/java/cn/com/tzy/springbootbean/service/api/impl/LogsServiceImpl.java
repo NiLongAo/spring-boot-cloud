@@ -34,7 +34,7 @@ public class LogsServiceImpl extends ServiceImpl<LogsMapper, Logs> implements Lo
             map.putDateTime("createTime", obj.getCreateTime());
             data.add(map);
         }
-        return PageResult.result(RespCode.CODE_0.getValue(), total, null, data);
+        return PageResult.result(RespCode.CODE_0.getValue(), null, data, total);
     }
 
     @Override

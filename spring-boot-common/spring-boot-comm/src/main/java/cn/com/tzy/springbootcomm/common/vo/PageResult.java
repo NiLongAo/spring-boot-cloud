@@ -19,32 +19,24 @@ public class PageResult implements Serializable {
     int code;
     String message;
     String tid = TraceContext.traceId();
-    PageModel data;
+    public Object data;
+    public int total;
 
-    public PageResult(int code, String message,PageModel data) {
+    public PageResult(int code, String message, Object data,int total) {
         this.code = code;
         this.message = message;
         this.data = data;
+        this.total = total;
     }
 
     public static PageResult result(RespCode respCode) {
-        return new PageResult(respCode.getValue(), respCode.getName(),null);
+        return result(respCode.getValue(), respCode.getName());
     }
 
     public static PageResult result(int code, String message) {
-        return new PageResult(code, message,null);
+        return result(code, message,null,0);
     }
-    public static PageResult result(int code,int total, String message, Object data) {
-        return new PageResult(code, message,new PageModel(total,data));
-    }
-
-    public static class PageModel{
-        public int total;
-        public Object data;
-
-        public PageModel(int total, Object data) {
-            this.total = total;
-            this.data = data;
-        }
+    public static PageResult result(int code, String message, Object data,int total) {
+        return new PageResult(code, message,data,total);
     }
 }

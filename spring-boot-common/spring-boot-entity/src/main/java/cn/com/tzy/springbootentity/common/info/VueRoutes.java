@@ -1,5 +1,6 @@
 package cn.com.tzy.springbootentity.common.info;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -33,6 +34,8 @@ public class VueRoutes {
     private String  pid;
     //菜单类型 'catalog', 'menu', 'embedded', 'link', 'button',
     private String type;
+
+    private Integer status;
 
     @Getter
     @Setter

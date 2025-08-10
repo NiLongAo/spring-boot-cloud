@@ -38,7 +38,7 @@ public class OauthClientServiceImpl extends ServiceImpl<OauthClientMapper, Oauth
             map.putString("autoapprove", obj.getAutoapprove());
             data.add(map);
         });
-        return PageResult.result(RespCode.CODE_0.getValue(), total, null, data);
+        return PageResult.result(RespCode.CODE_0.getValue(), null, data, total);
     }
 
     @Override

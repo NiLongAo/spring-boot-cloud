@@ -44,7 +44,7 @@ public class ConfigServiceImpl extends ServiceImpl<ConfigMapper, Config> impleme
             map.putString("v", obj.getV());
             data.add(map);
         });
-        return PageResult.result(RespCode.CODE_0.getValue(), total, null, data);
+        return PageResult.result(RespCode.CODE_0.getValue(), null, data, total);
     }
 
     @Override

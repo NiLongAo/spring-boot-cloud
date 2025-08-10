@@ -108,7 +108,7 @@ public class ActivitiServcieImpl extends BaseWorkflowService implements Activiti
                 map.putDateTime("dueDate",task.getDueDate());
                 maps.add(map);
             }
-            result = PageResult.result(RespCode.CODE_0.getValue(),(int) count,null,maps);
+            result = PageResult.result(RespCode.CODE_0.getValue(),null,maps,(int) count);
         } catch (Exception e) {
             log.error("获取待办流程错误:",e);
             result = PageResult.result(RespCode.CODE_2.getValue(),"获取待办流程错误");
@@ -156,7 +156,7 @@ public class ActivitiServcieImpl extends BaseWorkflowService implements Activiti
                 map.putDateTime("endTime",instance.getEndTime());
                 maps.add(map);
             }
-            result = PageResult.result(RespCode.CODE_0.getValue(),(int) count,null,maps);
+            result = PageResult.result(RespCode.CODE_0.getValue(),null,maps,(int) count);
         } catch (Exception e) {
             log.error("获取发起流程信息错误:",e);
             result = PageResult.result(RespCode.CODE_2.getValue(),"获取发起流程信息错误");
@@ -201,7 +201,7 @@ public class ActivitiServcieImpl extends BaseWorkflowService implements Activiti
                 map.putDateTime("endTime",task.getEndTime());
                 maps.add(map);
             }
-            result = PageResult.result(RespCode.CODE_0.getValue(),(int) count,null,maps);
+            result = PageResult.result(RespCode.CODE_0.getValue(),null,maps,(int) count);
         } catch (Exception e) {
             log.error("获取历史流程错误:",e);
             result = PageResult.result(RespCode.CODE_2.getValue(),"获取历史流程错误");
@@ -233,7 +233,7 @@ public class ActivitiServcieImpl extends BaseWorkflowService implements Activiti
                 map.put("diagramResourceName",processDefinition.getDiagramResourceName());
                 maps.add(map);
             }
-            result = PageResult.result(RespCode.CODE_0.getValue(),(int) count,null,maps);
+            result = PageResult.result(RespCode.CODE_0.getValue(),null,maps,(int) count);
         } catch (Exception e) {
             log.error("获取历史流程错误:",e);
             result = PageResult.result(RespCode.CODE_2.getValue(),"获取历史流程错误");
@@ -272,7 +272,7 @@ public class ActivitiServcieImpl extends BaseWorkflowService implements Activiti
                 map.putDateTime("dueDate",task.getDueDate());
                 maps.add(map);
             }
-            result = PageResult.result(RespCode.CODE_0.getValue(),(int) count,null,maps);
+            result = PageResult.result(RespCode.CODE_0.getValue(),null,maps,(int) count);
         } catch (Exception e) {
             log.error("获取待办流程错误:",e);
             result = PageResult.result(RespCode.CODE_2.getValue(),"获取待办流程错误");
@@ -313,7 +313,7 @@ public class ActivitiServcieImpl extends BaseWorkflowService implements Activiti
                 map.putDateTime("endTime",historicProcessInstance.getEndTime());
                 maps.add(map);
             }
-            result = PageResult.result(RespCode.CODE_0.getValue(),(int) count,null,maps);
+            result = PageResult.result(RespCode.CODE_0.getValue(),null,maps,(int) count);
         } catch (Exception e) {
             log.error("获取历史任务错误:",e);
             result = PageResult.result(RespCode.CODE_2.getValue(),"获取历史任务错误");

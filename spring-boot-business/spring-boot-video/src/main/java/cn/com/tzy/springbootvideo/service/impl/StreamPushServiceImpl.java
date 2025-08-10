@@ -47,7 +47,7 @@ public class StreamPushServiceImpl extends ServiceImpl<StreamPushMapper, StreamP
     public PageResult findPage(StreamPushPageParam param) {
         int total = baseMapper.findPageCount(param);
         List<StreamPushVo> pageResult = baseMapper.findPageResult(param);
-        return PageResult.result(RespCode.CODE_0.getValue(), total, null, pageResult);
+        return PageResult.result(RespCode.CODE_0.getValue(), null, pageResult, total);
     }
 
     @Override

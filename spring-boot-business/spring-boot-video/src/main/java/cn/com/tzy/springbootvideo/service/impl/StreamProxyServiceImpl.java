@@ -44,7 +44,7 @@ public class StreamProxyServiceImpl extends ServiceImpl<StreamProxyMapper, Strea
     public PageResult findPage(StreamProxyPageParam param) {
         int total = baseMapper.findPageCount(param);
         List<StreamProxyVo> pageResult = baseMapper.findPageResult(param);
-        return PageResult.result(RespCode.CODE_0.getValue(), total, null, pageResult);
+        return PageResult.result(RespCode.CODE_0.getValue(), null, pageResult, total);
     }
 
     @Override

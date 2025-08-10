@@ -32,7 +32,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
             map.putString("memo", obj.getMemo());
             data.add(map);
         });
-        return PageResult.result(RespCode.CODE_0.getValue(), total, null, data);
+        return PageResult.result(RespCode.CODE_0.getValue(), null, data, total);
     }
 
     @Override

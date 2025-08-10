@@ -232,7 +232,7 @@ public class UserService {
             request.setPageNumber(number);
             request.setPageSize(size);
             PageResult page = userServiceFeign.page(request);
-            List<UserExportModel> list = AppUtils.convertValue2(page.getData().data,new TypeReference<List<UserExportModel>>(){});
+            List<UserExportModel> list = AppUtils.convertValue2(page.getData(),new TypeReference<List<UserExportModel>>(){});
             if(list.isEmpty()){
                 break;
             }else if(list.size() < 2000){

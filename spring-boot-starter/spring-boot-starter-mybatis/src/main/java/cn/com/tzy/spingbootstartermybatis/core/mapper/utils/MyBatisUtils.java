@@ -44,11 +44,11 @@ public class MyBatisUtils {
     }
     public static <T> PageResult selectPage(BaseMapper<T> mapper,Page<T> page, Wrapper<T> queryWrapper) {
         mapper.selectPage(page,queryWrapper);
-        return PageResult.result(RespCode.CODE_0.getValue(), Math.toIntExact(page.getTotal()),null,page.getRecords());
+        return PageResult.result(RespCode.CODE_0.getValue(), null,page.getRecords(),Math.toIntExact(page.getTotal()));
     }
 
     public static <T> PageResult selectPage(IPage<T> page) {
-        return PageResult.result(RespCode.CODE_0.getValue(), Math.toIntExact(page.getTotal()),null,page.getRecords());
+        return PageResult.result(RespCode.CODE_0.getValue(),null,page.getRecords(), Math.toIntExact(page.getTotal()));
     }
 
 

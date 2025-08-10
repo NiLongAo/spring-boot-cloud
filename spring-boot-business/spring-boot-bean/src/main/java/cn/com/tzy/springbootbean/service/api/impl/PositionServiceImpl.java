@@ -44,7 +44,7 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, Position> i
         List<TreeNode<Position>> treeNode = TreeUtil.getTree(pageResult, Position::getParentId, Position::getId, null);
         //转换树结构
         List<Map> maps = AppUtils.transformationTree("children", treeNode);
-        return PageResult.result(RespCode.CODE_0.getValue(), pageResult.size(), null, maps);
+        return PageResult.result(RespCode.CODE_0.getValue(), null, maps, pageResult.size());
     }
 
     public void findParent(Map<Long, Position> map, Position onj){

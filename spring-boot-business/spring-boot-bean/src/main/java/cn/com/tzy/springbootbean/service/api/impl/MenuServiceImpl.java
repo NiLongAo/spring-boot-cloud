@@ -74,9 +74,9 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         menuList = menuList.stream().sorted(Comparator.comparingInt(Menu::getOrder)).collect(Collectors.toList());
         //查询操作结束...
         List<TreeNode<Menu>> treeNode = TreeUtil.getTree(menuList, Menu::getParentId, Menu::getId, Arrays.asList(null,""));
-        //转换树结构
-        List<Map> maps = AppUtils.transformationTree("children", treeNode);
-        return PageResult.result(RespCode.CODE_0.getValue(),menuList.size(),null,maps);
+        //树转vue路由
+        List<VueRoutes> routes = findRoutes(treeNode);
+        return PageResult.result(RespCode.CODE_0.getValue(),null,routes,menuList.size());
     }
 
     @SneakyThrows

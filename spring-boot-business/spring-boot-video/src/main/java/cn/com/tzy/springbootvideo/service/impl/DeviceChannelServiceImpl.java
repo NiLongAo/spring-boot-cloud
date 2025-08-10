@@ -90,12 +90,12 @@ public class DeviceChannelServiceImpl extends ServiceImpl<DeviceChannelMapper, D
             List<DeviceChannel> deviceChannelList = baseMapper.businessGroupList(param.deviceId,param.online,true);
             List<TreeNode<DeviceChannel>> treeNode = TreeUtil.getTree(deviceChannelList, DeviceChannel::getCivilCode, DeviceChannel::getChannelId, strings);
             List<Map> maps = AppUtils.transformationTree("children", treeNode);
-            return PageResult.result(RespCode.CODE_0.getValue(),deviceChannelList.size(),null,maps);
+            return PageResult.result(RespCode.CODE_0.getValue(),null,maps,deviceChannelList.size());
         }else if(GbIdConstant.Type.TYPE_215.getValue() == deviceVo.getTreeType()){
             List<DeviceChannel> deviceChannelList = baseMapper.businessGroupList(param.deviceId,param.online,false);
             List<TreeNode<DeviceChannel>> treeNode = TreeUtil.getTree(deviceChannelList, DeviceChannel::getParentId, DeviceChannel::getChannelId, strings);
             List<Map> maps = AppUtils.transformationTree("children", treeNode);
-            return PageResult.result(RespCode.CODE_0.getValue(),deviceChannelList.size(),null,maps);
+            return PageResult.result(RespCode.CODE_0.getValue(),null,maps,deviceChannelList.size());
         }else {
             return PageResult.result(RespCode.CODE_2.getValue(),"设备业务类型错误");
         }

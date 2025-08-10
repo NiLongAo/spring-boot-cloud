@@ -34,7 +34,7 @@ public class MobileMessageTemplateServiceImpl extends ServiceImpl<MobileMessageT
             map.putString("code", obj.getCode());
             data.add(map);
         });
-        return PageResult.result(RespCode.CODE_0.getValue(), total, null, data);
+        return PageResult.result(RespCode.CODE_0.getValue(), null, data, total);
     }
 
     @Override

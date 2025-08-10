@@ -31,7 +31,7 @@ public class DictionaryItemServiceImpl extends ServiceImpl<DictionaryItemMapper,
     public PageResult page(DictionaryItemParam param) {
         List<NotNullMap> data = new ArrayList<>();
         if(param.typeId == null){
-            return PageResult.result(RespCode.CODE_0.getValue(), 0, null, data);
+            return PageResult.result(RespCode.CODE_0.getValue(), null, data, 0);
         }
         int total = baseMapper.findPageCount(param);
         List<DictionaryItem> pageResult = baseMapper.findPageResult(param);
@@ -44,7 +44,7 @@ public class DictionaryItemServiceImpl extends ServiceImpl<DictionaryItemMapper,
             map.putString("value", obj.getValue());
             data.add(map);
         });
-        return PageResult.result(RespCode.CODE_0.getValue(), total, null, data);
+        return PageResult.result(RespCode.CODE_0.getValue(), null, data, total);
     }
 
     @Transactional(rollbackFor = Exception.class)
