@@ -21,7 +21,7 @@ public interface MenuConvert {
         if (type == null) {
             return null;
         }
-        return VueRoutes.MenuType.getType(type).getName();
+        return VueRoutes.MenuType.getType(type).getTitle();
     }
     @Named("componentToFrameSrc")
     default String componentToFrameSrc(Menu menu) {
@@ -44,14 +44,14 @@ public interface MenuConvert {
         if (badgeType == null) {
             return null;
         }
-        return VueRoutes.BadgeType.getType(badgeType).getName();
+        return VueRoutes.BadgeType.getType(badgeType).getTitle();
     }
     @Named("badgeVariantsToVueRouteBadgeVariants")
     default String badgeVariantsToVueRouteBadgeVariants(Integer badgeVariants) {
         if (badgeVariants == null) {
             return null;
         }
-        return VueRoutes.BadgeVariant.getType(badgeVariants).getName();
+        return VueRoutes.BadgeVariant.getType(badgeVariants).getTitle();
     }
     @Named("toVueRouteFlag")
     default Boolean toVueRouteFlag(Integer flag) {
@@ -66,7 +66,7 @@ public interface MenuConvert {
             @Mapping(target = "type",source = "type",qualifiedByName = "menuTypeToVueRouteType"),
             @Mapping(target = "meta.title",source = "menuName"),
             @Mapping(target = "meta.icon",source = "icon"),
-            @Mapping(target = "meta.frameSrc", source = ".", qualifiedByName = "componentToFrameSrc"),
+            @Mapping(target = "meta.iframeSrc", source = ".", qualifiedByName = "componentToFrameSrc"),
             @Mapping(target = "meta.activeIcon",source = "activeIcon"),
             @Mapping(target = "meta.activePath",source = "activePath"),
             @Mapping(target = "meta.badge",source = "badgeContext"),

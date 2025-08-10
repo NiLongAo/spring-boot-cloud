@@ -225,20 +225,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             isEnabled =userSet.getIsEnabled();
             if(userSet.getIsAdmin() == ConstEnum.Flag.YES.getValue() && Objects.equals(user.getTenantId(), Constant.TENANT_ID)){
                 //系统管理员所有权限都有
-                userPrivilegeSet = menuService.list(Wrappers.<Menu>lambdaQuery().eq(Menu::getType,Menu.MenuType.BUTTON.getType()).eq(Menu::getStatus,ConstEnum.Flag.YES.getValue())).stream().map(Menu::getId).collect(Collectors.toSet());
+                userPrivilegeSet = menuService.findTypeButtonMenu(null,null).stream().map(Menu::getAuthCode).collect(Collectors.toSet());
             } else if(userSet.getIsAdmin() == ConstEnum.Flag.YES.getValue()){
                 //系统管理员所有权限都有
-                userPrivilegeSet = menuService.findTypeButtonMenu(1,user.getTenantId()).stream().map(Menu::getId).collect(Collectors.toSet());
+                userPrivilegeSet = menuService.findTypeButtonMenu(1,user.getTenantId()).stream().map(Menu::getAuthCode).collect(Collectors.toSet());
             }else {
-                Set<String> rolePrivilegeList = menuService.findTypeButtonMenu(4,user.getId()).stream().map(Menu::getId).collect(Collectors.toSet());
+                Set<String> rolePrivilegeList = menuService.findTypeButtonMenu(4,user.getId()).stream().map(Menu::getAuthCode).collect(Collectors.toSet());
                 if (!rolePrivilegeList.isEmpty()) {
                     userPrivilegeSet.addAll(rolePrivilegeList);
                 }
-                Set<String> departmentPrivilegeList = menuService.findTypeButtonMenu(2,user.getId()).stream().map(Menu::getId).collect(Collectors.toSet());
+                Set<String> departmentPrivilegeList = menuService.findTypeButtonMenu(2,user.getId()).stream().map(Menu::getAuthCode).collect(Collectors.toSet());
                 if (!rolePrivilegeList.isEmpty()) {
                     userPrivilegeSet.addAll(departmentPrivilegeList);
                 }
-                Set<String> positionPrivilegeList = menuService.findTypeButtonMenu(3,user.getId()).stream().map(Menu::getId).collect(Collectors.toSet());
+                Set<String> positionPrivilegeList = menuService.findTypeButtonMenu(3,user.getId()).stream().map(Menu::getAuthCode).collect(Collectors.toSet());
                 if (!rolePrivilegeList.isEmpty()) {
                     userPrivilegeSet.addAll(positionPrivilegeList);
                 }

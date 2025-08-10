@@ -42,7 +42,7 @@ public class VueRoutes {
         //菜单图标
         private String icon;
         //内嵌Iframe的URL
-        private String frameSrc;
+        private String iframeSrc;
         //激活时显示的图标
         private String activeIcon;
         //作为路由时，需要激活的菜单的Path

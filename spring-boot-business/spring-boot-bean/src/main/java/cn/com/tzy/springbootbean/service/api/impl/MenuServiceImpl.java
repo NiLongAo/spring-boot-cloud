@@ -220,10 +220,13 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
             List<Menu> typeButtonMenu = baseMapper.findTypeButtonMenu(null, null);
             Map<String,Set<String>> allUrlPrivilege = new HashMap<>();
             for (Menu buttonMenu : typeButtonMenu) {
+                if(StringUtils.isEmpty(buttonMenu.getRequestUrl()) || StringUtils.isEmpty(buttonMenu.getAuthCode())){
+                    continue;
+                }
                 String[] split = buttonMenu.getRequestUrl().split(",");//多个页面url组合时
                 for (String url : split) {
                     Set<String> object =allUrlPrivilege.computeIfAbsent(url, k -> new HashSet<String>());
-                    object.add(buttonMenu.getId());
+                    object.add(buttonMenu.getAuthCode());
                 }
             }
             if (RedisUtils.hasKey(Constant.ALL_URL_KEY)) {
@@ -245,6 +248,9 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         List<VueRoutes> routesList = new ArrayList<>();
         for (TreeNode<Menu> menuTreeNode : treeNode) {
             VueRoutes convert = MenuConvert.INSTANCE.convert(menuTreeNode.getT());
+            if(Arrays.asList(VueRoutes.MenuType.EMBEDDED.getTitle(),VueRoutes.MenuType.LINK.getTitle()).contains(convert.getType())){
+                convert.setComponent("IFrameView");
+            }
             if (CollUtil.isNotEmpty(menuTreeNode.getChildren())) {
                 convert.setChildren(findRoutes(menuTreeNode.getChildren()));
             } else {

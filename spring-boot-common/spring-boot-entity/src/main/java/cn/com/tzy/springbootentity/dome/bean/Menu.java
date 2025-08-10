@@ -30,7 +30,7 @@ public class Menu extends StringIdEntity {
     /**
      * 级别 1.目录 2.菜单 3.按钮 4.内嵌 5.外链
      */
-    @TableField(value = "type")
+    @TableField(value = "`type`")
     @ApiModelProperty(value = "级别")
     private Integer type;
 
@@ -156,14 +156,14 @@ public class Menu extends StringIdEntity {
     /**
      * 是否开启 1.是 0否
      */
-    @TableField(value = "status")
+    @TableField(value = "`status`")
     @ApiModelProperty(value = "是否开启 1.是 0否")
     private Integer status;
 
     /**
      * 序号
      */
-    @TableField(value = "order")
+    @TableField(value = "`order`")
     @ApiModelProperty(value = "序号")
     private Integer order;
 

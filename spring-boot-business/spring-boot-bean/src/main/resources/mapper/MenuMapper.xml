@@ -59,44 +59,48 @@
     select
         bm.*
     from bean_menu bm,sys_tenant_connect_menu stcp,bean_user bu
-    where  bm.id = stcp.menu_id
+    where bm.auth_code = stcp.menu_id
     and stcp.tenant_id = bu.tenant_id
     and bu.id = #{userId}
     and bm.status = 1
-    and bm.id like concat('%',':list')
+    and bm.auth_code is not null and bm.auth_code != ''
+    and bm.auth_code like concat('%',':list')
  </select>
 
  <select id="findUserRoleMenu" parameterType="long" resultType="cn.com.tzy.springbootentity.dome.bean.Menu">
     select
         bm.*
     from bean_menu bm,bean_user_connect_role bucr,bean_role_connect_menu brcp
-    where bm.id = brcp.menu_id
+    where bm.auth_code = brcp.menu_id
     and brcp.role_id = bucr.role_id
     and bm.status = 1
     and bucr.user_id = #{userId}
-    and bm.id like concat('%',':list')
+    and bm.auth_code is not null and bm.auth_code != ''
+    and bm.auth_code like concat('%',':list')
  </select>
 
  <select id="findUserDepartmentMenu" parameterType="long" resultType="cn.com.tzy.springbootentity.dome.bean.Menu">
     select
         bm.*
     from bean_menu bm,bean_user_connect_department bucr,bean_department_connect_menu brcp
-    where bm.id = brcp.menu_id
+    where bm.auth_code = brcp.menu_id
     and brcp.department_id = bucr.department_id
     and bm.status = 1
     and bucr.user_id = #{userId}
-    and bm.id like concat('%',':list')
+    and bm.auth_code is not null and bm.auth_code != ''
+    and bm.auth_code like concat('%',':list')
  </select>
 
  <select id="findUserPositionMenu" parameterType="long" resultType="cn.com.tzy.springbootentity.dome.bean.Menu">
     select
         bm.*
     from bean_menu bm,bean_user_connect_position bucr,bean_position_connect_menu brcp
-    where bm.id = brcp.menu_id
+    where bm.auth_code = brcp.menu_id
     and brcp.position_id = bucr.position_id
     and bm.status = 1
     and bucr.user_id = #{userId}
-    and bm.id like concat('%',':list')
+    and bm.auth_code is not null and bm.auth_code != ''
+    and bm.auth_code like concat('%',':list')
  </select>
 
  <select id="findSelect" parameterType="string" resultType="cn.com.tzy.springbootentity.dome.bean.Menu">
@@ -126,9 +130,10 @@
       select
        bm.*
       from bean_menu bm,sys_tenant_connect_menu stcp
-      where bm.id = stcp.menu_id
+      where bm.auth_code = stcp.menu_id
       and stcp.tenant_id = #{tenantId}
       and bm.status = 1
+      and bm.auth_code is not null and bm.auth_code != ''
       order by `order`
 </select>
 
@@ -137,20 +142,21 @@
           a.*
        from bean_menu a
       <if test="bizType == 1">
-          left join sys_tenant_connect_menu b on a.id = b.menu_id
+          left join sys_tenant_connect_menu b on a.auth_code = b.menu_id
       </if>
       <if test="bizType == 2">
-          left join (bean_user_connect_department e,bean_department_connect_menu f) on e.department_id = f.department_id and a.id = f.menu_id
+          left join (bean_user_connect_department e,bean_department_connect_menu f) on e.department_id = f.department_id and a.auth_code = f.menu_id
       </if>
       <if test="bizType == 3">
-          left join  (bean_user_connect_position g,bean_position_connect_menu r) on g.position_id = r.position_id and a.id = r.menu_id
+          left join  (bean_user_connect_position g,bean_position_connect_menu r) on g.position_id = r.position_id and a.auth_code = r.menu_id
       </if>
       <if test="bizType == 4">
-          left join (bean_user_connect_role c,bean_role_connect_menu d) on c.role_id = d.role_id and a.id = d.menu_id
+          left join (bean_user_connect_role c,bean_role_connect_menu d) on c.role_id = d.role_id and a.auth_code = d.menu_id
       </if>
       <trim prefix="where" prefixOverrides="and">
-          and a.type = 3
           and a.status = 1
+          and a.auth_code is not null and a.auth_code != ''
+          and a.auth_code != ''
           <if test="bizType == 1">
               and b.tenant_id = #{bizId}
           </if>

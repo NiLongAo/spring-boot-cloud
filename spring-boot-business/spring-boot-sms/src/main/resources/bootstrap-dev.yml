@@ -30,3 +30,5 @@ spring:
             group: DEFAULT_GROUP
           - data-id: quartz-config-dev.yaml
             group: DEFAULT_GROUP
+  redis:
+    database: 6
