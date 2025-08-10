@@ -1,12 +1,12 @@
 package cn.com.tzy.springbootbean.service.api.impl;
 
-import cn.com.tzy.springbootbean.mapper.sql.PositionConnectPrivilegeMapper;
+import cn.com.tzy.springbootbean.mapper.sql.PositionConnectMenuMapper;
 import cn.com.tzy.springbootbean.mapper.sql.PositionMapper;
-import cn.com.tzy.springbootbean.service.api.PositionConnectPrivilegeService;
+import cn.com.tzy.springbootbean.service.api.PositionConnectMenuService;
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootentity.dome.bean.Position;
-import cn.com.tzy.springbootentity.dome.bean.PositionConnectPrivilege;
+import cn.com.tzy.springbootentity.dome.bean.PositionConnectMenu;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class PositionConnectPrivilegeServiceImpl extends ServiceImpl<PositionConnectPrivilegeMapper, PositionConnectPrivilege> implements PositionConnectPrivilegeService{
+public class PositionConnectMenuServiceImpl extends ServiceImpl<PositionConnectMenuMapper, PositionConnectMenu> implements PositionConnectMenuService{
 
     @Autowired
     PositionMapper positionMapper;
@@ -41,10 +41,10 @@ public class PositionConnectPrivilegeServiceImpl extends ServiceImpl<PositionCon
         //要添加的值
         List<String> addList = privilegeList.stream().filter(num -> !privileges.contains(num)).collect(Collectors.toList());
         if(deleteList.size() > 0){
-            baseMapper.deletePositionConnectPrivilege(position.getId(),deleteList);
+            baseMapper.deletePositionConnectMenu(position.getId(),deleteList);
         }
         if(addList.size() > 0){
-            baseMapper.savePositionConnectPrivilege(position.getId(),addList);
+            baseMapper.savePositionConnectMenu(position.getId(),addList);
         }
         return RestResult.result(RespCode.CODE_0.getValue(),"保存成功");
     }

@@ -16,10 +16,7 @@ import org.springframework.security.web.FilterInvocation;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Log4j2
 public class AuthorizationAccessDecisionVoter implements AccessDecisionVoter<FilterInvocation> {
@@ -42,17 +39,12 @@ public class AuthorizationAccessDecisionVoter implements AccessDecisionVoter<Fil
         }
         log.debug("进入自定义鉴权投票器，URI : {} {}", method, restfulPath);
         PathMatcher pathMatcher = new AntPathMatcher();
-        Map<String, Object> urlPermRolesRules = (Map<String, Object>) RedisUtils.hmget(Constant.ALL_URL_KEY);
-
+        Map<String, Set<String>> urlPermRolesRules = (Map<String, Set<String>>) RedisUtils.hmget(Constant.ALL_URL_KEY);
         // 根据请求路径判断有访问权限的角色列表
-        List<String> authorizedRoles = new ArrayList<>(); // 拥有访问权限的角色
         boolean requireCheck = false; // 是否需要鉴权，默认“没有设置权限规则”不用鉴权
-
-        for (Map.Entry<String, Object> permRoles : urlPermRolesRules.entrySet()) {
+        for (Map.Entry<String, Set<String>> permRoles : urlPermRolesRules.entrySet()) {
             String perm = permRoles.getKey();
             if (pathMatcher.match(perm, restfulPath)) {
-                List<String> roles = Convert.toList(String.class, permRoles.getValue());
-                authorizedRoles.addAll(Convert.toList(String.class, roles));
                 requireCheck = true;
                 break;
             }

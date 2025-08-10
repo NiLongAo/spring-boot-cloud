@@ -67,9 +67,6 @@ public class Constant {
      * redis-key-前缀-shiro:perm_roles_rule:
      */
     public final static String ALL_URL_KEY = "shiro:all:url:";
-    public final static  String ROLE_ID_LIST_KEY = "roleIdList";
-    public final static  String POSITION_ID_LIST_KEY = "positionIdList";
-    public final static  String DEPARTMENT_ID_LIST_KEY = "departmentIdList";
 
     /**
      * JWT载体key

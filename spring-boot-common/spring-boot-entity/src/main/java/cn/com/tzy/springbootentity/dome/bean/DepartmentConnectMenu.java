@@ -1,7 +1,6 @@
 package cn.com.tzy.springbootentity.dome.bean;
 
 import cn.com.tzy.springbootcomm.common.bean.Base;
-import cn.com.tzy.springbootcomm.common.bean.LongIdEntity;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
@@ -16,8 +15,8 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-@TableName(value = "bean_department_connect_privilege")
-public class DepartmentConnectPrivilege extends Base {
+@TableName(value = "bean_department_connect_menu")
+public class DepartmentConnectMenu extends Base {
     /**
      * 部门编号
      */
@@ -26,11 +25,11 @@ public class DepartmentConnectPrivilege extends Base {
     private Long departmentId;
 
     /**
-     * 权限编号
+     * 菜单编号
      */
-    @TableField(value = "privilege_id")
-    @ApiModelProperty(value = "权限编号")
-    private String privilegeId;
+    @TableField(value = "menu_id")
+    @ApiModelProperty(value = "菜单编号")
+    private String menuId;
 
     /**
      * 租户编号

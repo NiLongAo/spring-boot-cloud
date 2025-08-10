@@ -1,189 +1,140 @@
 /*菜单初始化数据*/
 truncate table bean_menu;
-truncate table bean_privilege;
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values(null,'home',1,'首页','/home','/index/home/workbench/index','clarity:home-solid',1,0,1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('home','home:list','列表','',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values(null,'work',1,'工作台','/work','/work','grommet-icons:test',1,0,2);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('work','work.oa',2,'工作流','/work/oa','/work/oa/index','grommet-icons:test',1,0,1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('work.oa','work.oa:list','列表','',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('work','work.leave',2,'请假申请','/work/leave/:id','/work/leave/index','grommet-icons:test',1,1,2);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('work.leave','work.leave:list','列表','',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('work','work.personal',2,'个人中心','/work/personal','/work/personal/index','grommet-icons:test',1,0,3);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('work.personal','work.personal:list','列表','',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('work.personal','work.personal:user_save','个人信息保存','/webapi/bean/user/update_login_user_info',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('work.personal','work.personal:other_save','绑定解绑第三方信息','/webapi/mini/bind_mini_web,/webapi/mini/unbind_mini_web',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values(null,'oa',1,'流程管理','/oa','/oa','grommet-icons:test',1,0,3);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('oa','oa.repository',2,'流程定义','/oa/repository','/oa/repository/index','grommet-icons:test',1,0,1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('oa.repository','oa.repository:list','列表','/webapi/activiti/activiti/find_repository_list',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('oa.repository','oa.repository:add','添加','/webapi/activiti/activiti/deploy_process_parameter,/webapi/activiti/activiti/deploy_process',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('oa.repository','oa.repository:deploy','部署','/webapi/activiti/activiti/deploy_process_parameter,/webapi/activiti/activiti/deploy_process',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('oa.repository','oa.repository:pending','挂起-激活','/webapi/activiti/activiti/suspended_process_definition',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('oa.repository','oa.repository:delete','删除','/webapi/activiti/activiti/delete_process',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('oa','oa.deploy',2,'流程部署','/oa/deploy/:id','/oa/deploy/index','mdi:card-account-details',1,1,2);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('oa.deploy','oa.deploy:list','列表','',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('oa.deploy','oa.deploy:deploy','部署','/webapi/activiti/activiti/deploy_process_parameter',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('oa','oa.need',2,'待办流程','/oa/need','/oa/need/index','grommet-icons:test',1,0,3);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('oa.need','oa.need:list','列表','',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('oa.need','oa.need:detail','详情','',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('oa.need','oa.need:sign_for','签收','/webapi/activiti/activiti/appoint_claim',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('oa.need','oa.need:pending','挂起-激活','/webapi/activiti/activiti/suspended_instance',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('oa.need','oa.need:reject','驳回','/webapi/activiti/activiti/back_process',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('oa','oa.historic',2,'历史流程','/oa/historic','/oa/historic/index','grommet-icons:test',1,0,4);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('oa.historic','oa.historic:list','列表','',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('oa.historic','oa.historic:detail','详情','',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values(null,'monitor',1,'系统监控','/monitor','/monitor','grommet-icons:test',1,0,4);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('monitor','monitor.naocs',2,'服务注册中心','/monitor/naocs','https://www.nilongao.cn/nacos/','grommet-icons:test',1,0,1);/*外联模式*/
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('monitor.naocs','monitore.naocs:list','列表','',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('monitor','monitor.minio',2,'资源文件','/monitor/minio','https://www.nilongao.cn/minio','grommet-icons:test',1,0,2);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('monitor.minio','monitore.minio:list','列表','',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('monitor','monitor.sentinel',2,'熔断限流配置','http://1.82.217.118:8850/','http://1.82.217.118:8850/','grommet-icons:test',1,0,3);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('monitor.sentinel','monitore.sentinel:list','列表','',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('monitor','monitor.skywalking',2,'链路追踪','http://1.82.217.118:12013/','http://1.82.217.118:12013/','grommet-icons:test',1,0,4);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('monitor.skywalking','monitore.skywalking:list','列表','',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('monitor','monitor.jenkins',2,'服务构建','http://1.82.217.118:10240/','http://1.82.217.118:10240/','grommet-icons:test',1,0,5);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('monitor.jenkins','monitore.jenkins:list','列表','',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('monitor','monitor.elasticsearch',2,'elasticsearch可视化','http://1.82.217.118:10012/','http://1.82.217.118:10012/','grommet-icons:test',1,0,6);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('monitor.elasticsearch','monitore.elasticsearch:list','列表','',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('monitor','monitor.swagger',2,'Swagger接口文档','/monitor/swagger','http://122.51.147.244:9100/doc.html','grommet-icons:test',1,0,7);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('monitor.swagger','monitore.swagger:list','列表','',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('monitor','monitor.rabbitmq',2,'RabbitMq消息队列','/monitor/rabbitmq','https://www.nilongao.cn/rabbitmq/','grommet-icons:test',1,0,8);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('monitor.rabbitmq','monitore.rabbitmq:list','列表','',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('monitor','monitor.seata',2,'Seata分布式事务','http://1.82.217.118:8092/','http://1.82.217.118:8092/','grommet-icons:test',1,0,9);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('monitor.seata','monitore.seata:list','列表','',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('monitor','monitor.xxl-job',2,'XXL-JOB分布式定时器','/monitor/xxl-job','https://www.nilongao.cn/xxl-job-admin/','grommet-icons:test',1,0,10);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('monitor.xxl-job','monitore.xxl-job:list','列表','',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('monitor','monitor.certd',2,'自动化SSL证书','/monitor/certd','https://www.nilongao.cn:7001/','grommet-icons:test',1,0,11);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('monitor.certd','monitore.certd:list','列表','',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('monitor','monitor.one-api',2,'API语言大模型','/monitor/oneApi','https://www.nilongao.cn:7011/','grommet-icons:test',1,0,12);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('monitor.one-api','monitore.one-api:list','列表','',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('monitor','monitor.v2raya',2,'代理服务','/monitor/v2raya','https://www.nilongao.cn:7891/','grommet-icons:test',1,0,13);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('monitor.v2raya','monitore.v2raya:list','列表','',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values(null,'video',1,'视频管理','/video','/vide','grommet-icons:test',1,0,4);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('video','video.dispatch',2,'分屏调度','/video/dispatch','/video/dispatch/index','grommet-icons:test',1,0,1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.dispatch','video.dispatch:list','列表','/webapi/video/device/page',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.dispatch','video.dispatch:play','播放','/webapi/video/play/start',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('video','video.play',2,'国标设备','/video/play','/video/play/index','grommet-icons:test',1,0,2);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.play','video.play:list','列表','/webapi/video/device/page',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.play','video.play:refresh','刷新','/webapi/video/device/channel/sync',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.play','video.play:channel','设备通道','/webapi/video/device/channel/page',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.play','video.play:add','添加','/webapi/video/device/save_device',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.play','video.play:update','编辑','/webapi/video/device/save_device',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.play','video.play:delete','删除','/webapi/video/device/del',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('video','video.play.channel',2,'通道信息','/video/play/channel/:id','/video/play/channel/index','mdi:card-account-details',1,1,2);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.play.channel','video.play.channel:list','列表','/webapi/video/device/channel/page',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.play.channel','video.play.channel:add','添加','/webapi/video/device/channel/save',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.play.channel','video.play.channel:update','编辑','/webapi/video/device/channel/save',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.play.channel','video.play.channel:delete','删除','/webapi/video/device/channel/del',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.play.channel','video.play.channel:play','播放','/webapi/video/play/start',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.play.channel','video.play.channel:suspend','暂停','/webapi/video/play/start/stop',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.play.channel','video.play.channel:playback','历史回放','/webapi/video/device/channel/page',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('video','video.play.record',2,'国标录像','/video/play/record/:deviceId/:channelId','/video/play/record/index','mdi:card-account-details',1,1,3);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.play.record','video.play.record:list','列表','/webapi/video/device/channel/page',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.play.record','video.play.record:play','播放','/webapi/video/playback/start',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.play.record','video.play.record:suspend','暂停','/webapi/video/playback/stop',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('video','video.media',2,'流媒体管理','/video/media','/video/media/index','grommet-icons:test',1,0,5);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.media','video.media:list','列表','/webapi/video/media/server/page',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.media','video.media:add','添加','/webapi/video/media/server/save',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.media','video.media:update','编辑','/webapi/video/media/server/save',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.media','video.media:delete','删除','/webapi/video/media/server/remove',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('video','video.platform',2,'国标级联','/video/platform','/video/platform/index','grommet-icons:test',1,0,6);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.platform','video.platform:list','列表','/webapi/video/parent/platform/page',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.platform','video.platform:add','添加','/webapi/video/parent/platform/insert',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.platform','video.platform:join','关联','/webapi/video/platform/gb_channel/insert,/webapi/video/platform/gb_stream/add',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.platform','video.platform:update','编辑','/webapi/video/parent/platform/update',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.platform','video.platform:delete','删除','/webapi/video/parent/platform/delete',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('video','video.proxy',2,'拉流管理','/video/proxy','/video/proxy/index','grommet-icons:test',1,0,7);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.proxy','video.proxy:list','列表','/webapi/video/stream/proxy/page',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.proxy','video.proxy:add','添加','/webapi/video/stream/proxy/save',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.proxy','video.proxy:enable','启用-停用','/webapi/video/stream/proxy/start,/webapi/video/stream/proxy/stop',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.proxy','video.proxy:play','播放','/webapi/video/stream/proxy/get_play_url',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.proxy','video.proxy:update','编辑','/webapi/video/stream/proxy/save',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.proxy','video.proxy:delete','删除','/webapi/video/stream/proxy/remove',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('video','video.push',2,'推流管理','/video/push','/video/push/index','grommet-icons:test',1,0,8);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.push','video.push:list','列表','/webapi/video/stream/push/page',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.push','video.push:add','添加','/webapi/video/stream/push/save',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.push','video.push:play','播放','/webapi/video/stream/push/get_play_url',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.push','video.push:update','编辑','/webapi/video/stream/push/save',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('video.push','video.push:delete','删除','/webapi/video/stream/push/remove',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values(null,'fs',1,'通话中心','/fs','/fs','grommet-icons:test',1,0,5);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('fs','fs.call',2,'客服通话','/fs/call','/fs/call/index','grommet-icons:test',1,0,1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('fs.call','fs.call:list','列表','',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values(null,'system',1,'系统设置','/system','/index/system','icon-park-outline:system',1,0,100);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('system','system.tenant',2,'租户管理','/system/tenant','/index/system/tenant/index','icon-park-outline:menu-fold-one',1,0,1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.tenant','system.tenant:list','列表','/webapi/bean/tenant/page',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.tenant','system.tenant:add','新增','/webapi/bean/tenant/insert',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.tenant','system.tenant:update','编辑','/webapi/bean/tenant/update',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.tenant','system.tenant:delete','删除','/webapi/bean/tenant/remove',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('system','system.user',2,'用户管理','/system/user','/index/system/user/index','ri:user-3-fill',1,0,1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.user','system.user:list','列表','/webapi/bean/user/page',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.user','system.user:add','新增','/webapi/bean/user/insert',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.user','system.user:update','编辑','/webapi/bean/user/update',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.user','system.user:delete','删除','/webapi/bean/user/delete',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.user','system.user:detail','详情','/webapi/bean/user/info',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.user','system.user:print','打印','/webapi/bean/user/info',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.user','system.user:export','导出','/webapi/bean/user/info',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('system','system.user.detail',2,'用户详情','/system/user/user_detail/:id','/index/system/user/UserDetail','mdi:card-account-details',1,1,2);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.user.detail','system.user.detail:list','列表','/webapi/bean/user/info',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('system','system.role',2,'角色管理','/system/role','/index/system/role/index','carbon:user-role',1,0,3);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.role','system.role:list','列表','/webapi/bean/role/page',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.role','system.role:add','新增','/webapi/bean/role/detail',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.role','system.role:update','编辑','/webapi/bean/role/save',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.role','system.role:delete','删除','/webapi/bean/role/remove',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('system','system.department',2,'部门管理','/system/department','/index/system/department/index','ic:outline-apartment',1,0,5);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.department','system.department:list','列表','/webapi/bean/department/page',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.department','system.department:add','新增','/webapi/bean/department/save',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.department','system.department:update','编辑','/webapi/bean/department/save',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.department','system.department:delete','删除','/webapi/bean/department/remove',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('system','system.position',2,'职位管理','/system/position','/index/system/position/index','mdi:account-question-outline',1,0,7);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.position','system.position:list','列表','/webapi/bean/position/page',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.position','system.position:add','新增','/webapi/bean/position/save',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.position','system.position:update','编辑','/webapi/bean/position/save',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.position','system.position:delete','删除','/webapi/bean/position/remove',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('system','system.privilege',2,'权限管理','/system/privilege','/index/system/privilege/index','mdi:account-question-outline',1,0,8);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.privilege','system.privilege:list','列表','/webapi/bean/role/all,/webapi/bean/department/tree,/webapi/bean/position/tree,/webapi/bean/privilege/department_privilege_list,/webapi/bean/privilege/position_privilege_list,/webapi/bean/privilege/role_privilege_list',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.privilege','system.privilege:save','保存','/webapi/bean/privilege/department_privilege_save,/webapi/bean/privilege/position_privilege_save,/webapi/bean/privilege/role_privilege_save',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('system','system.menu',2,'菜单管理','/system/menu','/index/system/menu/index','icon-park-outline:menu-fold-one',1,0,9);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.menu','system.menu:list','列表','/webapi/bean/menu/page',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.menu','system.menu:add','新增','/webapi/bean/menu/save',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.menu','system.menu:update','编辑','/webapi/bean/menu/save',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.menu','system.menu:delete','删除','/webapi/bean/menu/remove',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('system','system.sms',2,'短信管理','/system/sms','','icon-park-outline:doc-search-two',1,0,10);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('system.sms','system.sms.sms_config',3,'短信配置','/system/sms/sms_config','/index/system/sms/sms_config/index','icon-park-outline:doc-search-two',1,0,1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.sms.sms_config','system.sms.sms_config:list','列表','/webapi/sms/sms_config/page',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.sms.sms_config','system.sms.sms_config:add','新增','/webapi/sms/sms_config/insert',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.sms.sms_config','system.sms.sms_config:update','编辑','/webapi/sms/sms_config/update',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.sms.sms_config','system.sms.sms_config:delete','删除','/webapi/sms/sms_config/remove',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('system.sms','system.sms.mobile_message_template',3,'短信模板','/system/sms/mobile_message_template','/index/system/sms/mobile_message_template/index','icon-park-outline:doc-search-two',1,0,2);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.sms.mobile_message_template','system.sms.mobile_message_template:list','列表','/webapi/sms/mobile_message_template/page',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.sms.mobile_message_template','system.sms.mobile_message_template:add','新增','/webapi/sms/mobile_message_template/insert',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.sms.mobile_message_template','system.sms.mobile_message_template:update','编辑','/webapi/sms/mobile_message_template/update',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.sms.mobile_message_template','system.sms.mobile_message_template:delete','删除','/webapi/sms/mobile_message_template/remove',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('system.sms','system.sms.mobile_message',3,'短信记录','/system/sms/mobile_message','/index/system/sms/mobile_message/index','icon-park-outline:doc-search-two',1,0,3);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.sms.mobile_message','system.sms.mobile_message:list','列表','/webapi/sms/mobile_message/page',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('system','system.dictionary',2,'字典管理','/system/dictionary','/index/system/dictionary/index','icon-park-outline:doc-search-two',1,0,11);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.dictionary','system.dictionary:list','列表','/webapi/config/dictionary_type/find_type_list,/webapi/config/dictionary_item/page',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.dictionary','system.dictionary:add_type','新增类型','/webapi/config/dictionary_type/save',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.dictionary','system.dictionary:update_type','编辑类型','/webapi/config/dictionary_type/save',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.dictionary','system.dictionary:delete_type','删除类型','/webapi/config/dictionary_type/remove',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.dictionary','system.dictionary:add_item','新增条目','/webapi/config/dictionary_item/save',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.dictionary','system.dictionary:update_item','编辑条目','/webapi/config/dictionary_item/save',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.dictionary','system.dictionary:delete_item','删除条目','/webapi/config/dictionary_item/remove',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('system','system.config',2,'系统管理','/system/config','/index/system/config/index','icon-park-outline:circles-seven',1,0,12);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.config','system.config:list','列表','/webapi/config/config/page',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.config','system.config:update','编辑','/webapi/config/config/update',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('system','system.oauth_client',2,'客户端管理','/system/oauth_client','/index/system/oauth_client/index','zondicons:tablet',1,0,13);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.oauth_client','system.oauth_client:list','列表','/webapi/config/oauth_client/page',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.oauth_client','system.oauth_client:add','新增','/webapi/config/oauth_client/save',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.oauth_client','system.oauth_client:update','编辑','/webapi/config/oauth_client/save',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.oauth_client','system.oauth_client:delete','删除','/webapi/config/oauth_client/remove',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('system','system.notice',2,'平台公告通知','/system/notice','/index/system/notice/index','zondicons:tablet',1,0,14);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.notice','system.notice:list','列表','/webapi/notice/public_notice/page',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.notice','system.notice:add','新增','/webapi/notice/public_notice/insert',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.notice','system.notice:update','编辑','/webapi/notice/public_notice/update',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.notice','system.notice:delete','删除','/webapi/notice/public_notice/remove',1);
-insert into bean_menu(parent_id,id,level,menu_name,path,view_path,icon,is_open,hide_menu,num)values('system','system.logs',2,'系统日志','/system/logs','/index/system/logs/index','zondicons:tablet',1,0,15);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.logs','system.logs:list','列表','/webapi/config/logs/page',1);
-insert into bean_privilege(menu_id,id,privilege_name,request_url,is_open)values('system.logs','system.logs:detail','详情','/webapi/config/logs/detail',1);
+insert into bean_menu(parent_id,id,`type`,menu_name,`path`,component,icon,status,hide_in_menu,`order`,auth_code,active_icon,request_url)
+-- 首页
+values(null,'home',2,'首页','/home','/index/home/workbench/index','clarity:home-solid',1,0,1,'home:list','clarity:home-solid',null)
+-- 工作台
+,(null,'work',1,'工作台','/work','/work','grommet-icons:test',1,0,2,null,'grommet-icons:test',null)
+,('work','work.oa',2,'工作流','/work/oa','/work/oa/index','grommet-icons:test',1,0,1,'work.oa:list','grommet-icons:test',null)
+,('work','work.leave',2,'请假申请','/work/leave/:id','/work/leave/index','grommet-icons:test',1,1,2,'work.leave:list','grommet-icons:test',null)
+,('work','work.personal',2,'个人中心','/work/personal','/work/personal/index','grommet-icons:test',1,0,3,'work.personal:list','grommet-icons:test',null)
+,('work.personal','work.personal.user_save',3,'个人信息保存',null,null,null,1,0,1,'work.personal:user_save',null,'/webapi/bean/user/update_login_user_info')
+,('work.personal','work.personal.other_save',3,'绑定解绑第三方信息',null,null,null,1,0,2,'work.personal:other_save',null,'/webapi/mini/bind_mini_web,/webapi/mini/unbind_mini_web')
+-- 流程管理
+,(null,'oa',1,'流程管理','/oa','/oa','grommet-icons:test',1,0,3,null,'grommet-icons:test',null)
+,('oa','oa.repository',2,'流程定义','/oa/repository','/oa/repository/index','grommet-icons:test',1,0,1,'oa.repository:list','grommet-icons:test','/webapi/activiti/activiti/find_repository_list')
+,('oa.repository','oa.repository.add',3,'添加',null,null,null,1,0,1,'oa.repository:add',null,'/webapi/activiti/activiti/deploy_process_parameter,/webapi/activiti/activiti/deploy_process')
+,('oa.repository','oa.repository.deploy',3,'部署',null,null,null,1,0,2,'oa.repository:deploy',null,'/webapi/activiti/activiti/deploy_process_parameter,/webapi/activiti/activiti/deploy_process')
+,('oa.repository','oa.repository.pending',3,'挂起-激活',null,null,null,1,0,3,'oa.repository:pending',null,'/webapi/activiti/activiti/suspended_process_definition')
+,('oa.repository','oa.repository.delete',3,'删除',null,null,null,1,0,4,'oa.repository:delete',null,'/webapi/activiti/activiti/delete_process')
+,('oa','oa.deploy',2,'流程部署','/oa/deploy/:id','/oa/deploy/index','mdi:card-account-details',1,1,2,'oa.deploy:list','mdi:card-account-details',null)
+,('oa.deploy','oa.deploy.deploy',3,'部署',null,null,null,1,0,1,'oa.deploy:deploy',null,'/webapi/activiti/activiti/deploy_process_parameter')
+,('oa','oa.need',2,'待办流程','/oa/need','/oa/need/index','grommet-icons:test',1,0,3,'oa.need:list','grommet-icons:test',null)
+,('oa.need','oa.need.pending',3,'挂起-激活',null,null,null,1,0,2,'oa.need:pending',null,'/webapi/activiti/activiti/suspended_instance')
+,('oa.need','oa.need.reject',3,'驳回',null,null,null,1,0,3,'oa.need:reject',null,'/webapi/activiti/activiti/back_process')
+,('oa','oa.historic',2,'历史流程','/oa/historic','/oa/historic/index','grommet-icons:test',1,0,4,'oa.historic:list','grommet-icons:test',null)
+,('oa.historic','oa.historic.detail',3,'详情',null,null,null,1,0,1,'oa.historic:detail',null,null)
+-- 系统监控
+,(null,'monitor',1,'系统监控','/monitor','/monitor','grommet-icons:test',1,0,4,null,'grommet-icons:test',null)
+,('monitor','monitor.naocs',5,'服务注册中心','/monitor/naocs','https://www.nilongao.cn/nacos/','grommet-icons:test',1,0,1,'monitore.naocs:list','grommet-icons:test',null)
+,('monitor','monitor.minio',5,'资源文件','/monitor/minio','https://www.nilongao.cn/minio','grommet-icons:test',1,0,2,'monitore.minio:list','grommet-icons:test',null)
+,('monitor','monitor.sentinel',5,'熔断限流配置','http://1.82.217.118:8850/','http://1.82.217.118:8850/','grommet-icons:test',1,0,3,'monitore.sentinel:list','grommet-icons:test',null)
+,('monitor','monitor.skywalking',5,'链路追踪','http://1.82.217.118:12013/','http://1.82.217.118:12013/','grommet-icons:test',1,0,4,'monitore.skywalking:list','grommet-icons:test',null)
+,('monitor','monitor.jenkins',5,'服务构建','http://1.82.217.118:10240/','http://1.82.217.118:10240/','grommet-icons:test',1,0,5,'monitore.jenkins:list','grommet-icons:test',null)
+,('monitor','monitor.elasticsearch',5,'elasticsearch可视化','http://1.82.217.118:10012/','http://1.82.217.118:10012/','grommet-icons:test',1,0,6,'monitore.elasticsearch:list','grommet-icons:test',null)
+,('monitor','monitor.swagger',5,'Swagger接口文档','/monitor/swagger','http://122.51.147.244:9100/doc.html','grommet-icons:test',1,0,7,'monitore.swagger:list','grommet-icons:test',null)
+,('monitor','monitor.rabbitmq',5,'RabbitMq消息队列','/monitor/rabbitmq','https://www.nilongao.cn/rabbitmq/','grommet-icons:test',1,0,8,'monitore.rabbitmq:list','grommet-icons:test',null)
+,('monitor','monitor.seata',5,'Seata分布式事务','http://1.82.217.118:8092/','http://1.82.217.118:8092/','grommet-icons:test',1,0,9,'monitore.seata:list','grommet-icons:test',null)
+,('monitor','monitor.xxl-job',5,'XXL-JOB分布式定时器','/monitor/xxl-job','https://www.nilongao.cn/xxl-job-admin/','grommet-icons:test',1,0,10,'monitore.xxl-job:list','grommet-icons:test',null)
+,('monitor','monitor.certd',5,'自动化SSL证书','/monitor/certd','https://www.nilongao.cn:7001/','grommet-icons:test',1,0,11,'monitore.certd:list','grommet-icons:test',null)
+,('monitor','monitor.one-api',5,'API语言大模型','/monitor/oneApi','https://www.nilongao.cn:7011/','grommet-icons:test',1,0,12,'monitore.one-api:list','grommet-icons:test',null)
+,('monitor','monitor.v2raya',5,'代理服务','/monitor/v2raya','https://www.nilongao.cn:7891/','grommet-icons:test',1,0,13,'monitore.v2raya:list','grommet-icons:test',null)
+-- 视频管理
+,(null,'video',1,'视频管理','/video','/vide','grommet-icons:test',1,0,4,null,'grommet-icons:test',null)
+,('video','video.dispatch',2,'分屏调度','/video/dispatch','/video/dispatch/index','grommet-icons:test',1,0,1,'video.dispatch:list','grommet-icons:test','/webapi/video/device/page')
+,('video.dispatch','video.dispatch.play',3,'播放',null,null,null,1,0,1,'video.dispatch:play',null,'/webapi/video/play/start')
+,('video','video.play',2,'国标设备','/video/play','/video/play/index','grommet-icons:test',1,0,2,'video.play:list','grommet-icons:test','/webapi/video/device/page')
+,('video.play','video.play.refresh',3,'刷新',null,null,null,1,0,1,'video.play:refresh',null,'/webapi/video/device/channel/sync')
+,('video.play','video.play.device_channel',3,'设备通道',null,null,null,1,0,2,'video.play:device_channel',null,'/webapi/video/device/channel/page')
+,('video.play','video.play.add',3,'添加',null,null,null,1,0,3,'video.play:add',null,'/webapi/video/device/save_device')
+,('video.play','video.play.update',3,'编辑',null,null,null,1,0,4,'video.play:update',null,'/webapi/video/device/save_device')
+,('video.play','video.play.delete',3,'删除',null,null,null,1,0,5,'video.play:delete',null,'/webapi/video/device/del')
+,('video','video.play.channel',2,'通道信息','/video/play/channel/:id','/video/play/channel/index','mdi:card-account-details',1,1,2,'video.play.channel:list','mdi:card-account-details','/webapi/video/device/channel/page')
+,('video.play.channel','video.play.channel.add',3,'添加',null,null,null,1,0,1,'video.play.channel:add',null,'/webapi/video/device/channel/save')
+,('video.play.channel','video.play.channel.update',3,'编辑',null,null,null,1,0,2,'video.play.channel:update',null,'/webapi/video/device/channel/save')
+,('video.play.channel','video.play.channel.delete',3,'删除',null,null,null,1,0,3,'video.play.channel:delete',null,'/webapi/video/device/channel/del')
+,('video.play.channel','video.play.channel.play',3,'播放',null,null,null,1,0,4,'video.play.channel:play',null,'/webapi/video/play/start')
+,('video.play.channel','video.play.channel.suspend',3,'暂停',null,null,null,1,0,5,'video.play.channel:suspend',null,'/webapi/video/play/start/stop')
+,('video.play.channel','video.play.channel.playback',3,'历史回放',null,null,null,1,0,6,'video.play.channel:playback',null,'/webapi/video/device/channel/page')
+,('video','video.play.record',2,'国标录像','/video/play/record/:deviceId/:channelId','/video/play/record/index','mdi:card-account-details',1,1,3,'video.play.record:list','mdi:card-account-details','/webapi/video/device/channel/page')
+,('video.play.record','video.play.record.play',3,'播放',null,null,null,1,0,1,'video.play.record:play',null,'/webapi/video/playback/start')
+,('video.play.record','video.play.record.suspend',3,'暂停',null,null,null,1,0,2,'video.play.record:suspend',null,'/webapi/video/playback/stop')
+,('video','video.media',2,'流媒体管理','/video/media','/video/media/index','grommet-icons:test',1,0,5,'video.media:list','grommet-icons:test','/webapi/video/media/server/page')
+,('video.media','video.media.add',3,'添加',null,null,null,1,0,1,'video.media:add',null,'/webapi/video/media/server/save')
+,('video.media','video.media.update',3,'编辑',null,null,null,1,0,2,'video.media:update',null,'/webapi/video/media/server/save')
+,('video.media','video.media.delete',3,'删除',null,null,null,1,0,3,'video.media:delete',null,'/webapi/video/media/server/remove')
+,('video','video.platform',2,'国标级联','/video/platform','/video/platform/index','grommet-icons:test',1,0,6,'video.platform:list','grommet-icons:test','/webapi/video/parent/platform/page')
+,('video.platform','video.platform.add',3,'添加',null,null,null,1,0,1,'video.platform:add',null,'/webapi/video/parent/platform/insert')
+,('video.platform','video.platform.join',3,'关联',null,null,null,1,0,2,'video.platform:join',null,'/webapi/video/platform/gb_channel/insert,/webapi/video/platform/gb_stream/add')
+,('video.platform','video.platform.update',3,'编辑',null,null,null,1,0,3,'video.platform:update',null,'/webapi/video/parent/platform/update')
+,('video.platform','video.platform.delete',3,'删除',null,null,null,1,0,4,'video.platform:delete',null,'/webapi/video/parent/platform/delete')
+,('video','video.proxy',2,'拉流管理','/video/proxy','/video/proxy/index','grommet-icons:test',1,0,7,'video.proxy:list','grommet-icons:test','/webapi/video/stream/proxy/page')
+,('video.proxy','video.proxy.add',3,'添加',null,null,null,1,0,1,'video.proxy:add',null,'/webapi/video/stream/proxy/save')
+,('video.proxy','video.proxy.enable',3,'启用-停用',null,null,null,1,0,2,'video.proxy:enable',null,'/webapi/video/stream/proxy/start,/webapi/video/stream/proxy/stop')
+,('video.proxy','video.proxy.play',3,'播放',null,null,null,1,0,3,'video.proxy:play',null,'/webapi/video/stream/proxy/get_play_url')
+,('video.proxy','video.proxy.update',3,'编辑',null,null,null,1,0,4,'video.proxy:update',null,'/webapi/video/stream/proxy/save')
+,('video.proxy','video.proxy.delete',3,'删除',null,null,null,1,0,5,'video.proxy:delete',null,'/webapi/video/stream/proxy/remove')
+,('video','video.push',2,'推流管理','/video/push','/video/push/index','grommet-icons:test',1,0,8,'video.push:list','grommet-icons:test','/webapi/video/stream/push/page')
+,('video.push','video.push.add',3,'添加',null,null,null,1,0,1,'video.push:add',null,'/webapi/video/stream/push/save')
+,('video.push','video.push.play',3,'播放',null,null,null,1,0,2,'video.push:play',null,'/webapi/video/stream/push/get_play_url')
+,('video.push','video.push.update',3,'编辑',null,null,null,1,0,3,'video.push:update',null,'/webapi/video/stream/push/save')
+,('video.push','video.push.delete',3,'删除',null,null,null,1,0,4,'video.push:delete',null,'/webapi/video/stream/push/remove')
+-- 通话中心
+,(null,'fs',1,'通话中心','/fs','/fs','grommet-icons:test',1,0,5,null,'grommet-icons:test',null)
+,('fs','fs.call',2,'客服通话','/fs/call','/fs/call/index','grommet-icons:test',1,0,1,'fs.call:list',null,null)
+-- 系统设置
+,(null,'system',1,'系统设置','/system','/index/system','icon-park-outline:system',1,0,100,null,'icon-park-outline:system',null)
+,('system','system.tenant',2,'租户管理','/system/tenant','/index/system/tenant/index','icon-park-outline:menu-fold-one',1,0,1,'system.tenant:list','icon-park-outline:menu-fold-one','/webapi/bean/tenant/page')
+,('system.tenant','system.tenant.add',3,'新增',null,null,null,1,0,2,'system.tenant:add',null,'/webapi/bean/tenant/insert')
+,('system.tenant','system.tenant.update',3,'编辑',null,null,null,1,0,3,'system.tenant:update',null,'/webapi/bean/tenant/update')
+,('system.tenant','system.tenant.delete',3,'删除',null,null,null,1,0,4,'system.tenant:delete',null,'/webapi/bean/tenant/remove')
+,('system','system.user',2,'用户管理','/system/user','/index/system/user/index','ri:user-3-fill',1,0,1,'system.user:list','ri:user-3-fill','/webapi/bean/user/page')
+,('system.user','system.user.add',3,'新增',null,null,null,1,0,2,'system.user:add',null,'/webapi/bean/user/insert')
+,('system.user','system.user.update',3,'编辑',null,null,null,1,0,3,'system.user:update',null,'/webapi/bean/user/update')
+,('system.user','system.user.delete',3,'删除',null,null,null,1,0,4,'system.user:delete',null,'/webapi/bean/user/delete')
+,('system.user','system.user.detail',3,'详情',null,null,null,1,0,5,'system.user:detail',null,'/webapi/bean/user/info')
+,('system.user','system.user.print',3,'打印',null,null,null,1,0,6,'system.user:print',null,'/webapi/bean/user/info')
+,('system.user','system.user.export',3,'导出',null,null,null,1,0,7,'system.user:export',null,'/webapi/bean/user/info')
+,('system','system.role',2,'角色管理','/system/role','/index/system/role/index','carbon:user-role',1,0,3,'system.role:list','carbon:user-role','/webapi/bean/role/page')
+,('system.role','system.role.add',3,'新增',null,null,null,1,0,2,'system.role:add',null,'/webapi/bean/role/detail')
+,('system.role','system.role.update',3,'编辑',null,null,null,1,0,3,'system.role:update',null,'/webapi/bean/role/save')
+,('system.role','system.role.delete',3,'删除',null,null,null,1,0,4,'system.role:delete',null,'/webapi/bean/role/remove')
+,('system','system.department',2,'部门管理','/system/department','/index/system/department/index','ic:outline-apartment',1,0,5,'system.department:list','ic:outline-apartment','/webapi/bean/department/page')
+,('system.department','system.department.add',3,'新增',null,null,null,1,0,2,'system.department:add',null,'/webapi/bean/department/save')
+,('system.department','system.department.update',3,'编辑',null,null,null,1,0,3,'system.department:update',null,'/webapi/bean/department/save')
+,('system.department','system.department.delete',3,'删除',null,null,null,1,0,4,'system.department:delete',null,'/webapi/bean/department/remove')
+,('system','system.position',2,'职位管理','/system/position','/index/system/position/index','mdi:account-question-outline',1,0,7,'system.position:list','mdi:account-question-outline','/webapi/bean/position/page')
+,('system.position','system.position.add',3,'新增',null,null,null,1,0,2,'system.position:add',null,'/webapi/bean/position/save')
+,('system.position','system.position.update',3,'编辑',null,null,null,1,0,3,'system.position:update',null,'/webapi/bean/position/save')
+,('system.position','system.position.delete',3,'删除',null,null,null,1,0,4,'system.position:delete',null,'/webapi/bean/position/remove')
+,('system','system.privilege',2,'权限管理','/system/privilege','/index/system/privilege/index','mdi:account-question-outline',1,0,8,'system.privilege:list','mdi:account-question-outline','/webapi/bean/role/all,/webapi/bean/department/tree,/webapi/bean/position/tree,/webapi/bean/privilege/department_privilege_list,/webapi/bean/privilege/position_privilege_list,/webapi/bean/privilege/role_privilege_list')
+,('system.privilege','system.privilege.list',3,'列表',null,null,null,1,0,1,'system.privilege:list',null,'/webapi/bean/role/all,/webapi/bean/department/tree,/webapi/bean/position/tree,/webapi/bean/privilege/department_privilege_list,/webapi/bean/privilege/position_privilege_list,/webapi/bean/privilege/role_privilege_list')
+,('system.privilege','system.privilege.save',3,'保存',null,null,null,1,0,2,'system.privilege:save',null,'/webapi/bean/privilege/department_privilege_save,/webapi/bean/privilege/position_privilege_save,/webapi/bean/privilege/role_privilege_save')
+,('system','system.menu',2,'菜单管理','/system/menu','/index/system/menu/index','icon-park-outline:menu-fold-one',1,0,9,'system.menu:list','icon-park-outline:menu-fold-one','/webapi/bean/menu/page')
+,('system.menu','system.menu.add',3,'新增',null,null,null,1,0,2,'system.menu:add',null,'/webapi/bean/menu/save')
+,('system.menu','system.menu.update',3,'编辑',null,null,null,1,0,3,'system.menu:update',null,'/webapi/bean/menu/save')
+,('system.menu','system.menu.delete',3,'删除',null,null,null,1,0,4,'system.menu:delete',null,'/webapi/bean/menu/remove')
+,('system','system.sms',2,'短信管理','/system/sms','','icon-park-outline:doc-search-two',1,0,10,null,'icon-park-outline:doc-search-two',null)
+,('system','system.dictionary',2,'字典管理','/system/dictionary','/index/system/dictionary/index','icon-park-outline:doc-search-two',1,0,11,'system.dictionary:list','icon-park-outline:doc-search-two','/webapi/config/dictionary_type/find_type_list,/webapi/config/dictionary_item/page')
+,('system.dictionary','system.dictionary.add_type',3,'新增类型',null,null,null,1,0,1,'system.dictionary:add_type',null,'/webapi/config/dictionary_type/save')
+,('system.dictionary','system.dictionary.update_type',3,'编辑类型',null,null,null,1,0,2,'system.dictionary:update_type',null,'/webapi/config/dictionary_type/save')
+,('system.dictionary','system.dictionary.delete_type',3,'删除类型',null,null,null,1,0,3,'system.dictionary:delete_type',null,'/webapi/config/dictionary_type/remove')
+,('system.dictionary','system.dictionary.add_item',3,'新增条目',null,null,null,1,0,4,'system.dictionary:add_item',null,'/webapi/config/dictionary_item/save')
+,('system.dictionary','system.dictionary.update_item',3,'编辑条目',null,null,null,1,0,5,'system.dictionary:update_item',null,'/webapi/config/dictionary_item/save')
+,('system.dictionary','system.dictionary.delete_item',3,'删除条目',null,null,null,1,0,6,'system.dictionary:delete_item',null,'/webapi/config/dictionary_item/remove')
+,('system','system.config',2,'系统管理','/system/config','/index/system/config/index','icon-park-outline:circles-seven',1,0,12,'system.config:list','icon-park-outline:circles-seven','/webapi/config/config/page')
+,('system.config','system.config.update',3,'编辑',null,null,null,1,0,1,'system.config:update',null,'/webapi/config/config/update')
+,('system','system.oauth_client',2,'客户端管理','/system/oauth_client','/index/system/oauth_client/index','zondicons:tablet',1,0,13,'system.oauth_client:list','zondicons:tablet','/webapi/config/oauth_client/page')
+,('system.oauth_client','system.oauth_client.add',3,'新增',null,null,null,1,0,1,'system.oauth_client:add',null,'/webapi/config/oauth_client/save')
+,('system.oauth_client','system.oauth_client.update',3,'编辑',null,null,null,1,0,2,'system.oauth_client:update',null,'/webapi/config/oauth_client/save')
+,('system.oauth_client','system.oauth_client.delete',3,'删除',null,null,null,1,0,3,'system.oauth_client:delete',null,'/webapi/config/oauth_client/remove')
+,('system','system.notice',2,'平台公告通知','/system/notice','/index/system/notice/index','zondicons:tablet',1,0,14,'system.notice:list','zondicons:tablet','/webapi/notice/public_notice/page')
+,('system.notice','system.notice.add',3,'新增',null,null,null,1,0,1,'system.notice:add',null,'/webapi/notice/public_notice/insert')
+,('system.notice','system.notice.update',3,'编辑',null,null,null,1,0,2,'system.notice:update',null,'/webapi/notice/public_notice/update')
+,('system.notice','system.notice.delete',3,'删除',null,null,null,1,0,3,'system.notice:delete',null,'/webapi/notice/public_notice/remove')
+,('system','system.logs',2,'系统日志','/system/logs','/index/system/logs/index','zondicons:tablet',1,0,15,'system.logs:list','zondicons:tablet','/webapi/config/logs/page')
+,('system.logs','system.logs.detail',3,'详情',null,null,null,1,0,1,'system.logs:detail',null,'/webapi/config/logs/detail')
+;
 
 /*租户默认信息*/
 insert into sys_tenant(id,tenant_name,tenant_user_id,tenant_user_name,status,account_count,update_user_id,update_time,create_user_id,create_time)values
@@ -208,8 +159,11 @@ insert into bean_user_set(id,is_admin,is_enabled)values (1,1,1);
 
 
 /*初始化客户端*/
-insert into sys_oauth_client(client_id,resource_ids,client_secret,scope,authorized_grant_types,web_server_redirect_uri,authorities,access_token_validity,refresh_token_validity,additional_information,autoapprove)values
-('web-api-client',null,'web-api-client','all','authorization_code,password,refresh_token,implicit,client_credentials','http://1.82.217.118:9200',null,7200,7200,null,null);
+insert into sys_oauth_client(client_id,resource_ids,client_secret,scope,authorized_grant_types,web_server_redirect_uri,authorities,access_token_validity,refresh_token_validity,additional_information,autoapprove)
+values('web-api-client',null,'web-api-client','all','authorization_code,password,refresh_token,implicit,client_credentials','http://1.82.217.118:9200',null,7200,7200,null,null)
+,('app-client',null,'app-client','all','authorization_code,password,refresh_token,implicit,client_credentials','http://1.82.217.118:9200',null,7200,7200,null,null)
+,('mini-web-app',null,'mini-web-app','all','authorization_code,password,refresh_token,implicit,client_credentials','http://1.82.217.118:9200',null,7200,7200,null,null)
+;
 
 /*定时器初始化*/
 insert into sms_quartz(id,classes_name,cron_expression,task_name,group_name,description,type,task_status,start_time,end_time)values (1,'cn.com.tzy.springbootsms.config.quartz.task.PubLicScheduler','0 0 0/1 * * ?','QUARTZ_SOCKET_SOCKET','QUARTZ_SOCKET','socket定时推送信息',1,1,null,null);

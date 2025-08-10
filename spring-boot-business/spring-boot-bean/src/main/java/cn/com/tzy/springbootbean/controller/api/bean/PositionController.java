@@ -1,13 +1,14 @@
 package cn.com.tzy.springbootbean.controller.api.bean;
 
-import cn.com.tzy.springbootbean.service.api.PositionConnectPrivilegeService;
+import cn.com.tzy.springbootbean.service.api.PositionConnectMenuService;
 import cn.com.tzy.springbootbean.service.api.PositionService;
 import cn.com.tzy.springbootcomm.common.vo.PageResult;
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootcomm.constant.NotNullMap;
 import cn.com.tzy.springbootentity.dome.bean.Position;
-import cn.com.tzy.springbootentity.dome.bean.PositionConnectPrivilege;
+import cn.com.tzy.springbootentity.dome.bean.PositionConnectMenu;
+import cn.com.tzy.springbootentity.param.bean.PositionConnectMenuParam;
 import cn.com.tzy.springbootentity.param.bean.PositionParam;
 import cn.com.tzy.springbootstartercloud.api.ApiController;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -28,7 +29,7 @@ public class PositionController  extends ApiController {
     @Autowired
     PositionService positionService;
     @Autowired
-    PositionConnectPrivilegeService positionConnectPrivilegeService;
+    PositionConnectMenuService positionConnectMenuService;
 
     /**
      * 权限信息下拉展示(动态搜索数据源)
@@ -86,7 +87,7 @@ public class PositionController  extends ApiController {
         if(parent != null){
             return RestResult.result(RespCode.CODE_0.getValue(),"请先删除子级职位");
         }
-        positionConnectPrivilegeService.remove(new LambdaQueryWrapper<PositionConnectPrivilege>().eq(PositionConnectPrivilege::getPositionId,id));
+        positionConnectMenuService.remove(new LambdaQueryWrapper<PositionConnectMenu>().eq(PositionConnectMenu::getPositionId,id));
         positionService.removeById(id);
         return  RestResult.result(RespCode.CODE_0.getValue(),"删除成功");
     }
@@ -96,5 +97,19 @@ public class PositionController  extends ApiController {
     public RestResult<?> detail(@RequestParam("id") Long id){
         Position position = positionService.getById(id);
         return  RestResult.result(RespCode.CODE_0.getValue(),null,position);
+    }
+
+
+
+    @GetMapping("position_privilege_list")
+    @ResponseBody
+    public RestResult<?> findPositionPrivilegeList(@RequestParam("positionId") Long positionId){
+        return positionConnectMenuService.findPositionPrivilegeList(positionId);
+    }
+
+    @PostMapping("position_privilege_save")
+    @ResponseBody
+    public RestResult<?> positionPrivilegeSave(@RequestBody PositionConnectMenuParam save){
+        return positionConnectMenuService.save(save.positionId,save.privilegeList);
     }
 }

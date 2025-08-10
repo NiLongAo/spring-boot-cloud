@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(value = "bean-server",contextId = "bean-server",path = "/api/bean/menu",configuration = FeignConfiguration.class)
 public interface MenuServiceFeign {
 
+    @RequestMapping(value = "/init_bottom", consumes = "application/json",method = RequestMethod.GET)
+    RestResult<?> initBottom();
+
     @RequestMapping(value = "tree", consumes = MediaType.APPLICATION_JSON_VALUE,method = RequestMethod.POST)
     RestResult<?> tree(@RequestBody @Validated MenuParam param);
 

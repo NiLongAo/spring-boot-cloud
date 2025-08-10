@@ -1,12 +1,12 @@
 package cn.com.tzy.springbootbean.service.api.impl;
 
-import cn.com.tzy.springbootbean.mapper.sql.DepartmentConnectPrivilegeMapper;
+import cn.com.tzy.springbootbean.mapper.sql.DepartmentConnectMenuMapper;
 import cn.com.tzy.springbootbean.mapper.sql.DepartmentMapper;
-import cn.com.tzy.springbootbean.service.api.DepartmentConnectPrivilegeService;
+import cn.com.tzy.springbootbean.service.api.DepartmentConnectMenuService;
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootentity.dome.bean.Department;
-import cn.com.tzy.springbootentity.dome.bean.DepartmentConnectPrivilege;
+import cn.com.tzy.springbootentity.dome.bean.DepartmentConnectMenu;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class DepartmentConnectPrivilegeServiceImpl extends ServiceImpl<DepartmentConnectPrivilegeMapper, DepartmentConnectPrivilege> implements DepartmentConnectPrivilegeService{
+public class DepartmentConnectMenuServiceImpl extends ServiceImpl<DepartmentConnectMenuMapper, DepartmentConnectMenu> implements DepartmentConnectMenuService{
 
     @Autowired
     DepartmentMapper departmentMapper;
@@ -44,7 +44,7 @@ public class DepartmentConnectPrivilegeServiceImpl extends ServiceImpl<Departmen
             baseMapper.deleteIdList(department.getId(),deleteList);
         }
         if(addList.size() > 0){
-            baseMapper.saveDepartmentConnectPrivilege(department.getId(),addList);
+            baseMapper.saveDepartmentConnectMenu(department.getId(),addList);
         }
         return RestResult.result(RespCode.CODE_0.getValue(),"保存成功");
     }

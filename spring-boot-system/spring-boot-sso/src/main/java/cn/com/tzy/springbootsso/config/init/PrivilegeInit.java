@@ -2,8 +2,7 @@ package cn.com.tzy.springbootsso.config.init;
 
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
-import cn.com.tzy.springbootfeignbean.api.bean.PrivilegeServiceFeign;
-import lombok.AllArgsConstructor;
+import cn.com.tzy.springbootfeignbean.api.bean.MenuServiceFeign;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -17,7 +16,7 @@ import org.springframework.stereotype.Component;
 public class PrivilegeInit implements CommandLineRunner {
 
     @Autowired
-    private PrivilegeServiceFeign privilegeServiceFeign;
+    private MenuServiceFeign menuServiceFeign;
 
     @Override
     public void run(String... args) throws Exception {
@@ -29,7 +28,7 @@ public class PrivilegeInit implements CommandLineRunner {
     private boolean allPrivilegeInit(){
         boolean flat = false;
         try {
-            RestResult<?> restResult = privilegeServiceFeign.init();
+            RestResult<?> restResult = menuServiceFeign.initBottom();
             if(restResult.getCode() == RespCode.CODE_0.getValue()){
                 flat =true;
             }

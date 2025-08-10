@@ -1,25 +1,27 @@
 package cn.com.tzy.springbootbean.service.api.impl;
 
+import cn.com.tzy.springbootbean.convert.bean.MenuConvert;
 import cn.com.tzy.springbootbean.mapper.sql.MenuMapper;
-import cn.com.tzy.springbootbean.mapper.sql.PrivilegeMapper;
 import cn.com.tzy.springbootbean.mapper.sql.UserSetMapper;
 import cn.com.tzy.springbootbean.service.api.MenuService;
 import cn.com.tzy.springbootcomm.common.bean.TreeNode;
+import cn.com.tzy.springbootcomm.constant.Constant;
 import cn.com.tzy.springbootentity.common.info.VueRoutes;
 import cn.com.tzy.springbootcomm.common.enumcom.ConstEnum;
 import cn.com.tzy.springbootcomm.common.vo.PageResult;
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootentity.dome.bean.Menu;
-import cn.com.tzy.springbootentity.dome.bean.Privilege;
 import cn.com.tzy.springbootentity.dome.bean.UserSet;
 import cn.com.tzy.springbootentity.param.bean.MenuParam;
 import cn.com.tzy.springbootcomm.utils.AppUtils;
 import cn.com.tzy.springbootentity.utils.TreeUtil;
+import cn.com.tzy.springbootstarterredis.utils.RedisUtils;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
@@ -29,13 +31,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.function.BinaryOperator;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
 public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements MenuService {
 
-    @Autowired
-    private PrivilegeMapper privilegeMapper;
     @Autowired
     private UserSetMapper userSetMapper;
 
@@ -63,36 +64,16 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     @Override
     public PageResult page(MenuParam param) {
         //所有菜单
-        List<Map> menuList = baseMapper.findSelect(param.menuName);
+        List<Menu> menuList = baseMapper.findSelect(param.getMenuName());
         //查询操作开始...
-        Map<String, Map> menuMap= new HashMap<>();
-        menuList.forEach(obj->{
-            menuMap.put(obj.get("id").toString(),obj);
-        });
-        menuList.forEach(onj->{
-            findParent(menuMap,onj);
-        });
+        Map<String, Menu> menuMap = menuList.stream().collect(Collectors.toMap(Menu::getId, Function.identity()));
+        for (Menu menu : menuList) {
+            findParent(menuMap,menu);
+        }
         menuList = new ArrayList<>(menuMap.values());
-        menuList = menuList.stream().sorted((k,v)-> Integer.parseInt(k.get("num").toString()) - Integer.parseInt(v.get("num").toString())).collect(Collectors.toList());
+        menuList = menuList.stream().sorted(Comparator.comparingInt(Menu::getOrder)).collect(Collectors.toList());
         //查询操作结束...
-        List<TreeNode<Map>> treeNode = TreeUtil.getTree(menuList, "parentId", "id", null);
-        List<String> stringList = new ArrayList<>();
-        //所有子集菜单编号，以及转换树
-        selectLastId(stringList, treeNode);
-        List<Map> privileges = privilegeMapper.findMenuList(stringList);
-        Map<String,List<TreeNode<Map>>> map = new HashMap<>();
-        privileges.forEach(obj ->{
-            List<TreeNode<Map>> parentMap = map.get(obj.get("parentId"));
-            if(parentMap == null){
-                parentMap = new ArrayList<>();
-                map.put(obj.get("parentId").toString(),parentMap);
-            }
-            TreeNode<Map> mapTreeNode = new TreeNode<>();
-            mapTreeNode.setT(obj);
-            mapTreeNode.setIsChildren(false);
-            parentMap.add(mapTreeNode);
-        });
-        addLastTree(treeNode,map);
+        List<TreeNode<Menu>> treeNode = TreeUtil.getTree(menuList, Menu::getParentId, Menu::getId, Arrays.asList(null,""));
         //转换树结构
         List<Map> maps = AppUtils.transformationTree("children", treeNode);
         return PageResult.result(RespCode.CODE_0.getValue(),menuList.size(),null,maps);
@@ -102,39 +83,21 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     @Override
     public RestResult<?> menuPrivilegeTree () {
         //所有菜单
-        List<Map> menuList = baseMapper.findMenuPrivilegeTree();
-        List<TreeNode<Map>> treeNode = TreeUtil.getTree(menuList, "parentId", "v", null);
-        List<String> stringList = new ArrayList<>();
-        //所有子集菜单编号，以及转换树
-        selectLastV(stringList, treeNode);
-        List<Map> privileges = privilegeMapper.findMenuPrivilegeTree(stringList);
-        Map<String,List<TreeNode<Map>>> map = new HashMap<>();
-        privileges.forEach(obj ->{
-            List<TreeNode<Map>> parentMap = map.get(obj.get("parentId"));
-            if(parentMap == null){
-                parentMap = new ArrayList<>();
-                map.put(obj.get("parentId").toString(),parentMap);
-            }
-            TreeNode<Map> mapTreeNode = new TreeNode<>();
-            mapTreeNode.setT(obj);
-            mapTreeNode.setIsChildren(false);
-            parentMap.add(mapTreeNode);
-        });
-        addLastTreeV(treeNode,map);
-
+        List<Menu> menuList = baseMapper.findMenuPrivilegeTree();
+        List<TreeNode<Menu>> treeNode = TreeUtil.getTree(menuList, Menu::getParentId, Menu::getId, Arrays.asList(null,""));
         //转换树结构
         List<Map> maps = AppUtils.transformationTree("children", treeNode);
         return RestResult.result(RespCode.CODE_0.getValue(),null,maps);
     }
 
-    public void findParent(Map<String, Map> map, Map onj){
-        if(onj != null && onj.get("parentId") != null){
-            Map entity= map.get(onj.get("parentId").toString());
+    public void findParent(Map<String, Menu> map, Menu onj){
+        if(onj != null && StringUtils.isNotEmpty(onj.getParentId())){
+            Menu entity= map.get(onj.getParentId());
             if(entity == null){
-                Map menu = baseMapper.find(onj.get("parentId").toString());
-                map.put(onj.get("parentId").toString(),menu);
-                if(menu != null && menu.get("parentId") != null){
-                    findParent(map,onj);
+                Menu menu = baseMapper.selectById(onj.getParentId());
+                if(menu != null){
+                    map.put(menu.getId(),menu);
+                    findParent(map,menu);
                 }
             }
         }
@@ -143,44 +106,34 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     @Override
     @Transactional(rollbackFor = Exception.class)
     public RestResult<?> save(MenuParam param) {
-        if(param.id == null){
+        if(param.getId() == null){
             return RestResult.result(RespCode.CODE_2.getValue(), "未获取菜单编号");
         }
-        if(param.parentId!= null && param.parentId.equals(param.id)){
+        if(StringUtils.isEmpty(param.getParentId()) && param.getParentId().equals(param.getId())){
             return RestResult.result(RespCode.CODE_2.getValue(),"父级编号与本级相同！");
         }
-        if(param.parentId!= null){
-            Menu parentMenu = baseMapper.selectOne(new QueryWrapper<Menu>().eq("id", param.parentId));
+        if(param.getParentId()!= null){
+            Menu parentMenu = baseMapper.selectOne(new QueryWrapper<Menu>().eq("id", param.getParentId()));
             if(parentMenu == null ){
                 return RestResult.result(RespCode.CODE_2.getValue(), "未获取到父菜单信息");
+            }else if(parentMenu.getType()==Menu.MenuType.BUTTON.getType()){
+                return RestResult.result(RespCode.CODE_2.getValue(), "菜单按钮权限无法添加下级");
             }
-            Integer parentPrivilegeCount = privilegeMapper.selectCount(new QueryWrapper<Privilege>().eq("menu_id", parentMenu.getId()));
+            Integer parentPrivilegeCount = baseMapper.selectCount(Wrappers.<Menu>lambdaQuery().eq(Menu::getType, Menu.MenuType.BUTTON.getType()).eq(Menu::getParentId, parentMenu.getId()));
             if(parentPrivilegeCount >0){
                 return RestResult.result(RespCode.CODE_2.getValue(), "当前选择父菜单已有权限,无法作为父菜单");
             }
         }
-        if (StringUtils.isEmpty(ConstEnum.Flag.getName(param.isOpen))) {
+        if (StringUtils.isEmpty(ConstEnum.Flag.getName(param.getStatus()))) {
             return RestResult.result(RespCode.CODE_2.getValue(), "当前状态错误，请检查");
         }
-        Menu  menu = baseMapper.selectOne(new QueryWrapper<Menu>().eq("id", param.id));
-        Menu build = Menu.builder()
-                .id(param.id)
-                .parentId(param.parentId)
-                .icon(param.icon)
-                .level(param.level)
-                .menuName(param.menuName)
-                .viewPath(param.viewPath)
-                .hideMenu(param.hideMenu)
-                .path(param.path)
-                .isOpen(param.isOpen)
-                .num(param.num)
-                .memo(param.memo)
-                .build();
+        int menu = baseMapper.selectCount(new QueryWrapper<Menu>().eq("id", param.getId()));
+        Menu build = MenuConvert.INSTANCE.convert(param);
         int b = 0;
-        if(menu == null){
-            b = baseMapper.insert(build);
-        }else {
+        if(menu > 0){
             b = baseMapper.updateById(build);
+        }else {
+            b = baseMapper.insert(build);
         }
         if (b > 0) {
             return RestResult.result(RespCode.CODE_0.getValue(), "保存成功");
@@ -190,21 +143,22 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     }
 
     @Override
-    public RestResult<?> findUserTreeMenu(Long userId) throws Exception {
+    public RestResult<?> findUserTreeMenu(Long userId) {
         List<Menu> userAllMenu = new ArrayList<>();
         List<Menu> userMenu = new ArrayList<>();
         //当前用户所有权限菜单
         //所有菜单
-        List<Menu> allMenu = baseMapper.selectList(new LambdaQueryWrapper<Menu>().eq(Menu::getIsOpen,ConstEnum.Flag.YES.getValue()));
+        List<Menu> allMenu = baseMapper.selectList(new LambdaQueryWrapper<Menu>().eq(Menu::getStatus,ConstEnum.Flag.YES.getValue()));
         Set<Menu> userMenuList = new HashSet<>();
         //删除当前用户租户没有菜单
         List<Menu> userTenantMenu = baseMapper.findUserTenantMenu(userId);
-        if(!userTenantMenu.isEmpty()){
-            userTenantMenu.forEach(menu -> {
-                List<Menu> delete = new ArrayList<>();
-                findSuperiorMenu(menu, allMenu, userAllMenu, delete);
-                allMenu.removeAll(delete);
-            });
+        if(CollUtil.isEmpty(userTenantMenu)){
+            return RestResult.result(RespCode.CODE_2.getValue(),"租户没有菜单权限");
+        }
+        for (Menu menu : userTenantMenu) {
+            List<Menu> delete = new ArrayList<>();
+            findSuperiorMenu(menu, allMenu, userAllMenu, delete);
+            allMenu.removeAll(delete);
         }
         UserSet userSet = userSetMapper.selectById(userId);
         if(userSet == null){
@@ -217,167 +171,98 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
             userMenuList.addAll(baseMapper.findUserDepartmentMenu(userId));
             //获取职位权限信息
             userMenuList.addAll(baseMapper.findUserPositionMenu(userId));
-            userMenuList.forEach(menu -> {
+            for (Menu menu : userMenuList) {
                 List<Menu> delete = new ArrayList<>();
                 findSuperiorMenu(menu, userAllMenu, userMenu, delete);
                 userAllMenu.removeAll(delete);
-            });
+            }
         }else {
             userMenu.addAll(userAllMenu);
         }
         //排序
-        userMenu.sort(Comparator.comparing(Menu::getNum));
-        List<TreeNode<Menu>> treeNode = TreeUtil.getTree(new ArrayList<>(userMenu), Menu::getParentId, Menu::getId, null);
+        userMenu.sort(Comparator.comparing(Menu::getOrder));
+        List<TreeNode<Menu>> treeNode = TreeUtil.getTree(new ArrayList<>(userMenu), Menu::getParentId, Menu::getId, Arrays.asList(null,""));
         //树转vue路由
-        List<VueRoutes> routes = findRoutes(null, treeNode);
+        List<VueRoutes> routes = findRoutes(treeNode);
         return RestResult.result(RespCode.CODE_0.getValue(), null, routes);
     }
 
     @Override
-    public RestResult<?> tenantMenuPrivilegeTree(Long tenantId) throws Exception {
+    public RestResult<?> tenantMenuPrivilegeTree(Long tenantId) {
         //所有菜单
-        List<Map> menuList = baseMapper.findMenuPrivilegeTree();
-        Map<String, Map> mapMap = menuList.stream().collect(Collectors.toMap(s -> String.valueOf(s.get("v")), s -> s,throwingMerger(),LinkedHashMap::new));
-        List<TreeNode<Map>> treeNode = TreeUtil.getTree(menuList, "parentId", "v", null);
-        List<String> stringList = new ArrayList<>();
-        //所有子集菜单编号，以及转换树
-        selectLastV(stringList, treeNode);
-        List<Map> privileges = privilegeMapper.findTenantMenuPrivilegeTree(tenantId,stringList);
-        Set<String> parentIdSet = privileges.stream().map(v -> String.valueOf(v.get("parentId"))).collect(Collectors.toSet());
+        List<Menu> menuList = baseMapper.findMenuPrivilegeTree();
+        Map<String, Menu> mapMap = menuList.stream().collect(Collectors.toMap(Menu::getId, Function.identity(),throwingMerger(),LinkedHashMap::new));
+        List<Menu> privileges = baseMapper.findTenantMenuPrivilegeTree(tenantId);
+        Set<String> idSet = privileges.stream().map(Menu::getId).collect(Collectors.toSet());
         Set<String> newMenuIdSet = new HashSet<>();
-        List<Map> newMenuList = new LinkedList<>();
-        for (String key : parentIdSet) {
+        for (String key : idSet) {
             deleteLastTreeV(key,newMenuIdSet,mapMap);
         }
         List<String> deleteList = CollUtil.subtractToList(mapMap.keySet(), newMenuIdSet);
         for (String deleteId : deleteList) {
             mapMap.remove(deleteId);
         }
-        newMenuList.addAll(mapMap.values());
-        newMenuList.addAll(privileges);
+        List<Menu> newMenuList = new LinkedList<>(mapMap.values());
         //转换树结构
-        treeNode = TreeUtil.getTree(newMenuList, "parentId", "v", null);
+        List<TreeNode<Menu>> treeNode = TreeUtil.getTree(newMenuList, Menu::getParentId, Menu::getId, null);
         List<Map> maps = AppUtils.transformationTree("children", treeNode);
         return RestResult.result(RespCode.CODE_0.getValue(),null,maps);
     }
 
+    @Override
+    public List<Menu> findTypeButtonMenu(Integer bizType, Long bizId) {
+        return baseMapper.findTypeButtonMenu(bizType,bizId);
+    }
+
+    @Override
+    public RestResult<?> initBottom() {
+        try {
+            List<Menu> typeButtonMenu = baseMapper.findTypeButtonMenu(null, null);
+            Map<String,Set<String>> allUrlPrivilege = new HashMap<>();
+            for (Menu buttonMenu : typeButtonMenu) {
+                String[] split = buttonMenu.getRequestUrl().split(",");//多个页面url组合时
+                for (String url : split) {
+                    Set<String> object =allUrlPrivilege.computeIfAbsent(url, k -> new HashSet<String>());
+                    object.add(buttonMenu.getId());
+                }
+            }
+            if (RedisUtils.hasKey(Constant.ALL_URL_KEY)) {
+                RedisUtils.del(Constant.ALL_URL_KEY);
+            }
+            RedisUtils.hmset(Constant.ALL_URL_KEY, allUrlPrivilege);
+        } catch (Exception e) {
+            log.error("初始化权限信息错误 :", e);
+        }
+        return RestResult.result(RespCode.CODE_0.getValue(), "初始化成功");
+    }
+
     /**
-     * //树转vue路由
+     * 树转vue路由
      *
      * @return
      */
-    private List<VueRoutes> findRoutes(VueRoutes routes,List<TreeNode<Menu>> treeNode) {
+    private List<VueRoutes> findRoutes(List<TreeNode<Menu>> treeNode) {
         List<VueRoutes> routesList = new ArrayList<>();
-        treeNode.forEach(obj -> {
-            VueRoutes vueRoutes = new VueRoutes();
-            if (obj.getChildren().size() > 0) {
-                List<VueRoutes> routes1 = findRoutes(routes,obj.getChildren());
-                if (routes1.size() > 0) {
-                    vueRoutes.setRedirect(routes1.get(0).getPath());
-                }
-                vueRoutes.setChildren(routes1);
-                vueRoutes.setComponent("Layout");//表示父级菜单
+        for (TreeNode<Menu> menuTreeNode : treeNode) {
+            VueRoutes convert = MenuConvert.INSTANCE.convert(menuTreeNode.getT());
+            if (CollUtil.isNotEmpty(menuTreeNode.getChildren())) {
+                convert.setChildren(findRoutes(menuTreeNode.getChildren()));
             } else {
-                vueRoutes.setChildren(new ArrayList<>());
-                vueRoutes.setComponent(obj.getT().getViewPath());
+                convert.setChildren(new ArrayList<>());
             }
-            vueRoutes.setName(obj.getT().getId());
-            vueRoutes.setPath(obj.getT().getPath());
-            VueRoutes.Meta meta = new VueRoutes.Meta();
-            meta.setIcon(obj.getT().getIcon());
-            meta.setTitle(obj.getT().getMenuName());
-            meta.setHideMenu(obj.getT().getHideMenu() != ConstEnum.Flag.NO.getValue());
-            //已http开头路由都为内联路由
-            if(obj.getT().getViewPath().startsWith("http")){
-                meta.setFrameSrc(obj.getT().getViewPath());
-                vueRoutes.setComponent("IFrame");
-            }
-            if(routes!= null && vueRoutes.getPath().contains(":")){
-                meta.setCurrentActiveMenu(routes.getPath());
-            }
-            vueRoutes.setMeta(meta);
-            routesList.add(vueRoutes);
-        });
+            routesList.add(convert);
+        }
         return routesList;
     }
-
-    /**
-     * 获取最后子集编号
-     * @param treeNode
-     * @return
-     */
-    private void selectLastId(List<String> stringList,List<TreeNode<Map>> treeNode){
-        treeNode.forEach(obj->{
-            if(obj.getIsChildren()){
-                selectLastId(stringList,obj.getChildren());
-            }else {
-                obj.getT().put("type",2);
-                stringList.add(obj.getT().get("id").toString());
-            }
-        });
-    }
-
-    /**
-     * 获取最后子集编号
-     * @param treeNode
-     * @return
-     */
-    private void selectLastV(List<String> stringList,List<TreeNode<Map>> treeNode){
-        treeNode.forEach(obj->{
-            if(obj.getIsChildren()){
-                selectLastV(stringList,obj.getChildren());
-            }else {
-                obj.getT().put("type",2);
-                stringList.add(obj.getT().get("v").toString());
-            }
-        });
-    }
     //删除没有子集的树
-    private void deleteLastTreeV(String key,Set<String> newMenuIdSet,Map<String, Map> mapMap){
-        Map map = mapMap.get(key);
+    private void deleteLastTreeV(String key,Set<String> newMenuIdSet,Map<String, Menu> mapMap){
+        Menu map = mapMap.get(key);
         if(ObjectUtil.isNotNull(map)){
-            newMenuIdSet.add(String.valueOf(map.get("v")));
-            Object v = map.get("parentId");
-            if(ObjectUtil.isNotNull(v)){
-                deleteLastTreeV(String.valueOf(v),newMenuIdSet,mapMap);
+            newMenuIdSet.add(map.getId());
+            if(ObjectUtil.isNotNull(map.getParentId())){
+                deleteLastTreeV(map.getParentId(),newMenuIdSet,mapMap);
             }
         }
-    }
-
-    /**
-     * 给树添加子元素
-     * @param treeNode
-     * @return
-     */
-    private void addLastTree(List<TreeNode<Map>> treeNode, Map<String,List<TreeNode<Map>>> map){
-        treeNode.forEach(obj->{
-            if(obj.getIsChildren()){
-                addLastTree(obj.getChildren(),map);
-            }
-            List<TreeNode<Map>> treeNodeList = map.get(obj.getT().get("id"));
-            if(treeNodeList != null && treeNodeList.size() > 0){
-                obj.setIsChildren(true);
-                obj.setChildren(treeNodeList);
-            }
-        });
-    }
-
-    /**
-     * 给树添加子元素
-     * @param treeNode
-     * @return
-     */
-    private void addLastTreeV(List<TreeNode<Map>> treeNode, Map<String,List<TreeNode<Map>>> map){
-        treeNode.forEach(obj->{
-            if(obj.getIsChildren()){
-                addLastTreeV(obj.getChildren(),map);
-            }
-            List<TreeNode<Map>> treeNodeList = map.get(obj.getT().get("v"));
-            if(treeNodeList != null && treeNodeList.size() > 0){
-                obj.setIsChildren(true);
-                obj.setChildren(treeNodeList);
-            }
-        });
     }
 
     private void findSuperiorMenu(Menu useMenu, List<Menu> allMenuList, List<Menu> userMenuList, List<Menu> delete) {

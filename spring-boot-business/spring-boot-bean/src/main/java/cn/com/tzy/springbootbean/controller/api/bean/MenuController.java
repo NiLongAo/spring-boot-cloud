@@ -26,20 +26,18 @@ public class MenuController  extends ApiController {
     @Autowired
     MenuService menuService;
     @Autowired
-    PrivilegeService privilegeService;
+    RoleConnectMenuService roleConnectMenuService;
     @Autowired
-    RoleConnectPrivilegeService roleConnectPrivilegeService;
+    DepartmentConnectMenuService departmentConnectMenuService;
     @Autowired
-    DepartmentConnectPrivilegeService departmentConnectPrivilegeService;
-    @Autowired
-    PositionConnectPrivilegeService positionConnectPrivilegeService;
+    PositionConnectMenuService positionConnectMenuService;
 
 
 
     @PostMapping("tree")
     @ResponseBody
     public RestResult<?> tree(@Validated @RequestBody MenuParam param){
-        return menuService.tree(param.topName,param.isShowPrivilege,param.menuName);
+        return menuService.tree(param.getTopName(),param.getIsShowPrivilege(),param.getMenuName());
     }
 
     @PostMapping("page")
@@ -70,13 +68,13 @@ public class MenuController  extends ApiController {
             NotNullMap map = new NotNullMap();
             map.putString("parentId",obj.getParentId());
             map.putString("menuId",obj.getId());
-            map.putInteger("level",obj.getLevel());
+            map.putInteger("level",obj.getType());
             map.putString("menuName",obj.getMenuName());
             map.putString("path",obj.getPath());
-            map.putString("viewPath",obj.getViewPath());
-            map.putInteger("hideMenu",obj.getHideMenu());
-            map.putInteger("isOpen",obj.getIsOpen());
-            map.putInteger("num",obj.getNum());
+            map.putString("viewPath",obj.getComponent());
+            map.putInteger("hideMenu",obj.getHideInMenu());
+            map.putInteger("isOpen",obj.getStatus());
+            map.putInteger("num",obj.getOrder());
             map.putString("memo",obj.getMemo());
             data.add(map);
         });
@@ -112,16 +110,10 @@ public class MenuController  extends ApiController {
         if(parent != null){
             return RestResult.result(RespCode.CODE_0.getValue(),"请先删除子级菜单");
         }
-        List<Privilege> privilegeList = privilegeService.list(new LambdaQueryWrapper<Privilege>().eq(Privilege::getMenuId, menu.getId()));
-        List<String> idList = new ArrayList<>();
-        privilegeList.forEach(obj->{
-            idList.add(obj.getId());
-            roleConnectPrivilegeService.remove(new LambdaQueryWrapper<RoleConnectPrivilege>().eq(RoleConnectPrivilege::getPrivilegeId,obj.getId()));
-            departmentConnectPrivilegeService.remove(new LambdaQueryWrapper<DepartmentConnectPrivilege>().eq(DepartmentConnectPrivilege::getPrivilegeId,obj.getId()));
-            positionConnectPrivilegeService.remove(new LambdaQueryWrapper<PositionConnectPrivilege>().eq(PositionConnectPrivilege::getPrivilegeId,obj.getId()));
-        });
-        if(!idList.isEmpty()){
-            privilegeService.removeByIds(idList);
+        if(menu.getType()==Menu.MenuType.BUTTON.getType()){
+            roleConnectMenuService.remove(new LambdaQueryWrapper<RoleConnectMenu>().eq(RoleConnectMenu::getMenuId,menu.getId()));
+            departmentConnectMenuService.remove(new LambdaQueryWrapper<DepartmentConnectMenu>().eq(DepartmentConnectMenu::getMenuId,menu.getId()));
+            positionConnectMenuService.remove(new LambdaQueryWrapper<PositionConnectMenu>().eq(PositionConnectMenu::getMenuId,menu.getId()));
         }
         menuService.removeById(menu.getId());
         return  RestResult.result(RespCode.CODE_0.getValue(),"删除成功");
@@ -132,6 +124,15 @@ public class MenuController  extends ApiController {
     public RestResult<?> detail(@RequestParam("id") String id){
         Menu menu = menuService.getById(id);
         return  RestResult.result(RespCode.CODE_0.getValue(),null,menu);
+    }
+
+    /**
+     * 根据职位Id获取用户集合
+     */
+    @GetMapping("init_bottom")
+    @ResponseBody
+    public RestResult<?> initBottom() {
+        return menuService.initBottom();
     }
 
 }

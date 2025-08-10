@@ -1,13 +1,14 @@
 package cn.com.tzy.springbootbean.controller.api.bean;
 
-import cn.com.tzy.springbootbean.service.api.RoleConnectPrivilegeService;
+import cn.com.tzy.springbootbean.service.api.RoleConnectMenuService;
 import cn.com.tzy.springbootbean.service.api.RoleService;
 import cn.com.tzy.springbootcomm.common.vo.PageResult;
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootcomm.constant.NotNullMap;
 import cn.com.tzy.springbootentity.dome.bean.Role;
-import cn.com.tzy.springbootentity.dome.bean.RoleConnectPrivilege;
+import cn.com.tzy.springbootentity.dome.bean.RoleConnectMenu;
+import cn.com.tzy.springbootentity.param.bean.RoleConnectMenuParam;
 import cn.com.tzy.springbootentity.param.bean.RoleParam;
 import cn.com.tzy.springbootstartercloud.api.ApiController;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -29,7 +30,7 @@ public class RoleController  extends ApiController {
     @Autowired
     RoleService roleService;
     @Autowired
-    RoleConnectPrivilegeService roleConnectPrivilegeService;
+    RoleConnectMenuService roleConnectMenuService;
 
     /**
      * 角色信息下拉展示(动态搜索数据源)
@@ -71,7 +72,7 @@ public class RoleController  extends ApiController {
     @GetMapping("remove")
     @ResponseBody
     public RestResult<?> remove(@RequestParam("id") Long id){
-        roleConnectPrivilegeService.remove(new LambdaQueryWrapper<RoleConnectPrivilege>().eq(RoleConnectPrivilege::getRoleId,id));
+        roleConnectMenuService.remove(new LambdaQueryWrapper<RoleConnectMenu>().eq(RoleConnectMenu::getRoleId,id));
         roleService.removeById(id);
         return  RestResult.result(RespCode.CODE_0.getValue(),"删除成功");
     }
@@ -84,6 +85,19 @@ public class RoleController  extends ApiController {
         return  RestResult.result(RespCode.CODE_0.getValue(),null,role);
     }
 
+
+
+    @GetMapping("role_privilege_list")
+    @ResponseBody
+    public RestResult<?> findRolePrivilegeList(@RequestParam("roleId") Long roleId){
+        return roleConnectMenuService.findRolePrivilegeList(roleId);
+    }
+
+    @PostMapping("role_privilege_save")
+    @ResponseBody
+    public RestResult<?> rolePrivilegeSave(@RequestBody RoleConnectMenuParam save){
+        return roleConnectMenuService.save(save.roleId,save.menuIdList);
+    }
 
 
 

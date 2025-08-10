@@ -1,13 +1,14 @@
 package cn.com.tzy.springbootbean.controller.api.bean;
 
-import cn.com.tzy.springbootbean.service.api.DepartmentConnectPrivilegeService;
+import cn.com.tzy.springbootbean.service.api.DepartmentConnectMenuService;
 import cn.com.tzy.springbootbean.service.api.DepartmentService;
 import cn.com.tzy.springbootcomm.common.vo.PageResult;
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootcomm.constant.NotNullMap;
 import cn.com.tzy.springbootentity.dome.bean.Department;
-import cn.com.tzy.springbootentity.dome.bean.DepartmentConnectPrivilege;
+import cn.com.tzy.springbootentity.dome.bean.DepartmentConnectMenu;
+import cn.com.tzy.springbootentity.param.bean.DepartmentConnectMenuParam;
 import cn.com.tzy.springbootentity.param.bean.DepartmentParam;
 import cn.com.tzy.springbootstartercloud.api.ApiController;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -28,7 +29,7 @@ public class DepartmentController  extends ApiController {
     @Autowired
     DepartmentService departmentService;
     @Autowired
-    DepartmentConnectPrivilegeService departmentConnectPrivilegeService;
+    DepartmentConnectMenuService departmentConnectMenuService;
 
     @PostMapping("tree")
     @ResponseBody
@@ -85,7 +86,7 @@ public class DepartmentController  extends ApiController {
         if(parent != null){
             return RestResult.result(RespCode.CODE_0.getValue(),"请先删除子级部门");
         }
-        departmentConnectPrivilegeService.remove(new LambdaQueryWrapper<DepartmentConnectPrivilege>().eq(DepartmentConnectPrivilege::getDepartmentId,id));
+        departmentConnectMenuService.remove(new LambdaQueryWrapper<DepartmentConnectMenu>().eq(DepartmentConnectMenu::getDepartmentId,id));
         departmentService.removeById(id);
         return  RestResult.result(RespCode.CODE_0.getValue(),"删除成功");
     }
@@ -98,4 +99,15 @@ public class DepartmentController  extends ApiController {
     }
 
 
+    @GetMapping("department_privilege_list")
+    @ResponseBody
+    public RestResult<?> findDepartmentPrivilegeList(@RequestParam("departmentId") Long departmentId){
+        return departmentConnectMenuService.findDepartmentPrivilegeList(departmentId);
+    }
+
+    @PostMapping("department_privilege_save")
+    @ResponseBody
+    public RestResult<?> departmentPrivilegeSave(@RequestBody DepartmentConnectMenuParam save){
+        return departmentConnectMenuService.save(save.departmentId,save.privilegeList);
+    }
 }

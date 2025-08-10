@@ -1,12 +1,12 @@
 package cn.com.tzy.springbootbean.service.api.impl;
 
-import cn.com.tzy.springbootbean.mapper.sql.TenantConnectPrivilegeMapper;
+import cn.com.tzy.springbootbean.mapper.sql.TenantConnectMenuMapper;
 import cn.com.tzy.springbootbean.mapper.sql.TenantMapper;
-import cn.com.tzy.springbootbean.service.api.TenantConnectPrivilegeService;
+import cn.com.tzy.springbootbean.service.api.TenantConnectMenuService;
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootentity.dome.sys.Tenant;
-import cn.com.tzy.springbootentity.dome.sys.TenantConnectPrivilege;
+import cn.com.tzy.springbootentity.dome.sys.TenantConnectMenu;
 import cn.com.tzy.springbootstarterredis.common.RedisCommon;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class TenantConnectPrivilegeServiceImpl  extends ServiceImpl<TenantConnectPrivilegeMapper, TenantConnectPrivilege> implements TenantConnectPrivilegeService {
+public class TenantConnectMenuServiceImpl  extends ServiceImpl<TenantConnectMenuMapper, TenantConnectMenu> implements TenantConnectMenuService {
 
     @Autowired
     private TenantMapper tenantMapper;
@@ -44,10 +44,10 @@ public class TenantConnectPrivilegeServiceImpl  extends ServiceImpl<TenantConnec
         //要添加的值
         List<String> addList = privilegeList.stream().filter(num -> !privileges.contains(num)).collect(Collectors.toList());
         if(deleteList.size() > 0){
-            baseMapper.deleteTenantConnectPrivilege(tenant.getId(),deleteList);
+            baseMapper.deleteTenantConnectMenu(tenant.getId(),deleteList);
         }
         if(addList.size() > 0){
-            baseMapper.saveTenantConnectPrivilege(tenant.getId(),addList);
+            baseMapper.saveTenantConnectMenu(tenant.getId(),addList);
         }
         return RestResult.result(RespCode.CODE_0.getValue(),"保存成功");
     }

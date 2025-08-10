@@ -37,17 +37,6 @@ create table sys_dictionary_item(
     primary key (id)
 )engine=innodb default charset=utf8 COMMENT='字典类型条目表';
 
-create table sys_config(
-   config_name          varchar(40) not null comment '配置名称',
-   k                    varchar(40) not null comment '配置名称（枚举）',
-   v                    varchar(40) not null comment '配置值',
-   update_user_id       bigint unsigned comment '修改人编号',
-   update_time          datetime comment '修改时间',
-   create_user_id       bigint unsigned comment '创建人编号',
-   create_time          datetime comment '创建时间',
-   primary key (k)
-)engine=innodb default charset=utf8 COMMENT='系统配置';
-
 CREATE TABLE IF NOT EXISTS sys_area (
     parent_id           int(20) DEFAULT null COMMENT '地区父节点',
     area_id             int(20) NOT NULL AUTO_INCREMENT COMMENT '地区Id',
@@ -97,9 +86,9 @@ create table sys_tenant (
 )engine=innodb default charset=utf8 COMMENT='租户基本信息';
 
 /*租户关联权限表*/
-create table sys_tenant_connect_privilege(
+create table sys_tenant_connect_menu(
     tenant_id            bigint NOT NULL DEFAULT 1 COMMENT '租户编号',
-    privilege_id         varchar(1024) not null not null comment '权限编号',
+    menu_id         varchar(1024) not null not null comment '权限编号',
     update_user_id       bigint unsigned comment '修改人编号',
     update_time          datetime comment '修改时间',
     create_user_id       bigint unsigned comment '创建人编号',
@@ -331,47 +320,46 @@ create table bean_role(
     primary key (id)
 )engine=innodb default charset=utf8 COMMENT='角色表';
 /*角色关联权限表*/
-create table bean_role_connect_privilege(
-   role_id              bigint unsigned not null comment '角色编号',
-   tenant_id bigint NOT NULL DEFAULT 1 COMMENT '租户编号',
-   privilege_id         varchar(1024) not null not null comment '权限编号',
+create table bean_role_connect_menu(
+   role_id                  bigint unsigned not null comment '角色编号',
+   tenant_id                bigint NOT NULL DEFAULT 1 COMMENT '租户编号',
+   menu_id                  varchar(1024) not null not null comment '权限编号',
    update_user_id           bigint unsigned comment '修改人编号',
    update_time              datetime comment '修改时间',
    create_user_id           bigint unsigned comment '创建人编号',
    create_time              datetime comment '创建时间'
 )engine=innodb default charset=utf8 COMMENT='角色关联权限表';
-/*权限表*/
-create table bean_privilege(
-    id                   varchar(1024) not null comment '主键',
-    privilege_name       varchar(20) not null comment '权限名称',
-    is_open              tinyint not null default 0 comment '是否开启 1.是 0否',
-    request_url          varchar(1024) comment '请求路径',
-    menu_id              varchar(1024) not null comment '菜单编号',
-    memo                 varchar(1024) comment '备注',
-    update_user_id       bigint unsigned comment '修改人编号',
-    update_time          datetime comment '修改时间',
-    create_user_id       bigint unsigned comment '创建人编号',
-    create_time          datetime comment '创建时间',
-    primary key (id)
-)engine=innodb default charset=utf8 COMMENT='权限表';
 
 /*菜单表*/
 create table bean_menu(
-    id                   varchar(1024) not null comment '主键',
-    parent_id            varchar(360) comment '父级菜单',
-    level                int not null comment '级别',
-    menu_name            varchar(40) not null comment '菜单名称',
-    path                 varchar(480) comment '跳转路径',
-    view_path            varchar(480) comment '页面路径',
-    icon                 varchar(60) comment '小图标',
-    is_open              tinyint not null default 0 comment '是否开启 1.是 0否',
-    hide_menu            tinyint not null default 0 comment '是否隐藏 1.是 0否',
-    num                  int comment '序号',
-    memo                 varchar(1024) comment '备注',
-    update_user_id       bigint unsigned comment '修改人编号',
-    update_time          datetime comment '修改时间',
-    create_user_id       bigint unsigned comment '创建人编号',
-    create_time          datetime comment '创建时间',
+    id                      varchar(1024) not null comment '主键',
+    parent_id               varchar(360) comment '父级菜单',
+    type                    tinyint not null default 1 comment '级别 1.目录 2.菜单 3.按钮 4.内嵌 5.外链',
+    menu_name               varchar(40) not null comment '菜单名称',
+    path                    varchar(480) comment '前端路径',
+    component               varchar(480) comment '跳转路径',
+    redirect                varchar(480) default null comment '重定向(默认指向第一个路径)',
+    auth_code               varchar(480) comment '权限标识',
+    icon                    varchar(60) comment '小图标',
+    active_icon             varchar(60) comment '激活时小图标',
+    active_path             varchar(60) comment '作为路由时，需要激活的菜单的Path',
+    badge_type              tinyint default 2 comment '徽标类型 1.点 2.文字',
+    badge_variants          tinyint default 1 comment '徽标颜色 1.默认 2.主要 3.成功 4.警告 5.错误',
+    badge_context           varchar(60) comment '徽标内容(当徽标类型为文字时有效)',
+    hide_children_in_menu   tinyint default 0 comment '在菜单中隐藏下级 1.是 0否',
+    hide_in_menu            tinyint default 0 comment '在菜单中隐藏 1.是 0否',
+    hide_in_tab             tinyint default 0 comment '在标签栏中隐藏 1.是 0否',
+    keep_alive              tinyint default 0 comment '是否缓存页面 1.是 0否',
+    no_basic_layout         tinyint default 0 comment '无需基础布局 1.是 0否',
+    open_in_new_window      tinyint default 0 comment '是否在新窗口打开 1.是 0否',
+    request_url             varchar(1024) comment '后端请求路径(用于后端权限限制)',
+    `order`                 int comment '序号',
+    `status`                tinyint not null default 1 comment '菜单状态 1.启用 0.禁用',
+    memo                    varchar(1024) comment '备注',
+    update_user_id          bigint unsigned comment '修改人编号',
+    update_time             datetime comment '修改时间',
+    create_user_id          bigint unsigned comment '创建人编号',
+    create_time             datetime comment '创建时间',
     primary key (id),
     key idx_parent_id_menu_name (parent_id, menu_name)
 )engine=innodb default charset=utf8 COMMENT='菜单表';
@@ -403,10 +391,10 @@ create table bean_user_connect_department(
 )engine=innodb default charset=utf8 COMMENT='用户关联部门表';
 
 /*部门关联权限表*/
-create table bean_department_connect_privilege(
+create table bean_department_connect_menu(
     department_id        bigint unsigned not null  comment '部门编号',
     tenant_id            bigint NOT NULL DEFAULT 1 COMMENT '租户编号',
-    privilege_id         varchar(1024) not null not null comment '权限编号',
+    menu_id         varchar(1024) not null not null comment '权限编号',
     update_user_id       bigint unsigned comment '修改人编号',
     update_time          datetime comment '修改时间',
     create_user_id       bigint unsigned comment '创建人编号',
@@ -439,10 +427,10 @@ create table bean_user_connect_position(
 )engine=innodb default charset=utf8 COMMENT='用户关联职位表';
 
 /*职位关联权限表*/
-create table bean_position_connect_privilege(
+create table bean_position_connect_menu(
     position_id          bigint unsigned not null  comment '部门编号',
     tenant_id            bigint NOT NULL DEFAULT 1 COMMENT '租户编号',
-    privilege_id         varchar(1024) not null comment '权限编号',
+    menu_id              varchar(1024) not null comment '权限编号',
     update_user_id       bigint unsigned comment '修改人编号',
     update_time          datetime comment '修改时间',
     create_user_id       bigint unsigned comment '创建人编号',

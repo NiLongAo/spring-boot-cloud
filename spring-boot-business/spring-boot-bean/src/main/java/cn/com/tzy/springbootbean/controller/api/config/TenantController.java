@@ -1,12 +1,14 @@
 package cn.com.tzy.springbootbean.controller.api.config;
 
 import cn.com.tzy.springbootbean.convert.sys.TenantConvert;
+import cn.com.tzy.springbootbean.service.api.TenantConnectMenuService;
 import cn.com.tzy.springbootbean.service.api.TenantService;
 import cn.com.tzy.springbootcomm.common.model.BaseModel;
 import cn.com.tzy.springbootcomm.common.vo.PageResult;
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootentity.dome.sys.Tenant;
+import cn.com.tzy.springbootentity.param.sms.TenantConnectMenuParam;
 import cn.com.tzy.springbootentity.param.sys.TenantParam;
 import cn.com.tzy.springbootentity.vo.bean.TenantUserVo;
 import cn.com.tzy.springbootstartercloud.api.ApiController;
@@ -22,6 +24,8 @@ public class TenantController extends ApiController {
 
     @Autowired
     private TenantService tenantService;
+    @Autowired
+    private TenantConnectMenuService tenantConnectMenuService;
 
     /**
      * 租户信息下拉展示(动态搜索数据源)
@@ -68,5 +72,19 @@ public class TenantController extends ApiController {
     public RestResult<?> detail(@RequestParam("id") Long id){
         Tenant tenant = tenantService.getById(id);
         return  RestResult.result(RespCode.CODE_0.getValue(),null,tenant);
+    }
+
+
+
+    @GetMapping("tenant_privilege_list")
+    @ResponseBody
+    public RestResult<?> findTenantPrivilegeList(@RequestParam("tenantId") Long tenantId){
+        return tenantConnectMenuService.findPositionPrivilegeList(tenantId);
+    }
+
+    @PostMapping("tenant_privilege_save")
+    @ResponseBody
+    public RestResult<?> tenantPrivilegeSave(@RequestBody TenantConnectMenuParam save){
+        return tenantConnectMenuService.save(save.tenantId,save.privilegeList);
     }
 }

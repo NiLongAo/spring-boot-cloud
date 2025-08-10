@@ -3,6 +3,7 @@ package cn.com.tzy.springbootbean.service.api.impl;
 import cn.com.tzy.spingbootstartermybatis.core.tenant.context.TenantContextHolder;
 import cn.com.tzy.springbootbean.mapper.sql.*;
 import cn.com.tzy.springbootbean.service.api.AreaService;
+import cn.com.tzy.springbootbean.service.api.MenuService;
 import cn.com.tzy.springbootbean.service.api.TenantService;
 import cn.com.tzy.springbootbean.service.api.UserService;
 import cn.com.tzy.springbootbean.utils.PassWordUtils;
@@ -14,6 +15,7 @@ import cn.com.tzy.springbootcomm.constant.Constant;
 import cn.com.tzy.springbootcomm.constant.NotNullMap;
 import cn.com.tzy.springbootcomm.utils.JwtUtils;
 import cn.com.tzy.springbootentity.common.info.SecurityBaseUser;
+import cn.com.tzy.springbootentity.dome.bean.Menu;
 import cn.com.tzy.springbootentity.dome.bean.MiniUser;
 import cn.com.tzy.springbootentity.dome.bean.User;
 import cn.com.tzy.springbootentity.dome.bean.UserSet;
@@ -26,6 +28,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.Assert;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,8 +44,6 @@ import java.util.stream.Collectors;
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
     @Autowired
-    private PrivilegeMapper privilegeMapper;
-    @Autowired
     private UserSetMapper userSetMapper;
     @Autowired
     private TenantService tenantService;
@@ -56,6 +57,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private MiniUserMapper miniUserMapper;
     @Resource
     private AreaService areaService;
+    @Resource
+    private MenuService menuService;
 
 
     @Override
@@ -222,20 +225,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             isEnabled =userSet.getIsEnabled();
             if(userSet.getIsAdmin() == ConstEnum.Flag.YES.getValue() && Objects.equals(user.getTenantId(), Constant.TENANT_ID)){
                 //系统管理员所有权限都有
-                userPrivilegeSet = privilegeMapper.findUserAdmin();
+                userPrivilegeSet = menuService.list(Wrappers.<Menu>lambdaQuery().eq(Menu::getType,Menu.MenuType.BUTTON.getType()).eq(Menu::getStatus,ConstEnum.Flag.YES.getValue())).stream().map(Menu::getId).collect(Collectors.toSet());
             } else if(userSet.getIsAdmin() == ConstEnum.Flag.YES.getValue()){
                 //系统管理员所有权限都有
-                userPrivilegeSet = privilegeMapper.findTenantPrivilegeList(user.getTenantId());
+                userPrivilegeSet = menuService.findTypeButtonMenu(1,user.getTenantId()).stream().map(Menu::getId).collect(Collectors.toSet());
             }else {
-                Set<String> rolePrivilegeList = privilegeMapper.findUserRolePrivilegeList(user.getId());
+                Set<String> rolePrivilegeList = menuService.findTypeButtonMenu(4,user.getId()).stream().map(Menu::getId).collect(Collectors.toSet());
                 if (!rolePrivilegeList.isEmpty()) {
                     userPrivilegeSet.addAll(rolePrivilegeList);
                 }
-                Set<String> departmentPrivilegeList = privilegeMapper.findUserDepartmentPrivilegeList(user.getId());
+                Set<String> departmentPrivilegeList = menuService.findTypeButtonMenu(2,user.getId()).stream().map(Menu::getId).collect(Collectors.toSet());
                 if (!rolePrivilegeList.isEmpty()) {
                     userPrivilegeSet.addAll(departmentPrivilegeList);
                 }
-                Set<String> positionPrivilegeList = privilegeMapper.findUserPositionPrivilegeList(user.getId());
+                Set<String> positionPrivilegeList = menuService.findTypeButtonMenu(3,user.getId()).stream().map(Menu::getId).collect(Collectors.toSet());
                 if (!rolePrivilegeList.isEmpty()) {
                     userPrivilegeSet.addAll(positionPrivilegeList);
                 }

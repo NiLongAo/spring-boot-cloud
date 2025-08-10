@@ -1,32 +1,35 @@
-package cn.com.tzy.springbootentity.param.sms;
+package cn.com.tzy.springbootentity.dome.sys;
 
-import cn.com.tzy.springbootcomm.common.model.BaseModel;
+import cn.com.tzy.springbootcomm.common.bean.Base;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-import javax.validation.constraints.NotNull;
-import java.util.List;
-
 @ApiModel(value="租户联权限表")
 @Data
+@EqualsAndHashCode(callSuper=true)
 @SuperBuilder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class TenantConnectPrivilegeParam extends BaseModel {
+@TableName(value = "sys_tenant_connect_menu")
+public class TenantConnectMenu extends Base {
     /**
      * 租户编号
      */
+    @TableField(value = "tenant_id")
     @ApiModelProperty(value="租户编号")
-    @NotNull(message = "租户编号不能为空",groups = {add.class})
-    public Long tenantId;
+    private Long tenantId;
 
     /**
      * 权限编号
      */
+    @TableField(value = "menu_id")
     @ApiModelProperty(value="权限编号")
-    public List<String> privilegeList;
+    private String menuId;
 }

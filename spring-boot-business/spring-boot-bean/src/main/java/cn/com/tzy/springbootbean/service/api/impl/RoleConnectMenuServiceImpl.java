@@ -1,12 +1,12 @@
 package cn.com.tzy.springbootbean.service.api.impl;
 
-import cn.com.tzy.springbootbean.mapper.sql.RoleConnectPrivilegeMapper;
+import cn.com.tzy.springbootbean.mapper.sql.RoleConnectMenuMapper;
 import cn.com.tzy.springbootbean.mapper.sql.RoleMapper;
-import cn.com.tzy.springbootbean.service.api.RoleConnectPrivilegeService;
+import cn.com.tzy.springbootbean.service.api.RoleConnectMenuService;
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootentity.dome.bean.Role;
-import cn.com.tzy.springbootentity.dome.bean.RoleConnectPrivilege;
+import cn.com.tzy.springbootentity.dome.bean.RoleConnectMenu;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class RoleConnectPrivilegeServiceImpl extends ServiceImpl<RoleConnectPrivilegeMapper, RoleConnectPrivilege> implements RoleConnectPrivilegeService{
+public class RoleConnectMenuServiceImpl extends ServiceImpl<RoleConnectMenuMapper, RoleConnectMenu> implements RoleConnectMenuService{
 
     @Autowired
     private RoleMapper roleMapper;
@@ -27,7 +27,7 @@ public class RoleConnectPrivilegeServiceImpl extends ServiceImpl<RoleConnectPriv
     }
 
     @Override
-    public RestResult<?> save(Long roleId, List<String> privilegeList) {
+    public RestResult<?> save(Long roleId, List<String> menuIdList) {
         if(roleId == null){
             return RestResult.result(RespCode.CODE_2.getValue(),"未获取角色编号");
         }
@@ -37,14 +37,14 @@ public class RoleConnectPrivilegeServiceImpl extends ServiceImpl<RoleConnectPriv
         }
         List<String> privileges = baseMapper.findRolePrivilegeList(roleId);
         //要删除的值
-        List<String> deleteList =privileges.stream().filter(num -> !privilegeList.contains(num)).collect(Collectors.toList());
+        List<String> deleteList =privileges.stream().filter(num -> !menuIdList.contains(num)).collect(Collectors.toList());
         //要添加的值
-        List<String> addList = privilegeList.stream().filter(num -> !privileges.contains(num)).collect(Collectors.toList());
+        List<String> addList = menuIdList.stream().filter(num -> !privileges.contains(num)).collect(Collectors.toList());
         if(deleteList.size() > 0){
-            baseMapper.deleteRoleConnectPrivilege(role.getId(),deleteList);
+            baseMapper.deleteRoleConnectMenu(role.getId(),deleteList);
         }
         if(addList.size() > 0){
-            baseMapper.saveRoleConnectPrivilege(role.getId(),addList);
+            baseMapper.saveRoleConnectMenu(role.getId(),addList);
         }
         return RestResult.result(RespCode.CODE_0.getValue(),"保存成功");
     }

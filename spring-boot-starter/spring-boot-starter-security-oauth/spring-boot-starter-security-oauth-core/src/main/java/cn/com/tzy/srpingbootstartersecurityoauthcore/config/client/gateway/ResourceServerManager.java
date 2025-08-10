@@ -62,15 +62,14 @@ public class ResourceServerManager implements ReactiveAuthorizationManager<Autho
         }
         // 缓存取 URL权限-角色集合 规则数据
         // urlPermRolesRules = [{'key':'GET:/api/v1/users/*','value':['ADMIN','TEST']},...]
-        Map<String, Object> urlPermRolesRules = (Map<String, Object>) RedisUtils.hmget(Constant.ALL_URL_KEY);
+        Map<String, Set<String>> urlPermRolesRules = (Map<String, Set<String>>) RedisUtils.hmget(Constant.ALL_URL_KEY);
         // 根据请求路径判断有访问权限的角色列表
         List<String> authorizedRoles = new ArrayList<>(); // 拥有访问权限的角色
         boolean requireCheck = false; // 是否需要鉴权，默认“没有设置权限规则”不用鉴权
-        for (Map.Entry<String, Object> permRoles : urlPermRolesRules.entrySet()) {
+        for (Map.Entry<String, Set<String>> permRoles : urlPermRolesRules.entrySet()) {
             String perm = permRoles.getKey();
             if (pathMatcher.match(perm, restfulPath)) {
-                List<String> roles = Convert.toList(String.class, permRoles.getValue());
-                authorizedRoles.addAll(Convert.toList(String.class, roles));
+                authorizedRoles.addAll(Convert.toList(String.class, permRoles.getValue()));
                 requireCheck = true;
                 break;
             }
