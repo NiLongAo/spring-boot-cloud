@@ -100,16 +100,21 @@ public class VueRoutes {
             this.title=title;
             this.name=name;
         }
-        private static final Map<Integer,MenuType> map = new HashMap<>();
+        private static final Map<Integer,MenuType> typeMap = new HashMap<>();
+        private static final Map<String,MenuType> titleMap = new HashMap<>();
 
         static {
             for (MenuType s : MenuType.values()) {
-                map.put(s.getType(), s);
+                typeMap.put(s.getType(), s);
+                titleMap.put(s.getTitle(), s);
             }
         }
 
         public static MenuType getType(int type) {
-            return map.get(type);
+            return typeMap.get(type);
+        }
+        public static MenuType getTitle(String title) {
+            return titleMap.get(title);
         }
     }
 
@@ -126,16 +131,21 @@ public class VueRoutes {
             this.title=title;
             this.name=name;
         }
-        private static Map<Integer,BadgeType> map = new HashMap<>();
+        private static final Map<Integer,BadgeType> typeMap = new HashMap<>();
+        private static final Map<String,BadgeType> titleMap = new HashMap<>();
 
         static {
             for (BadgeType s : BadgeType.values()) {
-                map.put(s.getType(), s);
+                typeMap.put(s.getType(), s);
+                titleMap.put(s.getTitle(), s);
             }
         }
 
         public static BadgeType getType(int type) {
-            return map.get(type);
+            return typeMap.get(type);
+        }
+        public static BadgeType getTitle(String title) {
+            return titleMap.get(title);
         }
     }
 
@@ -157,16 +167,21 @@ public class VueRoutes {
             this.title=title;
             this.name=name;
         }
-        private static Map<Integer,BadgeVariant> map = new HashMap<>();
-
+        private static final Map<Integer,BadgeVariant> typeMap = new HashMap<>();
+        private static final Map<String,BadgeVariant> titleMap = new HashMap<>();
         static {
             for (BadgeVariant s : BadgeVariant.values()) {
-                map.put(s.getType(), s);
+                typeMap.put(s.getType(), s);
+                titleMap.put(s.getTitle(), s);
             }
         }
 
         public static BadgeVariant getType(int type) {
-            return map.get(type);
+            return typeMap.get(type);
+        }
+
+        public static BadgeVariant getTitle(String title) {
+            return titleMap.get(title);
         }
     }
 }

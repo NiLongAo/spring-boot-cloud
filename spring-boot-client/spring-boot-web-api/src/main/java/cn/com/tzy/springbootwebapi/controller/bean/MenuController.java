@@ -2,6 +2,7 @@ package cn.com.tzy.springbootwebapi.controller.bean;
 
 import cn.com.tzy.springbootcomm.common.vo.PageResult;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
+import cn.com.tzy.springbootentity.common.info.VueRoutes;
 import cn.com.tzy.springbootentity.param.bean.MenuParam;
 import cn.com.tzy.springbootstartercloud.api.ApiController;
 import cn.com.tzy.springbootwebapi.service.bean.MenuService;
@@ -68,7 +69,7 @@ public class MenuController extends ApiController {
     @ApiOperation(value = "保存菜单信息", notes = "保存菜单信息")
     @PostMapping("save")
     @ResponseBody
-    public RestResult<?> save(@RequestBody @Validated MenuParam param){
+    public RestResult<?> save(@RequestBody @Validated VueRoutes param){
         return menuService.save(param);
     }
 

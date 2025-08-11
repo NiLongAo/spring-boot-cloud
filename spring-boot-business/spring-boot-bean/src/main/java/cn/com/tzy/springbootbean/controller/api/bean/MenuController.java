@@ -5,6 +5,7 @@ import cn.com.tzy.springbootcomm.common.vo.PageResult;
 import cn.com.tzy.springbootcomm.common.vo.RespCode;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
 import cn.com.tzy.springbootcomm.constant.NotNullMap;
+import cn.com.tzy.springbootentity.common.info.VueRoutes;
 import cn.com.tzy.springbootentity.dome.bean.*;
 import cn.com.tzy.springbootentity.param.bean.MenuParam;
 import cn.com.tzy.springbootstartercloud.api.ApiController;
@@ -95,7 +96,7 @@ public class MenuController  extends ApiController {
 
     @PostMapping("save")
     @ResponseBody
-    public RestResult<?> save(@RequestBody @Validated MenuParam param){
+    public RestResult<?> save(@RequestBody @Validated VueRoutes param){
         return menuService.save(param);
     }
 

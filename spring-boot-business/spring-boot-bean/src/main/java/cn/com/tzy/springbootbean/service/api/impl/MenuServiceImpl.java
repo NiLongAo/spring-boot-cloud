@@ -105,15 +105,15 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public RestResult<?> save(MenuParam param) {
+    public RestResult<?> save(VueRoutes param) {
         if(param.getId() == null){
             return RestResult.result(RespCode.CODE_2.getValue(), "未获取菜单编号");
         }
-        if(StringUtils.isEmpty(param.getParentId()) && param.getParentId().equals(param.getId())){
+        if(StringUtils.isEmpty(param.getPid()) && param.getPid().equals(param.getId())){
             return RestResult.result(RespCode.CODE_2.getValue(),"父级编号与本级相同！");
         }
-        if(param.getParentId()!= null){
-            Menu parentMenu = baseMapper.selectOne(new QueryWrapper<Menu>().eq("id", param.getParentId()));
+        if(param.getPid()!= null){
+            Menu parentMenu = baseMapper.selectOne(new QueryWrapper<Menu>().eq("id", param.getPid()));
             if(parentMenu == null ){
                 return RestResult.result(RespCode.CODE_2.getValue(), "未获取到父菜单信息");
             }else if(parentMenu.getType()==Menu.MenuType.BUTTON.getType()){

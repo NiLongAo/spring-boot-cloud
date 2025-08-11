@@ -82,4 +82,68 @@ public interface MenuConvert {
             @Mapping(target = "meta.order",source = "order"),
     })
     VueRoutes convert(Menu menu);
+
+    @Named("vueRouteTypeToType")
+    default Integer vueRouteTypeToType(VueRoutes type) {
+        if (type == null) {
+            return null;
+        }
+        return VueRoutes.MenuType.getTitle(type.getType()).getType();
+    }
+
+    @Named("vueRouteToComponent")
+    default String vueRouteToComponent(VueRoutes type) {
+        if (type == null) {
+            return null;
+        }
+        VueRoutes.MenuType title = VueRoutes.MenuType.getTitle(type.getType());
+        switch ( title){
+            case LINK:
+                return type.getMeta().getLink();
+            case EMBEDDED:
+                return type.getMeta().getIframeSrc();
+            default:
+                return type.getComponent();
+        }
+    }
+    @Named("vueRouteBadgeTypeToBadgeType")
+    default Integer vueRouteBadgeTypeToBadgeType(String badgeType) {
+        if (badgeType == null) {
+            return null;
+        }
+        return VueRoutes.BadgeType.getTitle(badgeType).getType();
+    }
+    @Named("vueRouteBadgeVariantsToBadgeVariants")
+    default Integer vueRouteBadgeVariantsToBadgeVariants(String badgeVariants) {
+        if (badgeVariants == null) {
+            return null;
+        }
+        return VueRoutes.BadgeVariant.getTitle(badgeVariants).getType();
+    }
+
+    @Named("toFlagVueRoute")
+    default Integer toFlagVueRoute(boolean flag) {
+        return flag?ConstEnum.Flag.YES.getValue():ConstEnum.Flag.NO.getValue();
+    }
+
+    @Mappings( {
+            @Mapping(source = "name",target = "menuName"),
+            @Mapping(source = "pid",target = "parentId"),
+            @Mapping(source = ".",target = "type",qualifiedByName = "vueRouteTypeToType"),
+            @Mapping(source = ".", target = "component", qualifiedByName = "vueRouteToComponent"),
+            @Mapping(source = "meta.icon",target = "icon"),
+            @Mapping(source = "meta.activeIcon",target = "activeIcon"),
+            @Mapping(source = "meta.activePath",target = "activePath"),
+            @Mapping(source = "meta.badge",target = "badgeContext"),
+            @Mapping(source = "meta.badgeType",target = "badgeType",qualifiedByName = "vueRouteBadgeTypeToBadgeType"),
+            @Mapping(source = "meta.badgeVariants",target = "badgeVariants",qualifiedByName = "vueRouteBadgeVariantsToBadgeVariants"),
+            @Mapping(source = "meta.hideChildrenInMenu",target = "hideChildrenInMenu",qualifiedByName = "toFlagVueRoute"),
+            @Mapping(source = "meta.hideInMenu",target = "hideInMenu",qualifiedByName = "toFlagVueRoute"),
+            @Mapping(source = "meta.hideInTab",target = "hideInTab",qualifiedByName = "toFlagVueRoute"),
+            @Mapping(source = "meta.keepAlive",target = "keepAlive",qualifiedByName = "toFlagVueRoute"),
+            @Mapping(source = "meta.noBasicLayout",target = "noBasicLayout",qualifiedByName = "toFlagVueRoute"),
+            @Mapping(source = "meta.openInNewWindow",target = "openInNewWindow",qualifiedByName = "toFlagVueRoute"),
+            @Mapping(source = "meta.order",target = "order"),
+    })
+    Menu convert(VueRoutes param);
 }

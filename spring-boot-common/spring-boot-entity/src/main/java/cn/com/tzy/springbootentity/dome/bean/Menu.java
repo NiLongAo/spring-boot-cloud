@@ -87,7 +87,7 @@ public class Menu extends StringIdEntity {
      * 作为路由时，需要激活的菜单的Path
      */
     @TableField(value = "active_path")
-    @ApiModelProperty(value = "作为路由时，需要激活的菜单的Path")
+    @ApiModelProperty(value = "作为详情不展示菜单时，需要激活的菜单的Path")
     private String activePath;
 
     /**

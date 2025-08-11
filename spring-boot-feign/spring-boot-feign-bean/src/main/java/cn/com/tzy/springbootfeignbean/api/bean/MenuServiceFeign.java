@@ -2,6 +2,7 @@ package cn.com.tzy.springbootfeignbean.api.bean;
 
 import cn.com.tzy.springbootcomm.common.vo.PageResult;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
+import cn.com.tzy.springbootentity.common.info.VueRoutes;
 import cn.com.tzy.springbootentity.param.bean.MenuParam;
 import cn.com.tzy.springbootstarterfeign.config.feign.FeignConfiguration;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -37,7 +38,7 @@ public interface MenuServiceFeign {
     RestResult<?> tenantMenuPrivilegeTree(@RequestParam("tenantId") Long tenantId);
 
     @RequestMapping(value = "/save", consumes = MediaType.APPLICATION_JSON_VALUE,method = RequestMethod.POST)
-    RestResult<?> save(@RequestBody @Validated MenuParam param);
+    RestResult<?> save(@RequestBody @Validated VueRoutes param);
 
     @RequestMapping(value = "/remove", consumes = MediaType.APPLICATION_JSON_VALUE,method = RequestMethod.GET)
     public RestResult<?> remove(@RequestParam("id")Long id);

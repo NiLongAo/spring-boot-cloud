@@ -4,6 +4,7 @@ import cn.com.tzy.springbootcomm.utils.JwtUtils;
 import cn.com.tzy.springbootentity.common.info.UserPayload;
 import cn.com.tzy.springbootcomm.common.vo.PageResult;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
+import cn.com.tzy.springbootentity.common.info.VueRoutes;
 import cn.com.tzy.springbootentity.param.bean.MenuParam;
 import cn.com.tzy.springbootcomm.utils.AppUtils;
 import cn.com.tzy.springbootfeignbean.api.bean.MenuServiceFeign;
@@ -44,7 +45,7 @@ public class MenuService {
     }
 
 
-    public RestResult<?> save(MenuParam param){
+    public RestResult<?> save(VueRoutes param){
         return menuServiceFeign.save(param);
     }
 
