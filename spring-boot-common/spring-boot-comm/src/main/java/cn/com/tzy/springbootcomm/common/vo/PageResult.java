@@ -16,17 +16,24 @@ import java.io.Serializable;
 public class PageResult implements Serializable {
     public static final PageResult SUCCESS = new PageResult();
 
-    int code;
-    String message;
-    String tid = TraceContext.traceId();
-    public Object data;
-    public int total;
+    private int code;
+    private String message;
+    private String tid = TraceContext.traceId();
+    private Page data;
 
-    public PageResult(int code, String message, Object data,int total) {
+    @Data
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class Page implements Serializable{
+        private Object items;
+        private int total;
+    }
+
+    public PageResult(int code, String message, Object data, int total) {
         this.code = code;
         this.message = message;
-        this.data = data;
-        this.total = total;
+        this.data = Page.builder().items(data).total(total).build();
     }
 
     public static PageResult result(RespCode respCode) {
