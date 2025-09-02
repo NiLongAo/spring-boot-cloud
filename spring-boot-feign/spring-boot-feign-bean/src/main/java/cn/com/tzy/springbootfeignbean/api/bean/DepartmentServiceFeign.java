@@ -2,7 +2,9 @@ package cn.com.tzy.springbootfeignbean.api.bean;
 
 import cn.com.tzy.springbootcomm.common.vo.PageResult;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
+import cn.com.tzy.springbootentity.param.bean.DepartmentConnectMenuParam;
 import cn.com.tzy.springbootentity.param.bean.DepartmentParam;
+import cn.com.tzy.springbootentity.param.bean.PositionConnectMenuParam;
 import cn.com.tzy.springbootstarterfeign.config.feign.FeignConfiguration;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -38,5 +40,11 @@ public interface DepartmentServiceFeign {
 
     @RequestMapping(value = "tree", consumes = MediaType.APPLICATION_JSON_VALUE,method = RequestMethod.POST)
     RestResult<?> tree(@RequestBody @Validated DepartmentParam param);
+
+    @RequestMapping(value = "/department_privilege_list", consumes = MediaType.APPLICATION_JSON_VALUE,method = RequestMethod.GET)
+    RestResult<?> findDepartmentPrivilegeList(@RequestParam("departmentId") Long departmentId);
+
+    @RequestMapping(value = "department_privilege_save", consumes = MediaType.APPLICATION_JSON_VALUE,method = RequestMethod.POST)
+    RestResult<?> departmentPrivilegeSave(@RequestBody DepartmentConnectMenuParam save);
 
 }

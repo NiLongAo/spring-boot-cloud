@@ -23,7 +23,7 @@
        bdcp.menu_id
        from bean_department_connect_menu bdcp,bean_menu bp
        where  bdcp.department_id =#{departmentId}
-       and bdcp.menu_id = bp.id
+       and bdcp.menu_id = bp.auth_code
   </select>
 
   <insert id="saveDepartmentConnectMenu">

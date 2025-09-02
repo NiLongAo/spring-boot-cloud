@@ -3,7 +3,9 @@ package cn.com.tzy.springbootwebapi.controller.bean;
 
 import cn.com.tzy.springbootcomm.common.vo.PageResult;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
+import cn.com.tzy.springbootentity.param.bean.DepartmentConnectMenuParam;
 import cn.com.tzy.springbootentity.param.bean.DepartmentParam;
+import cn.com.tzy.springbootentity.param.bean.PositionConnectMenuParam;
 import cn.com.tzy.springbootstartercloud.api.ApiController;
 import cn.com.tzy.springbootwebapi.service.bean.DepartmentService;
 import io.swagger.annotations.Api;
@@ -86,5 +88,17 @@ public class DepartmentController extends ApiController {
         return departmentService.detail(id);
     }
 
+
+    @GetMapping("position_privilege_list")
+    @ResponseBody
+    public RestResult<?> findDepartmentPrivilegeList(@RequestParam("departmentId") Long departmentId){
+        return departmentService.findDepartmentPrivilegeList(departmentId);
+    }
+
+    @PostMapping("position_privilege_save")
+    @ResponseBody
+    public RestResult<?> departmentPrivilegeSave(@Validated @RequestBody DepartmentConnectMenuParam param){
+        return departmentService.departmentPrivilegeSave(param);
+    }
 
 }

@@ -2,6 +2,7 @@ package cn.com.tzy.springbootfeignbean.api.sys;
 
 import cn.com.tzy.springbootcomm.common.vo.PageResult;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
+import cn.com.tzy.springbootentity.param.sms.TenantConnectMenuParam;
 import cn.com.tzy.springbootentity.param.sys.TenantParam;
 import cn.com.tzy.springbootentity.vo.bean.TenantUserVo;
 import cn.com.tzy.springbootstarterfeign.config.feign.FeignConfiguration;
@@ -37,5 +38,11 @@ public interface TenantServiceFeign {
 
     @RequestMapping(value = "/detail", consumes = MediaType.APPLICATION_JSON_VALUE,method = RequestMethod.GET)
     RestResult<?> detail(@RequestParam(value = "id") Long id);
+
+    @RequestMapping(value = "/tenant_privilege_list", consumes = MediaType.APPLICATION_JSON_VALUE,method = RequestMethod.GET)
+    RestResult<?> findTenantPrivilegeList(@RequestParam("tenantId") Long tenantId);
+
+    @RequestMapping(value = "tenant_privilege_save", consumes = MediaType.APPLICATION_JSON_VALUE,method = RequestMethod.POST)
+    RestResult<?> tenantPrivilegeSave(@RequestBody TenantConnectMenuParam save);
 
 }

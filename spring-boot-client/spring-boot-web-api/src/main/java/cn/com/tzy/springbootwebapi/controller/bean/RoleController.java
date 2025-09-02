@@ -3,7 +3,9 @@ package cn.com.tzy.springbootwebapi.controller.bean;
 
 import cn.com.tzy.springbootcomm.common.vo.PageResult;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
+import cn.com.tzy.springbootentity.param.bean.RoleConnectMenuParam;
 import cn.com.tzy.springbootentity.param.bean.RoleParam;
+import cn.com.tzy.springbootentity.param.sms.TenantConnectMenuParam;
 import cn.com.tzy.springbootstartercloud.api.ApiController;
 import cn.com.tzy.springbootwebapi.service.bean.RoleService;
 import io.swagger.annotations.Api;
@@ -77,7 +79,17 @@ public class RoleController extends ApiController {
     public RestResult<?> detail(@RequestParam("id") Long id){
         return roleService.detail(id);
     }
+    @GetMapping("role_privilege_list")
+    @ResponseBody
+    public RestResult<?> findRolePrivilegeList(@RequestParam("roleId") Long roleId){
+        return roleService.findRolePrivilegeList(roleId);
+    }
 
+    @PostMapping("role_privilege_save")
+    @ResponseBody
+    public RestResult<?> rolePrivilegeSave(@Validated @RequestBody RoleConnectMenuParam param){
+        return roleService.rolePrivilegeSave(param);
+    }
 
 
 

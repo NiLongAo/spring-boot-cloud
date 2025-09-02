@@ -23,7 +23,7 @@
        brcp.menu_id
        from bean_role_connect_menu brcp,bean_menu bp
        where brcp.role_id =#{roleId}
-       and brcp.menu_id = bp.id
+       and brcp.menu_id = bp.auth_code
   </select>
 
   <insert id="saveRoleConnectMenu">

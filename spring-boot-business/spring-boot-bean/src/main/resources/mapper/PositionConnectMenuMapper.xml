@@ -23,7 +23,7 @@
        bpcp.menu_id
        from bean_position_connect_menu bpcp,bean_menu bp
        where bpcp.position_id =#{positionId}
-       and bpcp.menu_id = bp.id
+       and bpcp.menu_id = bp.auth_code
   </select>
 
   <insert id="savePositionConnectMenu">

@@ -2,8 +2,11 @@ package cn.com.tzy.springbootwebapi.service.bean;
 
 import cn.com.tzy.springbootcomm.common.vo.PageResult;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
+import cn.com.tzy.springbootentity.param.bean.DepartmentConnectMenuParam;
 import cn.com.tzy.springbootentity.param.bean.DepartmentParam;
+import cn.com.tzy.springbootentity.param.bean.PositionConnectMenuParam;
 import cn.com.tzy.springbootfeignbean.api.bean.DepartmentServiceFeign;
+import io.seata.spring.annotation.GlobalTransactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
@@ -26,11 +29,9 @@ public class DepartmentService {
         return departmentServiceFeign.findAll();
     }
 
-
     public RestResult<?> save(@RequestBody @Validated DepartmentParam param){
         return departmentServiceFeign.save(param);
     }
-
 
     public RestResult<?> remove(@RequestParam("id")Long id){
         return  departmentServiceFeign.remove(id);
@@ -42,6 +43,13 @@ public class DepartmentService {
 
     public RestResult<?> select(List<Long> departmentIdList, String departmentName, Integer limit){
         return departmentServiceFeign.select(departmentIdList,departmentName,limit);
+    }
+    public RestResult<?> findDepartmentPrivilegeList(Long departmentId) {
+        return departmentServiceFeign.findDepartmentPrivilegeList(departmentId);
+    }
+    @GlobalTransactional
+    public RestResult<?> departmentPrivilegeSave(DepartmentConnectMenuParam save) {
+        return departmentServiceFeign.departmentPrivilegeSave(save);
     }
 
 }

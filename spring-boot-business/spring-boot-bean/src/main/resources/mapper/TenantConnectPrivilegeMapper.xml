@@ -21,7 +21,7 @@
        stcp.menu_id
        from sys_tenant_connect_menu stcp ,bean_menu bp
        where stcp.tenant_id =#{tenantId}
-       and stcp.menu_id = bp.id
+       and stcp.menu_id = bp.auth_code
   </select>
 
   <insert id="saveTenantConnectMenu">

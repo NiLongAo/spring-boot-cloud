@@ -2,12 +2,14 @@ package cn.com.tzy.springbootwebapi.service.config;
 
 import cn.com.tzy.springbootcomm.common.vo.PageResult;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
+import cn.com.tzy.springbootentity.param.sms.TenantConnectMenuParam;
 import cn.com.tzy.springbootentity.param.sys.TenantParam;
 import cn.com.tzy.springbootentity.vo.bean.TenantUserVo;
 import cn.com.tzy.springbootfeignbean.api.sys.TenantServiceFeign;
 import io.seata.spring.annotation.GlobalTransactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -42,5 +44,13 @@ public class TenantService {
 
     public RestResult<?> detail(Long id) {
         return feign.detail(id);
+    }
+
+    public RestResult<?> findTenantPrivilegeList(Long tenantId) {
+        return feign.findTenantPrivilegeList(tenantId);
+    }
+    @GlobalTransactional
+    public RestResult<?> tenantPrivilegeSave(TenantConnectMenuParam save) {
+        return feign.tenantPrivilegeSave(save);
     }
 }

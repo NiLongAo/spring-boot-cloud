@@ -2,8 +2,11 @@ package cn.com.tzy.springbootwebapi.service.bean;
 
 import cn.com.tzy.springbootcomm.common.vo.PageResult;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
+import cn.com.tzy.springbootentity.param.bean.PositionConnectMenuParam;
+import cn.com.tzy.springbootentity.param.bean.RoleConnectMenuParam;
 import cn.com.tzy.springbootentity.param.bean.RoleParam;
 import cn.com.tzy.springbootfeignbean.api.bean.RoleServiceFeign;
+import io.seata.spring.annotation.GlobalTransactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,5 +31,12 @@ public class RoleService {
 
     public RestResult<?> select(List<Long> roleIdList, String roleName, Integer limit){
         return roleServiceFeign.select(roleIdList,roleName,limit);
+    }
+    public RestResult<?> findRolePrivilegeList(Long roleId) {
+        return roleServiceFeign.findRolePrivilegeList(roleId);
+    }
+    @GlobalTransactional
+    public RestResult<?> rolePrivilegeSave(RoleConnectMenuParam save) {
+        return roleServiceFeign.rolePrivilegeSave(save);
     }
 }

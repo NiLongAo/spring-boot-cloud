@@ -3,6 +3,7 @@ package cn.com.tzy.springbootwebapi.controller.config;
 import cn.com.tzy.springbootcomm.common.model.BaseModel;
 import cn.com.tzy.springbootcomm.common.vo.PageResult;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
+import cn.com.tzy.springbootentity.param.sms.TenantConnectMenuParam;
 import cn.com.tzy.springbootentity.param.sys.TenantParam;
 import cn.com.tzy.springbootentity.vo.bean.TenantUserVo;
 import cn.com.tzy.springbootstartercloud.api.ApiController;
@@ -64,5 +65,17 @@ public class TenantController extends ApiController {
     @ResponseBody
     public RestResult<?> detail(@RequestParam("id") Long id){
         return  tenantService.detail(id);
+    }
+
+    @GetMapping("tenant_privilege_list")
+    @ResponseBody
+    public RestResult<?> findTenantPrivilegeList(@RequestParam("tenantId") Long tenantId){
+        return tenantService.findTenantPrivilegeList(tenantId);
+    }
+
+    @PostMapping("tenant_privilege_save")
+    @ResponseBody
+    public RestResult<?> tenantPrivilegeSave(@Validated @RequestBody TenantConnectMenuParam param){
+        return tenantService.tenantPrivilegeSave(param);
     }
 }

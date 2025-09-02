@@ -2,7 +2,9 @@ package cn.com.tzy.springbootwebapi.controller.bean;
 
 import cn.com.tzy.springbootcomm.common.vo.PageResult;
 import cn.com.tzy.springbootcomm.common.vo.RestResult;
+import cn.com.tzy.springbootentity.param.bean.PositionConnectMenuParam;
 import cn.com.tzy.springbootentity.param.bean.PositionParam;
+import cn.com.tzy.springbootentity.param.bean.RoleConnectMenuParam;
 import cn.com.tzy.springbootstartercloud.api.ApiController;
 import cn.com.tzy.springbootwebapi.service.bean.PositionService;
 import io.swagger.annotations.Api;
@@ -83,5 +85,17 @@ public class PositionController extends ApiController {
     @ResponseBody
     public RestResult<?> detail(@RequestParam("id") Long id){
         return positionService.detail(id);
+    }
+
+    @GetMapping("position_privilege_list")
+    @ResponseBody
+    public RestResult<?> findPositionPrivilegeList(@RequestParam("positionId") Long positionId){
+        return positionService.findPositionPrivilegeList(positionId);
+    }
+
+    @PostMapping("position_privilege_save")
+    @ResponseBody
+    public RestResult<?> positionPrivilegeSave(@Validated @RequestBody PositionConnectMenuParam param){
+        return positionService.positionPrivilegeSave(param);
     }
 }
