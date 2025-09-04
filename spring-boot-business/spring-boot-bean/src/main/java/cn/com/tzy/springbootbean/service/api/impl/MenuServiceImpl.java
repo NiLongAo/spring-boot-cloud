@@ -83,7 +83,19 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     @Override
     public RestResult<?> menuPrivilegeTree () {
         //所有菜单
-        List<Menu> menuList = baseMapper.findMenuPrivilegeTree();
+        List<Menu> list = baseMapper.findMenuPrivilegeTree();
+        //特殊处理，如果权限不为空则，将权限化作Id，前端进行分配
+        Map<String, List<Menu>> collect = list.stream().filter(obj -> StringUtils.isNotEmpty(obj.getParentId())).collect(Collectors.groupingBy(Menu::getParentId));
+        List<Menu> menuList = list.stream().peek(obj -> {
+            if(StringUtils.isNotEmpty(obj.getAuthCode())){
+                if(CollUtil.isNotEmpty(collect.get(obj.getId()))){
+                    for (Menu menu : collect.get(obj.getId())) {
+                        menu.setParentId(obj.getAuthCode());
+                    }
+                }
+                obj.setId(obj.getAuthCode());
+            }
+        }).collect(Collectors.toList());
         List<TreeNode<Menu>> treeNode = TreeUtil.getTree(menuList, Menu::getParentId, Menu::getId, Arrays.asList(null,""));
         //转换树结构
         List<Map> maps = AppUtils.transformationTree("children", treeNode);
