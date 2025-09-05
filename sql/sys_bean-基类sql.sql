@@ -87,12 +87,14 @@ create table sys_tenant (
 
 /*租户关联权限表*/
 create table sys_tenant_connect_menu(
+    id                  int unsigned not null auto_increment COMMENT '主键',
     tenant_id            bigint NOT NULL DEFAULT 1 COMMENT '租户编号',
     menu_id         varchar(1024) not null not null comment '权限编号',
     update_user_id       bigint unsigned comment '修改人编号',
     update_time          datetime comment '修改时间',
     create_user_id       bigint unsigned comment '创建人编号',
-    create_time          datetime comment '创建时间'
+    create_time          datetime comment '创建时间',
+    primary key (id)
 )engine=innodb default charset=utf8 COMMENT='租户联权限表';
 
 /*短信接口*/

@@ -51,7 +51,6 @@ public class TenantController extends ApiController {
     @PostMapping("update")
     @ResponseBody
     public RestResult<?> update(@RequestBody @Validated(BaseModel.edit.class) TenantParam param){
-
         return tenantService.update(param);
     }
 

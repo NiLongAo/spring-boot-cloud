@@ -35,7 +35,7 @@ public class RoleService {
     public RestResult<?> findRolePrivilegeList(Long roleId) {
         return roleServiceFeign.findRolePrivilegeList(roleId);
     }
-    @GlobalTransactional
+
     public RestResult<?> rolePrivilegeSave(RoleConnectMenuParam save) {
         return roleServiceFeign.rolePrivilegeSave(save);
     }

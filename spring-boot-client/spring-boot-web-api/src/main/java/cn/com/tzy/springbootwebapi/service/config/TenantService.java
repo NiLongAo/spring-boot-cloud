@@ -49,7 +49,7 @@ public class TenantService {
     public RestResult<?> findTenantPrivilegeList(Long tenantId) {
         return feign.findTenantPrivilegeList(tenantId);
     }
-    @GlobalTransactional
+
     public RestResult<?> tenantPrivilegeSave(TenantConnectMenuParam save) {
         return feign.tenantPrivilegeSave(save);
     }

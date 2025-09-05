@@ -47,7 +47,6 @@ public class DepartmentService {
     public RestResult<?> findDepartmentPrivilegeList(Long departmentId) {
         return departmentServiceFeign.findDepartmentPrivilegeList(departmentId);
     }
-    @GlobalTransactional
     public RestResult<?> departmentPrivilegeSave(DepartmentConnectMenuParam save) {
         return departmentServiceFeign.departmentPrivilegeSave(save);
     }

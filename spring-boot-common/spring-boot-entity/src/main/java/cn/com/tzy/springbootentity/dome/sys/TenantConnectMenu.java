@@ -1,6 +1,8 @@
 package cn.com.tzy.springbootentity.dome.sys;
 
 import cn.com.tzy.springbootcomm.common.bean.Base;
+import cn.com.tzy.springbootcomm.common.bean.IntIdEntity;
+import cn.com.tzy.springbootcomm.common.bean.LongIdEntity;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
@@ -18,7 +20,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @TableName(value = "sys_tenant_connect_menu")
-public class TenantConnectMenu extends Base {
+public class TenantConnectMenu extends LongIdEntity {
     /**
      * 租户编号
      */

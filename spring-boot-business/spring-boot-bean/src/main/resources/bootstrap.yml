@@ -9,3 +9,4 @@ spring:
     active: dev
 elasticsearch:
   clusterNodes: 1.82.217.118:10010
+

@@ -41,7 +41,6 @@ public class PositionService {
     public RestResult<?> findPositionPrivilegeList(Long positionId) {
         return positionServiceFeign.findPositionPrivilegeList(positionId);
     }
-    @GlobalTransactional
     public RestResult<?> positionPrivilegeSave(PositionConnectMenuParam save) {
         return positionServiceFeign.positionPrivilegeSave(save);
     }
