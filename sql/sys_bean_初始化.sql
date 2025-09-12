@@ -95,6 +95,7 @@ values(null,'home',2,'首页','/home','/index/home/workbench/index','clarity:hom
 ,('system.user','system.user.detail',3,'详情',null,null,null,1,0,5,'system.user:detail',null,null,'/webapi/bean/user/info')
 ,('system.user','system.user.print',3,'打印',null,null,null,1,0,6,'system.user:print',null,null,'/webapi/bean/user/info')
 ,('system.user','system.user.export',3,'导出',null,null,null,1,0,7,'system.user:export',null,null,'/webapi/bean/user/info')
+,('system','system.user.detail.list',2,'用户详情','/system/user/user_detail/:id','/index/system/user/UserDetail','mdi:card-account-details',1,1,2,'system.user.detail:list','mdi:card-account-details',null,'/webapi/bean/user/info')
 ,('system','system.role',2,'角色管理','/system/role','/index/system/role/index','carbon:user-role',1,0,3,'system.role:list','carbon:user-role',null,'/webapi/bean/role/page')
 ,('system.role','system.role.add',3,'新增',null,null,null,1,0,2,'system.role:add',null,null,'/webapi/bean/role/detail')
 ,('system.role','system.role.update',3,'编辑',null,null,null,1,0,3,'system.role:update',null,null,'/webapi/bean/role/save')
