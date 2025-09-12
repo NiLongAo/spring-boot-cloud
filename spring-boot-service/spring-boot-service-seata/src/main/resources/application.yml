@@ -41,9 +41,9 @@ seata:
       datasource: druid
       db-type: mysql
       driver-class-name: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://sh-cdb-ort8kycm.sql.tencentcdb.com:59151/seata?useUnicode=true
-      user: mysql
-      password: 123456
+      url: jdbc:mysql://gateway01.ap-southeast-1.prod.alicloud.tidbcloud.com:4000/seata_dev?useUnicode=true
+      user: 2PTr7pRYipsWGvC.root
+      password: rACns9Ak194ZpLrV
       min-conn: 5
       max-conn: 100
       global-table: global_table
