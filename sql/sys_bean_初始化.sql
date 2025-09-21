@@ -144,14 +144,30 @@ values(null,'home',2,'首页','/home','/index/home/workbench/index','clarity:hom
 ,('system','system.logs',2,'系统日志','/system/logs','/index/system/logs/index','zondicons:tablet',1,0,15,'system.logs:list','zondicons:tablet',null,'/webapi/config/logs/page')
 ,('system.logs','system.logs.detail',3,'详情',null,null,null,1,0,1,'system.logs:detail',null,null,'/webapi/config/logs/detail')
 ;
-
-/*租户默认信息*/
-insert into sys_tenant(id,tenant_name,tenant_user_id,tenant_user_name,status,account_count,update_user_id,update_time,create_user_id,create_time)values
-(0,'系统租户',1,'root',1,0,1,now(),1,now());
-
 /*系统配置*/
 insert into sys_config(config_name,k,v)values('minio服务器地址','minio.path','http://1.82.217.118:9000/spring-clond');
 insert into sys_config(config_name,k,v)values('打印水印名称','print.name','测试水印信息');
+/*租户默认信息*/
+insert into sys_tenant(id,tenant_name,tenant_user_id,tenant_user_name,status,account_count,update_user_id,update_time,create_user_id,create_time)values
+(1,'系统租户',1,'root',1,0,1,now(),1,now());
+/*租户添加默认菜单*/
+INSERT INTO sys_tenant_connect_menu(tenant_id,menu_id,update_user_id,update_time,create_user_id,create_time)
+(select 1,auth_code,1,now(),1,now() from bean_menu where auth_code is not null and auth_code != '');
+# 添加角色
+INSERT INTO `bean_role` (`id`, `role_name`, `memo`, `update_user_id`, `update_time`, `create_user_id`, `create_time`, `tenant_id`)
+VALUES(1, '系统管理员', '111', 1, '2023-09-09 13:26:40', NULL, NULL, 1)
+,(2, '开放角色', '111', 1, '2022-10-16 11:55:37', 1, '2022-10-16 11:55:37', 9);
+# 添加职位
+INSERT INTO `bean_position` (`id`, `parent_id`, `position_name`, `is_enable`, `memo`, `update_user_id`, `update_time`, `create_user_id`, `create_time`, `tenant_id`)
+VALUES (1, NULL, '开发者', 1, NULL, NULL, NULL, NULL, NULL, 1)
+,(2, NULL, '运维者', 1, NULL, NULL, NULL, NULL, NULL, 1)
+,(3, NULL, '公审者', 1, '发射东风', NULL, NULL, NULL, NULL, 1)
+,(5, NULL, '开放职位', 1, '1111', 1, '2022-10-16 11:56:11', 1, '2022-10-16 11:56:11', 9);
+# 添加部门
+INSERT INTO `bean_department` (`id`, `parent_id`, `department_name`, `is_enable`, `memo`, `update_user_id`, `update_time`, `create_user_id`, `create_time`, `tenant_id`)
+VALUES (1, NULL, '科研部', 1, NULL, NULL, NULL, NULL, NULL, 1)
+,(10, NULL, '开放部门', 1, '测试', 13, '2024-02-29 14:30:33', 13, '2024-02-29 14:30:33', 9);
+
 
 
 

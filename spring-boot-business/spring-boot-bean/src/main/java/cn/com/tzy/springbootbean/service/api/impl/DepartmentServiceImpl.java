@@ -20,10 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Department> implements DepartmentService{
@@ -79,7 +76,7 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
             findParent(map,onj);
         });
         pageResult = new ArrayList<>(map.values());
-        List<TreeNode<Department>> treeNode = TreeUtil.getTree(pageResult, Department::getParentId, Department::getId, null);
+        List<TreeNode<Department>> treeNode = TreeUtil.getTree(pageResult, Department::getParentId, Department::getId, Arrays.asList(null,""));
         //转换树结构
         List<Map> maps = AppUtils.transformationTree("children", treeNode);
         return PageResult.result(RespCode.CODE_0.getValue(), null, maps, pageResult.size());
