@@ -89,13 +89,13 @@ public class DepartmentController extends ApiController {
     }
 
 
-    @GetMapping("position_privilege_list")
+    @GetMapping("department_privilege_list")
     @ResponseBody
     public RestResult<?> findDepartmentPrivilegeList(@RequestParam("departmentId") Long departmentId){
         return departmentService.findDepartmentPrivilegeList(departmentId);
     }
 
-    @PostMapping("position_privilege_save")
+    @PostMapping("department_privilege_save")
     @ResponseBody
     public RestResult<?> departmentPrivilegeSave(@Validated @RequestBody DepartmentConnectMenuParam param){
         return departmentService.departmentPrivilegeSave(param);

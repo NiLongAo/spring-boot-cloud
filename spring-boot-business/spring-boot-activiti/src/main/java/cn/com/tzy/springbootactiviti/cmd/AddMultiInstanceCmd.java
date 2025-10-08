@@ -2,7 +2,6 @@ package cn.com.tzy.springbootactiviti.cmd;
 
 import cn.com.tzy.springbootactiviti.exception.WorkflowException;
 import cn.com.tzy.springbootactiviti.utils.ActivitiUtil;
-import lombok.Builder;
 import lombok.experimental.SuperBuilder;
 import org.activiti.bpmn.model.Activity;
 import org.activiti.bpmn.model.BpmnModel;
