@@ -1,0 +1,121 @@
+---
+alwaysApply: true
+description: Spring Boot Cloud项目结构和架构总览
+---
+
+# Spring Boot Cloud 项目架构规范
+
+## 项目概述
+本项目是一个基于Spring Boot 2.3.2.RELEASE和Spring Cloud Alibaba Hoxton.SR9的微服务架构系统。
+
+## 技术栈
+- **Spring Boot版本**: 2.3.2.RELEASE
+- **Spring Cloud版本**: Hoxton.SR9
+- **Spring Cloud Alibaba**: 2.2.6.RELEASE
+- **Java版本**: 1.8
+- **数据库**: MySQL 8.0.16
+- **ORM框架**: MyBatis-Plus 3.4.3
+- **认证授权**: Spring Security + OAuth2 + JWT
+- **服务网关**: Spring Cloud Gateway
+- **注册中心/配置中心**: Nacos
+- **熔断限流**: Sentinel
+- **分布式事务**: Seata
+- **消息队列**: RabbitMQ
+- **缓存**: Redis
+- **对象存储**: MinIO
+- **搜索引擎**: Elasticsearch 7.14.0
+- **分布式任务调度**: XXL-Job
+- **工作流引擎**: Activiti 7.1.0.M6
+- **监控链路追踪**: SkyWalking
+- **API文档**: Swagger2
+
+## 核心模块说明
+
+### 1. spring-boot-business (业务服务模块)
+业务服务层，包含具体业务逻辑实现：
+- `spring-boot-bean`: 基础业务服务（用户、角色、权限、部门、菜单等）
+- `spring-boot-activiti`: 工作流底层服务
+- `spring-boot-oa`: OA办公业务服务
+- `spring-boot-sms`: 短信服务、Socket.IO、定时任务、Redis订阅
+- `spring-boot-face`: 人脸识别服务（基于SeetaFace6）
+- `spring-boot-video`: 国标GB28181视频监控服务
+- `spring-boot-fs`: 文件服务
+
+### 2. spring-boot-client (客户端接口模块)
+对外提供API接口：
+- `spring-boot-web-api`: Web端接口服务
+- `spring-boot-app`: 移动端/小程序接口服务
+
+### 3. spring-boot-common (公共基础模块)
+公共组件和实体定义：
+- `spring-boot-comm`: 通用工具类、常量、枚举等
+- `spring-boot-entity`: 实体类（Entity、VO、DTO、Param等）
+
+### 4. spring-boot-feign (服务间调用模块)
+Feign客户端接口定义，用于微服务间RPC调用：
+- `spring-boot-feign-bean`: 基础服务Feign接口
+- `spring-boot-feign-sso`: 认证服务Feign接口
+- `spring-boot-feign-sms`: 短信服务Feign接口
+- 其他业务服务Feign接口...
+
+### 5. spring-boot-starter (自定义Starter模块)
+自定义Spring Boot Starter，提供开箱即用的功能组件：
+- `spring-boot-starter-cloud`: 微服务公共配置
+- `spring-boot-starter-mybatis`: MyBatis增强配置（自动填充、多租户）
+- `spring-boot-starter-redis`: Redis操作及缓存配置
+- `spring-boot-starter-security-oauth`: 安全认证配置
+- `spring-boot-starter-swagger`: API文档配置
+- 其他starter...
+
+### 6. spring-boot-system (系统服务模块)
+系统级核心服务：
+- `spring-boot-gateway`: 统一网关服务
+- `spring-boot-sso`: 统一认证授权服务
+- `spring-boot-pay`: 支付服务
+
+### 7. spring-boot-service (第三方服务模块)
+集成的第三方开源服务（本地调试用）：
+- `spring-boot-service-nacos`: Nacos服务
+- `spring-boot-service-sentinel`: Sentinel控制台
+- `spring-boot-service-seata`: Seata分布式事务服务
+- `spring-boot-service-xxl-job`: XXL-Job调度中心
+
+## 项目包结构规范
+```
+cn.com.tzy
+├── controller      # 控制器层
+├── service         # 服务层
+│   └── impl        # 服务实现
+├── mapper          # 数据访问层
+├── entity          # 实体类
+│   ├── model       # 数据库实体
+│   ├── vo          # 视图对象
+│   ├── dto         # 数据传输对象
+│   └── param       # 请求参数对象
+├── config          # 配置类
+├── constant        # 常量
+├── enums           # 枚举
+├── utils           # 工具类
+└── exception       # 异常类
+```
+
+## 模块依赖关系
+1. **业务服务模块** → 依赖 → **Common模块** + **Starter模块** + **Feign模块**
+2. **客户端模块** → 依赖 → **Feign模块** → 调用 → **业务服务**
+3. **网关服务** → 路由转发 → **所有业务服务**
+4. **所有服务** → 注册到 → **Nacos**
+
+## 开发原则
+1. 每个业务服务独立部署，服务间通过Feign进行调用
+2. 所有外部请求必须经过Gateway网关
+3. 统一使用Nacos进行服务注册和配置管理
+4. 使用Sentinel进行流量控制和熔断降级
+5. 分布式事务使用Seata的AT模式
+6. 使用Lombok简化代码，使用MapStruct进行对象转换
+7. 遵循RESTful API设计规范
+8. 所有API必须有Swagger文档注解
+
+## 参考文件
+- 主POM配置: [pom.xml](mdc:pom.xml)
+- 项目说明: [README.md](mdc:README.md)
+- Docker编排: [docker-compose.yml](mdc:docker-compose.yml)

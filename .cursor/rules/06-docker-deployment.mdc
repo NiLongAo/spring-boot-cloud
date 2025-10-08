@@ -1,0 +1,415 @@
+---
+globs: "Dockerfile,docker-*.yml,*.sh"
+description: Docker容器化部署规范
+---
+
+# Docker 容器化部署规范
+
+## Dockerfile 编写规范
+
+### 标准 Dockerfile 模板
+```dockerfile
+FROM openjdk:8-jre-alpine
+
+LABEL maintainer="your-email@example.com"
+LABEL description="Spring Boot Microservice"
+
+# 设置时区
+RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
+    && echo 'Asia/Shanghai' > /etc/timezone
+
+# 工作目录
+WORKDIR /app
+
+# 复制依赖包（分层优化，依赖不常变）
+COPY target/lib /app/lib
+
+# 复制应用jar包
+COPY target/*.jar /app/app.jar
+
+# 复制配置文件（可选）
+COPY start/*.yml /app/config/
+
+# SkyWalking Agent（可选）
+COPY target/tmp/skywalking-agent /app/skywalking-agent
+
+# 暴露端口
+EXPOSE 8080
+
+# JVM参数
+ENV JAVA_OPTS="-Xms512m -Xmx1024m -XX:+UseG1GC"
+
+# 启动命令
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -jar /app/app.jar"]
+```
+
+### 带 SkyWalking 的 Dockerfile
+```dockerfile
+FROM openjdk:8-jre-alpine
+
+WORKDIR /app
+
+COPY target/lib /app/lib
+COPY target/*.jar /app/app.jar
+COPY target/tmp/skywalking-agent /app/skywalking-agent
+
+EXPOSE 8080
+
+ENV JAVA_OPTS="-Xms512m -Xmx1024m"
+ENV SW_AGENT_NAME="spring-boot-bean"
+ENV SW_AGENT_COLLECTOR_BACKEND_SERVICES="127.0.0.1:11800"
+
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS \
+    -javaagent:/app/skywalking-agent/skywalking-agent.jar \
+    -Dskywalking.agent.service_name=$SW_AGENT_NAME \
+    -Dskywalking.collector.backend_service=$SW_AGENT_COLLECTOR_BACKEND_SERVICES \
+    -jar /app/app.jar"]
+```
+
+## Docker Compose 编排规范
+
+### 单服务示例
+```yaml
+version: '3.8'
+
+services:
+  spring-boot-bean:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: spring-boot-bean:1.0.0
+    container_name: spring-boot-bean
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - NACOS_HOST=nacos
+      - NACOS_PORT=8848
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    volumes:
+      - ./logs:/app/logs
+      - ./config:/app/config
+    networks:
+      - spring-cloud-net
+    depends_on:
+      - mysql
+      - redis
+      - nacos
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  spring-cloud-net:
+    driver: bridge
+```
+
+### 完整微服务架构编排
+参考项目中的 [docker-compose.yml](mdc:docker-compose.yml)
+
+## 镜像构建脚本规范
+
+### docker-image-build.sh
+每个服务模块下都有 `docker-image-build.sh` 脚本：
+
+```bash
+#!/bin/bash
+
+# 服务名称
+SERVICE_NAME="spring-boot-bean"
+# 版本号
+VERSION="1.0.0"
+# 镜像名称
+IMAGE_NAME="${SERVICE_NAME}:${VERSION}"
+
+echo "=========================================="
+echo "开始构建 ${SERVICE_NAME} 镜像"
+echo "=========================================="
+
+# 1. Maven打包
+echo "1. Maven打包..."
+cd ../..
+mvn clean package -pl spring-boot-business/${SERVICE_NAME} -am -DskipTests
+
+# 2. 切换到服务目录
+cd spring-boot-business/${SERVICE_NAME}
+
+# 3. 构建Docker镜像
+echo "2. 构建Docker镜像..."
+docker build -t ${IMAGE_NAME} .
+
+# 4. 打标签
+echo "3. 打标签..."
+docker tag ${IMAGE_NAME} registry.example.com/${IMAGE_NAME}
+
+# 5. 推送镜像（可选）
+# echo "4. 推送镜像..."
+# docker push registry.example.com/${IMAGE_NAME}
+
+echo "=========================================="
+echo "镜像构建完成: ${IMAGE_NAME}"
+echo "=========================================="
+```
+
+## 启动脚本规范
+
+### start.sh (Linux)
+位于 `start/start.sh`：
+
+```bash
+#!/bin/bash
+
+APP_NAME="spring-boot-bean"
+JAR_NAME="${APP_NAME}.jar"
+
+# JVM参数
+JAVA_OPTS="-Xms512m -Xmx1024m -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
+
+# 应用参数
+APP_OPTS="--spring.profiles.active=prod"
+
+# SkyWalking参数（可选）
+SW_OPTS="-javaagent:./skywalking-agent/skywalking-agent.jar \
+         -Dskywalking.agent.service_name=${APP_NAME} \
+         -Dskywalking.collector.backend_service=127.0.0.1:11800"
+
+# 日志目录
+LOG_DIR="./logs"
+mkdir -p ${LOG_DIR}
+
+# 检查进程
+PID=$(ps -ef | grep ${JAR_NAME} | grep -v grep | awk '{print $2}')
+
+if [ -n "$PID" ]; then
+    echo "${APP_NAME} is already running (PID: ${PID})"
+    exit 1
+fi
+
+# 启动应用
+echo "Starting ${APP_NAME}..."
+nohup java ${JAVA_OPTS} ${SW_OPTS} -jar ${JAR_NAME} ${APP_OPTS} \
+    > ${LOG_DIR}/application.log 2>&1 &
+
+sleep 3
+
+# 检查启动结果
+PID=$(ps -ef | grep ${JAR_NAME} | grep -v grep | awk '{print $2}')
+if [ -n "$PID" ]; then
+    echo "${APP_NAME} started successfully (PID: ${PID})"
+else
+    echo "${APP_NAME} failed to start"
+    exit 1
+fi
+```
+
+### stop.sh
+```bash
+#!/bin/bash
+
+APP_NAME="spring-boot-bean"
+JAR_NAME="${APP_NAME}.jar"
+
+PID=$(ps -ef | grep ${JAR_NAME} | grep -v grep | awk '{print $2}')
+
+if [ -z "$PID" ]; then
+    echo "${APP_NAME} is not running"
+    exit 1
+fi
+
+echo "Stopping ${APP_NAME} (PID: ${PID})..."
+kill -15 ${PID}
+
+# 等待进程结束
+for i in {1..30}; do
+    PID=$(ps -ef | grep ${JAR_NAME} | grep -v grep | awk '{print $2}')
+    if [ -z "$PID" ]; then
+        echo "${APP_NAME} stopped successfully"
+        exit 0
+    fi
+    sleep 1
+done
+
+# 强制杀死
+echo "Force killing ${APP_NAME}..."
+kill -9 ${PID}
+echo "${APP_NAME} stopped"
+```
+
+### restart.sh
+```bash
+#!/bin/bash
+
+./stop.sh
+sleep 2
+./start.sh
+```
+
+## 环境变量规范
+
+### 统一环境变量命名
+```bash
+# Nacos
+NACOS_HOST=127.0.0.1
+NACOS_PORT=8848
+NACOS_NAMESPACE=dev
+
+# MySQL
+MYSQL_HOST=127.0.0.1
+MYSQL_PORT=3306
+MYSQL_DATABASE=spring_boot_cloud
+MYSQL_USERNAME=root
+MYSQL_PASSWORD=password
+
+# Redis
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
+REDIS_PASSWORD=
+
+# RabbitMQ
+RABBITMQ_HOST=127.0.0.1
+RABBITMQ_PORT=5672
+RABBITMQ_USERNAME=guest
+RABBITMQ_PASSWORD=guest
+
+# Sentinel
+SENTINEL_HOST=127.0.0.1
+SENTINEL_PORT=8858
+
+# Seata
+SEATA_HOST=127.0.0.1
+SEATA_PORT=8091
+
+# XXL-Job
+XXL_JOB_HOST=127.0.0.1
+XXL_JOB_PORT=8888
+
+# SkyWalking
+SKYWALKING_HOST=127.0.0.1
+SKYWALKING_PORT=11800
+
+# MinIO
+MINIO_HOST=127.0.0.1
+MINIO_PORT=9000
+MINIO_ACCESS_KEY=minioadmin
+MINIO_SECRET_KEY=minioadmin
+```
+
+### 在 application.yml 中使用
+```yaml
+spring:
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:127.0.0.1}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:spring_boot_cloud}?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:password}
+  
+  redis:
+    host: ${REDIS_HOST:127.0.0.1}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:}
+```
+
+## 日志卷挂载规范
+
+### 应用日志
+```yaml
+volumes:
+  - ./logs/${SERVICE_NAME}:/app/logs
+```
+
+### 日志目录结构
+```
+logs/
+├── spring-boot-bean/
+│   ├── application.log
+│   ├── error.log
+│   └── access.log
+├── spring-boot-gateway/
+└── spring-boot-sso/
+```
+
+## 健康检查规范
+
+```yaml
+healthcheck:
+  test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+  interval: 30s      # 检查间隔
+  timeout: 10s       # 超时时间
+  retries: 3         # 重试次数
+  start_period: 60s  # 启动等待时间
+```
+
+## 资源限制规范
+
+```yaml
+deploy:
+  resources:
+    limits:
+      cpus: '2'
+      memory: 2G
+    reservations:
+      cpus: '0.5'
+      memory: 512M
+```
+
+## 网络规范
+
+```yaml
+networks:
+  spring-cloud-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+```
+
+## 数据卷规范
+
+```yaml
+volumes:
+  mysql-data:
+    driver: local
+  redis-data:
+    driver: local
+  nacos-data:
+    driver: local
+```
+
+## 部署流程
+
+1. **本地开发测试**
+   ```bash
+   mvn clean package -DskipTests
+   java -jar target/app.jar
+   ```
+
+2. **构建Docker镜像**
+   ```bash
+   cd spring-boot-business/spring-boot-bean
+   sh docker-image-build.sh
+   ```
+
+3. **启动服务**
+   ```bash
+   docker-compose up -d
+   ```
+
+4. **查看日志**
+   ```bash
+   docker-compose logs -f spring-boot-bean
+   ```
+
+5. **停止服务**
+   ```bash
+   docker-compose down
+   ```
+
+## 参考文件
+- [docker-compose.yml](mdc:docker-compose.yml)
+- [docker-compose-server.yml](mdc:docker-compose-server.yml)
+- [docker-compose-backups.yml](mdc:docker-compose-backups.yml)

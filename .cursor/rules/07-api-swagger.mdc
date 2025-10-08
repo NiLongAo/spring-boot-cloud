@@ -1,0 +1,500 @@
+---
+description: RESTful API设计和Swagger文档规范
+---
+
+# RESTful API 和 Swagger 文档规范
+
+## RESTful API 设计规范
+
+### URL设计原则
+1. **使用名词复数形式**，避免动词
+   - ✅ `/api/users`
+   - ❌ `/api/getUsers`
+
+2. **资源层级关系**
+   - `/api/users/{userId}/orders` - 用户的订单
+   - `/api/departments/{deptId}/users` - 部门的用户
+
+3. **URL路径统一小写**，使用横线分隔
+   - ✅ `/api/user-profiles`
+   - ❌ `/api/userProfiles` 或 `/api/user_profiles`
+
+4. **版本控制**
+   - 路径版本：`/api/v1/users`
+   - 或通过Header：`Accept: application/vnd.api+json;version=1`
+
+### HTTP方法规范
+
+| 方法 | 用途 | 示例 |
+|------|------|------|
+| GET | 查询资源 | `GET /api/users` - 获取用户列表<br>`GET /api/users/1` - 获取ID为1的用户 |
+| POST | 创建资源 | `POST /api/users` - 创建新用户 |
+| PUT | 更新资源（全量） | `PUT /api/users/1` - 更新ID为1的用户（全部字段） |
+| PATCH | 更新资源（部分） | `PATCH /api/users/1` - 更新ID为1的用户（部分字段） |
+| DELETE | 删除资源 | `DELETE /api/users/1` - 删除ID为1的用户 |
+
+### 请求参数规范
+
+#### 路径参数 (Path Variable)
+用于标识资源：
+```java
+@GetMapping("/users/{id}")
+public Result<UserVo> getById(@PathVariable Long id) {
+    return Result.ok(userService.getById(id));
+}
+```
+
+#### 查询参数 (Query Parameter)
+用于过滤、排序、分页：
+```java
+@GetMapping("/users")
+public Result<IPage<UserVo>> page(
+    @RequestParam(defaultValue = "1") Integer current,
+    @RequestParam(defaultValue = "10") Integer size,
+    @RequestParam(required = false) String username,
+    @RequestParam(required = false) Long deptId
+) {
+    // 处理逻辑
+}
+```
+
+#### 请求体 (Request Body)
+用于POST/PUT/PATCH提交复杂数据：
+```java
+@PostMapping("/users")
+public Result<Void> add(@RequestBody @Valid UserParam param) {
+    userService.add(param);
+    return Result.ok();
+}
+```
+
+### HTTP状态码规范
+
+| 状态码 | 含义 | 使用场景 |
+|--------|------|----------|
+| 200 OK | 成功 | GET/PUT/PATCH请求成功 |
+| 201 Created | 已创建 | POST创建资源成功 |
+| 204 No Content | 无内容 | DELETE删除成功 |
+| 400 Bad Request | 请求错误 | 参数校验失败 |
+| 401 Unauthorized | 未认证 | 未登录或Token失效 |
+| 403 Forbidden | 无权限 | 权限不足 |
+| 404 Not Found | 未找到 | 资源不存在 |
+| 500 Internal Server Error | 服务器错误 | 系统异常 |
+
+### 响应结构规范
+
+#### 统一响应对象
+```java
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Result<T> implements Serializable {
+    
+    private Integer code;
+    private String message;
+    private T data;
+    private Long timestamp;
+    
+    public static <T> Result<T> ok() {
+        return new Result<>(200, "success", null, System.currentTimeMillis());
+    }
+    
+    public static <T> Result<T> ok(T data) {
+        return new Result<>(200, "success", data, System.currentTimeMillis());
+    }
+    
+    public static <T> Result<T> ok(String message, T data) {
+        return new Result<>(200, message, data, System.currentTimeMillis());
+    }
+    
+    public static <T> Result<T> error(String message) {
+        return new Result<>(500, message, null, System.currentTimeMillis());
+    }
+    
+    public static <T> Result<T> error(Integer code, String message) {
+        return new Result<>(code, message, null, System.currentTimeMillis());
+    }
+    
+    public boolean isSuccess() {
+        return code == 200;
+    }
+}
+```
+
+#### 响应示例
+
+**单条数据**
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": {
+    "id": 1,
+    "username": "admin",
+    "nickName": "管理员"
+  },
+  "timestamp": 1704672000000
+}
+```
+
+**列表数据**
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": [
+    {"id": 1, "username": "admin"},
+    {"id": 2, "username": "user"}
+  ],
+  "timestamp": 1704672000000
+}
+```
+
+**分页数据**
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": {
+    "records": [
+      {"id": 1, "username": "admin"},
+      {"id": 2, "username": "user"}
+    ],
+    "total": 100,
+    "size": 10,
+    "current": 1,
+    "pages": 10
+  },
+  "timestamp": 1704672000000
+}
+```
+
+**错误响应**
+```json
+{
+  "code": 400,
+  "message": "用户名不能为空",
+  "data": null,
+  "timestamp": 1704672000000
+}
+```
+
+## Swagger 文档规范
+
+### 基础配置
+```java
+@Configuration
+@EnableSwagger2
+public class SwaggerConfig {
+    
+    @Bean
+    public Docket api() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("cn.com.tzy"))
+                .paths(PathSelectors.any())
+                .build()
+                .globalOperationParameters(globalOperationParameters());
+    }
+    
+    private ApiInfo apiInfo() {
+        return new ApiInfoBuilder()
+                .title("Spring Boot Cloud API文档")
+                .description("微服务接口文档")
+                .version("1.0.0")
+                .contact(new Contact("开发者", "https://example.com", "dev@example.com"))
+                .build();
+    }
+    
+    private List<Parameter> globalOperationParameters() {
+        List<Parameter> params = new ArrayList<>();
+        params.add(new ParameterBuilder()
+                .name("Authorization")
+                .description("Token认证")
+                .modelRef(new ModelRef("string"))
+                .parameterType("header")
+                .required(false)
+                .build());
+        return params;
+    }
+}
+```
+
+### Controller层注解
+
+#### 类级别注解
+```java
+@Api(tags = "用户管理")
+@RestController
+@RequestMapping("/api/users")
+@Slf4j
+public class UserController {
+    
+    @Autowired
+    private UserService userService;
+}
+```
+
+#### 方法级别注解
+```java
+@ApiOperation(value = "根据ID查询用户", notes = "根据用户ID获取用户详细信息")
+@ApiImplicitParams({
+    @ApiImplicitParam(name = "id", value = "用户ID", required = true, dataType = "Long", paramType = "path")
+})
+@GetMapping("/{id}")
+public Result<UserVo> getById(@PathVariable Long id) {
+    return Result.ok(userService.getVoById(id));
+}
+
+@ApiOperation("分页查询用户列表")
+@GetMapping
+public Result<IPage<UserVo>> page(
+    @ApiParam(value = "当前页", defaultValue = "1") @RequestParam(defaultValue = "1") Integer current,
+    @ApiParam(value = "每页大小", defaultValue = "10") @RequestParam(defaultValue = "10") Integer size,
+    @ApiParam("用户名（模糊查询）") @RequestParam(required = false) String username,
+    @ApiParam("部门ID") @RequestParam(required = false) Long deptId
+) {
+    UserQueryParam param = new UserQueryParam();
+    param.setCurrent(current);
+    param.setSize(size);
+    param.setUsername(username);
+    param.setDeptId(deptId);
+    return Result.ok(userService.pageVo(param));
+}
+
+@ApiOperation("新增用户")
+@PostMapping
+public Result<Void> add(@RequestBody @Valid UserParam param) {
+    userService.add(param);
+    return Result.ok();
+}
+
+@ApiOperation("修改用户")
+@PutMapping("/{id}")
+public Result<Void> update(
+    @ApiParam("用户ID") @PathVariable Long id,
+    @RequestBody @Valid UserParam param
+) {
+    param.setId(id);
+    userService.update(param);
+    return Result.ok();
+}
+
+@ApiOperation("删除用户")
+@DeleteMapping("/{id}")
+public Result<Void> delete(@PathVariable Long id) {
+    userService.delete(id);
+    return Result.ok();
+}
+
+@ApiOperation("批量删除用户")
+@DeleteMapping
+public Result<Void> batchDelete(@RequestBody List<Long> ids) {
+    userService.batchDelete(ids);
+    return Result.ok();
+}
+```
+
+### 实体类注解
+
+#### VO对象
+```java
+@Data
+@ApiModel("用户VO")
+public class UserVo implements Serializable {
+    
+    @ApiModelProperty("用户ID")
+    private Long id;
+    
+    @ApiModelProperty("用户名")
+    private String username;
+    
+    @ApiModelProperty("昵称")
+    private String nickName;
+    
+    @ApiModelProperty("邮箱")
+    private String email;
+    
+    @ApiModelProperty("手机号")
+    private String phone;
+    
+    @ApiModelProperty("头像")
+    private String avatar;
+    
+    @ApiModelProperty("状态：0-禁用，1-启用")
+    private Integer status;
+    
+    @ApiModelProperty("部门ID")
+    private Long deptId;
+    
+    @ApiModelProperty("部门名称")
+    private String deptName;
+    
+    @ApiModelProperty("创建时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date createTime;
+}
+```
+
+#### Param对象
+```java
+@Data
+@ApiModel("用户新增/修改参数")
+public class UserParam implements Serializable {
+    
+    @ApiModelProperty("用户ID（修改时必填）")
+    private Long id;
+    
+    @ApiModelProperty(value = "用户名", required = true, example = "admin")
+    @NotBlank(message = "用户名不能为空")
+    @Length(min = 2, max = 20, message = "用户名长度为2-20个字符")
+    private String username;
+    
+    @ApiModelProperty(value = "密码", required = true)
+    @NotBlank(message = "密码不能为空")
+    @Length(min = 6, max = 20, message = "密码长度为6-20个字符")
+    private String password;
+    
+    @ApiModelProperty("昵称")
+    private String nickName;
+    
+    @ApiModelProperty("邮箱")
+    @Email(message = "邮箱格式不正确")
+    private String email;
+    
+    @ApiModelProperty("手机号")
+    @Pattern(regexp = "^1[3-9]\\d{9}$", message = "手机号格式不正确")
+    private String phone;
+    
+    @ApiModelProperty("部门ID")
+    @NotNull(message = "部门ID不能为空")
+    private Long deptId;
+}
+```
+
+#### 查询参数对象
+```java
+@Data
+@ApiModel("用户查询参数")
+public class UserQueryParam extends BasePageParam {
+    
+    @ApiModelProperty("用户名（模糊查询）")
+    private String username;
+    
+    @ApiModelProperty("部门ID")
+    private Long deptId;
+    
+    @ApiModelProperty("状态：0-禁用，1-启用")
+    private Integer status;
+    
+    @ApiModelProperty("开始时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date startTime;
+    
+    @ApiModelProperty("结束时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date endTime;
+}
+```
+
+#### 分页基类
+```java
+@Data
+@ApiModel("分页参数")
+public class BasePageParam implements Serializable {
+    
+    @ApiModelProperty(value = "当前页", example = "1")
+    @Min(value = 1, message = "当前页必须大于0")
+    private Integer current = 1;
+    
+    @ApiModelProperty(value = "每页大小", example = "10")
+    @Min(value = 1, message = "每页大小必须大于0")
+    @Max(value = 100, message = "每页大小不能超过100")
+    private Integer size = 10;
+}
+```
+
+## 接口版本控制
+
+### 方式一：URL路径版本
+```java
+@RestController
+@RequestMapping("/api/v1/users")
+public class UserV1Controller {
+    // v1版本接口
+}
+
+@RestController
+@RequestMapping("/api/v2/users")
+public class UserV2Controller {
+    // v2版本接口
+}
+```
+
+### 方式二：自定义注解
+```java
+@Target({ElementType.METHOD, ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Mapping
+public @interface ApiVersion {
+    int value() default 1;
+}
+
+@RestController
+@RequestMapping("/api/users")
+public class UserController {
+    
+    @ApiVersion(1)
+    @GetMapping
+    public Result<List<UserVo>> listV1() {
+        // v1逻辑
+    }
+    
+    @ApiVersion(2)
+    @GetMapping
+    public Result<List<UserVo>> listV2() {
+        // v2逻辑
+    }
+}
+```
+
+## 跨域配置
+
+```java
+@Configuration
+public class CorsConfig {
+    
+    @Bean
+    public CorsFilter corsFilter() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.addAllowedOriginPattern("*");
+        config.setAllowCredentials(true);
+        config.addAllowedHeader("*");
+        config.addAllowedMethod("*");
+        
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        
+        return new CorsFilter(source);
+    }
+}
+```
+
+## 接口文档访问
+
+启动项目后，访问以下地址：
+- Swagger UI: `http://localhost:8080/swagger-ui.html`
+- Swagger JSON: `http://localhost:8080/v2/api-docs`
+- Knife4j UI (增强版): `http://localhost:8080/doc.html`
+
+## 最佳实践
+
+1. **接口幂等性**：POST/PUT/DELETE操作应设计为幂等
+2. **参数校验**：使用JSR-303注解校验参数
+3. **异常处理**：全局异常处理器统一处理异常
+4. **日志记录**：关键操作记录日志
+5. **接口文档**：所有接口必须有完整的Swagger注解
+6. **版本管理**：重大变更使用版本控制
+7. **安全防护**：敏感接口需要权限验证
+8. **性能优化**：合理使用缓存，避免N+1查询

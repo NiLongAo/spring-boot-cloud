@@ -1,0 +1,321 @@
+---
+globs: "*.java"
+description: Java代码编写规范和最佳实践
+---
+
+# Java 编码规范
+
+## 基本规范
+- **Java版本**: JDK 1.8
+- **编码格式**: UTF-8
+- **构建工具**: Maven
+- **代码简化**: 必须使用Lombok注解
+- **对象映射**: 使用MapStruct进行DTO/VO/Entity转换
+
+## Lombok使用规范
+
+### 实体类注解
+```java
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
+@TableName("sys_user")  // MyBatis-Plus注解
+public class User extends BaseEntity {
+    private Long id;
+    private String username;
+    private String password;
+}
+```
+
+### 日志注解
+```java
+@Slf4j
+@RestController
+public class UserController {
+    public void test() {
+        log.info("日志信息");
+        log.error("错误信息", exception);
+    }
+}
+```
+
+### 其他常用注解
+- `@Getter / @Setter`: 生成getter/setter方法
+- `@ToString`: 生成toString方法
+- `@Slf4j`: 注入log日志对象
+- `@RequiredArgsConstructor`: 生成包含final字段的构造器
+
+## 命名规范
+
+### 类命名
+- **Controller层**: `XxxController` (如 `UserController`)
+- **Service接口**: `XxxService` (如 `UserService`)
+- **Service实现**: `XxxServiceImpl` (如 `UserServiceImpl`)
+- **Mapper接口**: `XxxMapper` (如 `UserMapper`)
+- **Entity实体**: 与数据库表对应的名称 (如 `User`, `SysRole`)
+- **VO对象**: `XxxVo` (如 `UserVo`)
+- **DTO对象**: `XxxDto` (如 `UserDto`)
+- **Param对象**: `XxxParam` (如 `UserQueryParam`)
+
+### 方法命名
+- **查询单个**: `get` / `find` (如 `getUserById`)
+- **查询列表**: `list` / `query` (如 `listUsers`)
+- **分页查询**: `page` (如 `pageUsers`)
+- **新增**: `add` / `insert` / `create` (如 `addUser`)
+- **修改**: `update` / `modify` (如 `updateUser`)
+- **删除**: `delete` / `remove` (如 `deleteUser`)
+- **保存或更新**: `saveOrUpdate`
+
+### 变量命名
+- 使用驼峰命名法
+- 布尔类型使用 `is/has/can` 前缀
+- 集合类型使用复数形式或 `list/map` 后缀
+
+## 注解使用规范
+
+### Controller层
+```java
+@Slf4j
+@RestController
+@RequestMapping("/api/user")
+@Api(tags = "用户管理")
+public class UserController {
+    
+    @Autowired
+    private UserService userService;
+    
+    @GetMapping("/{id}")
+    @ApiOperation("根据ID查询用户")
+    public Result<UserVo> getById(@PathVariable Long id) {
+        return Result.ok(userService.getById(id));
+    }
+    
+    @PostMapping
+    @ApiOperation("新增用户")
+    public Result<Void> add(@RequestBody @Valid UserParam param) {
+        userService.add(param);
+        return Result.ok();
+    }
+}
+```
+
+### Service层
+```java
+public interface UserService {
+    UserVo getById(Long id);
+    void add(UserParam param);
+    void update(UserParam param);
+    void delete(Long id);
+    IPage<UserVo> page(UserQueryParam param);
+}
+
+@Slf4j
+@Service
+public class UserServiceImpl implements UserService {
+    
+    @Autowired
+    private UserMapper userMapper;
+    
+    @Override
+    public UserVo getById(Long id) {
+        User user = userMapper.selectById(id);
+        return UserConvert.INSTANCE.toVo(user);
+    }
+    
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void add(UserParam param) {
+        User user = UserConvert.INSTANCE.toEntity(param);
+        userMapper.insert(user);
+    }
+}
+```
+
+### Mapper层
+```java
+@Mapper
+public interface UserMapper extends BaseMapper<User> {
+    // 自定义查询方法
+    List<User> selectByDeptId(@Param("deptId") Long deptId);
+}
+```
+
+## MyBatis-Plus规范
+
+### 实体类注解
+```java
+@Data
+@TableName("sys_user")
+public class User {
+    @TableId(type = IdType.AUTO)
+    private Long id;
+    
+    @TableField("user_name")
+    private String username;
+    
+    @TableField(fill = FieldFill.INSERT)
+    private Date createTime;
+    
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private Date updateTime;
+    
+    @TableLogic
+    private Integer deleted;
+    
+    @Version
+    private Integer version;
+}
+```
+
+### 常用方法
+- 单条查询: `selectById()`, `selectOne()`
+- 列表查询: `selectList()`, `selectBatchIds()`
+- 分页查询: `selectPage()`
+- 新增: `insert()`
+- 更新: `updateById()`, `update()`
+- 删除: `deleteById()`, `delete()`
+
+## 异常处理规范
+
+### 抛出业务异常
+```java
+if (user == null) {
+    throw new BusinessException("用户不存在");
+}
+```
+
+### 全局异常处理
+```java
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+    
+    @ExceptionHandler(BusinessException.class)
+    public Result handleBusinessException(BusinessException e) {
+        log.error("业务异常：{}", e.getMessage());
+        return Result.error(e.getMessage());
+    }
+    
+    @ExceptionHandler(Exception.class)
+    public Result handleException(Exception e) {
+        log.error("系统异常", e);
+        return Result.error("系统异常，请联系管理员");
+    }
+}
+```
+
+## 参数校验规范
+
+使用JSR-303注解进行参数校验：
+```java
+@Data
+public class UserParam {
+    
+    @NotBlank(message = "用户名不能为空")
+    @Length(min = 2, max = 20, message = "用户名长度为2-20个字符")
+    private String username;
+    
+    @NotBlank(message = "密码不能为空")
+    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,}$", 
+             message = "密码至少8位，包含大小写字母和数字")
+    private String password;
+    
+    @NotNull(message = "年龄不能为空")
+    @Min(value = 1, message = "年龄最小为1")
+    @Max(value = 150, message = "年龄最大为150")
+    private Integer age;
+    
+    @Email(message = "邮箱格式不正确")
+    private String email;
+}
+```
+
+## 日志规范
+
+### 日志级别使用
+- `ERROR`: 错误信息，系统异常
+- `WARN`: 警告信息，潜在问题
+- `INFO`: 关键业务流程日志
+- `DEBUG`: 调试信息（生产环境关闭）
+
+### 日志格式
+```java
+@Slf4j
+public class UserService {
+    
+    public void deleteUser(Long id) {
+        log.info("删除用户，ID: {}", id);
+        try {
+            userMapper.deleteById(id);
+            log.info("删除用户成功，ID: {}", id);
+        } catch (Exception e) {
+            log.error("删除用户失败，ID: {}", id, e);
+            throw new BusinessException("删除用户失败");
+        }
+    }
+}
+```
+
+## 事务管理规范
+
+- Service层方法添加 `@Transactional` 注解
+- 必须指定 `rollbackFor = Exception.class`
+- 避免在Controller层使用事务
+
+```java
+@Override
+@Transactional(rollbackFor = Exception.class)
+public void saveUser(UserParam param) {
+    // 业务逻辑
+}
+```
+
+## 分布式事务规范
+
+使用Seata进行分布式事务管理：
+```java
+@GlobalTransactional(rollbackFor = Exception.class)
+public void createOrder(OrderParam param) {
+    // 订单服务操作
+    orderService.create(param);
+    // 远程调用库存服务
+    stockFeignClient.reduce(param.getProductId(), param.getQuantity());
+    // 远程调用账户服务
+    accountFeignClient.deduct(param.getUserId(), param.getAmount());
+}
+```
+
+## 代码注释规范
+
+### 类注释
+```java
+/**
+ * 用户服务实现类
+ * 
+ * @author 作者名
+ * @since 2025-01-01
+ */
+@Service
+public class UserServiceImpl implements UserService {
+}
+```
+
+### 方法注释（复杂业务逻辑必须注释）
+```java
+/**
+ * 分页查询用户列表
+ * 
+ * @param param 查询参数
+ * @return 用户分页数据
+ */
+public IPage<UserVo> pageUsers(UserQueryParam param) {
+}
+```
+
+## 性能优化建议
+1. 避免在循环中进行数据库操作，使用批量操作
+2. 合理使用Redis缓存热点数据
+3. 大数据量查询使用分页
+4. 使用异步处理耗时操作
+5. 避免深层次对象嵌套查询（N+1问题）

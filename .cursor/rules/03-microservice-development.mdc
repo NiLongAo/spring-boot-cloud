@@ -1,0 +1,449 @@
+---
+description: Spring Cloud微服务开发规范和最佳实践
+---
+
+# Spring Cloud 微服务开发规范
+
+## 服务配置规范
+
+### application.yml 配置结构
+```yaml
+spring:
+  application:
+    name: spring-boot-bean  # 服务名称，使用横线分隔
+  profiles:
+    active: dev  # 环境配置
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_HOST:127.0.0.1}:${NACOS_PORT:8848}
+        namespace: ${NACOS_NAMESPACE:}
+      config:
+        server-addr: ${NACOS_HOST:127.0.0.1}:${NACOS_PORT:8848}
+        namespace: ${NACOS_NAMESPACE:}
+        file-extension: yml
+        shared-configs:
+          - data-id: common.yml  # 公共配置
+            refresh: true
+
+server:
+  port: 8080
+
+# MyBatis配置
+mybatis-plus:
+  mapper-locations: classpath*:mapper/**/*.xml
+  type-aliases-package: cn.com.tzy.**.entity.model
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+```
+
+### 主启动类
+```java
+@Slf4j
+@SpringBootApplication
+@EnableDiscoveryClient  // 开启服务注册发现
+@EnableFeignClients(basePackages = "cn.com.tzy.**.feign")  // 开启Feign客户端
+@MapperScan("cn.com.tzy.**.mapper")  // 扫描Mapper接口
+public class BeanApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(BeanApplication.class, args);
+        log.info("========== Bean Service Started ==========");
+    }
+}
+```
+
+## Feign 客户端开发规范
+
+### Feign接口定义
+在 `spring-boot-feign-xxx` 模块中定义：
+
+```java
+@FeignClient(
+    name = "spring-boot-bean",  // 服务名称
+    path = "/api/user",  // 请求路径前缀
+    fallbackFactory = UserFeignFallback.class  // 降级处理
+)
+public interface UserFeignClient {
+    
+    @GetMapping("/{id}")
+    Result<UserVo> getById(@PathVariable("id") Long id);
+    
+    @PostMapping
+    Result<Void> add(@RequestBody UserParam param);
+    
+    @GetMapping("/list")
+    Result<List<UserVo>> listByIds(@RequestParam("ids") List<Long> ids);
+}
+```
+
+### Feign降级处理
+```java
+@Slf4j
+@Component
+public class UserFeignFallback implements FallbackFactory<UserFeignClient> {
+    
+    @Override
+    public UserFeignClient create(Throwable cause) {
+        return new UserFeignClient() {
+            @Override
+            public Result<UserVo> getById(Long id) {
+                log.error("调用用户服务失败，ID: {}", id, cause);
+                return Result.error("用户服务暂时不可用");
+            }
+            
+            @Override
+            public Result<Void> add(UserParam param) {
+                log.error("调用用户服务失败", cause);
+                return Result.error("用户服务暂时不可用");
+            }
+            
+            @Override
+            public Result<List<UserVo>> listByIds(List<Long> ids) {
+                log.error("调用用户服务失败", cause);
+                return Result.error("用户服务暂时不可用");
+            }
+        };
+    }
+}
+```
+
+### Feign使用规范
+```java
+@Slf4j
+@Service
+public class OrderServiceImpl implements OrderService {
+    
+    @Autowired
+    private UserFeignClient userFeignClient;
+    
+    @Override
+    public OrderVo getOrderDetail(Long orderId) {
+        // 调用远程服务
+        Result<UserVo> result = userFeignClient.getById(userId);
+        if (!result.isSuccess()) {
+            log.error("获取用户信息失败: {}", result.getMessage());
+            throw new BusinessException("获取用户信息失败");
+        }
+        UserVo user = result.getData();
+        // 业务处理...
+        return orderVo;
+    }
+}
+```
+
+## Sentinel 熔断限流规范
+
+### 基本配置
+```yaml
+spring:
+  cloud:
+    sentinel:
+      transport:
+        dashboard: ${SENTINEL_HOST:127.0.0.1}:${SENTINEL_PORT:8858}
+      eager: true  # 启动时立即初始化
+```
+
+### 自定义限流处理
+```java
+@Component
+public class CustomBlockExceptionHandler implements BlockExceptionHandler {
+    
+    @Override
+    public void handle(HttpServletRequest request, HttpServletResponse response, 
+                      BlockException e) throws Exception {
+        response.setContentType("application/json;charset=UTF-8");
+        Result result = Result.error("系统繁忙，请稍后重试");
+        response.getWriter().write(JSON.toJSONString(result));
+    }
+}
+```
+
+### 注解方式限流
+```java
+@SentinelResource(
+    value = "getUserById",
+    blockHandler = "handleBlock",
+    fallback = "handleFallback"
+)
+public UserVo getUserById(Long id) {
+    return userMapper.selectById(id);
+}
+
+// 限流处理
+public UserVo handleBlock(Long id, BlockException e) {
+    log.warn("触发限流，ID: {}", id);
+    throw new BusinessException("系统繁忙，请稍后重试");
+}
+
+// 异常降级
+public UserVo handleFallback(Long id, Throwable e) {
+    log.error("查询用户异常，ID: {}", id, e);
+    throw new BusinessException("查询用户失败");
+}
+```
+
+## Gateway 网关配置规范
+
+### 路由配置
+```yaml
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: bean-service
+          uri: lb://spring-boot-bean  # lb: 负载均衡
+          predicates:
+            - Path=/api/bean/**
+          filters:
+            - StripPrefix=2  # 去除路径前缀
+        - id: sms-service
+          uri: lb://spring-boot-sms
+          predicates:
+            - Path=/api/sms/**
+          filters:
+            - StripPrefix=2
+```
+
+### 全局过滤器
+```java
+@Slf4j
+@Component
+public class AuthFilter implements GlobalFilter, Ordered {
+    
+    @Override
+    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        ServerHttpRequest request = exchange.getRequest();
+        String path = request.getURI().getPath();
+        
+        // 白名单路径放行
+        if (isWhiteList(path)) {
+            return chain.filter(exchange);
+        }
+        
+        // Token验证
+        String token = request.getHeaders().getFirst("Authorization");
+        if (StringUtils.isBlank(token)) {
+            return unauthorized(exchange);
+        }
+        
+        // 验证token并传递用户信息
+        return chain.filter(exchange);
+    }
+    
+    @Override
+    public int getOrder() {
+        return -100;
+    }
+}
+```
+
+## Redis 缓存使用规范
+
+### 缓存注解
+```java
+@Service
+public class UserServiceImpl implements UserService {
+    
+    @Cacheable(value = "user", key = "#id")
+    public UserVo getById(Long id) {
+        return userMapper.selectById(id);
+    }
+    
+    @CachePut(value = "user", key = "#result.id")
+    public UserVo update(UserParam param) {
+        userMapper.updateById(user);
+        return user;
+    }
+    
+    @CacheEvict(value = "user", key = "#id")
+    public void delete(Long id) {
+        userMapper.deleteById(id);
+    }
+}
+```
+
+### Redis工具类使用
+```java
+@Autowired
+private RedisTemplate<String, Object> redisTemplate;
+
+// 设置缓存
+redisTemplate.opsForValue().set("key", value, 30, TimeUnit.MINUTES);
+
+// 获取缓存
+Object value = redisTemplate.opsForValue().get("key");
+
+// 删除缓存
+redisTemplate.delete("key");
+```
+
+## RabbitMQ 消息队列规范
+
+### 消息发送
+```java
+@Autowired
+private RabbitTemplate rabbitTemplate;
+
+public void sendMessage() {
+    rabbitTemplate.convertAndSend(
+        "exchange.name",  // 交换机
+        "routing.key",    // 路由键
+        message           // 消息内容
+    );
+}
+```
+
+### 消息消费
+```java
+@Component
+@RabbitListener(queues = "queue.name")
+public class MessageConsumer {
+    
+    @RabbitHandler
+    public void handleMessage(String message) {
+        log.info("收到消息: {}", message);
+        // 处理业务逻辑
+    }
+}
+```
+
+## Seata 分布式事务规范
+
+### 开启全局事务
+```java
+@GlobalTransactional(
+    name = "create-order",  // 全局事务名称
+    rollbackFor = Exception.class
+)
+public void createOrder(OrderParam param) {
+    // 本地数据库操作
+    orderMapper.insert(order);
+    
+    // 远程服务调用
+    stockFeignClient.reduce(param.getProductId(), param.getQuantity());
+    accountFeignClient.deduct(param.getUserId(), param.getAmount());
+}
+```
+
+### 注意事项
+1. 只在事务发起方标注 `@GlobalTransactional`
+2. 被调用的远程服务方法需要标注 `@Transactional`
+3. 确保数据库支持事务（InnoDB引擎）
+4. 避免事务中有耗时操作
+
+## XXL-Job 分布式任务规范
+
+### 任务配置
+```yaml
+xxl:
+  job:
+    admin:
+      addresses: http://${XXL_JOB_HOST:127.0.0.1}:${XXL_JOB_PORT:8888}/xxl-job-admin
+    executor:
+      appname: ${spring.application.name}
+      port: 9999
+      logpath: /data/applogs/xxl-job/jobhandler
+```
+
+### 任务定义
+```java
+@Slf4j
+@Component
+public class DemoJobHandler {
+    
+    @XxlJob("demoJobHandler")
+    public void execute() throws Exception {
+        log.info("定时任务开始执行");
+        // 业务逻辑
+        log.info("定时任务执行完成");
+    }
+}
+```
+
+## 服务监控规范
+
+### 健康检查
+每个服务都应该提供健康检查接口：
+```java
+@RestController
+@RequestMapping("/actuator")
+public class HealthController {
+    
+    @GetMapping("/health")
+    public Result health() {
+        return Result.ok("服务运行正常");
+    }
+}
+```
+
+### SkyWalking链路追踪
+- 自动集成，无需额外代码
+- 通过agent方式启动：`-javaagent:skywalking-agent.jar`
+- 配置服务名称与应用名称一致
+
+## 日志规范
+
+### 日志配置
+```yaml
+logging:
+  level:
+    cn.com.tzy: info
+    org.springframework: warn
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+```
+
+### 日志使用
+```java
+@Slf4j
+public class UserService {
+    
+    public void test() {
+        log.debug("调试信息");
+        log.info("关键业务流程: 用户ID={}, 操作={}", userId, operation);
+        log.warn("警告信息: {}", warning);
+        log.error("错误信息", exception);
+    }
+}
+```
+
+## 接口规范
+
+### 统一响应结构
+```java
+@Data
+public class Result<T> {
+    private Integer code;
+    private String message;
+    private T data;
+    
+    public static <T> Result<T> ok() {
+        return new Result<>(200, "success", null);
+    }
+    
+    public static <T> Result<T> ok(T data) {
+        return new Result<>(200, "success", data);
+    }
+    
+    public static <T> Result<T> error(String message) {
+        return new Result<>(500, message, null);
+    }
+}
+```
+
+### RESTful API设计
+- GET: 查询资源
+- POST: 创建资源
+- PUT: 更新资源（全量）
+- PATCH: 更新资源（部分）
+- DELETE: 删除资源
+
+## 安全规范
+
+1. 所有对外接口必须经过网关
+2. 敏感信息（密码、密钥）必须加密存储
+3. Token必须设置过期时间
+4. 重要操作记录操作日志
+5. SQL防注入（使用MyBatis预编译）
+6. XSS防护（输入校验和输出转义）

@@ -1,0 +1,399 @@
+---
+globs: "pom.xml"
+description: Maven依赖管理和构建规范
+---
+
+# Maven 依赖管理规范
+
+## 项目基本信息
+- **GroupId**: `cn.com.tzy`
+- **Version**: `1.0.0`
+- **Parent**: `spring-boot-starter-parent:2.3.2.RELEASE`
+- **Java版本**: 1.8
+- **编码**: UTF-8
+
+## 版本管理
+在根pom.xml的 `<properties>` 中统一管理版本号：
+
+```xml
+<properties>
+    <spring.boot.version>2.3.2.RELEASE</spring.boot.version>
+    <spring-cloud.version>Hoxton.SR9</spring-cloud.version>
+    <spring-cloud-dependencies.version>2.2.6.RELEASE</spring-cloud-dependencies.version>
+    <mybatis-plus.version>3.4.3</mybatis-plus.version>
+    <!-- 其他版本... -->
+</properties>
+```
+
+## 依赖声明规范
+
+### 根POM (spring-boot-cloud)
+- 只在 `<dependencyManagement>` 中声明版本
+- 子模块根据需要引入，无需指定版本
+
+```xml
+<dependencyManagement>
+    <dependencies>
+        <!-- Spring Cloud -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-dependencies</artifactId>
+            <version>${spring-cloud.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+        
+        <!-- 内部模块 -->
+        <dependency>
+            <groupId>cn.com.tzy</groupId>
+            <artifactId>spring-boot-comm</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+```
+
+### 子模块POM
+直接引入依赖，无需指定版本：
+
+```xml
+<dependencies>
+    <!-- 内部依赖 -->
+    <dependency>
+        <groupId>cn.com.tzy</groupId>
+        <artifactId>spring-boot-comm</artifactId>
+    </dependency>
+    
+    <!-- Spring Boot -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    
+    <!-- Lombok -->
+    <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+        <scope>provided</scope>
+    </dependency>
+</dependencies>
+```
+
+## 模块依赖规范
+
+### 业务服务模块 (spring-boot-business/*)
+```xml
+<dependencies>
+    <!-- Common模块 -->
+    <dependency>
+        <groupId>cn.com.tzy</groupId>
+        <artifactId>spring-boot-comm</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>cn.com.tzy</groupId>
+        <artifactId>spring-boot-entity</artifactId>
+    </dependency>
+    
+    <!-- Starter模块 -->
+    <dependency>
+        <groupId>cn.com.tzy</groupId>
+        <artifactId>spring-boot-starter-cloud</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>cn.com.tzy</groupId>
+        <artifactId>spring-boot-starter-mybatis</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>cn.com.tzy</groupId>
+        <artifactId>spring-boot-starter-redis</artifactId>
+    </dependency>
+    
+    <!-- Feign客户端（如需调用其他服务） -->
+    <dependency>
+        <groupId>cn.com.tzy</groupId>
+        <artifactId>spring-boot-feign-sso</artifactId>
+    </dependency>
+    
+    <!-- MySQL驱动 -->
+    <dependency>
+        <groupId>mysql</groupId>
+        <artifactId>mysql-connector-java</artifactId>
+    </dependency>
+</dependencies>
+```
+
+### 客户端接口模块 (spring-boot-client/*)
+```xml
+<dependencies>
+    <!-- Feign客户端（调用业务服务） -->
+    <dependency>
+        <groupId>cn.com.tzy</groupId>
+        <artifactId>spring-boot-feign-bean</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>cn.com.tzy</groupId>
+        <artifactId>spring-boot-feign-sms</artifactId>
+    </dependency>
+    
+    <!-- Starter模块 -->
+    <dependency>
+        <groupId>cn.com.tzy</groupId>
+        <artifactId>spring-boot-starter-cloud</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>cn.com.tzy</groupId>
+        <artifactId>spring-boot-starter-swagger</artifactId>
+    </dependency>
+</dependencies>
+```
+
+### Feign接口模块 (spring-boot-feign/*)
+Feign模块只定义接口，依赖最小化：
+
+```xml
+<dependencies>
+    <dependency>
+        <groupId>cn.com.tzy</groupId>
+        <artifactId>spring-boot-entity</artifactId>
+    </dependency>
+    
+    <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-openfeign</artifactId>
+    </dependency>
+</dependencies>
+```
+
+### 网关模块 (spring-boot-gateway)
+```xml
+<dependencies>
+    <dependency>
+        <groupId>cn.com.tzy</groupId>
+        <artifactId>spring-boot-starter-cloud</artifactId>
+    </dependency>
+    
+    <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-gateway</artifactId>
+    </dependency>
+    
+    <dependency>
+        <groupId>com.alibaba.cloud</groupId>
+        <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+    </dependency>
+    
+    <!-- 注意：Gateway不能引入spring-boot-starter-web -->
+</dependencies>
+```
+
+## 常用依赖组合
+
+### Web应用基础依赖
+```xml
+<!-- Spring Boot Web -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+
+<!-- Validation -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-validation</artifactId>
+</dependency>
+
+<!-- Lombok -->
+<dependency>
+    <groupId>org.projectlombok</groupId>
+    <artifactId>lombok</artifactId>
+    <scope>provided</scope>
+</dependency>
+```
+
+### 微服务依赖
+```xml
+<!-- Nacos服务注册发现 -->
+<dependency>
+    <groupId>com.alibaba.cloud</groupId>
+    <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+</dependency>
+
+<!-- Nacos配置中心 -->
+<dependency>
+    <groupId>com.alibaba.cloud</groupId>
+    <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+</dependency>
+
+<!-- Sentinel熔断限流 -->
+<dependency>
+    <groupId>com.alibaba.cloud</groupId>
+    <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
+</dependency>
+
+<!-- OpenFeign -->
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-openfeign</artifactId>
+</dependency>
+
+<!-- 负载均衡 -->
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-loadbalancer</artifactId>
+</dependency>
+```
+
+### 数据访问依赖
+```xml
+<!-- MyBatis-Plus -->
+<dependency>
+    <groupId>com.baomidou</groupId>
+    <artifactId>mybatis-plus-boot-starter</artifactId>
+</dependency>
+
+<!-- MySQL -->
+<dependency>
+    <groupId>mysql</groupId>
+    <artifactId>mysql-connector-java</artifactId>
+</dependency>
+
+<!-- Redis -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-redis</artifactId>
+</dependency>
+
+<!-- 连接池 -->
+<dependency>
+    <groupId>com.alibaba</groupId>
+    <artifactId>druid-spring-boot-starter</artifactId>
+</dependency>
+```
+
+## 插件配置
+
+### Lombok + MapStruct 编译插件
+```xml
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-compiler-plugin</artifactId>
+    <configuration>
+        <source>1.8</source>
+        <target>1.8</target>
+        <encoding>UTF-8</encoding>
+        <annotationProcessorPaths>
+            <path>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+            </path>
+            <path>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct-processor</artifactId>
+                <version>${mapstruct.version}</version>
+            </path>
+        </annotationProcessorPaths>
+    </configuration>
+</plugin>
+```
+
+### Spring Boot 打包插件
+```xml
+<plugin>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-maven-plugin</artifactId>
+    <configuration>
+        <fork>true</fork>
+        <finalName>${project.build.finalName}</finalName>
+        <jvmArguments>-Dfile.encoding=UTF-8</jvmArguments>
+        <layout>ZIP</layout>
+    </configuration>
+    <executions>
+        <execution>
+            <goals>
+                <goal>repackage</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+```
+
+### 跳过测试
+```xml
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-surefire-plugin</artifactId>
+    <configuration>
+        <skipTests>true</skipTests>
+    </configuration>
+</plugin>
+```
+
+## 依赖排除规范
+
+排除冲突的依赖：
+```xml
+<dependency>
+    <groupId>com.alibaba.cloud</groupId>
+    <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+    <exclusions>
+        <exclusion>
+            <groupId>com.alibaba.nacos</groupId>
+            <artifactId>nacos-client</artifactId>
+        </exclusion>
+    </exclusions>
+</dependency>
+```
+
+## Scope使用规范
+- `compile`: 默认，编译、测试、运行都需要
+- `provided`: 编译和测试需要，运行时由JDK或容器提供（如Lombok、Servlet API）
+- `runtime`: 运行和测试需要（如JDBC驱动）
+- `test`: 仅测试时需要
+- `system`: 本地依赖，不推荐使用
+
+## Maven仓库配置
+项目使用阿里云Maven镜像：
+
+```xml
+<repositories>
+    <repository>
+        <id>aliyun</id>
+        <name>aliyun Repository</name>
+        <url>https://maven.aliyun.com/repository/public</url>
+        <snapshots>
+            <enabled>false</enabled>
+        </snapshots>
+    </repository>
+</repositories>
+```
+
+## 构建命令
+
+```bash
+# 清理并编译
+mvn clean compile
+
+# 打包（跳过测试）
+mvn clean package -DskipTests
+
+# 安装到本地仓库
+mvn clean install -DskipTests
+
+# 只编译指定模块
+mvn clean package -pl spring-boot-business/spring-boot-bean -am
+
+# 查看依赖树
+mvn dependency:tree
+
+# 查看有效POM
+mvn help:effective-pom
+```
+
+## 注意事项
+1. 新增依赖时，优先在根POM的 `<dependencyManagement>` 中声明版本
+2. 避免在子模块中硬编码版本号
+3. 定期检查并更新依赖版本，关注安全漏洞
+4. 避免循环依赖
+5. Feign接口模块保持轻量，不引入重量级依赖
+6. 使用 `mvn dependency:analyze` 检测未使用的依赖
