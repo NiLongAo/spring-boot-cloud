@@ -13,6 +13,7 @@ import cn.com.tzy.springbootstarterfreeswitch.vo.media.HookKey;
 import cn.com.tzy.springbootstarterfreeswitch.vo.media.HookVo;
 import cn.com.tzy.springbootstarterfreeswitch.vo.media.ZLMServerConfig;
 import cn.com.tzy.springbootstarterfreeswitch.vo.sip.MediaServerVo;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.CommandLineRunner;
@@ -94,7 +95,7 @@ public class ZLMRunner implements CommandLineRunner {
         config.setIp(mediaServerVo.getIp());
         config.setHttpPort(mediaServerVo.getHttpPort());
         allZML.remove(mediaServerVo.getId());
-        if (allZML.size() == 0) {
+        if (CollUtil.isEmpty(allZML)) {
             mediaHookSubscribe.removeSubscribe(HookKeyFactory.onServerStarted());
         }
         config.setRestart("0".equals(config.getHookEnable())? ConstEnum.Flag.YES.getValue() :ConstEnum.Flag.NO.getValue());
