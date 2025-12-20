@@ -9,7 +9,10 @@ RUN mkdir -p /spring-boot-fs/skywalking-agent-lib
 RUN mkdir -p /spring-boot-fs/logs
 
 WORKDIR /spring-boot-fs
-EXPOSE 8630
+EXPOSE 6082
+EXPOSE 8670
+EXPOSE 9122
+EXPOSE 13011
 EXPOSE 13007
 ADD ./target/spring-boot-fs.jar ./
 ADD ./target/lib/* ./lib/
