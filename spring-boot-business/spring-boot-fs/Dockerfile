@@ -14,6 +14,7 @@ EXPOSE 8670
 EXPOSE 9122
 EXPOSE 13011
 EXPOSE 13007
+EXPOSE 14030
 ADD ./target/spring-boot-fs.jar ./
 ADD ./target/lib/* ./lib/
 ADD ./start/logback.xml ./
@@ -24,6 +25,7 @@ ENTRYPOINT [ \
     "-javaagent:/spring-boot-fs/skywalking-agent-lib/skywalking-agent.jar", \
     "-Dskywalking.agent.service_name=spring-boot-fs", \
     "-Dskywalking.collector.backend_service=1.82.217.118:12011", \
+    "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=14030", \
     "-XX:MetaspaceSize=256M", "-XX:MaxMetaspaceSize=256M","-XX:+AlwaysPreTouch","-XX:ReservedCodeCacheSize=128m", "-Xms256m", "-Xmx256m", "-Xss512k", "-XX:+UseG1GC","-XX:G1HeapRegionSize=4M",\
     "-Dloader.path=/spring-boot-fs/lib", \
     "-Dfile.encoding=utf-8", \
