@@ -97,7 +97,7 @@ public class FsXmlController extends ApiController {
                         .modelMap(new HashMap<String, Object>(){{
                             put(FsTypeEnum.INTERNAL.getName(), ConfigModel.builder()
                                     .iceStart(ConstEnum.Flag.YES.getValue())
-                                    .stunAddress("autonat:192.168.1.27")
+                                    .stunAddress("autonat:1.82.217.118")
                                     .build());
                         }})
                         .build()
