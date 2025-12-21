@@ -54,30 +54,30 @@ public class RegisterRequestProcessor extends AbstractSipRequestEvent implements
         SipTransactionManager sipTransactionManager = RedisService.getSipTransactionManager();
         try {
             RequestEventExt evtExt = (RequestEventExt) event;
-            String requestAddress = String.format("%s:%s",evtExt.getRemoteIpAddress(),evtExt.getRemotePort());
-            SIPRequest request = (SIPRequest)event.getRequest();
+            String requestAddress = String.format("%s:%s", evtExt.getRemoteIpAddress(), evtExt.getRemotePort());
+            SIPRequest request = (SIPRequest) event.getRequest();
             // 注册标志
             boolean registerFlag = request.getExpires().getExpires() > 0;
-            String title = registerFlag ? "[注册请求]": "[注销请求]";
-            String deviceId = ((SipUri)(((FromHeader) request.getHeader(FromHeader.NAME)).getAddress()).getURI()).getUser();
+            String title = registerFlag ? "[注册请求]" : "[注销请求]";
+            String deviceId = ((SipUri) (((FromHeader) request.getHeader(FromHeader.NAME)).getAddress()).getURI()).getUser();
             DeviceVo deviceVo = deviceVoService.findDeviceGbId(deviceId);
             Address remoteAddress = SipUtils.getRemoteAddressFromRequest(request, videoProperties.getSipUseSourceIpAsRemoteAddress());
             SipConfigProperties sipConfigProperties = sipServer.getSipConfigProperties();
-            String routeId = ((SipUri)request.getRequestLine().getUri()).getUser();
+            String routeId = ((SipUri) request.getRequestLine().getUri()).getUser();
             Response response;
-            if(!StringUtils.equals(sipConfigProperties.getId(),routeId)){
+            if (!StringUtils.equals(sipConfigProperties.getId(), routeId)) {
                 // 注册失败
                 response = sipServer.getSipFactory().createMessageFactory().createResponse(Response.FORBIDDEN, request);
                 response.setReasonPhrase("国标Id错误");
-                log.info("[{}] SIP服务器ID错误, 回复403: {}",title, requestAddress);
+                log.info("[{}] SIP服务器ID错误 routeId:{}, 回复403: {}", title, routeId, requestAddress);
                 sipMessageHandle.handleMessage(request.getLocalAddress().getHostAddress(), response);
                 return;
             }
-            log.info("[{}] 设备：{}, 开始处理: {}",title, deviceId, remoteAddress);
+            log.info("[{}] 设备：{}, 开始处理: {}", title, deviceId, remoteAddress);
             if (deviceVo != null && registerFlag) {
                 SipTransactionInfo sipTransactionInfo = sipTransactionManager.findDevice(deviceVo.getDeviceId());
-                if(sipTransactionInfo != null && request.getCallIdHeader().getCallId().equals(sipTransactionInfo.getCallId())){
-                    log.info("[{}] 注册续订: {}",title, deviceVo.getDeviceId());
+                if (sipTransactionInfo != null && request.getCallIdHeader().getCallId().equals(sipTransactionInfo.getCallId())) {
+                    log.info("[{}] 注册续订: {}", title, deviceVo.getDeviceId());
                     deviceVo.setExpires(request.getExpires().getExpires());
                     deviceVo.setIp(remoteAddress.getIp());
                     deviceVo.setPort(remoteAddress.getPort());
@@ -87,9 +87,9 @@ public class RegisterRequestProcessor extends AbstractSipRequestEvent implements
                     // 判断TCP还是UDP
                     ViaHeader reqViaHeader = (ViaHeader) request.getHeader(ViaHeader.NAME);
                     String transport = reqViaHeader.getTransport();
-                    deviceVo.setTransport("TCP".equalsIgnoreCase(transport) ? TransportType.TCP.getValue() :TransportType.UDP.getValue());
-                    sipMessageHandle.handleMessage(request.getLocalAddress().getHostAddress(),response);
-                    deviceVoService.online(deviceVo,sipServer,sipCommander,videoProperties,new SipTransactionInfo((SIPResponse)response),"注册续订");
+                    deviceVo.setTransport("TCP".equalsIgnoreCase(transport) ? TransportType.TCP.getValue() : TransportType.UDP.getValue());
+                    sipMessageHandle.handleMessage(request.getLocalAddress().getHostAddress(), response);
+                    deviceVoService.online(deviceVo, sipServer, sipCommander, videoProperties, new SipTransactionInfo((SIPResponse) response), "注册续订");
                     return;
                 }
             }
@@ -97,11 +97,11 @@ public class RegisterRequestProcessor extends AbstractSipRequestEvent implements
             String password = (deviceVo != null && StringUtils.isNotEmpty(deviceVo.getPassword()) ? deviceVo.getPassword() : sipConfigProperties.getPassword());
             AuthorizationHeader authHead = (AuthorizationHeader) request.getHeader(AuthorizationHeader.NAME);
             if (authHead == null && StringUtils.isNotEmpty(password)) {
-                log.info("[{}] 回复401: {}",title, requestAddress);
+                log.info("[{}] 回复401: {}", title, requestAddress);
                 response = sipServer.getSipFactory().createMessageFactory().createResponse(Response.UNAUTHORIZED, request);
                 DigestServerAuthenticationHelper.generateChallenge(sipServer.getSipFactory().createHeaderFactory(), response, sipConfigProperties.getDomain());
                 //回复未注册消息 401
-                sipMessageHandle.handleMessage(request.getLocalAddress().getHostAddress(),response);
+                sipMessageHandle.handleMessage(request.getLocalAddress().getHostAddress(), response);
                 return;
             }
             // 校验密码是否正确
@@ -110,7 +110,7 @@ public class RegisterRequestProcessor extends AbstractSipRequestEvent implements
                 // 注册失败
                 response = sipServer.getSipFactory().createMessageFactory().createResponse(Response.FORBIDDEN, request);
                 response.setReasonPhrase("wrong password");
-                log.info("[{}] 密码/SIP服务器ID错误, 回复403: {}",title, requestAddress);
+                log.info("[{}] 密码/SIP服务器ID错误, 回复403: {}", title, requestAddress);
                 sipMessageHandle.handleMessage(request.getLocalAddress().getHostAddress(), response);
                 return;
             }
@@ -129,7 +129,7 @@ public class RegisterRequestProcessor extends AbstractSipRequestEvent implements
                 deviceVo.setTreeType(GbIdConstant.Type.TYPE_215.getValue());
                 deviceVo.setDeviceId(deviceId);
                 deviceVo.setOnline(ConstEnum.Flag.NO.getValue());
-            }else {
+            } else {
                 if (ObjectUtils.isEmpty(deviceVo.getStreamMode())) {
                     deviceVo.setStreamMode(StreamModeType.TCP_PASSIVE.getValue());
                 }
@@ -147,7 +147,7 @@ public class RegisterRequestProcessor extends AbstractSipRequestEvent implements
             sipMessageHandle.handleMessage(request.getLocalAddress().getHostAddress(), response);
             // 注册成功
             if (registerFlag) {
-                log.info("[{}] deviceId: {}->{}",title,  deviceId, requestAddress);
+                log.info("[{}] deviceId: {}->{}", title, deviceId, requestAddress);
                 // 注册成功
                 deviceVo.setExpires(request.getExpires().getExpires());
                 // 判断TCP还是UDP
@@ -155,24 +155,24 @@ public class RegisterRequestProcessor extends AbstractSipRequestEvent implements
                 String transport = reqViaHeader.getTransport();
                 deviceVo.setTransport("TCP".equalsIgnoreCase(transport) ? 2 : 1);
                 deviceVo.setRegisterTime(new Date());
-                deviceVoService.online(deviceVo,sipServer,sipCommander,videoProperties,new SipTransactionInfo((SIPResponse)response),"设备注册");
+                deviceVoService.online(deviceVo, sipServer, sipCommander, videoProperties, new SipTransactionInfo((SIPResponse) response), "设备注册");
             } else {
-                log.info("[{}] deviceId: {}->{}",title ,deviceId, requestAddress);
-                deviceVoService.offline(deviceId,"设备注销");
+                log.info("[{}] deviceId: {}->{}", title, deviceId, requestAddress);
+                deviceVoService.offline(deviceId, "设备注销");
             }
-        }catch (SipException | ParseException e){
+        } catch (SipException | ParseException e) {
             log.error(e.getMessage());
-        }catch (Exception e){
-            log.error("[REGISTER请求]，消息处理异常：", e );
+        } catch (Exception e) {
+            log.error("[REGISTER请求]，消息处理异常：", e);
         }
     }
 
     private Response getRegisterOkResponse(Request request) throws ParseException, PeerUnavailableException {
         // 携带授权头并且密码正确
-        Response  response = sipServer.getSipFactory().createMessageFactory().createResponse(Response.OK, request);
+        Response response = sipServer.getSipFactory().createMessageFactory().createResponse(Response.OK, request);
         // 添加date头
         SIPDateHeader dateHeader = new SIPDateHeader();
-        dateHeader.setDate( new VideoSipDate(Calendar.getInstance(Locale.ENGLISH).getTimeInMillis()));
+        dateHeader.setDate(new VideoSipDate(Calendar.getInstance(Locale.ENGLISH).getTimeInMillis()));
         response.addHeader(dateHeader);
         // 添加Contact头
         response.addHeader(request.getHeader(ContactHeader.NAME));
