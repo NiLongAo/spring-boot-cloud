@@ -124,7 +124,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         if (param.getId() == null) {
             return RestResult.result(RespCode.CODE_2.getValue(), "未获取菜单编号");
         }
-        if (StringUtils.isEmpty(param.getPid()) && param.getPid().equals(param.getId())) {
+        if (StringUtils.isNotEmpty(param.getPid()) && param.getPid().equals(param.getId())) {
             return RestResult.result(RespCode.CODE_2.getValue(), "父级编号与本级相同！");
         }
         if (param.getPid() != null) {
