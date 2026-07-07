@@ -280,11 +280,11 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         List<VueRoutes> routesList = new ArrayList<>();
         for (TreeNode<Menu> menuTreeNode : treeNode) {
             VueRoutes convert = MenuConvert.INSTANCE.convert(menuTreeNode.getT());
-            if (Arrays.asList(VueRoutes.MenuType.EMBEDDED.getTitle(), VueRoutes.MenuType.LINK.getTitle())
-                    .contains(convert.getType())) {
+            if (Arrays.asList(VueRoutes.MenuType.EMBEDDED.getTitle(), VueRoutes.MenuType.LINK.getTitle()).contains(convert.getType())) {
                 convert.setComponent("IFrameView");
             }
             if (CollUtil.isNotEmpty(menuTreeNode.getChildren())) {
+                convert.setComponent(null);
                 convert.setChildren(findRoutes(menuTreeNode.getChildren()));
             } else {
                 convert.setChildren(new ArrayList<>());
