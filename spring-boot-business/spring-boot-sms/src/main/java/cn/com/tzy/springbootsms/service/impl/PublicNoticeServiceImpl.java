@@ -155,6 +155,13 @@ public class PublicNoticeServiceImpl extends ServiceImpl<PublicNoticeMapper, Pub
 
     @Override
     public RestResult<?> remove(Long id) {
+        PublicNotice oldPublicNotice = baseMapper.selectById(id);
+        if (StringUtils.isNotBlank(oldPublicNotice.getContent())){
+            RestResult<?> restResult = upLoadServiceFeign.delete(oldPublicNotice.getContent());
+            if( restResult.getCode()!=RespCode.CODE_0.getValue()){
+                throw new ParamException("删除原文件错误");
+            }
+        }
         int i = baseMapper.deleteById(id);
         if(i == 0){
             return RestResult.result(RespCode.CODE_2.getValue(),"删除失败",null);
@@ -234,10 +241,8 @@ public class PublicNoticeServiceImpl extends ServiceImpl<PublicNoticeMapper, Pub
         if(result.getCode() != RespCode.CODE_0.getValue()){
             throw new ParamException("文件上传失败");
         }
-        List<Map> list = AppUtils.convertValue2(result.getData(), new TypeReference<List<Map>>(){});
-        Map map = list.get(0);
+        Map map = AppUtils.convertValue2(result.getData(), new TypeReference<Map>(){});
         String path = String.valueOf(map.get("path"));
-        String fullPath = String.valueOf(map.get("fullPath"));
         return path;
     }
 
