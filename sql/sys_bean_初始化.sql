@@ -12,7 +12,7 @@ values(null,'home',2,'首页','/home','/index/home/workbench/index','clarity:hom
 ,('work.personal','work.personal.other_save',3,'绑定解绑第三方信息',null,null,null,1,0,2,'work.personal:other_save',null,null,'/webapi/mini/bind_mini_web,/webapi/mini/unbind_mini_web')
 -- 流程管理
 ,(null,'oa',1,'流程管理','/oa','/oa','grommet-icons:test',1,0,3,null,'grommet-icons:test',null,null)
-,('oa','oa.repository',2,'流程定义','/oa/repository','/oa/repository/index','grommet-icons:test',1,0,1,null,'oa.repository:list','grommet-icons:test','/webapi/activiti/activiti/find_repository_list')
+,('oa','oa.repository',2,'流程定义','/oa/repository','/oa/repository/index','grommet-icons:test',1,0,1,'oa.repository:list','grommet-icons:test',null,'/webapi/activiti/activiti/find_repository_list')
 ,('oa.repository','oa.repository.add',3,'添加',null,null,null,1,0,1,'oa.repository:add',null,null,'/webapi/activiti/activiti/deploy_process_parameter,/webapi/activiti/activiti/deploy_process')
 ,('oa.repository','oa.repository.deploy',3,'部署',null,null,null,1,0,2,'oa.repository:deploy',null,null,'/webapi/activiti/activiti/deploy_process_parameter,/webapi/activiti/activiti/deploy_process')
 ,('oa.repository','oa.repository.pending',3,'挂起-激活',null,null,null,1,0,3,'oa.repository:pending',null,null,'/webapi/activiti/activiti/suspended_process_definition')
