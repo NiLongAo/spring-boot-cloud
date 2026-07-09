@@ -36,3 +36,6 @@ logs
 .lib-service/
 .fastRequest/
 */spring-boot-face/conf/
+
+### ai ###
+.codex/
