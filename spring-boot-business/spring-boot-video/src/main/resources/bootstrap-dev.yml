@@ -28,8 +28,10 @@ spring:
           - data-id: feign-config-dev.yaml
             group: DEFAULT_GROUP
 sip:
-  # 信令服务器ip 没有服务ip时取nacos中注册的ip
-  ip : 0.0.0.0
+  # Docker 内监听地址
+  bind-ip: 0.0.0.0
+  # SIP Via/Contact/Call-ID 对外宣告地址
+  advertised-ip: 192.168.1.135
   # 信令服务器端口 6080
   port: 6083
   # 信令区域编号 4401020051

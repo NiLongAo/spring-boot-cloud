@@ -121,6 +121,7 @@ public class SIPRequestProvider {
                 }
                 if (sipProvider != null) {
                     this.callIdHeader = sipProvider.getNewCallId();
+                    updateCallIdHost(ip);
                 }
             }
             return this;
@@ -184,7 +185,7 @@ public class SIPRequestProvider {
          * @return
          */
         public  Builder addViaHeader(String ip, int port, String transport,boolean rPort) throws PeerUnavailableException, InvalidArgumentException, ParseException {
-            ViaHeader viaHeader = this.sipFactory.createHeaderFactory().createViaHeader(ip, port, transport, SipUtils.getNewViaTag());
+            ViaHeader viaHeader = this.sipFactory.createHeaderFactory().createViaHeader(sipServer.getAdvertisedIp(ip), port, transport, SipUtils.getNewViaTag());
             if(rPort){
                 viaHeader.setRPort();
             }
@@ -260,7 +261,7 @@ public class SIPRequestProvider {
             if(StringUtils.isEmpty(sipGbId) || StringUtils.isEmpty(sipAddress)){
                 throw new RuntimeException("sipGbId is null or sipAddress is null");
             }
-            SipURI sipContactUrl = sipFactory.createAddressFactory().createSipURI(sipGbId, sipAddress);
+            SipURI sipContactUrl = sipFactory.createAddressFactory().createSipURI(sipGbId, sipServer.getAdvertisedAddress(sipAddress));
             Address address = sipFactory.createAddressFactory().createAddress(sipContactUrl);
             headerList.add(sipFactory.createHeaderFactory().createContactHeader(address));
             return this;
@@ -268,6 +269,26 @@ public class SIPRequestProvider {
 
         public CallIdHeader getCallIdHeader(){
             return this.callIdHeader;
+        }
+
+        private void updateCallIdHost(String ip) {
+            if (this.callIdHeader == null) {
+                return;
+            }
+            String advertisedIp = sipServer.getAdvertisedIp(ip);
+            if (StringUtils.isEmpty(advertisedIp)) {
+                return;
+            }
+            String callId = this.callIdHeader.getCallId();
+            int hostIndex = callId.lastIndexOf('@');
+            if (hostIndex < 0 || hostIndex == callId.length() - 1) {
+                return;
+            }
+            try {
+                this.callIdHeader.setCallId(String.format("%s@%s", callId.substring(0, hostIndex), advertisedIp));
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
         }
 
 

@@ -16,9 +16,13 @@ public class SipConfigProperties {
 	 */
 	private String name = "video-sip-server";
 	/**
-	 * 信令服务器ip //没有服务ip时取nacos 中ip
+	 * SIP local listening address. In Docker this can be 0.0.0.0.
 	 */
-	private String ip;
+	private String bindIp;
+	/**
+	 * SIP address announced in Via/Contact/Call-ID. In Docker this should be the host/public reachable IP.
+	 */
+	private String advertisedIp;
 	/**
 	 * 信令服务器端口
 	 */

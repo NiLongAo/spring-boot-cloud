@@ -102,7 +102,8 @@ public class SIPResponseProvider {
             if(this.sipURI == null){
                 throw new RuntimeException("SipURI is null");
             }
-            SipURI sipContactUrl = sipFactory.createAddressFactory().createSipURI(this.sipURI.getUser(), String.format("%s:%s",this.sipURI.getHost(),this.sipURI.getPort()));
+            String contactAddress = sipServer.getAdvertisedAddress(String.format("%s:%s",this.sipURI.getHost(),this.sipURI.getPort()));
+            SipURI sipContactUrl = sipFactory.createAddressFactory().createSipURI(this.sipURI.getUser(), contactAddress);
             Address address = sipFactory.createAddressFactory().createAddress(sipContactUrl);
             headerList.add(sipFactory.createHeaderFactory().createContactHeader(address));
             return this;

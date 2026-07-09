@@ -71,10 +71,10 @@ public class SipServer {
         //初始化 SipListener 中 SipServer
         ((SipListenerImpl)sipListener).init(sipTimeoutEvent,sipRequestEventMap,sipResponseEventMap);
         //判断 sipConfigProperties 中ip是否有值若没有则取 nacos 中ip
-        if(StringUtils.isEmpty(sipConfigProperties.getIp())){
-            sipConfigProperties.setIp(nacosDiscoveryProperties.getIp());
+        if(StringUtils.isEmpty(sipConfigProperties.getAdvertisedIp())){
+            sipConfigProperties.setAdvertisedIp(nacosDiscoveryProperties.getIp());
         }
-        addListeningPoint(sipConfigProperties.getId(),sipConfigProperties.getIp(), sipConfigProperties.getPort());
+        addListeningPoint(sipConfigProperties.getId(),getBindIp(), sipConfigProperties.getPort());
     }
 
 
@@ -172,7 +172,41 @@ public class SipServer {
         if (StringUtils.isNotEmpty(localIp) && getUdpSipProvider(localIp) != null) {
             return localIp;
         }
-        return getUdpSipProvider().getListeningPoint().getIPAddress();
+        SipProviderImpl udpSipProvider = getUdpSipProvider();
+        if (udpSipProvider == null) {
+            return getBindIp();
+        }
+        return udpSipProvider.getListeningPoint().getIPAddress();
+    }
+
+    public String getBindIp() {
+        if (StringUtils.isNotEmpty(sipConfigProperties.getBindIp())) {
+            return sipConfigProperties.getBindIp();
+        }
+        return nacosDiscoveryProperties.getIp();
+    }
+
+    public String getAdvertisedIp(String localIp) {
+        if (StringUtils.isNotEmpty(sipConfigProperties.getAdvertisedIp())) {
+            return sipConfigProperties.getAdvertisedIp();
+        }
+        if (StringUtils.isNotEmpty(localIp)) {
+            return localIp;
+        }
+        return getBindIp();
+    }
+
+    public String getAdvertisedAddress(String address) {
+        if (StringUtils.isEmpty(address)) {
+            return address;
+        }
+        int portIndex = address.lastIndexOf(':');
+        if (portIndex <= 0 || portIndex == address.length() - 1) {
+            return getAdvertisedIp(address);
+        }
+        String host = address.substring(0, portIndex);
+        String port = address.substring(portIndex + 1);
+        return String.format("%s:%s", getAdvertisedIp(host), port);
     }
 
     public SipSubscribeHandle getSubscribeManager(){
