@@ -59,7 +59,7 @@ services:
     image: ccr.ccs.tencentyun.com/spring_boot_cloud/spring_cloud_video:latest
     ports:
       - 8660:8660
-      - 6081:6081
+      - 6083:6083
       - 13010:13010
       - 14004:14004
     volumes:

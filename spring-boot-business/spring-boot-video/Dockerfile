@@ -10,7 +10,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
 
 WORKDIR /spring-boot-video
 EXPOSE 8660
-EXPOSE 6081
+EXPOSE 6083
 EXPOSE 13010
 EXPOSE 14004
 ADD ./target/spring-boot-video.jar ./
