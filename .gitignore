@@ -4,6 +4,7 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+
 ### STS ###
 .apt_generated
 .classpath
@@ -35,7 +36,5 @@ logs
 ### 大文件取消上传 ###
 .lib-service/
 .fastRequest/
+.codex
 */spring-boot-face/conf/
-
-### ai ###
-.codex/

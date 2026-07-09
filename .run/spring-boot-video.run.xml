@@ -43,6 +43,11 @@
               <option name="hostIp" value="0.0.0.0" />
               <option name="hostPort" value="14004" />
             </DockerPortBindingImpl>
+            <DockerPortBindingImpl>
+              <option name="containerPort" value="6083" />
+              <option name="hostIp" value="0.0.0.0" />
+              <option name="hostPort" value="6083" />
+            </DockerPortBindingImpl>
           </list>
         </option>
         <option name="showCommandPreview" value="true" />
