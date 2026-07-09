@@ -1567,7 +1567,7 @@ public class SIPCommanderImpl implements SIPCommander {
                 .createCallIdHeader(response.getCallIdHeader())
                 .createFromHeader(response.getFromHeader())
                 .createToHeader(response.getToHeader())
-                .createCSeqHeader(RedisService.getCseqManager().getCSEQ())
+                .createCSeqHeader(response.getCSeq().getSeqNumber())
                 .createContactHeader(sipConfigProperties.getId(),String.format("%s:%s",response.getLocalAddress().getHostAddress(), sipConfigProperties.getPort()))
                 .createUserAgentHeader()
                 .buildRequest();
