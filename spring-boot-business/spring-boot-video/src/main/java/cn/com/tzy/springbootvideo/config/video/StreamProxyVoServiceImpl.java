@@ -80,7 +80,11 @@ public class StreamProxyVoServiceImpl extends StreamProxyVoService {
             log.info("[拉流信息] 未获取到 mediaServerId 信息");
             return new ArrayList<>();
         }
-        List<StreamProxy> list = streamProxyService.list(new LambdaQueryWrapper<StreamProxy>().eq(StreamProxy::getMediaServerId, mediaServerId).eq(StreamProxy::getEnable, ConstEnum.Flag.YES.getValue()));
+        List<StreamProxy> list = streamProxyService.list(new LambdaQueryWrapper<StreamProxy>()
+                .eq(StreamProxy::getMediaServerId, mediaServerId)
+                .eq(StreamProxy::getEnable, ConstEnum.Flag.YES.getValue())
+                .eq(StreamProxy::getEnableDisableNoneReader, ConstEnum.Flag.NO.getValue())
+        );
         return StreamProxyConvert.INSTANCE.convertVo(list);
     }
 

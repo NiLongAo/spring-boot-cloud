@@ -22,6 +22,7 @@ import cn.com.tzy.springbootstartervideocore.service.video.*;
 import cn.com.tzy.springbootstartervideocore.sip.SipServer;
 import cn.com.tzy.springbootstartervideocore.sip.cmd.SIPCommander;
 import cn.com.tzy.springbootstartervideocore.sip.cmd.SIPCommanderForPlatform;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.json.JSONUtil;
 import lombok.extern.log4j.Log4j2;
@@ -208,7 +209,7 @@ public class ZlmService {
         }
         //删除无人观看自动移除的流
         List<StreamProxyVo> streamProxyVoList = streamProxyVoService.findAutoRemoveMediaServerIdList(mediaServerVo.getId());
-        if(! streamProxyVoList.isEmpty()){
+        if(CollUtil.isNotEmpty(streamProxyVoList)){
             for (StreamProxyVo streamProxyVo : streamProxyVoList) {
                 gbStreamVoService.delAppStream(streamProxyVo.getApp(), streamProxyVo.getStream());
                 streamProxyVoService.del(streamProxyVo.getApp(), streamProxyVo.getStream());
