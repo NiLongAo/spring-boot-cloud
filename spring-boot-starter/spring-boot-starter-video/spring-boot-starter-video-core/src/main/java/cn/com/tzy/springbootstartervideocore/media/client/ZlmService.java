@@ -243,6 +243,7 @@ public class ZlmService {
         SsrcTransactionManager ssrcTransactionManager = RedisService.getSsrcTransactionManager();
         //取消zlm在线认证
         zlmKeepaliveTask(mediaServerVo,true);
+        dynamicTask.stop(streamChangedTaskKey(mediaServerVo.getId()));
         //删除无人观看自动移除的流
         List<StreamProxyVo> streamProxyVoList = streamProxyVoService.findAutoRemoveMediaServerIdList(mediaServerVo.getId());
         if(! streamProxyVoList.isEmpty()){
@@ -294,9 +295,13 @@ public class ZlmService {
     }
     //定时检测流上下线操作并相关处理
     public void zlmStreamChanged(MediaServerVo mediaServerVo){
-        dynamicTask.startCron(StreamChangedManager.VIDEO_MEDIA_STREAM_CHANGED_PREFIX,60,()->{
+        dynamicTask.startCron(streamChangedTaskKey(mediaServerVo.getId()),60,()->{
             cleanStream(mediaServerVo,false);
         });
+    }
+
+    private String streamChangedTaskKey(String mediaServerId) {
+        return StreamChangedManager.VIDEO_MEDIA_STREAM_CHANGED_PREFIX + mediaServerId;
     }
 
     private  void cleanStream(MediaServerVo mediaServerVo,boolean delAll){
@@ -316,7 +321,7 @@ public class ZlmService {
                     continue;
                 }
                 OnStreamChangedResult result = MediaClient.getMediaInfo(mediaServerVo, null, vo.getSchema(), vo.getApp(), vo.getStream());
-                if(delAll || result == null || result.getCode() != RespCode.CODE_0.getValue() || result.getTotalReaderCount() <= 0){
+                if(ZlmStreamCleanupPolicy.shouldClose(vo, result, delAll, System.currentTimeMillis() / 1000)){
                     delete.add(vo);
                     continue;
                 }
