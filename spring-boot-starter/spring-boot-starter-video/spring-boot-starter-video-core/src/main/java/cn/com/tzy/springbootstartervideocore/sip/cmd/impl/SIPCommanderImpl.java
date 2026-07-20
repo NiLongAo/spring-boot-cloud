@@ -134,7 +134,7 @@ public class SIPCommanderImpl implements SIPCommander {
         SipConfigProperties sipConfigProperties = sipServer.getSipConfigProperties();;
         //构建器
         Request request = SIPRequestProvider.builder(sipServer, null, Request.MESSAGE, ptzXml.toString())
-                .createSipURI(deviceVo.getDeviceId(), deviceVo.getHostAddress())
+                .createSipURI(channelId, deviceVo.getHostAddress())
                 .addViaHeader(localIp, sipConfigProperties.getPort(), TransportType.getName(deviceVo.getTransport()), true)
                 .createCallIdHeader(localIp,TransportType.getName(deviceVo.getTransport()),null)
                 .createFromHeader(sipConfigProperties.getId(), sipConfigProperties.getDomain(), SipUtils.getNewFromTag())
@@ -176,7 +176,7 @@ public class SIPCommanderImpl implements SIPCommander {
         SipConfigProperties sipConfigProperties = sipServer.getSipConfigProperties();;
         //构建器
         Request request = SIPRequestProvider.builder(sipServer, null, Request.MESSAGE, ptzXml.toString())
-                .createSipURI(deviceVo.getDeviceId(), deviceVo.getHostAddress())
+                .createSipURI(channelId, deviceVo.getHostAddress())
                 .addViaHeader(localIp, sipConfigProperties.getPort(), TransportType.getName(deviceVo.getTransport()), true)
                 .createCallIdHeader(localIp,TransportType.getName(deviceVo.getTransport()),null)
                 .createFromHeader(sipConfigProperties.getId(), sipConfigProperties.getDomain(), SipUtils.getNewFromTag())
@@ -216,7 +216,7 @@ public class SIPCommanderImpl implements SIPCommander {
         SipConfigProperties sipConfigProperties = sipServer.getSipConfigProperties();;
         //构建器
         Request request = SIPRequestProvider.builder(sipServer, null, Request.MESSAGE, ptzXml.toString())
-                .createSipURI(deviceVo.getDeviceId(), deviceVo.getHostAddress())
+                .createSipURI(channelId, deviceVo.getHostAddress())
                 .createCallIdHeader(localIp,TransportType.getName(deviceVo.getTransport()),null)
                 .addViaHeader(localIp, sipConfigProperties.getPort(), TransportType.getName(deviceVo.getTransport()), true)
                 .createFromHeader(sipConfigProperties.getId(), sipConfigProperties.getDomain(), SipUtils.getNewFromTag())
@@ -441,7 +441,7 @@ public class SIPCommanderImpl implements SIPCommander {
         SipConfigProperties sipConfigProperties = sipServer.getSipConfigProperties();;
         //构建器
         SIPRequest request = (SIPRequest)SIPRequestProvider.builder(sipServer, null, Request.INVITE, content.toString())
-                .createSipURI(deviceVo.getDeviceId(), deviceVo.getHostAddress())
+                .createSipURI(channelId, deviceVo.getHostAddress())
                 .addViaHeader(localIp, sipConfigProperties.getPort(), TransportType.getName(deviceVo.getTransport()), true)
                 .createCallIdHeader(localIp,TransportType.getName(deviceVo.getTransport()),null)
                 .createFromHeader(sipConfigProperties.getId(), sipConfigProperties.getDomain(), SipUtils.getNewFromTag())
@@ -560,7 +560,7 @@ public class SIPCommanderImpl implements SIPCommander {
         SipConfigProperties sipConfigProperties = sipServer.getSipConfigProperties();;
         //构建器
         SIPRequest request = (SIPRequest)SIPRequestProvider.builder(sipServer, null, Request.INVITE, content.toString())
-                .createSipURI(deviceVo.getDeviceId(), deviceVo.getHostAddress())
+                .createSipURI(channelId, deviceVo.getHostAddress())
                 .addViaHeader(localIp, sipConfigProperties.getPort(), TransportType.getName(deviceVo.getTransport()), true)
                 .createCallIdHeader(localIp,TransportType.getName(deviceVo.getTransport()),null)
                 .createFromHeader(sipConfigProperties.getId(), sipConfigProperties.getDomain(), SipUtils.getNewFromTag())
@@ -623,7 +623,7 @@ public class SIPCommanderImpl implements SIPCommander {
         SipConfigProperties sipConfigProperties = sipServer.getSipConfigProperties();
         //构建器
         Request request = SIPRequestProvider.builder(sipServer, null, Request.BYE,null)
-                .createSipURI(ssrcTransaction.getDeviceId(), deviceVo.getHostAddress())
+                .createSipURI(ssrcTransaction.getChannelId(), deviceVo.getHostAddress())
                 .addViaHeader(localIp, sipConfigProperties.getPort(), TransportType.getName(deviceVo.getTransport()), false)
                 .createFromHeader(sipConfigProperties.getId(), sipConfigProperties.getDomain(), sipTransactionInfo.getFromTag())
                 .createToHeader(ssrcTransaction.getChannelId(), deviceVo.getHostAddress(), sipTransactionInfo.getToTag())
@@ -671,7 +671,7 @@ public class SIPCommanderImpl implements SIPCommander {
         broadcastXml.append("</Notify>\r\n");
         //构建器
         Request request = SIPRequestProvider.builder(sipServer, null, Request.MESSAGE, broadcastXml.toString())
-                .createSipURI(deviceVo.getDeviceId(), deviceVo.getHostAddress())
+                .createSipURI(channelId, deviceVo.getHostAddress())
                 .addViaHeader(localIp, sipConfigProperties.getPort(), TransportType.getName(deviceVo.getTransport()), true)
                 .createCallIdHeader(localIp,TransportType.getName(deviceVo.getTransport()),null)
                 .createFromHeader(sipConfigProperties.getId(), sipConfigProperties.getDomain(), SipUtils.getNewFromTag())
@@ -1121,7 +1121,7 @@ public class SIPCommanderImpl implements SIPCommander {
         SipConfigProperties sipConfigProperties = sipServer.getSipConfigProperties();;
         //构建器
         Request request = SIPRequestProvider.builder(sipServer, null, Request.MESSAGE, recordInfoXml.toString())
-                .createSipURI(deviceVo.getDeviceId(), deviceVo.getHostAddress())
+                .createSipURI(channelId, deviceVo.getHostAddress())
                 .addViaHeader(localIp, sipConfigProperties.getPort(), TransportType.getName(deviceVo.getTransport()), true)
                 .createCallIdHeader(localIp,TransportType.getName(deviceVo.getTransport()),null)
                 .createFromHeader(sipConfigProperties.getId(), sipConfigProperties.getDomain(), SipUtils.getNewFromTag())
@@ -1502,7 +1502,7 @@ public class SIPCommanderImpl implements SIPCommander {
         SipConfigProperties sipConfigProperties = sipServer.getSipConfigProperties();;
         //构建器
         Request request = SIPRequestProvider.builder(sipServer, null, Request.INFO, content)
-                .createSipURI(deviceVo.getDeviceId(), deviceVo.getHostAddress())
+                .createSipURI(streamInfo.getChannelId(), deviceVo.getHostAddress())
                 .addViaHeader(localIp, sipConfigProperties.getPort(), TransportType.getName(deviceVo.getTransport()), false)
                 .createCallIdHeader(null,null,sipTransactionInfo.getCallId())
                 .createFromHeader(sipConfigProperties.getId(), sipConfigProperties.getDomain(), sipTransactionInfo.getFromTag())
