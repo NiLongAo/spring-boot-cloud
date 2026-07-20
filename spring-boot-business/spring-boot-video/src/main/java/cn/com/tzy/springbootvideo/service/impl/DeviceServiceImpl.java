@@ -22,6 +22,7 @@ import cn.com.tzy.springbootvideo.convert.video.DeviceConvert;
 import cn.com.tzy.springbootvideo.mapper.DeviceMapper;
 import cn.com.tzy.springbootvideo.service.DeviceChannelService;
 import cn.com.tzy.springbootvideo.service.DeviceService;
+import cn.com.tzy.springbootvideo.service.DeviceUpdatePolicy;
 import cn.com.tzy.springbootvideo.service.PlatformGbChannelService;
 import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -125,10 +126,11 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
     @Override
     public RestResult<?> saveDevice(Device param) {
         DeviceVo deviceVo = DeviceConvert.INSTANCE.convert(param);
+        Device before = param.getId() == null ? baseMapper.selectOne(new LambdaQueryWrapper<Device>().eq(Device::getDeviceId, deviceVo.getDeviceId())) : baseMapper.selectById(param.getId());
         int save = VideoService.getDeviceService().save(deviceVo);
         if(save > 0){
             Device device = baseMapper.selectOne(new LambdaQueryWrapper<Device>().eq(Device::getDeviceId, deviceVo.getDeviceId()));
-            if(device.getOnline()==ConstEnum.Flag.YES.getValue()){
+            if(before != null && before.getOnline() == ConstEnum.Flag.YES.getValue() && DeviceUpdatePolicy.requiresOffline(before, device)){
                 VideoService.getDeviceService().offline(deviceVo.getDeviceId(),"保存设备");
             }
             return RestResult.result(RespCode.CODE_0.getValue(),"保存成功");
