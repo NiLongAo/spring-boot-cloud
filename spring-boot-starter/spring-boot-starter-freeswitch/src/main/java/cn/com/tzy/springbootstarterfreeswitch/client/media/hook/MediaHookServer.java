@@ -92,7 +92,7 @@ public class MediaHookServer {
      * @param hookVo
      */
     public NotNullMap onPlay(OnPlayHookVo hookVo){
-        log.debug("[ZLM HOOK] 播放鉴权：{}->{}" + hookVo.getMediaServerId(), hookVo);
+        log.debug("[ZLM HOOK] 播放鉴权：{}->{}" , hookVo.getMediaServerId(), hookVo);
         MediaServerVoService mediaServerVoService = SipService.getMediaServerService();
         TokenService tokenService = MediaService.getTokenService();
 
